@@ -1,0 +1,27 @@
+# build output
+dist/
+.astro/
+
+# dependencies
+node_modules/
+
+# local env
+.env
+.env.production
+.dev.vars
+
+# verification artifacts (the harness is committed; its output is not)
+.verify/
+
+# wrangler's local Miniflare state — caches, D1/KV/R2 stubs, trace stores.
+# Written by `npm run lighthouse`, which serves the build through `wrangler pages
+# dev`. Local runtime scratch, not source; it was committed once before anyone
+# looked at `git ls-files`.
+.wrangler/
+
+# macOS
+.DS_Store
+
+# editor
+.vscode/
+.idea/

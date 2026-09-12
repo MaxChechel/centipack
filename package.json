@@ -1,0 +1,28 @@
+{
+  "name": "outredge-system",
+  "type": "module",
+  "version": "0.1.0",
+  "private": true,
+  "scripts": {
+    "dev": "astro dev",
+    "build": "astro build",
+    "build:styleguide": "INCLUDE_STYLEGUIDE=1 astro build",
+    "preview": "astro preview",
+    "check": "astro check",
+    "springs": "node scripts/springs/generate.mjs",
+    "verify": "node scripts/verify/run.mjs",
+    "lighthouse": "node scripts/verify/lighthouse.mjs"
+  },
+  "dependencies": {
+    "@astrojs/mdx": "^8.0.1",
+    "astro": "^7.3.2",
+    "zod": "^4.6.2"
+  },
+  "devDependencies": {
+    "@astrojs/check": "^0.9.10",
+    "@tailwindcss/vite": "^4.3.3",
+    "axe-core": "^4.10.3",
+    "tailwindcss": "^4.3.3",
+    "typescript": "^6.0.3"
+  }
+}

@@ -1,0 +1,67 @@
+---
+/**
+ * Home — the starter's own front page.
+ *
+ * Kept deliberately thin, and thinner than it was. It exists to show the page
+ * grammar (§4.4) with nothing else in the way: a stack of Sections, atoms and
+ * blocks inside, no spacing decisions, no containers, no spacer divs.
+ *
+ * There is no "about this repo" section, because there was nothing here a
+ * client project would keep — a starter's placeholder prose is prose the next
+ * person has to notice and delete, and half of them will not. What the repo is
+ * belongs in README.md, which is where someone looks for it. A page that exists
+ * to demonstrate the grammar should contain the grammar and little else.
+ */
+import BaseLayout from '../components/shells/BaseLayout.astro';
+import Section from '../components/Section.astro';
+import SectionHeader from '../components/blocks/SectionHeader.astro';
+import Button from '../components/atoms/Button.astro';
+import CtaBanner from '../components/blocks/CtaBanner.astro';
+import ItemCard from '../components/blocks/ItemCard.astro';
+import { getItems } from '../lib/items';
+import { SITE } from '../consts';
+
+const items = await getItems();
+---
+
+<BaseLayout title={`${SITE.name} — the Astro starter`} description={SITE.description}>
+  <Section spaceTop="nav" spaceBottom="lg">
+    <div class="gap-lg flex flex-col items-start">
+      <SectionHeader
+        eyebrow="Starter"
+        heading="A page is a stack of Sections."
+        headingLevel="h1"
+        size="h1"
+        lede="Section owns all vertical rhythm, the container and the theme. Everything below it composes with grid, flex, gap and the token vocabulary — and nothing below it re-applies a gutter, a max-width or a page centre."
+        split
+      />
+      <div class="gap-sm flex flex-wrap">
+        <Button href="/styleguide" variant="primary" icon="arrow">Open the styleguide</Button>
+        <Button href="/contact" variant="secondary">Contact</Button>
+      </div>
+    </div>
+  </Section>
+
+  <Section id="pattern" space="lg" class="bg-subtle">
+    <div class="gap-lg flex flex-col">
+      <SectionHeader
+        eyebrow="The card pattern"
+        heading="A card is a recipe, not a component"
+        lede="bg-surface + border-line + rounded-md + padding from the spacing scale. Project cards are instantiations of it; they never invent their own surface, border or radius treatment."
+        split
+      />
+      <div class="gap-md grid sm:grid-cols-2 lg:grid-cols-3">
+        {items.map((item) => <ItemCard item={item} />)}
+      </div>
+    </div>
+  </Section>
+
+  <Section id="contact" space="lg" spaceBottom="lg">
+    <CtaBanner
+      theme="dark"
+      heading="Start here"
+      body="Copy the template, swap the primitives, verify, ship."
+      primary={{ label: 'Open the styleguide', href: '/styleguide' }}
+    />
+  </Section>
+</BaseLayout>

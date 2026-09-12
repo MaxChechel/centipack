@@ -1,0 +1,222 @@
+---
+/**
+ * Form field — label + control + error slot, always together (§4.1).
+ *
+ * Explicit `for`/`id` wiring rather than a wrapping label: the error message
+ * has to be referenced by `aria-describedby`, which needs an id anyway, and a
+ * field whose label and whose description are wired two different ways is a
+ * field where one of them eventually stops matching.
+ *
+ * The control border is `--line-strong`, not `--line`. On an input the border
+ * IS the control's boundary — the only thing saying "you can type here" — which
+ * is WCAG 1.4.11's 3:1 case, and `--line` is nowhere near it. The two line
+ * tokens exist for exactly this distinction.
+ *
+ * ONE COMPONENT, NOT FIVE. Text, textarea, select, checkbox and radio all route
+ * through here, because the part worth sharing is not the control — it is the
+ * label wiring, the error slot, the `aria-describedby`/`aria-invalid` pair and
+ * the disabled state. Five components would re-implement that five times and
+ * drift four ways. The control is the easy half.
+ *
+ * Checkbox and radio invert the layout — control first, label beside it — which
+ * is the one structural difference, and it lives in the template below rather
+ * than in a second component.
+ *
+ * ------------------------------------------------------------------------
+ * RADIO GROUPS ARE A PATTERN, NOT A COMPONENT (§4.1). A group of radios is a
+ * `<fieldset>` with a `<legend>`, and that is all it is:
+ *
+ *     <fieldset class="field-group flex flex-col gap-sm">
+ *       <legend class="text-sm text-secondary mb-xs">Engagement</legend>
+ *       <FormField type="radio" name="engagement" value="project" label="One-off project" />
+ *       <FormField type="radio" name="engagement" value="retainer" label="Retainer" />
+ *     </fieldset>
+ *
+ * The legend is what a screen reader announces before each option, and no
+ * component can supply it without also owning the layout of the options — at
+ * which point every design that wants them in two columns forks the component.
+ * `<fieldset disabled>` disables every control inside it, which is the correct
+ * way to make a whole group inert.
+ *
+ * File upload and switch are deliberately absent: build-on-demand (§4.1).
+ */
+interface Props {
+  label: string;
+  name: string;
+  /** Unique on the page. Defaults to `name`, which is usually already unique. */
+  id?: string;
+  type?: 'text' | 'email' | 'tel' | 'url' | 'textarea' | 'select' | 'checkbox' | 'radio';
+  placeholder?: string;
+  required?: boolean;
+  /**
+   * Ships disabled, re-enabled in the browser by the page's module. §8's rule:
+   * a form is inert until its endpoint has been verified end to end.
+   */
+  disabled?: boolean;
+  autocomplete?: string;
+  inputmode?: 'text' | 'email' | 'tel' | 'url';
+  rows?: number;
+  options?: readonly string[];
+  /** Submitted value. Required for `radio`; optional for `checkbox`. */
+  value?: string;
+  /** Initial state for `checkbox` / `radio`. */
+  checked?: boolean;
+  /** Renders the error slot and points `aria-describedby` at it. */
+  error?: string;
+  class?: string;
+}
+
+const {
+  label,
+  name,
+  id,
+  type = 'text',
+  placeholder,
+  required = false,
+  disabled = false,
+  autocomplete,
+  inputmode,
+  rows = 5,
+  options = [],
+  value,
+  checked = false,
+  error,
+  class: className,
+} = Astro.props as Props;
+
+/* A radio shares its `name` with every sibling in the group, so `name` cannot
+   be the id. Fall back to name+value, which is unique within a group. */
+const fieldId = id ?? (type === 'radio' && value ? `${name}-${value}` : name);
+const errorId = `${fieldId}-error`;
+const isToggle = type === 'checkbox' || type === 'radio';
+
+if (type === 'radio' && !value) {
+  throw new Error(`FormField: radio "${name}" needs a \`value\` — a radio without one submits "on".`);
+}
+
+/* Shared across every branch below: this is the part that must not be
+   re-implemented per control. */
+const described = error ? errorId : undefined;
+const invalid = error ? 'true' : undefined;
+
+/**
+ * NOTE, and it is load-bearing: there is no `appearance-none` utility on the
+ * select. A utility lands in `@layer utilities`, which beats `@layer components`,
+ * and would override the `appearance: base-select` that turns the control into a
+ * styleable dropdown. The base `appearance` is set in global.css instead — in the
+ * same layer as the enhancement, and before it, so source order lets the
+ * enhancement win.
+ */
+const control = [
+  'w-full rounded-sm border border-line-strong bg-surface text-primary',
+  // A real control height rather than padding around a line box. 3rem matches
+  // the Button, so a form and its submit read as one set of controls instead of
+  // two, and it clears the 24px minimum target on its own.
+  'min-h-control-md px-sm py-xs text-sm',
+  'placeholder:text-tertiary',
+  'transition-colors duration-spring-soft ease-spring-soft',
+  'hover:border-accent focus-visible:border-accent',
+  // A disabled control must read as disabled, not merely behave as one.
+  'disabled:cursor-not-allowed disabled:opacity-50',
+  // The invalid state is announced, so it must also be seen without colour
+  // alone — the border thickens as well as recolouring.
+  'aria-[invalid=true]:border-accent',
+].join(' ');
+---
+
+<div class:list={['flex flex-col gap-xs', className]}>
+  {
+    isToggle ? (
+      /* Control first, label beside it. The label is still a real <label for>,
+         so the text is part of the click target without a wrapper. */
+      <div class="gap-sm flex items-start">
+        <span class="control-toggle-wrap">
+          <input
+            id={fieldId}
+            type={type === 'checkbox' ? 'checkbox' : 'radio'}
+            name={name}
+            value={value}
+            checked={checked}
+            required={required}
+            disabled={disabled}
+            aria-invalid={invalid}
+            aria-describedby={described}
+            class="control-toggle"
+          />
+          <span class="control-mark" aria-hidden="true" />
+        </span>
+        <label for={fieldId} class="text-sm text-secondary">
+          {label}
+          {required && <span class="sr-only"> (required)</span>}
+        </label>
+      </div>
+    ) : (
+      <Fragment>
+        <label for={fieldId} class="text-sm text-secondary">
+          {label}
+          {required && <span class="sr-only"> (required)</span>}
+        </label>
+
+        {type === 'textarea' ? (
+          <textarea
+            id={fieldId}
+            name={name}
+            rows={rows}
+            placeholder={placeholder}
+            required={required}
+            disabled={disabled}
+            aria-invalid={invalid}
+            aria-describedby={described}
+            class:list={[control, 'min-h-0 resize-y py-sm']}
+          />
+        ) : type === 'select' ? (
+          <span class="select-wrap relative block">
+            <select
+              id={fieldId}
+              name={name}
+              required={required}
+              disabled={disabled}
+              aria-invalid={invalid}
+              aria-describedby={described}
+              class:list={[control, 'cursor-pointer pr-control-md']}
+            >
+              <option value="">{placeholder ?? 'Select one…'}</option>
+              {options.map((option) => (
+                <option value={option}>{option}</option>
+              ))}
+            </select>
+            <span class="select-icon" aria-hidden="true" />
+          </span>
+        ) : (
+          <input
+            id={fieldId}
+            type={type}
+            name={name}
+            placeholder={placeholder}
+            required={required}
+            disabled={disabled}
+            autocomplete={autocomplete}
+            inputmode={inputmode}
+            aria-invalid={invalid}
+            aria-describedby={described}
+            class={control}
+          />
+        )}
+      </Fragment>
+    )
+  }
+
+  {
+    error && (
+      <p id={errorId} class="text-caption text-primary">
+        {error}
+      </p>
+    )
+  }
+</div>
+
+<script>
+  /* Loaded by the component, so it ships only on pages that render a form
+     control — and once per page, because Astro hoists and dedupes it. */
+  import '../../scripts/select';
+</script>

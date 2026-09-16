@@ -106,7 +106,22 @@ export const BASE = process.env.BASE ?? 'http://localhost:4321';
  * Every page the build emits with the styleguide route on. PROJECT: extend as
  * real pages land — a page that is not in this list is a page nothing verifies.
  */
-export const PAGES = ['/', '/contact', '/styleguide'];
+export const PAGES = [
+  '/',
+  '/products',
+  /* One of the three category pages — same template, same props shape. */
+  '/products/cold-chain-shipping',
+  /* BOTH product states, deliberately. The mailers page is the only one the
+     design writes in full — lede, six facts, an eight-column table — and gel
+     packs is the opposite end: no lede, no facts, no table, every optional block
+     self-skipping. A sweep that only saw the full one would never exercise the
+     skips, which is where a block leaves an empty shell behind. */
+  '/products/cold-chain-shipping/insulated-metallic-mailers',
+  '/products/cold-chain-shipping/gel-packs',
+  '/about',
+  '/contact',
+  '/styleguide',
+];
 
 /** §9's widths. Not negotiable, and not a sample. */
 export const WIDTHS = [320, 360, 390, 430, 768, 1024, 1440];

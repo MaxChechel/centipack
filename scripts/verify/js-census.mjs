@@ -24,20 +24,51 @@ const EXPECTED = [
   {
     id: 'nav disclosure',
     signature: /data-disclosure/,
-    why: 'ARCHITECTURE §4.3 — dropdown panels must be a keyboard-operable disclosure, which CSS alone cannot do (Escape must return focus).',
+    why: 'ARCHITECTURE §4.3 — TWO behaviours, bundled into one script because both belong to the nav and ship on every page. (1) Dropdown panels must be a keyboard-operable disclosure, which CSS alone cannot do: Escape has to return focus. (2) An open disclosure must not survive the breakpoint that made it reachable — the desktop trigger keeps aria-expanded="true" and the mobile <details> keeps `open` when the other takes over, so a hidden control lies to a screen reader until the window is resized back. Declared as one entry because one script is what dist actually contains, and a census that reports modules the bundler merged is a census describing source rather than output.',
     maxGzip: 700,
   },
   {
-    id: 'contact form enable',
+    id: 'contact form submit',
     signature: /data-contact-form/,
-    why: 'ARCHITECTURE §8 — the form ships disabled so an unverified endpoint cannot silently swallow an enquiry, and started_at must be stamped in the browser rather than baked into cached HTML.',
-    maxGzip: 500,
+    why:
+      'ARCHITECTURE §8 — THREE jobs, and the third is why this budget moved from 500 to 750 B. ' +
+      '(1) The form ships disabled so an unverified endpoint cannot silently swallow an enquiry. ' +
+      '(2) started_at is stamped in the browser, because a build-time value would be baked into cached HTML and every visitor would submit the same stale timestamp. ' +
+      '(3) The submission is intercepted and the answer rendered on the page. That third job was missing and the form was broken without it: functions/api/contact.ts replies with JSON, and a native POST to a JSON response NAVIGATES — a visitor who filled the form correctly left the site and read {"ok":true} in a blank tab. ' +
+      'Intercepting costs no capability the page had, because the form ships disabled and only this module enables it, so there has never been a no-JavaScript path that could submit. What it buys is the error text: the endpoint distinguishes a failed challenge from a bad address from a dead provider, and without a fetch every one of those is the same blank tab. ' +
+      'It also resets the Turnstile widget after a failure, because the token is single-use and a second attempt with a spent one fails for a reason the visitor cannot see. ' +
+      'Measured at 620 B gzipped against the 750 B budget.',
+    maxGzip: 750,
   },
   {
     id: 'select enter-to-open',
     signature: /showPicker/,
     why: 'ARCHITECTURE §6/§4.1 — a focused <select> opens on Space and the arrows but NOT on Enter, on any platform. Measured here: Enter on a select inside a form does nothing at all. One delegated listener restores the key people expect, on a native control, instead of rebuilding the select as a div with role="combobox".',
     maxGzip: 400,
+  },
+  {
+    id: 'rail pagination',
+    signature: /rail-progress/,
+    why: 'ARCHITECTURE open ruling 1, ruled for this project — the product grids become a native scroll-snap rail below lg, and the browser gives every part of that free EXCEPT a pagination indicator. This computes the visible fraction and the scroll fraction and writes two custom properties; the shape and the colours are CSS. Swiper was measured and rejected: ~15 KB gzipped for its pagination build against 2 KB for this whole site, to replace a scroller the platform already ships correctly.',
+    maxGzip: 500,
+  },
+  {
+    /**
+     * A BUNDLER ARTEFACT, NAMED RATHER THAN EXEMPTED. When a module is imported
+     * by more than one page, Rollup hoists it into a shared chunk and leaves
+     * each page with a stub that does nothing but import it — 27 bytes of
+     * `import"./rail.<hash>.js";`. The real module is counted once, under its
+     * own name; these are the pointers to it.
+     *
+     * It is declared here rather than skipped because §6's rule is that every
+     * byte is named, and "the bundler made it" is a reason, not an exemption. The
+     * budget is tight on purpose: if one of these ever grows past a bare import,
+     * something has started shipping through a door nobody is watching.
+     */
+    id: 'shared-chunk pointer',
+    signature: /^\s*import"\.\/[\w.$-]+\.js";?\s*$/,
+    why: 'Rollup hoists a module imported by several pages into one shared chunk — counted once under its own name — and leaves each page a bare import of it. The pointer, not the module.',
+    maxGzip: 120,
   },
   {
     id: 'clip playback',

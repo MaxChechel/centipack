@@ -30,10 +30,31 @@ interface Env {
   CRM_ENDPOINT?: string;
 }
 
-/** PROJECT: the fields this form collects. Kept in one place so the validator,
- *  the email body and the CRM payload cannot drift apart. */
-const FIELDS = ['name', 'company', 'email', 'message'] as const;
+/**
+ * PROJECT: the fields this form collects. Kept in one place so the validator,
+ * the email body and the CRM payload cannot drift apart.
+ *
+ * `volume` IS IN THIS LIST AND WAS NOT. The template shipped the four fields it
+ * draws; CentiPack's form asks a fifth — "Projected shipments per week" — and a
+ * field absent from here is read from neither the request nor the email. It
+ * passed validation, it passed the build, and the one number this business
+ * qualifies a lead on would simply not have been in the message the client
+ * received. This list is the contract, and the contract now matches the form.
+ *
+ * The labels are here too, because the email is read by a person: `volume:
+ * 1,000–5,000` is worse than "Projected shipments per week: 1,000–5,000", and a
+ * second list of labels somewhere else is how the two drift.
+ */
+const FIELDS = ['name', 'email', 'company', 'volume', 'message'] as const;
 type Field = (typeof FIELDS)[number];
+
+const LABELS: Record<Field, string> = {
+  name: 'Name',
+  email: 'Work email',
+  company: 'Company',
+  volume: 'Projected shipments per week',
+  message: 'What they are shipping, and where',
+};
 
 const REQUIRED: readonly Field[] = ['name', 'email', 'message'];
 
@@ -96,7 +117,7 @@ type Delivery = { ok: true } | { ok: false; reason: string };
 async function sendLead(lead: Lead, env: Env): Promise<Delivery> {
   // --- Path A: email via Resend ------------------------------------------
   if (env.RESEND_API_KEY) {
-    const text = FIELDS.map((f) => `${f}: ${lead.fields[f] || '—'}`).join('\n');
+    const text = FIELDS.map((f) => `${LABELS[f]}: ${lead.fields[f] || '—'}`).join('\n');
     const res = await fetch('https://api.resend.com/emails', {
       method: 'POST',
       headers: {
@@ -107,7 +128,13 @@ async function sendLead(lead: Lead, env: Env): Promise<Delivery> {
         from: env.LEAD_FROM,
         to: [env.LEAD_TO],
         reply_to: lead.email,
-        subject: `New enquiry from ${lead.fields.name || 'the website'}`,
+        /* The company, not just the person: the client triages these by account,
+           and "New enquiry from Jane Doe" in a list of thirty says less than the
+           pharmacy's name does. Falls back cleanly when company is blank, which
+           it may be — it is not a required field. */
+        subject: lead.fields.company
+          ? `New enquiry — ${lead.fields.company} (${lead.fields.name})`
+          : `New enquiry — ${lead.fields.name || 'the website'}`,
         text: `${text}\n\nsubmitted: ${lead.submittedAt}`,
       }),
     });

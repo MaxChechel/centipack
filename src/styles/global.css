@@ -80,65 +80,91 @@
   --color-current: currentcolor;
   --color-inherit: inherit;
 
-  /* --- Neutral ramp ------------------------------------------------------
-     PROJECT: replace.
+  /* --- Neutral ramp — CentiPack "Neutral" + "Brand/Black" -----------------
+     The client's warm-neutral ink-and-line family, lifted from the Figma
+     variable collection. Every value below is the client's own except the three
+     marked DERIVED, and each of those is justified where it stands.
 
-     That marker is a convention, not decoration: every value a client project
-     has to swap carries it, and it is the only thing the retheme checklist in
-     README.md has to grep for. Replace these with the brand's primitives from
-     Figma, re-derive both themes in §3, and run `npm run verify` — the contrast
-     matrix is what says whether the new brand is shippable.
-
-     Generated at even CIE L* steps with a constant, very low cool chroma
-     (Lab a*=-0.6 b*=-3.2, tapered to neutral at the white end where the blue
-     channel would clip). Even L* spacing matters: it is what makes "one step
-     lighter" mean the same amount everywhere on the ramp, and it is what let
-     the semantic layer below find steps that clear AA rather than landing in
-     the gap between two of them.
+     Warm, not grey: the family holds R = B+5, G = B+3 through the midtones and
+     tapers to neutral at both ends, which is what keeps it in step with the
+     sand grounds rather than reading blue against them.
 
      The steps are NOT in the --color-* namespace, so `bg-gray-500` does not
      compile. Primitives are not a vocabulary; the semantic layer is. */
-  --gray-0: #ffffff;      /* PROJECT: replace — L*100 */
-  --gray-25: #fbfcfd;     /* L* 99 */
-  --gray-50: #f4f7fa;     /* L* 97 */
-  --gray-100: #eaeef4;    /* L* 94 */
-  --gray-200: #d9dde3;    /* L* 88 */
-  --gray-300: #c2c7cc;    /* L* 80 */
-  --gray-400: #a2a6ab;    /* L* 68 */
-  --gray-500: #8f9499;    /* L* 61 */
-  --gray-600: #73777c;    /* L* 50 */
-  --gray-700: #5f6468;    /* L* 42 */
-  --gray-800: #484c50;    /* L* 32 */
-  --gray-900: #313539;    /* L* 22 */
-  --gray-925: #272a2e;    /* L* 17 — exists for the dark theme's ground ladder */
-  --gray-950: #1c2024;    /* L* 12 */
-  --gray-1000: #000000;   /* L*  0 */
+  --gray-0: #ffffff;      /* Figma Neutral/0          — L*100.0 */
+  --gray-50: #f1f1f1;     /* Figma Grays/Gray-00      — L* 95.1 */
+  --gray-200: #e4e3e1;    /* Figma color/neutral/200  — L* 90.3 */
+  --gray-300: #d4d2cf;    /* Figma Neutral/300        — L* 84.3 */
+  /* DERIVED. The client ramp jumps L*84.3 → L*57.6 with nothing between, and
+     the dark theme's tertiary text needs L* ≥ 63.3 to clear AA on the lightest
+     dark ground. This is that missing step, placed at L*70 for margin. */
+  --gray-400: #adaba8;    /* DERIVED                  — L* 70.1 */
+  /* TUNED, by 1.55 L*. The client's Neutral/500 is #8c8a87 (L*57.6), which
+     measures 2.98:1 against --bg-subtle as a control boundary and misses WCAG
+     1.4.11's 3:1 by two hundredths. Darkened until it clears at 3.14:1. The hue
+     is untouched; only the lightness moved. */
+  --gray-500: #888683;    /* TUNED from #8c8a87       — L* 56.0 */
+  --gray-600: #6b6967;    /* Figma Neutral/600        — L* 44.5 */
+  --gray-700: #4d4b4a;    /* Figma Neutral/700        — L* 32.0 */
+  --gray-800: #333231;    /* Figma Neutral/800        — L* 20.9 */
+  /* DERIVED. The dark theme's ground ladder needs a step between Brand/Black
+     and Neutral/800; this sits midway at even L* spacing. */
+  --gray-900: #292827;    /* DERIVED                  — L* 16.2 */
+  --gray-950: #1f1f1f;    /* Figma Brand/Black        — L* 11.8 */
+  --gray-1000: #000000;   /* L* 0 — the scrim mixes against this, nothing else */
 
-  /* Accent primitives. PROJECT: replace.
+  /* --- Sand ramp — CentiPack "Secondary" ---------------------------------
+     A SECOND primitive family, and the reason is the design rather than taste:
+     CentiPack's page grounds are warm sand tints (#f9f7f5, #f2eee8) while its
+     ink and lines are warm neutrals. At the same lightness the two are
+     different hues — the client's own Gray-00 (#f1f1f1, L*95.1) and Secondary/100
+     (#f2eee8, L*94.2) sit a step apart on the ramp and a world apart in warmth
+     — so one ramp cannot carry both without dropping one of them. Recorded as a
+     deviation in AUDIT.md.
 
-     A REAL colour, deliberately, even though the reference site this system
-     came from is monochrome by design and resolved its accent to the text
-     colour. A starter whose accent resolves to --text-primary looks correct
-     with the accent wiring completely broken — and the starter is the one
-     artefact whose job is to exercise every token. A visible blue means a
-     snapped accent is visible too, in the one place someone would notice.
+     Only the two steps the semantic layer points at ship. Secondary/300, /400
+     and /600 exist in Figma and are unused by the launch design; they get added
+     here when a section demands one, not before (§4.5). */
+  --sand-50: #f9f7f5;     /* Figma Secondary/50       — L* 97.3 */
+  --sand-100: #f2eee8;    /* Figma Secondary/100      — L* 94.2 */
 
-     Two steps, not one: an accent that clears 4.5:1 as text on a light ground
-     cannot also clear it on a dark one. Each theme picks its own (§3, rule 5).
-     The styleguide exercises both in buttons, in TextLink hover and in a
-     highlight sample, so the retheme checklist has something to look at. */
-  --accent-500: #3861af;  /* PROJECT: replace — L*42, the light-theme accent */
-  --accent-300: #8ba8fe;  /* PROJECT: replace — L*70, the dark-theme accent  */
+  /* Accent primitives.
+
+     CentiPack's design is monochrome on its surface — the primary button is
+     Brand/Black, links are ink — but the client's variable collection carries a
+     real accent hue, `text/brand` #0e2a46 at hue 210°, and the launch design
+     spends it once (the highlighted SKU row on the mailers page). It is the
+     accent, and it is wired here so that every future consumer follows.
+
+     Two steps, not one, per §2.4 rule 5: #0e2a46 measures 1.13:1 on the dark
+     ground and is unusable there. The dark step is DERIVED rather than taken
+     from the client's own `color/primary/300` (#bcc3cb): that value clears the
+     matrix but sits at 13% saturation, close enough to --text-secondary on dark
+     (#d4d2cf) that neither reads as distinct from the other. The derived step
+     keeps hue 210° and carries 30% saturation, so it is still legibly the brand
+     blue at L*68. */
+  --accent-700: #0e2a46;  /* Figma text/brand   — L*16.5, the light-theme accent */
+  --accent-300: #8fa8c2;  /* DERIVED            — L*68.0, the dark-theme accent  */
 
   /* --- Typography --------------------------------------------------------
      --font-body is emitted by Astro's font pipeline; see the `fonts` block in
-     astro.config.mjs, which currently declares nothing. Until a project adds a
-     face, the stack falls through to the system UI font. */
+     astro.config.mjs. CentiPack sets DM Sans, self-hosted and subset.
+
+     ONE VARIABLE FACE, MEASURED. Three static instances at opsz 14 (400/500/700)
+     subset to Latin come to 38,584 B; the same three weights as one partial
+     variable face — opsz pinned at 14, the wght axis clipped to 400–700 — come
+     to 21,732 B in a single request. 44% smaller and two fewer round trips, so
+     the variable face ships. §7's "only the weights the design applies" is
+     honoured by the axis clip: nothing lighter than 400 or heavier than 700
+     exists in the file. */
   --font-sans: var(--font-body, ui-sans-serif), system-ui, -apple-system, 'Segoe UI', Arial, sans-serif;
 
+  /* The three the design applies, and no others. 700 is spent on exactly one
+     thing — the SKU column of the product spec table — which is recorded as an
+     open question in WORKLOG rather than silently paid for. */
   --font-weight-regular: 400;
   --font-weight-medium: 500;
-  --font-weight-semibold: 600;
+  --font-weight-bold: 700;
 
   /* The TYPE SCALE is not here. It is named for role — --text-h1 … --text-eyebrow
      — and lives outside @theme in §1b, for the same reason the semantic colours
@@ -149,14 +175,22 @@
      name, one of which carries only half the style. Outside @theme there is one
      `.text-h1`, and it is the whole treatment. */
 
-  --leading-flat: 1;
-  --leading-tight: 1.1;
-  --leading-snug: 1.3;
-  --leading-body: 1.55;
+  /* Read off the Figma type styles, which carry four leadings and four
+     trackings between them. Body sits at 1.3 rather than the system default's
+     1.55 because that is what the design specifies throughout; the measure is
+     capped at 66ch below, which is what keeps it readable at that leading. */
+  --leading-flat: 1;      /* h1, and every mobile heading style */
+  --leading-tight: 1.1;   /* h2, h3, h5 */
+  --leading-snug: 1.2;    /* h4, h6 */
+  --leading-body: 1.3;    /* all body copy */
 
-  --tracking-tight: -0.02em;
-  --tracking-normal: 0em;
-  --tracking-wide: 0.06em;
+  /* Figma expresses tracking as a percentage of the size; these are the same
+     four values in em. The house default is tight: DM Sans is set at -2%
+     everywhere except the headings that loosen and the eyebrow that opens up. */
+  --tracking-tight: -0.02em;    /* h1, h2, and all body copy */
+  --tracking-snug: -0.015em;    /* h3 */
+  --tracking-slight: -0.01em;   /* h4, h5, h6 */
+  --tracking-wide: 0.03em;      /* eyebrow */
 
   /* --- Spacing -----------------------------------------------------------
      The namespace is `--spacing-*`, NOT `--space-*`. That is not cosmetic:
@@ -170,27 +204,53 @@
      is silent in both directions. A t-shirt name cannot be confused with
      something it isn't.
 
-     Fluid throughout, 320px → 1312px, from a 2px hairline to 12rem. */
+     STATIC, NOT FLUID, AND THAT IS A MEASUREMENT RATHER THAN A PREFERENCE.
+     The system's scale clamps every step between a mobile and a desktop value;
+     CentiPack's design specifies the SAME gap at both ends — card grid 12px at
+     402 and at 1440, card padding 24px at both, content stack 32px at both. A
+     clamp between two equal values is a constant written the long way, and a
+     clamp between the system's default ends would render neither of the two
+     widths the design actually specifies. So the steps below are the design's
+     numbers, and the three things that DO scale with the viewport — the site
+     margin, the nav height, and the section rhythm — carry the clamps instead.
+     Recorded as a deviation in AUDIT.md.
+
+     Six of the design's gaps do not land on a step: 6, 10, 20, 28, 40 and 80.
+     Each is used once or twice, in the nav and footer chrome, and each snaps to
+     its nearest step — the largest move is 4px. Listed in the Phase 0 WORKLOG
+     entry rather than absorbed silently. */
   --spacing-0: 0px;
-  --spacing-3xs: clamp(0.125rem, 0.1048rem + 0.1008vw, 0.1875rem);  /*   2 →   3px */
-  --spacing-2xs: clamp(0.25rem, 0.2097rem + 0.2016vw, 0.375rem);    /*   4 →   6px */
-  --spacing-xs: clamp(0.5rem, 0.4597rem + 0.2016vw, 0.625rem);      /*   8 →  10px */
-  --spacing-sm: clamp(0.75rem, 0.6694rem + 0.4032vw, 1rem);         /*  12 →  16px */
-  --spacing-md: clamp(1rem, 0.8387rem + 0.8065vw, 1.5rem);          /*  16 →  24px */
-  --spacing-lg: clamp(1.5rem, 1.2581rem + 1.2097vw, 2.25rem);       /*  24 →  36px */
-  --spacing-xl: clamp(2rem, 1.6774rem + 1.6129vw, 3rem);            /*  32 →  48px */
-  --spacing-2xl: clamp(3rem, 2.5161rem + 2.4194vw, 4.5rem);         /*  48 →  72px */
-  --spacing-3xl: clamp(4rem, 3.0323rem + 4.8387vw, 7rem);           /*  64 → 112px */
-  --spacing-4xl: clamp(5rem, 2.7419rem + 11.2903vw, 12rem);         /*  80 → 192px */
+  --spacing-3xs: 0.125rem;  /*  2px — hairline offsets */
+  --spacing-2xs: 0.25rem;   /*  4px */
+  --spacing-xs: 0.5rem;     /*  8px — card title → sublabel */
+  --spacing-sm: 0.75rem;    /* 12px — the card grid gap, everywhere */
+  --spacing-md: 1rem;       /* 16px — product card padding, nav row padding */
+  --spacing-lg: 1.5rem;     /* 24px — content card padding, button inset */
+  --spacing-xl: 2rem;       /* 32px — the content stack gap */
+  --spacing-2xl: 3rem;      /* 48px */
+  --spacing-3xl: 4rem;      /* 64px */
+  --spacing-4xl: 6rem;      /* 96px */
+  /* 192px. Added in Phase 2, correcting a Phase 0 call: the scale was capped at
+     96 and the design's footer puts ~200px between its link columns and its
+     legal rule. One real gap, one step. */
+  --spacing-5xl: 12rem;     /* 192px */
 
   /* Section rhythm. Owned by the Section component; pages never set these and
      there is no such thing as a spacer div. `none` is a real step, not an
      escape hatch — sections that butt against the next, separated by a rule or
-     a background change rather than by space, need zero padding on an edge. */
+     a background change rather than by space, need zero padding on an edge, and
+     the product index does exactly that between its three category bands.
+
+     Fluid, interpolated between the two widths the design was drawn at: 402px
+     and 1440px. Measured tops in the design are 48/64 on mobile and 72/80/96/120
+     on desktop; the three steps below span that. */
   --spacing-section-none: 0px;
-  --spacing-section-sm: clamp(2.5rem, 2.3387rem + 0.8065vw, 3rem);
-  --spacing-section-md: clamp(4rem, 3.6774rem + 1.6129vw, 5rem);
-  --spacing-section-lg: clamp(4rem, 3.3548rem + 3.2258vw, 6rem);
+  /* 40 → 48. Retuned in Phase 2: the index and category heroes close on a 48px
+     step in the design, and the step was 64 at desktop because nothing used it
+     when it was first derived. */
+  --spacing-section-sm: clamp(2.5rem, 2.3065rem + 0.7707vw, 3rem);   /*  40 →  48px */
+  --spacing-section-md: clamp(3rem, 1.8381rem + 4.6243vw, 6rem);     /*  48 →  96px */
+  --spacing-section-lg: clamp(4rem, 2.6445rem + 5.395vw, 7.5rem);    /*  64 → 120px */
 
   /* The page-top step: the first section on a page must clear the fixed nav.
      DERIVED, never measured — exactly nav height plus one md step, so it stays
@@ -200,11 +260,16 @@
   --spacing-section-nav: calc(var(--nav-height) + var(--spacing-section-md));
 
   /* Control heights live in the spacing namespace so `h-nav` and `h-control-md`
-     generate. --nav-height is also read directly in CSS. */
-  --nav-height: 4rem;
+     generate. --nav-height is also read directly in CSS.
+
+     The design draws two control heights, not one: buttons are 48px at every
+     width, text inputs are 52px. They are two tokens rather than one rounded
+     compromise because both numbers are in the design and neither is a mistake. */
+  --nav-height: clamp(4.125rem, 3.7377rem + 1.5414vw, 5.125rem);  /* 66 → 82px */
   --spacing-nav: var(--nav-height);
-  --spacing-control-sm: 2.25rem;
-  --spacing-control-md: 3rem;
+  --spacing-control-sm: 2.25rem;   /* 36px — Button size="sm"; unexercised by the launch design */
+  --spacing-control-md: 3rem;      /* 48px — every button in the design */
+  --spacing-control-lg: 3.25rem;   /* 52px — every text input in the design */
   /* Checkbox and radio box. Fixed, not fluid: a tick target that grows with the
      viewport stops matching the text beside it, and 1.125rem already clears the
      24px minimum once its label is counted as part of the target. */
@@ -212,8 +277,9 @@
   --spacing-icon: 1.5rem;
   /* The nav sizes the wordmark by WIDTH: marks arrive with wildly different
      aspect ratios, and a width cap is the only one that keeps the bar's rhythm
-     when a project swaps its logo in. */
-  --spacing-nav-logo: 7rem;
+     when a project swaps its logo in. CentiPack's lockup is drawn at 152×32 on
+     mobile and 228×48 on desktop — one ratio, two sizes, so one fluid width. */
+  --spacing-nav-logo: clamp(9.5rem, 7.6604rem + 7.3218vw, 14.25rem);  /* 152 → 228px */
   /* Third-party wordmark height, and its width cap. Marks arrive with
      inconsistent viewBoxes; capping both normalizes them optically. */
   --spacing-logo: 2rem;
@@ -225,10 +291,10 @@
      has to invent a second, unrelated mechanism for dark. Borders work in both.
      --radius-md is the card radius (see the card pattern in the styleguide). */
   --radius-none: 0px;
-  --radius-sm: 0.25rem;
-  --radius-md: 0.5rem;
-  --radius-lg: 1rem;
-  --radius-full: 100vw;
+  --radius-sm: 0.125rem;    /*  2px — buttons and text inputs */
+  --radius-md: 0.1875rem;   /*  3px — the card radius */
+  --radius-lg: 0.375rem;    /*  6px — Figma radius/6 */
+  --radius-full: 100vw;     /*        Figma radius/full */
 
   /* THE SYSTEM'S ONLY SHADOW, and it exists for one case: a popup floating over
      content. Everywhere else separation is a 1px rule and a background step,
@@ -236,6 +302,14 @@
      exception because nothing else in the page is above the page — a border
      alone cannot say that. Remapped per theme like any other token. */
   --shadow-popover: 0 1rem 2.5rem -0.75rem rgb(0 0 0 / 0.18), 0 0.25rem 0.75rem -0.25rem rgb(0 0 0 / 0.1);
+
+  /* ONE blur step, re-exposed deliberately after the --blur-* reset in §2.2.
+     The design frosts the plates that sit on photographs — the hero's stat
+     cards — and a backdrop filter is the only way to do that without a second
+     image. It is a token rather than an arbitrary value because it appears in
+     more than one place, and because `backdrop-blur-sm` resolving to nothing is
+     exactly the silent failure the reset exists to surface. */
+  --blur-overlay: 50px;
 
   --border-width: 1px;
   --focus-width: 0.125rem;
@@ -354,18 +428,30 @@
    ========================================================================== */
 
 :root {
-  --text-h1: clamp(2.25rem, 1.6855rem + 2.8226vw, 4rem);          /* 36 → 64px */
-  --text-h2: clamp(2rem, 1.6774rem + 1.6129vw, 3rem);             /* 32 → 48px */
-  --text-h3: clamp(1.75rem, 1.5484rem + 1.0081vw, 2.375rem);      /* 28 → 38px */
-  --text-h4: clamp(1.5rem, 1.379rem + 0.6048vw, 1.875rem);        /* 24 → 30px */
-  --text-h5: clamp(1.25rem, 1.1694rem + 0.4032vw, 1.5rem);        /* 20 → 24px */
-  --text-h6: clamp(1.125rem, 1.0847rem + 0.2016vw, 1.25rem);      /* 18 → 20px */
+  /* Interpolated between the two widths CentiPack was drawn at — 402px and
+     1440px — so every step hits the design exactly at both ends and never jumps
+     between them. Figma keeps a second "Mobile/" type collection; these clamps
+     are that collection and the desktop one expressed as one scale. */
+  --text-h1: clamp(2.25rem, 1.5723rem + 2.6975vw, 4rem);          /* 36 → 64px */
+  --text-h2: clamp(2rem, 1.6128rem + 1.5414vw, 3rem);             /* 32 → 48px */
+  --text-h3: clamp(1.5rem, 1.3064rem + 0.7707vw, 2rem);           /* 24 → 32px */
+  --text-h4: clamp(1.25rem, 1.1532rem + 0.3854vw, 1.5rem);        /* 20 → 24px */
+  --text-h5: clamp(1.125rem, 1.0766rem + 0.1927vw, 1.25rem);      /* 18 → 20px */
+  /* h6 is INTERPOLATED, not measured: the launch design stops at h5. It is kept
+     as a real step so the scale has no hole, and the first design that needs it
+     gets a value that is already in rhythm rather than an invented one. */
+  --text-h6: clamp(1rem, 0.9516rem + 0.1927vw, 1.125rem);         /* 16 → 18px */
 
-  --text-large: clamp(1.125rem, 1.0847rem + 0.2016vw, 1.25rem);    /* 18 → 20px */
-  --text-body: clamp(1rem, 0.9798rem + 0.1008vw, 1.0625rem);      /* 16 → 17px */
-  --text-sm: clamp(0.875rem, 0.8548rem + 0.1008vw, 0.9375rem); /* 14 → 15px */
-  --text-caption: clamp(0.875rem, 0.8548rem + 0.1008vw, 0.9375rem); /* 14 → 15px */
-  --text-eyebrow: clamp(0.75rem, 0.7298rem + 0.1008vw, 0.8125rem);  /* 12 → 13px */
+  /* --text-large is the h5 step wearing a body treatment. The launch design's
+     section ledes are all 16px, so nothing uses it yet; SectionHeader's lede
+     class is a Phase 2 decision, recorded as open question 4. */
+  --text-large: clamp(1.125rem, 1.0766rem + 0.1927vw, 1.25rem);   /* 18 → 20px */
+  /* Static from here down: the design draws these at the same size on both
+     frames, and a clamp between two equal values is a constant written twice. */
+  --text-body: 1rem;         /* 16px — Figma "Body S" */
+  --text-sm: 0.9375rem;      /* 15px — Figma "Buttons", and every tertiary link */
+  --text-caption: 0.75rem;   /* 12px — Figma "Body XS" */
+  --text-eyebrow: 0.6875rem; /* 11px — Figma "eyebrow" */
 }
 
 /* --------------------------------------------------------------------------
@@ -389,14 +475,18 @@
      in the system. Nav, Section and Footer all read it through the same
      container utility, which is what makes a logo, a heading and a footer link
      land on one vertical line down the page edge. */
-  --site-margin: clamp(1.25rem, 0.8468rem + 2.0161vw, 2.5rem);  /* 20 → 40px */
+  --site-margin: clamp(1rem, 0.2254rem + 3.0829vw, 3rem);  /* 16 → 48px */
 
-  --container-main: 82rem;
-  --container-narrow: 50rem;
+  /* 1440px: the design's frame width, gutters included. The container is
+     border-box, so 90rem minus two 48px margins is the 1344px content column
+     every desktop frame is built on. */
+  --container-main: 90rem;
+  /* 1008px: the home hero's 912px text column plus its two margins. */
+  --container-narrow: 63rem;
 
   /* A text-measure cap applied INSIDE content, never a page container. Long
      copy gets it; a grid of cards does not. */
-  --container-measure: 68ch;
+  --container-measure: 66ch;  /* the 530px measure of the contact page's standfirst */
 
   /* The width cap on a third-party wordmark. Outside @theme with the rest of the
      container group, so no `max-w-logo` exists to be applied to something that
@@ -439,18 +529,18 @@
      base    the page ground
      subtle  a secondary ground — bands, wells, recessed areas
      surface cards and anything raised off the ground */
-  --bg-base: var(--gray-25);
-  --bg-subtle: var(--gray-100);
+  --bg-base: var(--sand-50);
+  --bg-subtle: var(--sand-100);
   --bg-surface: var(--gray-0);
 
   /* --- Text --------------------------------------------------------------
      primary    headings and body
      secondary  supporting copy, lede, inactive nav links
-     tertiary   captions, metadata, labels. The floor: 5.14:1 on bg-subtle,
-                which is the tightest pair in the light theme. */
+     tertiary   captions, metadata, labels. The floor: 4.73:1 on bg-subtle,
+                which is the tightest pair in the whole matrix. */
   --text-primary: var(--gray-950);
-  --text-secondary: var(--gray-800);
-  --text-tertiary: var(--gray-700);
+  --text-secondary: var(--gray-700);
+  --text-tertiary: var(--gray-600);
 
   /* --- Lines -------------------------------------------------------------
      line         dividers and card edges. Decorative, so AA text contrast does
@@ -461,15 +551,89 @@
                   --line is nowhere near that. Two tokens because they have two
                   different jobs, not because one is a darker shade. */
   --line: var(--gray-300);
-  --line-strong: var(--gray-600);
+  /* A DOCUMENTED A11Y FIX (§10). The design draws input and secondary-button
+     borders in Neutral/300 (#d4d2cf), which measures 1.31:1 against the cream
+     panel behind them. Nothing else in those controls says "this is a control"
+     — the fill is white on cream, itself 1.16:1 — so WCAG 1.4.11's 3:1 applies
+     to the border and #d4d2cf cannot carry it. --line-strong is the tuned
+     gray-500 instead, at 3.14:1 on the tightest ground. Divider and card edges
+     are unaffected and stay exactly as drawn. */
+  --line-strong: var(--gray-500);
 
   /* --- Accent ------------------------------------------------------------
      Present from day one even in a monochrome design, so that the day an
      accent is introduced it is introduced HERE and every consumer follows.
      --accent is legal as text, as a fill, and as a border; --accent-contrast
      is the only legal text colour on top of an --accent fill. */
-  --accent: var(--accent-500);
+  --accent: var(--accent-700);
   --accent-contrast: var(--gray-0);
+
+  /* --- The inverse fill --------------------------------------------------
+     The ink-coloured primary action: ground and ink swapped. CentiPack's
+     primary button is Brand/Black on light and pure white on dark, which is
+     neither the accent nor something markup may express by reaching for
+     --text-primary — `bg-primary` does not compile, deliberately (§2.3), and
+     it should not: a fill is a different job from a text colour and carries a
+     different contrast obligation.
+
+     So it is its own pair, named for the relationship rather than the value,
+     and it goes through the matrix like everything else. --text-on-inverse is
+     the ONLY legal text on a --bg-inverse fill. */
+  --bg-inverse: var(--gray-950);
+  /* DECLARED HERE, IN THE BARE :root, AND NOT ONLY IN THE [data-theme] BLOCKS.
+     It was only in the two theme blocks, and most of this site renders with no
+     data-theme attribute at all — so `background-color: var(--bg-inverse-hover)`
+     was invalid at computed-value time on every unthemed page and resolved to
+     TRANSPARENT. The primary button's hover did nothing visible except drop its
+     fill. Measured, not guessed: a real mouse move over the hero button read
+     back `rgba(0, 0, 0, 0)`.
+
+     The contrast matrix did not catch it because it asks each theme scope by
+     name and never asks the unstamped state — which is the state most pages are
+     in. `scripts/verify/contrast.mjs` now asserts root declaration separately. */
+  --bg-inverse-hover: var(--gray-800);
+  --text-on-inverse: var(--gray-0);
+
+  /* --- Over media --------------------------------------------------------
+     A translucent plate and its hairline, for furniture that sits ON a
+     photograph: the hero's stat cards, and anything else that has to read as a
+     surface without hiding what is behind it.
+
+     THEY ARE RE-DECLARED IN EVERY THEME BLOCK, and the comment that used to sit
+     here was wrong about why. It claimed pointing at --text-primary made the
+     plate follow the theme "automatically". It does not: a `var()` inside a
+     custom property's value is substituted where that property is DECLARED, not
+     where it is used, so `color-mix(…, var(--text-primary) 15%, …)` declared on
+     :root resolves against :root's ink and then inherits as an already-mixed
+     colour. A dark region re-declaring --text-primary changes nothing.
+
+     Measured: the hero's stat tiles were drawing a 15% BLACK hairline on a dark
+     photograph, against the design's 15% white. Same family as the
+     --bg-inverse-hover bug in Entry 9 — a token whose value depends on another
+     token has to be re-declared wherever that other token moves.
+
+     Opacity variants are NEW TOKENS via color-mix(), never ad-hoc alpha in
+     markup (§2.3): `bg-surface/10` does not compile, and a translucent surface
+     is a design decision with a contrast consequence, so it gets a name.
+
+     THE CONTRAST MATRIX CANNOT MEASURE THESE and does not pretend to: what sits
+     behind them is a photograph, not a token. The gradient under the plate is
+     what makes the pair safe, and it is a Phase 4 visual check rather than an
+     arithmetic one. */
+  --bg-overlay: color-mix(in oklab, var(--text-primary) 10%, transparent);
+  --line-overlay: color-mix(in oklab, var(--text-primary) 15%, transparent);
+
+  /* --- The inactive fade -------------------------------------------------
+     Hovering one link in a column drops the others to this opacity, so the row
+     being read separates itself from the ones that are not.
+
+     TWO VALUES, BECAUSE ONE VALUE FAILS. Ink at 50% over the sand ground
+     composites to #8c8b8a and measures 3.23:1 — below AA, on text a reader is
+     still expected to read. White at 50% over the dark ground composites to
+     #8f8f8f at 5.09:1 and is fine. So light fades to 0.65 (4.98:1) and dark to
+     0.5; scripts/verify/contrast.mjs composites both and fails the run if either
+     drops under 4.5. */
+  --fade-inactive: 0.65;
 
   /* --- Derived roles -----------------------------------------------------
      Not new colours: named pointers at the tokens above, so a component never
@@ -481,6 +645,13 @@
      in JavaScript. */
   color-scheme: light;
 
+  /* RE-DECLARED IN BOTH THEME BLOCKS BELOW, and they have to be. `var()` inside
+     a custom property is substituted where the property is DECLARED, so these
+     three resolved against :root's ink and then inherited as fixed colours — a
+     dark region got a #1f1f1f focus ring on a #1f1f1f ground. Measured: every
+     dark region on the site had invisible keyboard focus, which is WCAG 2.4.7,
+     and it was in the template's own token layer rather than in anything this
+     project wrote. `themeCompleteness()` in the harness is what found it. */
   --focus-ring: var(--text-primary);
   --selection-bg: var(--text-primary);
   --selection-text: var(--bg-base);
@@ -509,6 +680,18 @@
 @utility border-line-strong { border-color: var(--line-strong); }
 /* Divider colour for `divide-y` / `divide-x` stacks. */
 @utility divide-line { border-color: var(--line); }
+
+/* The inverse fill, and the one text colour legal on it. `text-inverse` is
+   deliberately absent: the pair is a fill and its label, not a colour anything
+   may paint text with on its own. */
+@utility bg-inverse { background-color: var(--bg-inverse); }
+@utility bg-inverse-hover { background-color: var(--bg-inverse-hover); }
+@utility border-inverse-hover { border-color: var(--bg-inverse-hover); }
+@utility border-inverse { border-color: var(--bg-inverse); }
+@utility text-on-inverse { color: var(--text-on-inverse); }
+
+@utility bg-overlay { background-color: var(--bg-overlay); }
+@utility border-overlay { border-color: var(--line-overlay); }
 
 @utility text-accent { color: var(--accent); }
 @utility bg-accent { background-color: var(--accent); }
@@ -572,45 +755,101 @@
 /* Explicit light. Identical to :root, but stated so that a light section nested
    inside a dark ancestor RESETS rather than inherits. */
 [data-theme='light'] {
-  --bg-base: var(--gray-25);
-  --bg-subtle: var(--gray-100);
+  --bg-base: var(--sand-50);
+  --bg-subtle: var(--sand-100);
   --bg-surface: var(--gray-0);
 
   --text-primary: var(--gray-950);
-  --text-secondary: var(--gray-800);
-  --text-tertiary: var(--gray-700);
+  --text-secondary: var(--gray-700);
+  --text-tertiary: var(--gray-600);
 
   --line: var(--gray-300);
-  --line-strong: var(--gray-600);
+  --line-strong: var(--gray-500);
 
-  --accent: var(--accent-500);
+  --accent: var(--accent-700);
   --accent-contrast: var(--gray-0);
+
+  --bg-inverse: var(--gray-950);
+  --bg-inverse-hover: var(--gray-800);
+  --text-on-inverse: var(--gray-0);
+
+  /* Re-declared, not inherited — see the note in §2. */
+  --bg-overlay: color-mix(in oklab, var(--gray-950) 10%, transparent);
+  --line-overlay: color-mix(in oklab, var(--gray-950) 15%, transparent);
+  --fade-inactive: 0.65;
+
+  /* Dependent tokens, re-declared so they follow this theme's ink and ground
+     rather than :root's. See the note in §2. */
+  --focus-ring: var(--text-primary);
+  --selection-bg: var(--text-primary);
+  --selection-text: var(--bg-base);
+
+  color-scheme: light;
 }
 
 /* Dark. Derived per the six rules above; measured ratios in the comments are
-   what scripts/verify/contrast.mjs re-computes on every run. */
+   what scripts/verify/contrast.mjs re-computes on every run.
+
+   PARTLY DESIGNED, NOT INVENTED. The launch design is light-only as a page
+   theme, but it draws two dark regions — the footer and the closing CTA band —
+   and they are the dark theme rendered: ground #1f1f1f, text white, meta
+   #8c8a87, divider #333231. Those are the anchors. Everything above the ground
+   is derived from them by the six rules, and two of the design's own values
+   could not survive that derivation; both deltas are named below. */
 [data-theme='dark'] {
-  /* Ascending ladder (rule 2). */
-  --bg-base: var(--gray-950);      /* L*12 — the ground */
-  --bg-subtle: var(--gray-925);    /* L*17 — bands and wells */
-  --bg-surface: var(--gray-900);   /* L*22 — cards, raised */
+  /* Ascending ladder (rule 2), anchored on the footer's ground. */
+  --bg-base: var(--gray-950);      /* L*11.8 — Brand/Black, the designed footer ground */
+  --bg-subtle: var(--gray-900);    /* L*16.2 — bands and wells */
+  --bg-surface: var(--gray-800);   /* L*20.9 — cards, raised */
 
-  /* Not the light ramp mirrored (rule 1). Primary stops at gray-50 rather than
-     white: pure white on a near-black ground haloes, and the pair is already
-     at 11.5:1 on the lightest dark ground. */
-  --text-primary: var(--gray-50);    /* 11.50 : 1 on bg-surface, the tightest ground */
-  --text-secondary: var(--gray-300); /*  7.26 : 1 */
-  --text-tertiary: var(--gray-400);  /*  5.05 : 1 — the floor of the whole matrix */
+  /* Not the light ramp mirrored (rule 1). Primary is pure white because the
+     designed footer is pure white; the system's usual step back to gray-50 is a
+     glare precaution, not an accessibility one, and fidelity wins where the
+     design has actually spoken. */
+  --text-primary: var(--gray-0);     /* 12.79 : 1 on bg-surface, the tightest ground */
+  --text-secondary: var(--gray-300); /*  8.48 : 1 */
+  /* DELTA FROM THE DESIGN, and the reason is the matrix. The footer sets its
+     meta text in Neutral/500 (#8c8a87), which clears AA on the footer's own
+     ground at 4.79:1 and fails at 3.72:1 the moment the same token lands on
+     bg-surface. A text token has to clear every ground in its theme, so the
+     tertiary slot steps up to the derived gray-400. Footer meta therefore
+     renders one step lighter than drawn. */
+  --text-tertiary: var(--gray-400);  /*  5.59 : 1 — the floor of the dark theme */
 
-  /* Lines lighten (rule 3). line-strong is gray-500, not gray-600: gray-600
-     measures 2.75:1 against bg-surface and misses WCAG 1.4.11's 3:1 for
-     control boundaries. gray-500 clears it at 4.04:1. */
-  --line: var(--gray-800);
+  /* Lines lighten (rule 3). A SECOND DELTA, forced by rule 2: the design's
+     footer divider is Neutral/800, which is this theme's bg-surface — a rule
+     the same colour as the card it borders is not a rule. --line moves up one
+     step to gray-700, which reads against all three grounds. */
+  --line: var(--gray-700);
+  /* The same tuned step as light, and it clears 1.4.11 here too: 3.52:1 against
+     bg-surface, the tightest of the three. */
   --line-strong: var(--gray-500);
 
-  /* Re-picked, not re-used (rule 5). The light accent measures 1.4:1 here. */
-  --accent: var(--accent-300);       /* 5.37 : 1 on bg-surface */
-  --accent-contrast: var(--gray-950);/* 7.12 : 1 on the accent fill */
+  /* Re-picked, not re-used (rule 5). The light accent measures 1.13:1 here. */
+  --accent: var(--accent-300);       /* 5.21 : 1 on bg-surface */
+  --accent-contrast: var(--gray-950);/* 6.71 : 1 on the accent fill */
+
+  /* The plate and its hairline are WHITE here, which is the whole point of the
+     token and the thing the :root declaration could not deliver on its own. */
+  --bg-overlay: color-mix(in oklab, var(--gray-0) 10%, transparent);
+  --line-overlay: color-mix(in oklab, var(--gray-0) 15%, transparent);
+  --fade-inactive: 0.5;
+
+  /* The inverse fill inverts with the theme, which is the whole point of the
+     name: the dark CTA band and the footer draw a white button with dark text,
+     exactly as the light pages draw a black button with white text. */
+  --bg-inverse: var(--gray-0);
+  /* One step DOWN from white, which is the same gesture inverted: the fill
+     moves toward the ground rather than away from it. */
+  --bg-inverse-hover: var(--gray-300);
+  --text-on-inverse: var(--gray-950);/* 16.48 : 1 on the inverse fill */
+
+  /* Dependent tokens, re-declared so they follow this theme's ink and ground
+     rather than :root's. Without these the focus ring is #1f1f1f on a #1f1f1f
+     ground — invisible keyboard focus in every dark region on the site. */
+  --focus-ring: var(--text-primary);
+  --selection-bg: var(--text-primary);
+  --selection-text: var(--bg-base);
 
   color-scheme: dark;
 
@@ -652,11 +891,39 @@
     font-size: var(--text-body);
     font-weight: var(--font-weight-regular);
     line-height: var(--leading-body);
-    letter-spacing: var(--tracking-normal);
+    letter-spacing: var(--tracking-tight);
     text-wrap: pretty;
     -webkit-font-smoothing: antialiased;
     -moz-osx-font-smoothing: grayscale;
+    /* THE SAFETY NET FOR A WORD LONGER THAN ITS BOX.
+       Default `overflow-wrap: normal` lets a single unbreakable token — a product
+       name, an email address, an env var in a <code> — push past its container
+       and out over whatever is beside it. It does not scroll the document, so the
+       page-level overflow sweep never sees it; the only symptom is text lying on
+       top of a sibling at a width nobody screenshotted.
+       `break-word` is the conservative half of the pair: it only breaks a word
+       that has no other way to fit, and leaves normal wrapping alone. Applied at
+       the body so it inherits everywhere rather than being remembered per block. */
+    overflow-wrap: break-word;
   }
+
+  /* An identifier has no natural break points at all — `anywhere` is the only
+     value that will break PUBLIC_TURNSTILE_SITE_KEY, and code is the one place
+     where breaking mid-token is expected rather than a typographic failure. */
+  code, kbd, samp {
+    overflow-wrap: anywhere;
+  }
+
+  /* NO `hyphenate-limit-chars` HERE, AND THAT IS THE RESULT OF TRYING IT.
+     Tightening the limits to stop the browser hyphenating "between" and
+     "industry" in the hero's 67px stat column looked like restraint and was the
+     opposite: forbidding the good break does not stop the word needing to
+     break, so `overflow-wrap: break-word` above took over and produced
+     "betwee / n" and "industr / y" — a single orphaned letter on its own line,
+     measured at 320 with both `10 5 4` and `auto 4 3`.
+     The browser's own dictionary, with its own defaults, breaks the same words
+     at "be-tween" and "in-dustry", which is correct English and the whole reason
+     <html lang="en"> is set. Left alone deliberately. */
 
   /* Headings inherit; the type styles in §5 assign the scale. This is what
      keeps an <h2> free to look like an h4 without fighting a default, which is
@@ -770,25 +1037,25 @@
   .text-h3 {
     font-size: var(--text-h3);
     line-height: var(--leading-tight);
-    letter-spacing: var(--tracking-tight);
+    letter-spacing: var(--tracking-snug);
   }
 
   .text-h4 {
     font-size: var(--text-h4);
     line-height: var(--leading-snug);
-    letter-spacing: var(--tracking-normal);
+    letter-spacing: var(--tracking-slight);
   }
 
   .text-h5 {
     font-size: var(--text-h5);
-    line-height: var(--leading-snug);
-    letter-spacing: var(--tracking-normal);
+    line-height: var(--leading-tight);
+    letter-spacing: var(--tracking-slight);
   }
 
   .text-h6 {
     font-size: var(--text-h6);
     line-height: var(--leading-snug);
-    letter-spacing: var(--tracking-normal);
+    letter-spacing: var(--tracking-slight);
   }
 
   .text-large,
@@ -797,7 +1064,7 @@
   .text-caption {
     font-weight: var(--font-weight-regular);
     line-height: var(--leading-body);
-    letter-spacing: var(--tracking-normal);
+    letter-spacing: var(--tracking-tight);
     text-wrap: pretty;
   }
 
@@ -812,7 +1079,7 @@
   .text-eyebrow {
     font-size: var(--text-eyebrow);
     font-weight: var(--font-weight-medium);
-    line-height: var(--leading-body);
+    line-height: var(--leading-flat);
     letter-spacing: var(--tracking-wide);
     text-transform: uppercase;
     color: var(--text-tertiary);
@@ -862,7 +1129,7 @@
     margin-top: var(--spacing-xl);
   }
 
-  .prose h2 { font-size: var(--text-h3); line-height: var(--leading-tight); letter-spacing: var(--tracking-tight); font-weight: var(--font-weight-medium); }
+  .prose h2 { font-size: var(--text-h3); line-height: var(--leading-tight); letter-spacing: var(--tracking-snug); font-weight: var(--font-weight-medium); }
   .prose h3 { font-size: var(--text-h4); line-height: var(--leading-snug); font-weight: var(--font-weight-medium); }
   .prose h4 { font-size: var(--text-h6); line-height: var(--leading-snug); font-weight: var(--font-weight-medium); }
 
@@ -1447,7 +1714,23 @@
 
   /* A rotated corner, drawn in CSS so it costs no asset and follows
      currentColor under any theme. */
+  /* THE BOX RESERVES THE ROTATED FOOTPRINT, NOT THE DRAWN SQUARE.
+     A square of side s turned 45 degrees occupies s * sqrt(2) — so an 8px corner
+     in an 8px box hangs 1.7px out of it on each side. `transform` does not move
+     layout but it DOES enlarge the scrollable overflow area, which is how the
+     sweep's spill assertion found this: every <summary> on the page reported
+     +2px at all seven widths, and the hairline was poking into the gutter.
+     Drawing the corner in a ::before inside a box sized to the footprint keeps
+     the glyph identical and puts it back inside its own bounds. */
   .faq-chevron {
+    display: grid;
+    place-items: center;
+    inline-size: 0.75rem;
+    block-size: 0.75rem;
+  }
+
+  .faq-chevron::before {
+    content: '';
     display: block;
     width: 0.5rem;
     height: 0.5rem;
@@ -1457,7 +1740,7 @@
     transition: transform var(--transition-duration-spring-soft) var(--ease-spring-soft);
   }
 
-  .faq-item[open] .faq-chevron {
+  .faq-item[open] .faq-chevron::before {
     transform: translateY(25%) rotate(225deg);
   }
 
@@ -1572,6 +1855,60 @@
      while the container-main INSIDE the panel puts its columns on the same gutter
      line as the logo above and every section heading below. A panel that
      re-derived its own padding would be a third gutter on the page. */
+  /* --- The nav logo, and the one place a lockup has to become a mark ------
+     THE SHRINK WAS THE BUG, NOT THE SIZE. The logo link was a flex item with
+     the default `flex: 0 1 auto` and `min-width: auto`, so the row simply
+     squeezed it whenever the bar ran out of room: --spacing-nav-logo declares a
+     152px floor and the mark rendered at 63px at 320, 133px at 390. A wordmark
+     with a "SPECIALTY PACKAGING & COLD CHAIN" line under it at 63px is not small,
+     it is illegible — and nothing in the build said so, because a flex item
+     shrinking is not an overflow.
+
+     `flex: none` is the fix for the shrink. But the lockup genuinely does not
+     fit beside the call to action and the burger on a 320px screen — 152 + 161 +
+     36 plus two gaps is 377px of content in a 288px row — so below that the
+     lockup becomes the BADGE ALONE, which is the normal answer and the one the
+     mark is built for.
+
+     IT IS THE SAME ASSET, CROPPED. The badge occupies the first 48 of the
+     lockup's 228 viewBox units, so clipping the link to a 48-unit-wide window
+     and letting the SVG keep its full width shows the badge and nothing else.
+     No second file, no duplicated 8.7 KB path in the markup for a hidden
+     variant, and no `viewBox` swap — which CSS cannot do anyway. The ratio is
+     written as 228/48 because those are the artwork's own numbers. */
+  .nav-logo {
+    flex: none;
+    display: block;
+    width: var(--spacing-nav-logo);
+  }
+
+  .nav-logo > svg {
+    display: block;
+  }
+
+  /* 26rem is where the full lockup starts fitting: measured, not guessed — at
+     416px the row has 383px of content against the 377px the lockup version
+     needs. Below it, the badge. */
+  @media (max-width: 25.99rem) {
+    .nav-logo {
+      width: var(--spacing-control-md);
+      overflow: hidden;
+    }
+
+    /* THE CROP IS A min-width, NOT A width, and that is the layer order again.
+       Logo ships `w-full` on its own <svg> — a UTILITY, and utilities sit in a
+       later layer than components, so a `width` here loses to it and the lockup
+       just renders squashed into the 48px window instead of cropped. `min-width`
+       is in neither fight: nothing in the utility layer sets it, and min-width
+       outranks width by definition. Measured before the fix: the badge window
+       was 48px and the artwork inside it was 48px too, i.e. the whole lockup at
+       1/5 scale. Third time this layer order has cost a bug (see the nav help
+       arrow and the product card arrow) — it is in the template notes now. */
+    .nav-logo > svg {
+      min-width: calc(var(--spacing-control-md) * 228 / 48);
+    }
+  }
+
   .nav-panel {
     position: absolute;
     inset-inline: 0;
@@ -1600,7 +1937,16 @@
       visibility 0s;
   }
 
+  /* Same rotated-footprint rule as .faq-chevron above; see the note there. */
   .nav-caret {
+    display: grid;
+    place-items: center;
+    inline-size: 0.625rem;
+    block-size: 0.625rem;
+  }
+
+  .nav-caret::before {
+    content: '';
     display: block;
     width: 0.4rem;
     height: 0.4rem;
@@ -1610,18 +1956,785 @@
     transition: transform var(--transition-duration-spring-soft) var(--ease-spring-soft);
   }
 
-  [aria-expanded='true'] .nav-caret {
+  [aria-expanded='true'] .nav-caret::before {
     transform: translateY(25%) rotate(225deg);
   }
 
-  .nav-panel-link {
-    transition: background-color var(--transition-duration-spring-soft) var(--ease-spring-soft);
+  /* --- The navigation underline ------------------------------------------
+     One rule for every link in the nav and the footer: a hairline that draws
+     itself in from the left on the way in and clears itself out to the right on
+     the way out. No colour change — the fade group already says which link is
+     being pointed at, and a colour change on top of the line was two answers to
+     one question.
+
+     THE DIRECTION IS THE `transform-origin` SWITCH, and it is the whole trick.
+     The line rests at `scaleX(0)` with its origin on the RIGHT and hovers to
+     `scaleX(1)` with its origin on the LEFT. So growing happens from the left
+     edge, and when hover ends the origin snaps back to the right and the same
+     collapse reads as the line continuing off to the right rather than
+     rewinding. One property animated, and it is `transform` (§12.3) — the
+     compositor moves it with no layout and no paint.
+
+     `--ease-out` rather than a spring, deliberately: the file's own note says
+     the springs are wrong for anything that must not overshoot, and an underline
+     that sprang past the end of its word would be exactly that.
+
+     Duration is `--transition-duration-base`, 300ms. The brief asked for "about
+     250ms"; the scale's three steps are 150 / 300 / 450 and this is the one that
+     means "a normal UI transition". A fourth step for one interaction would be a
+     token pretending to be a system.
+
+     Gated on `(hover: hover)` with a `:focus-visible` twin, like every other
+     hover on this site. The global reduced-motion block already reaches
+     `*::after`, so nothing extra is needed for it here. */
+  .link-underline {
+    position: relative;
+  }
+
+  .link-underline::after {
+    content: '';
+    position: absolute;
+    inset-inline: 0;
+    inset-block-end: calc(var(--spacing-3xs) * -1);
+    block-size: var(--border-width);
+    background-color: currentcolor;
+    transform: scaleX(0);
+    transform-origin: right;
+    transition: transform var(--transition-duration-base) var(--ease-out);
   }
 
   @media (hover: hover) {
-    .nav-panel-link:hover {
-      background-color: var(--bg-subtle);
+    .link-underline:hover::after {
+      transform: scaleX(1);
+      transform-origin: left;
     }
+  }
+
+  .link-underline:focus-visible::after {
+    transform: scaleX(1);
+    transform-origin: left;
+  }
+
+  /* `.nav-panel-link` is gone: it existed only to carry the panel links' hover
+     colour, and with the colour change removed `.link-underline` above already
+     provides everything it did, `position: relative` included. */
+
+  /* The help card's link stretches over the card, so the circle beside it is
+     decorative rather than a second target. Same pattern as .product-card. */
+  .nav-help-link::after {
+    content: '';
+    position: absolute;
+    inset: 0;
+  }
+
+  /* Pointing anywhere at the card fills its affordance — the card is one
+     target, so the whole card is what reacts, not the circle under the cursor. */
+  /* The resting colour is set HERE, not with a `text-primary` utility in the
+     markup. Utilities live in a later layer than components, so the utility beat
+     the hover rule and the arrow stayed ink-on-ink when the circle filled —
+     measured: background #1f1f1f, colour #1f1f1f. Same trap as any other
+     "why isn't my component class winning" question, and the answer is always
+     the layer order. */
+  .nav-help-go {
+    color: var(--text-primary);
+    transition:
+      background-color var(--transition-duration-spring-soft) var(--ease-spring-soft),
+      border-color var(--transition-duration-spring-soft) var(--ease-spring-soft),
+      color var(--transition-duration-spring-soft) var(--ease-spring-soft);
+  }
+
+  @media (hover: hover) {
+    :has(> .nav-help-link:hover) .nav-help-go,
+    .nav-help-card:hover .nav-help-go {
+      background-color: var(--bg-inverse);
+      border-color: var(--bg-inverse);
+      color: var(--text-on-inverse);
+    }
+  }
+
+  .nav-help-card:focus-within .nav-help-go {
+    background-color: var(--bg-inverse);
+    border-color: var(--bg-inverse);
+    color: var(--text-on-inverse);
+  }
+}
+
+/* --- The inactive fade ---------------------------------------------------
+   Hovering one link in a column drops its siblings back, so the row being read
+   separates itself from the ones that are not. Applied to the LIST rather than
+   to each link: `:hover` on the container is what tells the siblings that
+   something in here is being pointed at, and there is no way to express "my
+   sibling is hovered" from the sibling.
+
+   `:focus-within` as well as `:hover`, because a keyboard user moving down the
+   column deserves the same emphasis a pointer gets — and because a rule that
+   only fires for pointers is a rule half the audience never sees.
+
+   The opacity is a token, not a literal: it differs per ground so that faded
+   text still clears AA, and the harness composites both and fails the run if
+   either drops under it. */
+@layer components {
+  .fade-group :is(a, button) {
+    transition: opacity var(--transition-duration-spring-soft) var(--ease-spring-soft);
+  }
+
+  @media (hover: hover) {
+    .fade-group:hover :is(a, button) {
+      opacity: var(--fade-inactive);
+    }
+
+    .fade-group:hover :is(a, button):hover {
+      opacity: 1;
+    }
+  }
+
+  .fade-group:focus-within :is(a, button) {
+    opacity: var(--fade-inactive);
+  }
+
+  .fade-group:focus-within :is(a, button):focus-visible {
+    opacity: 1;
+  }
+}
+
+/* --- Category card -------------------------------------------------------
+   The whole card is one target — its only link is the button at the bottom — so
+   pointing anywhere at it lifts the picture 1%. `scale` and nothing else: the
+   card's box must not move, and `overflow: hidden` crops the extra percent. */
+@layer components {
+  .category-card {
+    --scrim-strength: 1;
+  }
+
+  /* THE WHOLE CARD IS THE TARGET, and it is still ONE target with ONE
+     accessible name: the link that was already the card's only route to the
+     page grows a stretched ::after instead of a second anchor being added
+     around everything. A wrapping <a> would have put the heading, the
+     paragraph and the link label into a single announced name. */
+  .category-card-link::after {
+    content: '';
+    position: absolute;
+    inset: 0;
+  }
+
+  /* The photograph is not a target. Without this the image swallows the press
+     that the stretched link above is there to receive, and a drag on it starts
+     the browser's native image drag instead of following the card. */
+  .category-card .media-slot,
+  .product-card .media-slot {
+    pointer-events: none;
+  }
+
+  .category-card .media-slot {
+    transition: scale var(--transition-duration-spring-soft) var(--ease-spring-soft);
+  }
+
+  @media (hover: hover) {
+    .category-card:hover .media-slot {
+      scale: 1.01;
+    }
+  }
+
+  .category-card:focus-within .media-slot {
+    scale: 1.01;
+  }
+}
+
+/* --- The arrow link ------------------------------------------------------
+   The design's tertiary action. Two things happen on hover and neither is a
+   utility: the label lightens one step, and the arrow travels 4px.
+
+   ONLY `transform` IS ANIMATED on the arrow (§12.3) — it is the one property
+   the compositor can move without layout, and an arrow that nudged the label
+   along with it would be a layout change on every hover. The label's colour is
+   a paint, which is cheap and does not move anything.
+
+   `--text-secondary` rather than an opacity: the lighter tone has to stay above
+   AA, and a token that already does is better than an alpha that might not. */
+@layer components {
+  .btn-link svg {
+    transition: transform var(--transition-duration-spring-soft) var(--ease-spring-soft);
+  }
+
+  @media (hover: hover) {
+    .btn-link:hover {
+      color: var(--text-secondary);
+    }
+
+    .btn-link:hover svg {
+      transform: translateX(0.25rem);
+    }
+  }
+
+  .btn-link:focus-visible svg {
+    transform: translateX(0.25rem);
+  }
+}
+
+/* --- Product card --------------------------------------------------------
+   Three things a utility cannot express, and nothing else. The card's recipe —
+   `bg-subtle`, `--radius-md`, `p-md` — stays in markup where it is legible.
+
+   The grid is here rather than in markup because the "go" affordance is
+   positioned against the card, and a positioned child plus a three-row track is
+   a layout, not a class list. */
+@layer components {
+  .product-card {
+    position: relative;
+    isolation: isolate;
+    display: grid;
+    /* MEASURED BUG, and the reason this column is declared at all. Without it
+       the grid has one IMPLICIT column, which sizes to its widest item — and the
+       media slot's `aspect-ratio` turns its row height into a width. At 1440 that
+       made a 249px-wide box inside a 227px content area: the picture overflowed
+       the card by 22px and dragged the arrow six pixels past the card's right
+       edge. `minmax(0, 1fr)` is what stops a grid item from growing its track. */
+    grid-template-columns: minmax(0, 1fr);
+    /* `1fr`, NOT `minmax(0, 1fr)`: the zero floor let the picture row collapse to
+       57px when the aspect ratio stopped defining it. `1fr` is `minmax(auto,
+       1fr)` — it holds the content's own height and grows when the row is
+       stretched by a taller sibling card. */
+    /* TWO ROWS NOW, not three. The arrow used to occupy the third; it is
+       absolutely positioned (below), so a third track would have reserved an
+       empty row and a second 16px gap under the picture. */
+    grid-template-rows: auto 1fr;
+    overflow: hidden;
+    transition: background-color var(--transition-duration-spring-soft) var(--ease-spring-soft);
+  }
+
+  /* TWO TITLE LINES RESERVED, ON THE BLOCK RATHER THAN ON THE TITLE.
+     Reserving on the heading itself put the slack BETWEEN the title and the
+     summary, which left a hole under every one-line title. On the block the copy
+     sits at the top, together, and the slack falls below — where the picture
+     starts, which is the thing that has to line up across a row.
+
+     Computed from the tokens rather than measured: two lines of the title's own
+     step, the gap, and one line of the caption's. Nothing here goes stale when
+     the type scale moves, because the type scale is what it reads. */
+  /* `.product-card-head` used to carry a `min-block-size` computed from the type
+     tokens — two lines of title plus the summary — so that a one-line title and a
+     two-line title started their pictures on the same line. Removed at request.
+     Cards in a row are still equal height (the grid stretches them); what varies
+     now is where the picture begins inside each one. */
+
+  /* The whole card is one target. `::after` here rather than an
+     `after:content-['']` utility in markup: the empty-string arbitrary value is
+     escaped on its way into the HTML attribute, so the class ships and the rule
+     never generates — which the dead-class check caught, and which is the
+     §2 trap ("the scanner reads source as text") wearing one more hat. */
+  .product-card-link::after {
+    content: '';
+    position: absolute;
+    inset: 0;
+  }
+
+  /* The affordance. 2.25rem against the design's 33.46px — the nearest step, and
+     the snap is recorded with the other five in the Phase 0 worklog entry. */
+  /* Resting colour set HERE rather than with a `text-primary` utility: utilities
+     sit in a later layer than components, so the utility beat the hover rule and
+     the arrow stayed ink-coloured while its circle filled with ink. */
+  /* PINNED TO THE CARD, NOT PLACED IN IT. Out of flow in the bottom-right
+     corner, inset by the card's own padding so it sits exactly where the third
+     grid row used to put it — with the difference that the picture above it now
+     grows into the space the row was holding, and the arrow's position no longer
+     depends on how tall anything above it turned out to be.
+
+     `pointer-events: none` because it is decoration: it is `aria-hidden`, it is
+     the last child so it paints above the stretched link, and without this it
+     would swallow the one press in the card that most looks like a button. */
+  .product-card-go {
+    position: absolute;
+    inset-block-end: var(--spacing-md);
+    inset-inline-end: var(--spacing-md);
+    pointer-events: none;
+    color: var(--text-primary);
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    width: var(--spacing-control-sm);
+    height: var(--spacing-control-sm);
+    border-width: var(--border-width);
+    border-style: solid;
+    border-radius: var(--radius-full);
+    /* ALL THREE PROPERTIES THE HOVER CHANGES, not two. The hover below sets
+       background-color, border-color and color; only the last two were listed
+       here, so the circle's fill SNAPPED to black while its border and its arrow
+       faded over 400ms. `.nav-help-go` and the social marks always listed all
+       three, which is why this one looked different from the same gesture
+       everywhere else on the site. */
+    transition:
+      background-color var(--transition-duration-spring-soft) var(--ease-spring-soft),
+      border-color var(--transition-duration-spring-soft) var(--ease-spring-soft),
+      color var(--transition-duration-spring-soft) var(--ease-spring-soft);
+  }
+
+  /* Hover and focus are the SAME state here, because the whole card is one
+     target and a keyboard user gets to the title link, not to the card.
+
+     The affordance FILLS rather than recolours — the same gesture the nav's help
+     card and the social marks use, so "you can go here" looks like one thing
+     across the site — and the picture lifts 1%. `scale` on the image only: the
+     card's own box must not move, or a row of them would jitter against each
+     other, and `overflow: hidden` on the card is what crops the extra 1%. */
+  .product-card .media-slot {
+    transition: scale var(--transition-duration-spring-soft) var(--ease-spring-soft);
+  }
+
+  @media (hover: hover) {
+    .product-card:has(.product-card-link:hover) .product-card-go {
+      background-color: var(--bg-inverse);
+      border-color: var(--bg-inverse);
+      color: var(--text-on-inverse);
+    }
+
+    .product-card:has(.product-card-link:hover) .media-slot {
+      scale: 1.01;
+    }
+  }
+
+  .product-card:has(.product-card-link:focus-visible) .product-card-go {
+    background-color: var(--bg-inverse);
+    border-color: var(--bg-inverse);
+    color: var(--text-on-inverse);
+  }
+
+  .product-card:has(.product-card-link:focus-visible) .media-slot {
+    scale: 1.01;
+  }
+}
+
+/* --- The product rail ----------------------------------------------------
+   Five columns at desktop, a scroll-snap rail below `md`.
+
+   THE COLUMN IS THE UNIT, NOT THE ROW. `grid-template-columns: repeat(5, 1fr)`
+   means a two-product category's cards sit at the same width as a five-product
+   one's rather than stretching to fill — which is what the design draws, and
+   the right call: a card that grew because its category is short would read as
+   a different kind of thing.
+
+   The rail is CSS only. `scroll-snap` needs no script; the progress bar the
+   design puts under it does, and a bar that does not track the scroll is worse
+   than no bar — see the open question in WORKLOG. The gutters are negative
+   margins so the rail bleeds to the page edge while its first card still lands
+   on the container's gutter line, which is how a rail says "there is more".
+
+   `scrollbar-width: none` hides the bar but NOT the scrolling: the region is
+   still reachable by keyboard, which axe's scrollable-region-focusable rule
+   requires and which the tabindex on the list provides. */
+@layer components {
+  .product-rail {
+    grid-auto-flow: column;
+    grid-auto-columns: 68%;
+    overflow-x: auto;
+    scroll-snap-type: x mandatory;
+    scrollbar-width: none;
+    margin-inline: calc(var(--site-margin) * -1);
+    padding-inline: var(--site-margin);
+    /* THE SNAPPORT HAS TO BE INSET TOO, not just the padding.
+       `scroll-snap-align: start` snaps an item to the start of the SNAPPORT, and
+       the snapport defaults to the scrollport — the padding box — whose left edge
+       is the rail's own border box, i.e. the bled-out edge at x=0. So mandatory
+       snapping immediately scrolled the rail by one --site-margin on load and
+       parked the first card flush against the screen edge, 16px off the gutter
+       line every heading on the page sits on. Measured at load, before any user
+       gesture: scrollLeft=16 at 320, 27 at 768 — exactly one gutter, every time.
+       scroll-padding insets the snapport by the same gutter, so the first card
+       snaps ONTO the line instead of past it, and so does every card after it. */
+    scroll-padding-inline: var(--site-margin);
+    overscroll-behavior-x: contain;
+  }
+
+  .product-rail::-webkit-scrollbar {
+    display: none;
+  }
+
+  .product-rail-item {
+    scroll-snap-align: start;
+  }
+
+  @media (min-width: 30rem) {
+    .product-rail {
+      grid-auto-columns: 38%;
+    }
+  }
+
+  @media (min-width: 48rem) {
+    .product-rail {
+      grid-auto-columns: 26%;
+    }
+  }
+
+  /* The five-up lands at `lg`, not at `md`. The design draws it at 1440, where
+     each column is 259px; at 768 the same grid gives 166px columns holding a
+     1:1 photograph and a two-line title, which is not a card any more. It also
+     overflowed by a rounded pixel there, which the sweep caught — but the size
+     is the reason to move it, not the pixel. */
+  /* The column count is the one thing that differs between the products index
+     (five) and a category page (three); everything else about the rail is the
+     same object, which is why it is one block. */
+  @media (min-width: 62rem) {
+    .product-rail {
+      grid-auto-flow: row;
+      grid-auto-columns: auto;
+      overflow-x: visible;
+      scroll-snap-type: none;
+      margin-inline: 0;
+      padding-inline: 0;
+    }
+
+    .product-rail-5 {
+      grid-template-columns: repeat(5, minmax(0, 1fr));
+    }
+
+    .product-rail-3 {
+      grid-template-columns: repeat(3, minmax(0, 1fr));
+    }
+  }
+
+  /* Three-up has room to arrive earlier than five-up does. */
+  @media (min-width: 48rem) and (max-width: 61.99rem) {
+    .product-rail-3 {
+      grid-auto-columns: 38%;
+    }
+  }
+}
+
+/* --- The spec table ------------------------------------------------------
+   Eight columns of measurements. What a utility cannot express here is the
+   header treatment and the zebra-free hairline rhythm the design draws — every
+   row separated by a rule in `--line`, nothing else.
+
+   `min-inline-size` on the table rather than `width: 100%`: the table must be
+   allowed to exceed its container so the scroll box has something to scroll,
+   and must fill it when there is room. */
+@layer components {
+  /* THE TABLE SCROLLS, AND IT HAS TO SAY SO.
+     Eight columns on a 320px phone means the last visible cell is cut mid-value
+     — "10 x 8..." — with no scrollbar to be seen, because every touch platform
+     draws scrollbars as an overlay that fades to nothing when idle. A reader who
+     cannot tell the table continues stops reading at the crop.
+
+     The classic four-layer scroll shadow, and it is CSS ALONE: two COVER layers
+     painted in the table's own ground with `background-attachment: local`, so
+     they travel with the content, parked over two SHADOW layers attached to the
+     scrollport. At the left end the left cover sits on the left shadow and hides
+     it; scroll right and the cover moves away, revealing it. The shadow at the
+     far end disappears the same way when you reach it. No script, no resize
+     listener, no state — the shadow is a fact about the scroll position because
+     it IS the scroll position.
+
+     The shadow colour is mixed inline rather than stored in a :root custom
+     property on purpose: substitution happens where a property is DECLARED, so a
+     stored `--shadow: color-mix(... var(--text-primary) ...)` would resolve once
+     at :root and paint the light theme's ink inside every dark region. That is
+     WORKLOG Entry 11, and the rule it left behind is this one. Used directly in
+     a rule, `var(--text-primary)` resolves per element, per theme, correctly. */
+  .spec-table-scroll {
+    overflow-x: auto;
+    background-color: var(--bg-surface);
+    background-image:
+      linear-gradient(to right, var(--bg-surface) 30%, transparent),
+      linear-gradient(to left, var(--bg-surface) 30%, transparent),
+      linear-gradient(to right, color-mix(in oklab, var(--text-primary) 14%, transparent), transparent),
+      linear-gradient(to left, color-mix(in oklab, var(--text-primary) 14%, transparent), transparent);
+    background-position:
+      0 0,
+      100% 0,
+      0 0,
+      100% 0;
+    background-repeat: no-repeat;
+    background-size:
+      3rem 100%,
+      3rem 100%,
+      1rem 100%,
+      1rem 100%;
+    background-attachment: local, local, scroll, scroll;
+  }
+
+  .spec-table {
+    border-collapse: collapse;
+    min-inline-size: 100%;
+    white-space: nowrap;
+  }
+
+  .spec-table th,
+  .spec-table td {
+    padding: var(--spacing-lg) var(--spacing-md);
+    text-align: start;
+    vertical-align: baseline;
+    border-block-end: var(--border-width) solid var(--line);
+  }
+
+  .spec-table thead th {
+    padding-block: var(--spacing-sm);
+    font-size: var(--text-eyebrow);
+    font-weight: var(--font-weight-medium);
+    letter-spacing: var(--tracking-wide);
+    text-transform: uppercase;
+    color: var(--text-tertiary);
+  }
+
+  /* The SKU column is the row's subject, so it carries the row's weight. */
+  .spec-table tbody th {
+    font-weight: var(--font-weight-bold);
+    color: var(--text-primary);
+  }
+
+  .spec-table td {
+    color: var(--text-secondary);
+  }
+
+  .spec-table tbody tr:last-child :is(th, td) {
+    border-block-end: 0;
+  }
+}
+
+/* --- The rail's pagination ------------------------------------------------
+   A scrollbar, drawn in the page's own tokens. The track is a hairline in
+   `--line`; the thumb is `--text-primary` at the visible fraction of the rail,
+   offset by the scroll fraction. src/scripts/rail.ts sets the two numbers and
+   nothing else — the shape, the colours and the motion are all here.
+
+   `transform` and `width` rather than `left`: the thumb is the one thing on
+   this page that moves every frame, and only transform and opacity are ever
+   animated (§12.3). Width changes once per resize, not per scroll. */
+@layer components {
+  .rail-progress {
+    width: 40%;
+    height: 2px;
+    margin-inline: auto;
+    background-color: var(--line);
+    border-radius: var(--radius-full);
+    overflow: hidden;
+  }
+
+  /* `--rail-at` is expressed in the THUMB's own width, not the track's, because
+     a percentage translate resolves against the element being translated. The
+     module does that conversion so this stays one declaration. No transition:
+     the thumb has to be where the scroll is, and an eased thumb lags behind the
+     finger that is moving it. */
+  .rail-progress-thumb {
+    display: block;
+    width: var(--rail-thumb, 30%);
+    height: 100%;
+    background-color: var(--text-primary);
+    border-radius: inherit;
+    transform: translateX(var(--rail-at, 0%));
+  }
+
+  @media (min-width: 62rem) {
+    .rail-progress {
+      display: none;
+    }
+  }
+}
+
+/* --- The home page's closing collage -------------------------------------
+   Five product shots placed around the closing block at the design's own
+   offsets, carried in as custom properties per item because they are
+   MEASUREMENTS — percentages of the 1344 × 967 box the design draws them in —
+   and a measurement baked into a class name is one nobody can check against the
+   source.
+
+   Absolute only from `md`. Below that there is no room to scatter anything and
+   the list is a plain strip, which is why the positioning lives behind a query
+   rather than in the markup. The container holds the design's aspect ratio so
+   the percentages mean the same thing at every width. */
+@layer components {
+  @media (min-width: 48rem) {
+    .volume {
+      aspect-ratio: 1344 / 967;
+      justify-content: center;
+    }
+
+    .volume-collage {
+      position: absolute;
+      inset: 0;
+      z-index: 0;
+    }
+
+    .volume-collage-item {
+      position: absolute;
+      left: var(--at-left);
+      top: var(--at-top);
+      width: var(--at-width);
+    }
+  }
+}
+
+/* --- Media slots ---------------------------------------------------------
+   The shape a picture holds before it loads, and the one thing about it that is
+   art-directed. `--media-ratio` is set inline per slot by Media; a class may
+   redefine it per breakpoint, which an inline `aspect-ratio` would not allow. */
+@layer components {
+  .media-slot {
+    aspect-ratio: var(--media-ratio, 1 / 1);
+  }
+
+  /* --- The hero's three claims ------------------------------------------
+     TWO OBJECTS, ONE MARKUP. Below md the three claims share ONE glass plate
+     split by hairlines; from md they separate into the three cards the desktop
+     design draws. Both live here rather than in utilities on the markup for the
+     reason that keeps coming up in this file: a utility cannot be UNSET at a
+     breakpoint, and utilities outrank `@layer components`, so card classes in
+     the markup would have made the mobile plate unexpressible.
+
+     The dividers are a ::before rather than `border-inline-start`, because the
+     design insets them: the hairline stops short of the plate's own padding top
+     and bottom instead of running edge to edge. A border cannot be inset; an
+     absolutely positioned pseudo-element is the only way to say it.
+
+     `--bg-overlay` and `--line-overlay` are the named translucent tokens (§2.3)
+     and are re-declared per theme — they have to be, because they are mixed from
+     `--text-primary`, and a single :root declaration would paint the light
+     theme's black into every dark region. That is WORKLOG Entry 11. */
+  .hero-stats {
+    background-color: var(--bg-overlay);
+    border: var(--border-width) solid var(--line-overlay);
+    border-radius: var(--radius-md);
+    backdrop-filter: blur(var(--blur-overlay));
+    /* The plate is one box: the columns butt together and the hairline is what
+       separates them, so there is no gap to close. */
+    gap: 0;
+    /* Keeps the hairlines and the columns inside the corner radius. */
+    overflow: hidden;
+  }
+
+  .hero-stat {
+    position: relative;
+    /* Inline padding is one step down from the block padding, and that is a
+       measurement rather than a taste: at 12px each side a column at 390 gives
+       95px of text and "distributors" is 97px, so the label hyphenated two
+       pixels short of fitting. 8px gives 103px and it sets clean. Below 360 it
+       hyphenates anyway and should — see the note on the label in index.astro. */
+    padding: var(--spacing-md) var(--spacing-xs);
+    gap: var(--spacing-2xs);
+  }
+
+  .hero-stat + .hero-stat::before {
+    content: '';
+    position: absolute;
+    inset-block: var(--spacing-md);
+    inset-inline-start: 0;
+    inline-size: var(--border-width);
+    background-color: var(--line-overlay);
+  }
+
+  @media (min-width: 48rem) {
+    /* Three cards. The plate's own treatment comes off and moves onto each
+       column, which is the desktop design. */
+    .hero-stats {
+      background-color: transparent;
+      border-color: transparent;
+      backdrop-filter: none;
+      border-radius: 0;
+      overflow: visible;
+      gap: var(--spacing-lg);
+    }
+
+    .hero-stat {
+      background-color: var(--bg-overlay);
+      border: var(--border-width) solid var(--line-overlay);
+      border-radius: var(--radius-md);
+      backdrop-filter: blur(var(--blur-overlay));
+      padding: var(--spacing-md) var(--spacing-lg) var(--spacing-lg);
+      gap: var(--spacing-sm);
+    }
+
+    .hero-stat + .hero-stat::before {
+      content: none;
+    }
+  }
+
+  /* The home headline's own measure. 1000px is MEASURED, not chosen: it is the
+     narrowest cap at which this string sets in two lines at 64px, which is how
+     the design draws it. 980px gives three. See the note in index.astro for why
+     the design's own 912px column does not do it here.
+
+     A component class rather than a `--container-*` token, because this is not a
+     container: it caps one heading's measure the way `.measure` caps a
+     paragraph's, and the Section above it still owns the gutter and the rhythm. */
+  .hero-headline {
+    max-inline-size: 62.5rem;
+  }
+
+  /* The home hero is drawn twice: portrait at 402, landscape at 1440. One
+     picture, two crops — which is a real art direction decision and not a
+     responsive accident, so it lives here rather than in the page. */
+  .hero-media {
+    --media-ratio: 4 / 5;
+  }
+
+  @media (min-width: 48rem) {
+    .hero-media {
+      --media-ratio: 5 / 3;
+    }
+  }
+}
+
+/* --- The pending image slot ----------------------------------------------
+   TEMPORARY. Every rule here goes when the photography lands; see
+   src/components/blocks/Media.astro for why it exists and what removes it.
+
+   DASHED, not a flat grey fill. A solid placeholder is a thing everybody stops
+   seeing after a day, and the failure it leads to is shipping one. A dashed well
+   reads as unfinished at a glance and in a screenshot, which is the job. */
+@layer components {
+  .media-pending {
+    background-color: var(--bg-subtle);
+    border: var(--border-width) dashed var(--line-strong);
+    border-radius: var(--radius-md);
+  }
+}
+
+/* --- The closing plate ---------------------------------------------------
+   Minimum height, not height: the design draws a fixed 1344x600 plate, and with
+   the subtext removed a heading and a button alone collapsed it to roughly
+   300px — a strip, not the plate the page closes on. `min-block-size` holds the
+   proportion while still letting long copy at a narrow width grow the box
+   instead of being clipped.
+
+   480 below md, 600 from md up, both as the design's own numbers. Not tokens:
+   they are this one band's proportions, and a `--cta-plate-height` used once is
+   a token pretending to be a system. */
+@layer components {
+  .cta-plate {
+    min-block-size: 30rem;
+  }
+
+  @media (min-width: 48rem) {
+    .cta-plate {
+      min-block-size: 37.5rem;
+    }
+  }
+}
+
+/* --- The media scrim -----------------------------------------------------
+   A photograph is not a background token, so text over one needs a ramp to sit
+   on. One gradient, declared once, so the hero, the CategoryCards and the CTA
+   band all darken by the same amount rather than three hand-tuned rgba() values
+   drifting apart.
+
+   It fades to --gray-950 rather than to `black`: the ramp's own bottom end is
+   what every dark ground in this system is made of, and a scrim that bottoms out
+   somewhere else reads as a different black beside the footer. */
+@layer components {
+  .media-scrim::after {
+    content: '';
+    position: absolute;
+    inset: 0;
+    background-image: linear-gradient(to bottom, transparent, var(--gray-950));
+    /* STRENGTH IS A PER-USE PROPERTY, because the design does not use one value.
+       0.7 is the hero's and the closing plate's; the category card draws the
+       same gradient at FULL strength (Figma 788:8586 — a rectangle filled
+       `linear-gradient(to bottom, rgba(31,31,31,0), #1f1f1f)`, no opacity
+       modifier, and #1f1f1f is --gray-950 exactly). The card is the one that has
+       to carry a paragraph and a link over a photograph, so it is the one that
+       needs the bottom to close up.
+       Set as a custom property on the ELEMENT and inherited by ::after, so the
+       two rules never fight over specificity. */
+    opacity: var(--scrim-strength, 0.7);
+    pointer-events: none;
   }
 }
 

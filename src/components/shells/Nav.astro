@@ -1,20 +1,20 @@
 ---
 import Logo from '../atoms/Logo.astro';
 import Button from '../atoms/Button.astro';
-import { navigation, isGroup } from '../../data/navigation';
+import { getNavigation, isGroup } from '../../data/navigation';
 import { SITE } from '../../consts';
 import { canonicalPath } from '../../lib/urls';
 
 /**
  * Site navigation (§4.3).
  *
- * ONE NAV TREE means one source of truth for the links — `src/data/navigation.ts`
- * — not one DOM node rendered twice. The desktop bar and the mobile panel are
- * structurally different on purpose, because the interaction is: a mega menu is a
- * button-and-panel disclosure on desktop, and on mobile the same columns FOLD
- * INTO the menu as labelled sub-lists with no extra JavaScript at all. What is
- * forbidden is two hand-maintained link lists, which is how one of them goes
- * stale.
+ * ONE NAV TREE means one source of truth for the links — and here that source is
+ * the CATALOGUE itself, through `src/data/navigation.ts`. The desktop bar and
+ * the mobile panel are structurally different on purpose, because the
+ * interaction is: a mega menu is a button-and-panel disclosure on desktop, and
+ * on mobile the same columns FOLD INTO the menu as labelled sub-lists with no
+ * extra JavaScript at all. What is forbidden is two hand-maintained link lists,
+ * which is how one of them goes stale.
  *
  * The mobile menu is a native <details>/<summary>: keyboard-operable, announced
  * correctly, and zero JS. The burger morph is CSS.
@@ -22,29 +22,29 @@ import { canonicalPath } from '../../lib/urls';
  * THE MEGA PANEL IS FULL-BLEED, WITH THE CONTAINER INSIDE IT (§3.1). It is
  * positioned against the <header> rather than against its own <li>, so the panel
  * spans the viewport while its COLUMNS land on the same gutter line as the logo
- * above them and every section heading below. That alignment is the whole reason
- * the container primitive is implemented once; a panel that re-derived its own
- * padding would be a third gutter on the page.
+ * above them and every section heading below.
  *
  * The dropdown is a disclosure, NEVER hover-only — `<button aria-expanded>`
- * toggling a panel, Escape closing and returning focus, outside press closing,
- * focus leaving the group closing it. src/scripts/disclosure.ts is the single
- * delegated module that owns all of them.
+ * toggling a panel, Escape closing and returning focus, outside press closing.
+ * src/scripts/disclosure.ts is the single delegated module that owns all of them.
  */
 const here = canonicalPath(Astro.url.pathname);
+const navigation = await getNavigation();
 
 /** `aria-current="page"` is the accessible half; the styling hangs off it too. */
 const isCurrent = (href: string): boolean => {
-  if (href.startsWith('/#') || href.startsWith('#') || href.includes('#')) return false;
+  if (href.includes('#')) return false;
   return here === canonicalPath(href);
 };
 
 const groupIsCurrent = (group: { columns: readonly { links: readonly { href: string }[] }[] }): boolean =>
   group.columns.some((column) => column.links.some((link) => isCurrent(link.href)));
 
-const linkClass =
-  'text-sm text-secondary transition-colors duration-spring-soft ease-spring-soft ' +
-  'hover:text-primary aria-[current=page]:text-primary';
+/* NO HOVER COLOUR. The hover state is `.link-underline` — a hairline drawn in
+   from the left — and the fade group already dims the siblings, so a colour
+   change on top was a third answer to a question two things had answered.
+   `aria-current` keeps the accent: that is the page you are on, not a hover. */
+const linkClass = 'link-underline text-body text-primary aria-[current=page]:text-accent';
 ---
 
 <a href="#main" class="skip-link text-sm">Skip to main content</a>
@@ -55,17 +55,23 @@ const linkClass =
 <header class="border-line bg-base sticky top-0 z-40 border-b">
   <div class="container-main">
     <nav aria-label="Main" class="h-nav gap-md flex items-center justify-between">
+      <!-- `.nav-logo` owns the width, the no-shrink and the badge crop; see
+           global.css. The class is on the LINK because the link is the flex item
+           that was being squeezed. -->
       <a
         href="/"
-        class="w-nav-logo inline-flex items-center rounded-sm"
+        class="nav-logo rounded-sm"
         aria-label={`${SITE.name} — home`}
         aria-current={here === '/' ? 'page' : undefined}
       >
-        <Logo class="w-full" />
+        <Logo />
       </a>
 
-      <!-- Desktop bar. Hidden below lg, where the disclosure takes over. -->
-      <ul class="list-bare gap-lg hidden items-center lg:flex">
+      <!-- THE BAR IS ONE RIGHT-HAND GROUP: links, then the call to action.
+           The logo holds the left edge alone, which is what the design draws and
+           what keeps the whole of the nav's interactive surface in one place. -->
+      <div class="gap-xl flex items-center">
+      <ul class="list-bare gap-xl hidden items-center lg:flex">
         {
           navigation.map((item) =>
             isGroup(item) ? (
@@ -78,12 +84,12 @@ const linkClass =
                   aria-controls={`${item.id}-panel`}
                   class:list={[
                     linkClass,
-                    'gap-xs flex cursor-pointer items-center rounded-sm',
+                    'gap-sm flex cursor-pointer items-center rounded-sm',
                     // A group whose panel contains the current page reads as
                     // active, but the TRIGGER never takes aria-current: it is a
                     // button, not a link, and aria-current on it would announce
                     // a page that is not there. The link inside carries it.
-                    groupIsCurrent(item) && 'text-primary',
+                    groupIsCurrent(item) && 'text-accent',
                   ]}
                 >
                   {item.label}
@@ -91,30 +97,68 @@ const linkClass =
                 </button>
 
                 <div id={`${item.id}-panel`} class="nav-panel" aria-labelledby={item.id}>
-                  <div class="container-main py-xl">
-                    <ul class="list-bare gap-lg grid md:grid-cols-3">
-                      {item.columns.map((column) => (
-                        <li class="gap-sm flex flex-col">
+                  <div class="container-main py-xl gap-xl grid lg:grid-cols-4">
+                    {item.columns.map((column) => (
+                      <div class="gap-lg flex flex-col items-start">
+                        <div class="gap-md flex flex-col">
                           <p class="text-eyebrow">{column.title}</p>
-                          <ul class="list-bare gap-3xs flex flex-col">
+                          {/* One fade group per column — the set the reader is
+                              scanning is the column, not the panel. */}
+                          <ul class="fade-group list-bare gap-md flex flex-col">
                             {column.links.map((link) => (
                               <li>
                                 <a
                                   href={link.href}
-                                  class="nav-panel-link px-sm py-xs gap-3xs -mx-sm flex flex-col rounded-sm"
+                                  class="link-underline text-body text-primary rounded-sm"
                                   aria-current={isCurrent(link.href) ? 'page' : undefined}
                                 >
-                                  <span class="text-sm text-primary">{link.label}</span>
-                                  {link.description && (
-                                    <span class="text-caption text-tertiary">{link.description}</span>
-                                  )}
+                                  {link.label}
                                 </a>
                               </li>
                             ))}
                           </ul>
-                        </li>
-                      ))}
-                    </ul>
+                        </div>
+                        {column.browseLabel && (
+                          <Button href={column.href} variant="ghost" size="link" icon="arrow">
+                            {column.browseLabel}
+                          </Button>
+                        )}
+                      </div>
+                    ))}
+
+                    {/*
+                      The panel's fourth column is not a list — it is the question
+                      the menu ends on. Nav furniture rather than content, and it
+                      appears exactly once, so it is markup here rather than a
+                      fifth component (§4.2's counting rule cuts both ways).
+
+                      It wears the house card recipe: `bg-subtle`, `--radius-md`,
+                      interior padding, no border.
+                    */}
+                    {item.help && (
+                      <div class="nav-help-card bg-subtle rounded-md p-lg gap-lg relative isolate hidden flex-col justify-between lg:flex">
+                        <div class="gap-xs flex flex-col">
+                          <p class="text-h5 text-primary">{item.help.heading}</p>
+                          <p class="text-sm text-secondary">{item.help.body}</p>
+                        </div>
+                        <div class="gap-sm flex items-center justify-between">
+                          <a
+                            href={item.help.href}
+                            class="nav-help-link text-sm text-primary font-medium rounded-sm"
+                          >
+                            {item.help.linkLabel}
+                          </a>
+                          <span
+                            class="nav-help-go border-line h-control-md w-control-md flex flex-none items-center justify-center rounded-full border"
+                            aria-hidden="true"
+                          >
+                            <svg class="size-icon-inline" viewBox="0 0 16 16" fill="none">
+                              <path d="M4.5 11.5 11.5 4.5M6 4.5h5.5V10" stroke="currentColor" stroke-width="1.25" />
+                            </svg>
+                          </span>
+                        </div>
+                      </div>
+                    )}
                   </div>
                 </div>
               </li>
@@ -129,38 +173,38 @@ const linkClass =
         }
       </ul>
 
-      <div class="hidden lg:block">
-        <Button href={SITE.contactHref} variant="secondary" size="sm">Contact</Button>
-      </div>
+      <div class="gap-sm flex items-center">
+        <Button href={SITE.contactHref} variant="primary" icon="square" iconPosition="start">
+          Contact us
+        </Button>
 
-      <!-- Mobile disclosure. Same source, folded: a group's columns become
-           labelled sub-lists rather than a second disclosure, so the panel costs
-           no JavaScript. -->
-      <details class="nav-disclosure lg:hidden">
-        <summary
-          class="h-control-md w-control-md border-line flex cursor-pointer list-none items-center justify-center rounded-sm border"
-        >
-          <span class="sr-only">Menu</span>
-          <span class="nav-burger" aria-hidden="true"></span>
-        </summary>
+        <!-- Mobile disclosure. Same source, folded: a group's columns become
+             labelled sub-lists rather than a second disclosure, so the panel
+             costs no JavaScript. -->
+        <details class="nav-disclosure lg:hidden">
+          <summary
+            class="h-control-sm w-control-sm flex cursor-pointer list-none items-center justify-center rounded-sm"
+          >
+            <span class="sr-only">Menu</span>
+            <span class="nav-burger" aria-hidden="true"></span>
+          </summary>
 
-        <!-- Full-bleed band, container inside it: the panel's links land on the
-             same gutter line as the logo above them. -->
-        <div class="border-line bg-base absolute inset-x-0 top-full max-h-[80svh] overflow-y-auto border-y">
-          <div class="container-main py-lg">
-            <ul class="list-bare gap-lg flex flex-col">
+          <!-- Full-bleed band, container inside it: the panel's links land on
+               the same gutter line as the logo above them. -->
+          <div class="border-line bg-base absolute inset-x-0 top-full max-h-[80svh] overflow-y-auto border-y">
+            <div class="container-main py-lg gap-lg flex flex-col">
               {
                 navigation.map((item) =>
                   isGroup(item) ? (
                     item.columns.map((column) => (
-                      <li class="gap-sm flex flex-col">
+                      <div class="gap-sm flex flex-col">
                         <p class="text-eyebrow">{column.title}</p>
-                        <ul class="list-bare gap-sm border-line pl-sm flex flex-col border-l">
+                        <ul class="list-bare gap-sm flex flex-col">
                           {column.links.map((link) => (
                             <li>
                               <a
                                 href={link.href}
-                                class="text-h6 text-secondary aria-[current=page]:text-primary"
+                                class="link-underline text-body text-primary aria-[current=page]:text-accent"
                                 aria-current={isCurrent(link.href) ? 'page' : undefined}
                               >
                                 {link.label}
@@ -168,32 +212,31 @@ const linkClass =
                             </li>
                           ))}
                         </ul>
-                      </li>
+                      </div>
                     ))
                   ) : (
-                    <li>
-                      <a
-                        href={item.href}
-                        class="text-h6 text-primary"
-                        aria-current={isCurrent(item.href) ? 'page' : undefined}
-                      >
-                        {item.label}
-                      </a>
-                    </li>
+                    <a
+                      href={item.href}
+                      class="link-underline text-h6 text-primary"
+                      aria-current={isCurrent(item.href) ? 'page' : undefined}
+                    >
+                      {item.label}
+                    </a>
                   ),
                 )
               }
-              <li class="pt-xs">
-                <Button href={SITE.contactHref} variant="secondary" size="sm">Contact</Button>
-              </li>
-            </ul>
+            </div>
           </div>
-        </div>
-      </details>
+        </details>
+      </div>
+      </div>
     </nav>
   </div>
 </header>
 
 <script>
   import '../../scripts/disclosure';
+  /* Breakpoint-crossing cleanup: an open panel must not survive the width that
+     made it reachable. See the module for why CSS cannot do this. */
+  import '../../scripts/viewport';
 </script>

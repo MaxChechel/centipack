@@ -1,0 +1,101 @@
+---
+import type { Picture } from '../../lib/catalogue';
+
+/**
+ * An image slot, and what stands in its place while the photography is pending.
+ *
+ * `hasImage` is exported as a plain helper because the ABSENCE changes more than
+ * this component: a card that is dark because it sits on a photograph is not
+ * dark when there is no photograph, and neither is the hero. Consumers ask this
+ * rather than reaching into the view model twice.
+ *
+ * ─────────────────────────────────────────────────────────────────────────────
+ * THE PENDING BOX IS TEMPORARY, AND IT IS LOUD ON PURPOSE.
+ *
+ * CentiPack's photography is not shot. The client's own image plan (Figma
+ * 676:6358) is three slots per product, most of them empty, and the design draws
+ * a labelled "[ image pending ]" box rather than a stock photograph — so the
+ * placeholder is the design's convention, not an invention.
+ *
+ * It renders the slot's own name, visibly, because the failure this guards
+ * against is shipping a silent grey rectangle that everyone stopped noticing.
+ * When the photographs land, every `slot` label disappears with them; when the
+ * last one lands, this component collapses to the <img> branch and the
+ * `slot`/`ratio` props go with it. That removal is the point, and it is the
+ * thing to check at the Phase 4 gate.
+ * ─────────────────────────────────────────────────────────────────────────────
+ *
+ * §4.2's "a block that renders nothing renders NOTHING" does not apply here and
+ * the difference matters: an absent image is not absent CONTENT, it is a
+ * structural slot the layout is built around. A CategoryCard with no picture is
+ * still a card; a SectionHeader with no heading is not a header.
+ *
+ * `loading` is a prop rather than a default because the hero must not be lazy —
+ * it is the LCP element, and lazy-loading it is a measurable regression, not a
+ * style preference.
+ */
+interface Props {
+  image?: Picture;
+  /**
+   * What this slot holds, shown in the pending box. Never rendered with an image.
+   *
+   * NOT NAMED `slot`, AND THAT IS NOT A STYLE CHOICE. It was, and the bug it
+   * caused is the same family as §4.2's "`as` is reserved for Section":
+   * `slot` is a RESERVED ATTRIBUTE on every Astro component. Passing it assigns
+   * the element to a named slot of its parent — so `<Media slot="…" />` as a
+   * direct child of `<Section>`, which has only a default slot, was dropped from
+   * the output entirely. No error, no warning, no element.
+   *
+   * It survived everywhere Media sat inside a plain <div>, and vanished on the
+   * one page where it did not, which is exactly how long this kind of thing
+   * takes to find. `scripts/verify/contracts.mjs` now asserts the name.
+   */
+  label: string;
+  /**
+   * `width / height`, so the box holds its shape before anything loads.
+   *
+   * Applied as a CUSTOM PROPERTY rather than as `aspect-ratio` directly, because
+   * an inline `aspect-ratio` cannot be beaten by a class and some slots are
+   * art-directed: the home hero is 4:5 at 402 and 5:3 at 1440, one picture, two
+   * crops. A caller redefines `--media-ratio` in a media query and this prop is
+   * the fallback. See `.hero-media` in global.css.
+   */
+  ratio: string;
+  loading?: 'eager' | 'lazy';
+  fetchpriority?: 'high' | 'auto';
+  class?: string;
+}
+
+const {
+  image,
+  label,
+  ratio,
+  loading = 'lazy',
+  fetchpriority = 'auto',
+  class: className,
+} = Astro.props as Props;
+---
+
+{
+  image ? (
+    <img
+      src={image.src}
+      width={image.width}
+      height={image.height}
+      alt={image.alt}
+      loading={loading}
+      fetchpriority={fetchpriority}
+      decoding="async"
+      class:list={['media-slot h-full w-full object-cover', className]}
+      style={`--media-ratio:${ratio}`}
+    />
+  ) : (
+    <div
+      class:list={['media-slot media-pending p-sm flex items-center justify-center text-center', className]}
+      style={`--media-ratio:${ratio}`}
+      data-pending-image={label}
+    >
+      <span class="text-caption text-tertiary">[ image pending ]<br />{label}</span>
+    </div>
+  )
+}

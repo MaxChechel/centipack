@@ -1,5 +1,5 @@
 // @ts-check
-import { defineConfig, svgoOptimizer } from 'astro/config';
+import { defineConfig, fontProviders, svgoOptimizer } from 'astro/config';
 // The canonical origin is declared once, in src/consts.ts, and read here — so a
 // build cannot disagree with the sitemap about where the site lives.
 import { SITE } from './src/consts.ts';
@@ -80,25 +80,37 @@ export default defineConfig({
     svgOptimizer: svgoOptimizer(),
   },
 
-  // FONTS — placeholder. A project self-hosts and subsets its faces
-  // (scripts/subset-fonts.py), declares only the weights it actually applies,
-  // and lets Astro emit the @font-face plus the metric-matched fallbacks that
-  // are the CLS insurance. Until then the stack falls through to system-ui:
-  // see --font-sans in src/styles/global.css.
+  // FONTS — DM Sans, self-hosted and subset (§7).
   //
-  // fonts: [
-  //   {
-  //     provider: fontProviders.local(),
-  //     name: 'Brand Sans',
-  //     cssVariable: '--font-body',
-  //     display: 'swap',
-  //     fallbacks: ['Arial', 'sans-serif'],
-  //     options: {
-  //       variants: [
-  //         { weight: 400, style: 'normal', src: ['./src/assets/fonts/BrandSans-Regular.subset.woff2'] },
-  //         { weight: 500, style: 'normal', src: ['./src/assets/fonts/BrandSans-Medium.subset.woff2'] },
-  //       ],
-  //     },
-  //   },
-  // ],
+  // ONE partial variable face rather than three static instances: opsz is
+  // pinned at 14 (the value every Figma type style is drawn at, so no
+  // stylesheet has to carry `font-variation-settings`) and wght is clipped to
+  // 400–700, which is exactly the three weights the design applies and nothing
+  // else. 21,764 B against 38,584 B for the same three as statics — the
+  // measurement is in scripts/subset-fonts.py, which produced this file.
+  //
+  // Astro emits the @font-face and, because `optimizedFallbacks` defaults on,
+  // the metric-matched fallback that is the CLS insurance.
+  fonts: [
+    {
+      provider: fontProviders.local(),
+      name: 'DM Sans',
+      cssVariable: '--font-body',
+      display: 'swap',
+      fallbacks: ['Helvetica Neue', 'Arial', 'sans-serif'],
+      // A range, not a list: the face is variable across it, so one file
+      // answers 400, 500 and 700 and every step between.
+      weights: ['400 700'],
+      styles: ['normal'],
+      options: {
+        variants: [
+          {
+            weight: '400 700',
+            style: 'normal',
+            src: ['./src/assets/fonts/DMSans.subset.woff2'],
+          },
+        ],
+      },
+    },
+  ],
 });

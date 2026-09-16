@@ -15,8 +15,18 @@
  *   - a pointer press outside closes;
  *   - focus leaving the group closes it, so Tab cannot strand an open panel
  *     behind you;
- *   - hover is not wired at all. Hover may be added per project as an
- *     enhancement, never as the only way in: that excludes touch and keyboard.
+ *   - HOVER OPENS IT TOO, as an enhancement and never as the only way in. §4.3
+ *     is explicit about the direction: hover *may* open a panel, but a panel
+ *     reachable only by hover excludes touch and keyboard entirely. So the
+ *     button, Escape, outside-press and focus handling above are the contract,
+ *     and hover is a shortcut laid over them that changes the same one
+ *     attribute.
+ *
+ *     Three details that matter: it is gated on `(hover: hover)` so a touch
+ *     device never fires it; closing is delayed so crossing the gap between the
+ *     trigger and the panel does not shut it; and a pointer re-entering cancels
+ *     the pending close. Without the delay the panel is unusable with a mouse,
+ *     which is the classic way hover menus get shipped broken.
  */
 const TRIGGER = '[data-disclosure]';
 const GROUP = '[data-disclosure-group]';
@@ -67,4 +77,46 @@ document.addEventListener('focusin', (event) => {
   for (const trigger of triggersIn(document)) {
     if (isOpen(trigger) && trigger.closest(GROUP) !== group) setOpen(trigger, false);
   }
+});
+
+
+/* ── Hover, as an enhancement over the contract above ────────────────────────
+   Everything below is additive: remove it and every requirement in §4.3 is
+   still met by the click, Escape, outside-press and focus handlers. */
+const CAN_HOVER = window.matchMedia('(hover: hover)');
+
+/** Crossing from the trigger to the panel passes over a gap. Do not punish it. */
+const CLOSE_DELAY = 180;
+let closeTimer: number | undefined;
+
+const cancelClose = (): void => {
+  if (closeTimer !== undefined) clearTimeout(closeTimer);
+  closeTimer = undefined;
+};
+
+document.addEventListener('pointerover', (event) => {
+  if (!CAN_HOVER.matches || event.pointerType === 'touch') return;
+  const group = (event.target as Element | null)?.closest(GROUP);
+  if (!group) return;
+  cancelClose();
+  const trigger = group.querySelector<HTMLElement>(TRIGGER);
+  if (trigger && !isOpen(trigger)) {
+    closeAll(trigger);
+    setOpen(trigger, true);
+  }
+});
+
+document.addEventListener('pointerout', (event) => {
+  if (!CAN_HOVER.matches || event.pointerType === 'touch') return;
+  const group = (event.target as Element | null)?.closest(GROUP);
+  if (!group) return;
+  /* Still inside the same group — a move between its own children, not an exit. */
+  const to = event.relatedTarget as Element | null;
+  if (to && group.contains(to)) return;
+  cancelClose();
+  closeTimer = window.setTimeout(() => {
+    const trigger = group.querySelector<HTMLElement>(TRIGGER);
+    /* Keyboard focus inside the panel outranks the pointer having left it. */
+    if (trigger && !group.contains(document.activeElement)) setOpen(trigger, false);
+  }, CLOSE_DELAY);
 });

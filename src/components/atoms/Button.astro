@@ -9,14 +9,23 @@ import VisuallyHidden from './VisuallyHidden.astro';
  * `theme="dark"` Section recolours every button inside it with no variant
  * classes and no `dark:` in markup.
  *
- * `primary` is the accent fill, which is the one place the accent plumbing is
- * load-bearing in the base kit: if `--accent` or `--accent-contrast` is wired
- * wrong, the primary button is where you see it.
+ * `primary` is the INVERSE fill, not the accent fill — CentiPack's primary
+ * action is the ink colour (Brand/Black on light, pure white on dark), and the
+ * accent is a navy the design spends elsewhere. The template ships `bg-accent`
+ * here; this project's ruling is recorded in WORKLOG Entry 2 and the token pair
+ * it needs (`--bg-inverse` / `--text-on-inverse`) is declared in global.css §2
+ * with its own row in the contrast matrix.
+ *
+ * Hover LIFTS THE FILL ONE STEP rather than reversing it: `--bg-inverse-hover`
+ * is a lighter ink on light and a softer white on dark, so the button keeps its
+ * weight on the page as the pointer crosses it. Both states go through the
+ * contrast matrix, because a label that goes illegible on hover fails for
+ * exactly as long as anyone is looking at it.
  */
 export type ButtonVariant = 'primary' | 'secondary' | 'ghost';
-export type ButtonSize = 'sm' | 'md';
+export type ButtonSize = 'sm' | 'md' | 'link';
 /** Typed per §4.1; extend the union per project rather than passing markup. */
-export type ButtonIcon = 'arrow' | 'play' | 'close';
+export type ButtonIcon = 'arrow' | 'play' | 'close' | 'square';
 
 interface Props {
   variant?: ButtonVariant;
@@ -57,19 +66,62 @@ const Tag = href ? 'a' : 'button';
  */
 const VARIANT = {
   primary: [
-    'bg-accent text-on-accent border-accent',
-    'hover:bg-transparent hover:text-accent',
+    'bg-inverse text-on-inverse border-inverse',
+    'hover:bg-inverse-hover hover:border-inverse-hover',
   ],
+  /**
+   * `secondary` REVERSES on hover — an outline box fills with the ink and the
+   * label goes to the ground colour, and the whole thing inverts again on a dark
+   * theme because both halves are tokens. It is the same gesture as `primary`'s
+   * fill-lift read the other way round: the outline was the empty version of
+   * the filled button, so pointing at it completes it.
+   */
   secondary: [
     'bg-transparent text-primary border-line-strong',
-    'hover:bg-subtle hover:border-accent hover:text-accent',
+    'hover:bg-inverse hover:text-on-inverse hover:border-inverse',
   ],
   ghost: ['bg-transparent text-secondary border-transparent', 'hover:text-accent'],
 } as const;
 
+/**
+ * `link` is a CentiPack addition, and it is a size rather than a variant because
+ * that is what actually differs: the design's tertiary action — "Browse formats
+ * →", about fifteen of them across six page types — is a link with a trailing
+ * arrow and no box at all. Everything else about it is a Button: it renders an
+ * <a>, it takes an icon, it carries the disabled contract.
+ *
+ * The alternative was a new ArrowLink atom, which would have re-implemented the
+ * icon plumbing and the href→<a> switch to gain nothing. `border-transparent`
+ * rather than `border-0` keeps the box model identical to the other two sizes,
+ * so a `link` and an `md` on the same row still sit on one baseline.
+ */
 const SIZE = {
-  sm: 'h-control-sm px-md gap-xs text-sm',
-  md: 'h-control-md px-lg gap-xs text-body',
+  sm: 'h-control-sm gap-xs text-sm',
+  md: 'h-control-md gap-xs text-body',
+  /* `btn-link` carries the hover: the arrow slides and the label lightens, and
+     an arrow that travels is not something a utility can say. */
+  link: 'btn-link gap-2xs text-sm font-medium rounded-none border-transparent',
+} as const;
+
+/**
+ * Padding is its own lookup because A START ICON UNBALANCES THE BOX. The square
+ * mark sits inside the left padding's optical space, so a symmetric box reads as
+ * leaning left; the design compensates by giving the trailing side one step
+ * more — 24 / 32 at `md`, which is exactly what Figma draws.
+ *
+ * Two maps rather than one composed string: the scanner reads source as text, so
+ * every class it must generate has to appear literally somewhere.
+ */
+const PAD = {
+  sm: 'px-md',
+  md: 'px-lg',
+  link: '',
+} as const;
+
+const PAD_LEADING_ICON = {
+  sm: 'pl-md pr-lg',
+  md: 'pl-lg pr-xl',
+  link: '',
 } as const;
 
 /** Inline, currentColor, sized to the label's cap height. */
@@ -77,7 +129,13 @@ const ICON_PATHS = {
   arrow: 'M2 8h12M9.5 3.5 14 8l-4.5 4.5',
   play: 'M4.5 2.5v11l9-5.5-9-5.5Z',
   close: 'm3.5 3.5 9 9m0-9-9 9',
+  /* The mark the design puts before every primary button's label: a small
+     filled square, drawn at the same 16-unit grid as the rest. */
+  square: 'M5 5h6v6H5z',
 } as const;
+
+/** Only `square` is a filled mark; the rest are strokes. */
+const ICON_FILLED: Partial<Record<ButtonIcon, boolean>> = { square: true };
 ---
 
 <Tag
@@ -94,7 +152,10 @@ const ICON_PATHS = {
     // A disabled control must read as disabled.
     'disabled:pointer-events-none disabled:opacity-40 aria-disabled:pointer-events-none aria-disabled:opacity-40',
     SIZE[size],
-    VARIANT[variant],
+    icon && iconPosition === 'start' ? PAD_LEADING_ICON[size] : PAD[size],
+    /* `link` owns its own hover, so the variant's does not also fire — two
+       colour changes on one gesture read as a glitch rather than a response. */
+    size === 'link' ? VARIANT[variant][0] : VARIANT[variant],
     className,
   ]}
   {...rest}
@@ -102,7 +163,12 @@ const ICON_PATHS = {
   {
     icon && iconPosition === 'start' && (
       <svg class="size-icon-inline" viewBox="0 0 16 16" fill="none" aria-hidden="true">
-        <path d={ICON_PATHS[icon]} stroke="currentColor" stroke-width="1.25" />
+        <path
+          d={ICON_PATHS[icon]}
+          stroke={ICON_FILLED[icon] ? undefined : 'currentColor'}
+          stroke-width={ICON_FILLED[icon] ? undefined : 1.25}
+          fill={ICON_FILLED[icon] ? 'currentColor' : undefined}
+        />
       </svg>
     )
   }
@@ -110,7 +176,12 @@ const ICON_PATHS = {
   {
     icon && iconPosition === 'end' && (
       <svg class="size-icon-inline" viewBox="0 0 16 16" fill="none" aria-hidden="true">
-        <path d={ICON_PATHS[icon]} stroke="currentColor" stroke-width="1.25" />
+        <path
+          d={ICON_PATHS[icon]}
+          stroke={ICON_FILLED[icon] ? undefined : 'currentColor'}
+          stroke-width={ICON_FILLED[icon] ? undefined : 1.25}
+          fill={ICON_FILLED[icon] ? 'currentColor' : undefined}
+        />
       </svg>
     )
   }

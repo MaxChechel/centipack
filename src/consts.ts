@@ -12,26 +12,32 @@
  * sitemap filter. Four places to change, and the fourth is the one someone
  * misses — which is how a staging origin ends up in a production canonical tag.
  *
- * PROJECT: replace every value below. It is step one of the checklist in
- * README.md, and nothing else should be touched before it.
+ * Filled for CentiPack in Phase 0. Step one of the checklist in README.md.
  */
 export const SITE = {
-  /** PROJECT: replace. Used in the nav's accessible name and the footer. */
-  name: 'outredge-system',
-
-  /** PROJECT: replace. The default <meta name="description">. */
-  description: 'The Outredge dev system for Astro marketing sites.',
+  /** Used in the nav's accessible name and the footer. */
+  name: 'CentiPack',
 
   /**
-   * PROJECT: replace. The canonical production origin, no trailing slash.
+   * The default <meta name="description">.
+   *
+   * Lifted verbatim from the home hero lede in Figma — the copy is locked, and
+   * a description written separately from the page is a description that drifts
+   * from it.
+   */
+  description:
+    '2–8°C shippers, gel packs, branded boxes and the pharmacy formats that go inside them — specified around your lanes and produced to your run.',
+
+  /**
+   * The canonical production origin, no trailing slash.
    *
    * This is the single source of truth for it. `astro.config.mjs` imports this
    * rather than repeating the URL, so a build cannot disagree with the sitemap
    * about where the site lives.
    */
-  origin: 'https://example.com',
+  origin: 'https://centipack.com',
 
-  /** PROJECT: replace if the site is not in English. Sets <html lang>. */
+  /** Sets <html lang>. */
   locale: 'en',
 
   /** Where enquiries go in the markup. The endpoint's own config is in env. */

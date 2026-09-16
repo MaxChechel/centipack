@@ -1,0 +1,78 @@
+---
+/**
+ * The trail (§4.2).
+ *
+ * A block rather than six lines of markup in three page templates, for one
+ * reason: Phase 3 owes `BreadcrumbList` JSON-LD, and the structured trail and
+ * the visible trail have to come from ONE source or they will disagree — which
+ * is the failure Google penalises and nobody sees. The same `trail` array feeds
+ * both, and `JsonLd` is emitted from here so a page cannot render one without
+ * the other.
+ *
+ * The LAST crumb is the current page and is NOT a link. It carries
+ * `aria-current="page"`, which is what a screen reader announces and what the
+ * design's own colour change says visually — the earlier crumbs are tertiary,
+ * this one is primary.
+ *
+ * `<ol>` and not `<ul>`: a trail is ordered, and the order is the information.
+ */
+import JsonLd from '../atoms/JsonLd.astro';
+import { canonicalUrl } from '../../lib/urls';
+
+export interface Crumb {
+  label: string;
+  /** Omitted on the last crumb — the page you are already on. */
+  href?: string;
+}
+
+interface Props {
+  trail: readonly Crumb[];
+  class?: string;
+}
+
+const { trail, class: className } = Astro.props as Props;
+
+/* SELF-SKIP (§4.2). A trail of one is the home page pointing at itself. */
+const hasContent = trail.length > 1;
+
+/* schema.org counts from 1, and every item needs an absolute URL. The last
+   crumb has no href, so it names the page currently being rendered. */
+const itemListElement = trail.map((crumb, index) => ({
+  '@type': 'ListItem',
+  position: index + 1,
+  name: crumb.label,
+  item: canonicalUrl(crumb.href ?? Astro.url.pathname, Astro.site),
+}));
+---
+
+{hasContent && (
+<>
+  <nav aria-label="Breadcrumb" class={className}>
+    <ol class="list-bare gap-2xs flex flex-wrap items-center">
+      {
+        trail.map((crumb, index) => (
+          <li class="gap-2xs flex items-center">
+            {index > 0 && <span class="text-eyebrow" aria-hidden="true">/</span>}
+            {/* `link-underline` is the same hover the nav and the footer use. A
+                crumb borrowed `.nav-panel-link` for a hover colour before; that
+                class went with the colour change, and a crumb is a nav link
+                like any other. The comment sits OUTSIDE the ternary — a branch
+                takes one root element, and a comment beside it is a second. */}
+            {crumb.href ? (
+              <a href={crumb.href} class="text-eyebrow link-underline rounded-sm">
+                {crumb.label}
+              </a>
+            ) : (
+              <span class="text-eyebrow text-primary" aria-current="page">
+                {crumb.label}
+              </span>
+            )}
+          </li>
+        ))
+      }
+    </ol>
+  </nav>
+
+  <JsonLd schema={{ '@context': 'https://schema.org', '@type': 'BreadcrumbList', itemListElement }} />
+</>
+)}

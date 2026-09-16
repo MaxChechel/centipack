@@ -1,0 +1,112 @@
+---
+import BaseLayout from '../../components/shells/BaseLayout.astro';
+import Section from '../../components/Section.astro';
+import SectionHeader from '../../components/blocks/SectionHeader.astro';
+import Breadcrumb from '../../components/blocks/Breadcrumb.astro';
+import ProductRail from '../../components/blocks/ProductRail.astro';
+import CategoryCard from '../../components/blocks/CategoryCard.astro';
+import CtaPlate from '../../components/blocks/CtaPlate.astro';
+import Media from '../../components/blocks/Media.astro';
+import { getCatalogue, type CategoryView, type ProductView } from '../../lib/catalogue';
+import { closingBand } from '../../lib/closing-band';
+
+/**
+ * Category — one template, three pages (§4.4, §5).
+ *
+ * `getStaticPaths` reads the catalogue, so adding a category to
+ * `src/content/categories` adds a page, a nav column, a footer column and three
+ * cross-links with no other edit. That is the whole reason the content layer is
+ * CMS-shaped from the first commit.
+ *
+ * The closing band's picture and copy are shared with the products index through
+ * `src/lib/closing-band.ts` — one source, three consumers, rather than the same
+ * paragraph typed into three templates.
+ *
+ * Copy is verbatim from Figma 788:8952 / 788:9676 / 788:9850.
+ */
+export async function getStaticPaths() {
+  const catalogue = await getCatalogue();
+  return catalogue.map(({ category, products }) => ({
+    params: { category: category.slug },
+    props: { category, products, others: catalogue.filter((c) => c.category.slug !== category.slug).map((c) => c.category) },
+  }));
+}
+
+interface Props {
+  category: CategoryView;
+  products: ProductView[];
+  others: CategoryView[];
+}
+
+const { category, products, others } = Astro.props;
+const cta = await closingBand();
+---
+
+<BaseLayout title={`${category.pageTitle} — ${category.title} | CentiPack`} description={category.lede}>
+  {/* 1 — Hero. Same shape as the products index: trail, h1, lede in column two. */}
+  <Section spaceTop="nav" spaceBottom="sm" class="bg-subtle">
+    <div class="gap-xl md:gap-lg md:grid md:grid-cols-12 md:items-end flex flex-col">
+      <div class="gap-lg md:col-span-7 flex flex-col">
+        <Breadcrumb
+          trail={[
+            { label: 'Home', href: '/' },
+            { label: 'Products', href: '/products' },
+            { label: category.title },
+          ]}
+        />
+        <h1 class="text-h1 text-primary">{category.pageTitle}</h1>
+      </div>
+      <p class="text-body text-secondary md:col-span-4 md:col-start-9">{category.lede}</p>
+    </div>
+  </Section>
+
+  {/* 2 — The range in one picture. */}
+  <Section width="full" space="none">
+    <Media
+      image={category.rangeImage}
+      label={`${category.title} — the range together`}
+      ratio="1440 / 700"
+      loading="eager"
+      fetchpriority="high"
+    />
+  </Section>
+
+  {/* 3 — The products. Three-up here, where the index is five-up. */}
+  <Section space="lg">
+    <div class="gap-2xl flex flex-col">
+      <h2 class="text-h2 text-primary">{category.selectionHeading}</h2>
+      <ProductRail products={products} columns={3} label={`${category.title} products`} />
+    </div>
+  </Section>
+
+  {/* 4 — The other two layers. */}
+  <Section space="lg" class="bg-subtle">
+    <div class="gap-2xl flex flex-col">
+      <SectionHeader
+        eyebrow="The rest of the build"
+        heading="One supplier for every layer — specified together, invoiced once, and priced direct with no distributor in between."
+        headingLevel="h2"
+        size="h3"
+        measure
+      />
+      <ul class="list-bare gap-xl grid md:grid-cols-2">
+        {
+          others.map((other) => (
+            <li class="flex">
+              <CategoryCard category={other} headingLevel={3} cross ratio="1 / 1" class="w-full" />
+            </li>
+          ))
+        }
+      </ul>
+    </div>
+  </Section>
+
+  {/* 5 — The closing band. */}
+  <Section space="md" spaceTop="lg">
+    <CtaPlate {...cta} />
+  </Section>
+</BaseLayout>
+
+<script>
+  import '../../scripts/rail';
+</script>

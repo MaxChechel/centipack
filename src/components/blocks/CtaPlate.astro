@@ -1,0 +1,91 @@
+---
+import Button from '../atoms/Button.astro';
+import Media from './Media.astro';
+import type { Picture } from '../../lib/catalogue';
+
+/**
+ * The closing band (§4.2) — the design's own `cta` component.
+ *
+ * ITS OWN BLOCK, NOT A PROP ON `CtaBanner`. The Phase 1 audit called this an
+ * extension — one `image` prop on the block the kit already ships — and that was
+ * overruled in review, correctly: they are two different objects. `CtaBanner` is
+ * a bordered well that sits IN a ground; this is a photographic plate that
+ * replaces the ground for 600px. Different structure, different height
+ * behaviour, different theme rule. Bolting one onto the other would have meant a
+ * block whose every class list forked on a single boolean, which is two
+ * components wearing one name.
+ *
+ * They are siblings the same way ProductCard and CategoryCard are: same recipe
+ * family, no shared structure, no common parent worth writing.
+ *
+ * A BLOCK, not a Section: it renders no vertical rhythm and no container of its
+ * own, so a page decides where it sits by wrapping it in a Section like
+ * everything else.
+ *
+ * `data-theme="dark"` comes WITH the picture and not before it — the same rule
+ * CategoryCard follows. A scrim has nothing to darken when there is no
+ * photograph, and ink-on-ink is not a state worth shipping to get there.
+ */
+interface Props {
+  heading: string;
+  /** Document outline. Visual size is fixed at h2 — this is a closing band. */
+  headingLevel?: 'h2' | 'h3';
+  action?: { label: string; href: string };
+  image?: Picture;
+  /** What the picture is, for the pending box while the photography is owed. */
+  imageLabel?: string;
+  id?: string;
+  class?: string;
+}
+
+const {
+  heading,
+  headingLevel = 'h2',
+  action,
+  image,
+  imageLabel = 'Closing band',
+  id,
+  class: className,
+} = Astro.props as Props;
+
+/* SELF-SKIP (§4.2). A band with no heading and no action is an empty picture. */
+const hasContent = Boolean(heading) || Boolean(action);
+---
+
+{hasContent && (
+<div
+  id={id}
+  data-theme={image ? 'dark' : undefined}
+  class:list={[
+    /* `cta-plate` carries the minimum height: 600px from md up, 480 below.
+       The design draws this band at a fixed 1344x600 plate, and with the
+       subtext gone the content no longer fills it — a heading and a button
+       alone collapsed it to about 300px, which reads as a strip rather than
+       as the closing plate. A min-height rather than a height, so long copy
+       at a narrow width still grows it instead of being clipped. */
+    'cta-plate rounded-lg relative isolate flex items-center justify-center overflow-hidden',
+    image ? 'media-scrim' : 'bg-subtle',
+    className,
+  ]}
+>
+  <Media image={image} label={imageLabel} ratio="1344 / 600" class="absolute inset-0 -z-10 h-full" />
+
+  <div class="px-lg py-4xl gap-xl relative z-10 flex flex-col items-center text-center">
+    {
+      headingLevel === 'h3' ? (
+        <h3 class="text-h2 text-primary max-w-[60rem]">{heading}</h3>
+      ) : (
+        <h2 class="text-h2 text-primary max-w-[60rem]">{heading}</h2>
+      )
+    }
+
+    <div class="gap-lg flex flex-col items-center">
+      {action && (
+        <Button href={action.href} variant="primary" icon="square" iconPosition="start">
+          {action.label}
+        </Button>
+      )}
+    </div>
+  </div>
+</div>
+)}

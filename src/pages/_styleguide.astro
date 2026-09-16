@@ -13,6 +13,7 @@
  * up on one page rather than on whichever client page happened to use the
  * broken thing.
  */
+import { SITE } from '../consts';
 import cssSource from '../styles/global.css?raw';
 import BaseLayout from '../components/shells/BaseLayout.astro';
 import Section from '../components/Section.astro';
@@ -26,13 +27,15 @@ import SectionHeader from '../components/blocks/SectionHeader.astro';
 import Faq from '../components/blocks/Faq.astro';
 import CtaBanner from '../components/blocks/CtaBanner.astro';
 import LogoStrip from '../components/blocks/LogoStrip.astro';
-import ItemCard from '../components/blocks/ItemCard.astro';
-import { getItems, getItemBody } from '../lib/items';
-import * as vocabulary from '../components/mdx';
+import ProductCard from '../components/blocks/ProductCard.astro';
+import CategoryCard from '../components/blocks/CategoryCard.astro';
+import { getProducts, getCategories } from '../lib/catalogue';
+import Lede from '../components/mdx/Lede.astro';
 import {
   parseThemeScopes,
   textMatrix,
   accentMatrix,
+  inverseMatrix,
   lineMatrix,
   resolveColor,
   contrastRatio,
@@ -51,6 +54,12 @@ import {
 const scopes = parseThemeScopes(cssSource);
 const text = textMatrix(scopes);
 const accent = accentMatrix(scopes);
+const inverse = inverseMatrix(scopes);
+/* Quoted in the dark Section demo below. Computed, for the same reason the type
+   ranges are: a ratio typed into prose is a ratio that goes stale silently. */
+const darkTertiaryFloor = Math.min(
+  ...text.filter((r) => r.theme === 'dark' && r.text === '--text-tertiary').map((r) => r.ratio),
+);
 const lines = lineMatrix(scopes);
 const textFailures = text.filter((r) => !r.pass).length;
 
@@ -68,21 +77,31 @@ const cell = (theme: string, bg: string, t: string) =>
  * this page shipped first: it looks fine, axe cannot evaluate it at all, and on
  * the mid-ramp it genuinely fails. A styleguide that demonstrates the contrast
  * rule must not break it in its own furniture. */
-const ramp = [...scopes.root.keys()]
-  .filter((k) => /^--gray-\d+$/.test(k))
-  .map((k) => {
-    const value = scopes.root.get(k)!;
-    const onBlack = contrastRatio('#000000', value);
-    const onWhite = contrastRatio('#ffffff', value);
-    return {
-      name: k,
-      value,
-      step: Number(k.replace('--gray-', '')),
-      label: onBlack >= onWhite ? '#000000' : '#ffffff',
-      labelRatio: Math.max(onBlack, onWhite),
-    };
-  })
-  .sort((a, b) => a.step - b.step);
+const rampOf = (family: string) =>
+  [...scopes.root.keys()]
+    .filter((k) => new RegExp(`^--${family}-\\d+$`).test(k))
+    .map((k) => {
+      const value = scopes.root.get(k)!;
+      const onBlack = contrastRatio('#000000', value);
+      const onWhite = contrastRatio('#ffffff', value);
+      return {
+        name: k,
+        value,
+        step: Number(k.replace(`--${family}-`, '')),
+        label: onBlack >= onWhite ? '#000000' : '#ffffff',
+        labelRatio: Math.max(onBlack, onWhite),
+      };
+    })
+    .sort((a, b) => a.step - b.step);
+
+/* TWO families, because CentiPack has two. The neutral ramp carries ink and
+   lines; the sand ramp carries the page grounds. See the note in global.css §1
+   and the deviation in AUDIT.md. */
+const ramps = [
+  { family: 'gray', label: 'neutral — ink and lines', steps: rampOf('gray') },
+  { family: 'sand', label: 'sand — page grounds', steps: rampOf('sand') },
+];
+const ramp = ramps.flatMap((r) => r.steps);
 /* If this ever throws, a swatch is so mid-grey that neither black nor white
    clears AA on it — which is a ramp problem, not a label problem. */
 const rampLabelFloor = Math.min(...ramp.map((r) => r.labelRatio));
@@ -91,7 +110,7 @@ if (rampLabelFloor < AA) {
 }
 
 const accents = [
-  { name: '--accent-500', value: scopes.root.get('--accent-500')!, note: 'light theme' },
+  { name: '--accent-700', value: scopes.root.get('--accent-700')!, note: 'light theme' },
   { name: '--accent-300', value: scopes.root.get('--accent-300')!, note: 'dark theme' },
 ];
 
@@ -104,6 +123,8 @@ const SEMANTIC_ROLES: Record<string, string> = {
   '--text-tertiary': 'text · meta & captions',
   '--accent': 'accent · text, fill, border',
   '--accent-contrast': 'the only legal text on accent',
+  '--bg-inverse': 'the ink fill · primary action',
+  '--text-on-inverse': 'the only legal text on the inverse fill',
   '--line': 'dividers & card edges',
   '--line-strong': 'interactive control boundary',
 };
@@ -111,19 +132,35 @@ const semanticTokens = Object.keys(SEMANTIC_ROLES);
 
 /* The type scale. One token per role, one class per role — there is no bare
    `text-<size>` utility in the system to show alongside them (§1b). */
+/* THE RANGE IS READ OUT OF THE CSS, NOT TYPED HERE. It was typed here, and it
+   went stale the first time this project re-derived the scale: the page printed
+   the template's ranges beside CentiPack's type, which is the same class of
+   failure the contrast section computes its way out of. A label nobody can
+   falsify is worse than no label. */
+function rangeOf(token: string): string {
+  const raw = scopes.root.get(token);
+  if (!raw) throw new Error(`Styleguide: ${token} is not declared in global.css`);
+  const px = (rem: string) => Math.round(parseFloat(rem) * 16);
+  const clamp = /^clamp\(\s*([\d.]+)rem\s*,[^,]*,\s*([\d.]+)rem\s*\)$/.exec(raw);
+  if (clamp) return `${px(clamp[1])} \u2192 ${px(clamp[2])}px`;
+  const fixed = /^([\d.]+)rem$/.exec(raw);
+  if (fixed) return `${px(fixed[1])}px \u00b7 static`;
+  throw new Error(`Styleguide: cannot read a size range out of ${token}: ${raw}`);
+}
+
 const TYPE_ROLES = [
-  { token: '--text-h1', style: 'text-h1', note: '36 → 64px', sample: 'Heading one' },
-  { token: '--text-h2', style: 'text-h2', note: '32 → 48px', sample: 'Heading two' },
-  { token: '--text-h3', style: 'text-h3', note: '28 → 38px', sample: 'Heading three' },
-  { token: '--text-h4', style: 'text-h4', note: '24 → 30px', sample: 'Heading four' },
-  { token: '--text-h5', style: 'text-h5', note: '20 → 24px', sample: 'Heading five' },
-  { token: '--text-h6', style: 'text-h6', note: '18 → 20px', sample: 'Heading six' },
-  { token: '--text-large', style: 'text-large', note: '18 → 20px', sample: 'Lede — the opening paragraph.' },
-  { token: '--text-body', style: 'text-body', note: '16 → 17px', sample: 'Body — the default reading size.' },
-  { token: '--text-sm', style: 'text-sm', note: '14 → 15px', sample: 'Small body — dense UI copy.' },
-  { token: '--text-caption', style: 'text-caption', note: '14 → 15px', sample: 'Caption — figure captions, meta.' },
-  { token: '--text-eyebrow', style: 'text-eyebrow', note: '12 → 13px', sample: 'Eyebrow label' },
-];
+  { token: '--text-h1', style: 'text-h1', sample: 'Heading one' },
+  { token: '--text-h2', style: 'text-h2', sample: 'Heading two' },
+  { token: '--text-h3', style: 'text-h3', sample: 'Heading three' },
+  { token: '--text-h4', style: 'text-h4', sample: 'Heading four' },
+  { token: '--text-h5', style: 'text-h5', sample: 'Heading five' },
+  { token: '--text-h6', style: 'text-h6', sample: 'Heading six' },
+  { token: '--text-large', style: 'text-large', sample: 'Lede \u2014 the opening paragraph.' },
+  { token: '--text-body', style: 'text-body', sample: 'Body \u2014 the default reading size.' },
+  { token: '--text-sm', style: 'text-sm', sample: 'Small body \u2014 dense UI copy.' },
+  { token: '--text-caption', style: 'text-caption', sample: 'Caption \u2014 figure captions, meta.' },
+  { token: '--text-eyebrow', style: 'text-eyebrow', sample: 'Eyebrow label' },
+].map((r) => ({ ...r, note: rangeOf(r.token) }));
 
 /* Every form control, in every state worth seeing. Declared rather than written
    out three times: the point of the grid is that the three columns are the SAME
@@ -167,10 +204,12 @@ const demoLogos = [
   { name: 'Mark Three', slug: 'mark-three' },
 ];
 
-const items = await getItems();
-/* A real MDX body, rendered with the §4.5 vocabulary, so the components in
-   src/components/mdx/ are exercised by the harness rather than only shipped. */
-const { Content: ItemBody } = await getItemBody('item-one');
+const products = await getProducts();
+const categories = await getCategories();
+/* The §4.5 vocabulary is DORMANT in this project — CentiPack's content carries
+   frontmatter and no bodies — so the prose section below writes its sample
+   inline rather than rendering one. <Lede> is imported so the one piece of the
+   vocabulary that is exercised stays under axe and the dead-class check. */
 
 const INDEX = [
   ['01', 'color', 'Colour tokens'],
@@ -188,7 +227,7 @@ const INDEX = [
 ];
 ---
 
-<BaseLayout title="Styleguide · outredge-system" description="Every token and component in the system, annotated." noindex>
+<BaseLayout title={`Styleguide · ${SITE.name}`} description="Every token and component in the system, annotated." noindex>
   <!-- ===================================================================
        HEADER
        =================================================================== -->
@@ -197,7 +236,7 @@ const INDEX = [
       <div class="gap-md flex flex-wrap items-end justify-between">
         <div class="gap-sm flex flex-col">
           <h1 class="text-h1">Styleguide</h1>
-          <p class="sg-meta">outredge-system · internal · env-gated out of production builds</p>
+          <p class="sg-meta">{SITE.name} · internal · env-gated out of production builds</p>
         </div>
         <p class="sg-meta">
           contrast matrix: {text.length}/{text.length - textFailures} passing at {AA}:1
@@ -247,18 +286,23 @@ const INDEX = [
 
       <div class="gap-sm flex flex-col">
         <p class="sg-meta">
-          Primitive ramp — even CIE L* steps, constant low cool chroma.
-          <strong class="text-primary">PROJECT: replace.</strong> The retheme checklist greps for that marker.
+          Primitive ramps, from the CentiPack Figma variables. Two families: warm
+          neutrals for ink and lines, warm sand for the page grounds.
         </p>
-        <ul class="border-line list-bare grid grid-cols-5 overflow-hidden rounded-md border md:grid-cols-15">
-          {
-            ramp.map((swatch) => (
-              <li class="sg-swatch" style={`background:${swatch.value}`}>
-                <span class="sg-swatch-label" style={`color:${swatch.label}`}>{swatch.step}</span>
-              </li>
-            ))
-          }
-        </ul>
+        {
+          ramps.map((r) => (
+            <div class="gap-2xs flex flex-col">
+              <p class="sg-meta">{r.label}</p>
+              <ul class="border-line list-bare flex overflow-hidden rounded-md border">
+                {r.steps.map((swatch) => (
+                  <li class="sg-swatch min-w-0 flex-1" style={`background:${swatch.value}`}>
+                    <span class="sg-swatch-label" style={`color:${swatch.label}`}>{swatch.step}</span>
+                  </li>
+                ))}
+              </ul>
+            </div>
+          ))
+        }
         <ul class="list-bare gap-sm flex flex-wrap">
           {
             accents.map((a) => (
@@ -356,10 +400,14 @@ const INDEX = [
 
       <div class="gap-md grid md:grid-cols-2">
         <div class="bg-surface border-line p-md gap-xs flex flex-col rounded-md border">
-          <p class="sg-meta">Accent group · {accent.length} pairs, {accent.filter((r) => !r.pass).length} failing</p>
+          <p class="sg-meta">
+            Accent group · {accent.length} pairs, {accent.filter((r) => !r.pass).length} failing.
+            Inverse fill · {inverse.length} pairs, {inverse.filter((r) => !r.pass).length} failing —
+            the primary button is the ink fill here, not the accent, so it carries its own row.
+          </p>
           <ul class="list-bare gap-3xs flex flex-col">
             {
-              accent.map((r) => (
+              [...accent, ...inverse].map((r) => (
                 <li class="sg-mono gap-sm flex items-baseline justify-between">
                   <span>{r.theme} · {r.text.replace('--', '')} on {r.bg.replace('--', '')}</span>
                   <span class={r.pass ? 'text-secondary' : 'text-accent'}>{r.ratio.toFixed(2)}</span>
@@ -398,7 +446,7 @@ const INDEX = [
       <SectionHeader
         eyebrow="03 · type"
         heading="Type scale"
-        lede="One token per role, one class per role, and no bare text-<size> utility to fall back to — the scale is not in @theme, so an element either wears a named style or inherits one. Every step is a clamp() between a 320px and a 1312px viewport; there are no media queries in the type system at all."
+        lede="One token per role, one class per role, and no bare text-<size> utility to fall back to — the scale is not in @theme, so an element either wears a named style or inherits one. Headings clamp between the two widths CentiPack was drawn at, 402px and 1440px; body sizes are static because the design draws them the same at both. No media queries in the type system at all, and the ranges below are read out of global.css rather than typed."
         split
       />
 
@@ -442,7 +490,7 @@ const INDEX = [
       <SectionHeader
         eyebrow="04 · spacing"
         heading="Spacing scale"
-        lede="Fluid throughout, from a 2px hairline to 12rem. The bars are live token widths at this viewport — resize and they move. T-shirt names permanently: a numeric name would collide with stock Tailwind's meaning in every developer's memory, and the failure is silent in both directions."
+        lede="Static, from a 2px hairline to 96px, because CentiPack's design specifies the same gaps at 402px and at 1440px — only the section rhythm, the site margin and the nav height scale with the viewport, and those carry the clamps. The bars are live token widths at this viewport. T-shirt names permanently: a numeric name would collide with stock Tailwind's meaning in every developer's memory, and the failure is silent in both directions."
         split
       />
 
@@ -622,7 +670,7 @@ const INDEX = [
         <div class="bg-surface border-line p-md gap-xs flex flex-col rounded-md border md:col-span-1">
           <p class="text-h6 text-primary">Surface card</p>
           <p class="text-sm text-secondary">Supporting copy, secondary.</p>
-          <p class="text-caption text-tertiary">Tertiary meta — the tightest pair in the whole matrix, 5.05:1.</p>
+          <p class="text-caption text-tertiary">Tertiary meta — {darkTertiaryFloor.toFixed(2)}:1 here, the floor of the dark theme.</p>
         </div>
         <div class="gap-sm md:col-span-2 flex flex-wrap items-start">
           <Button href="#section" variant="primary">Primary adapts</Button>
@@ -646,7 +694,11 @@ const INDEX = [
       />
 
       <div class="gap-md flex flex-col">
-        <p class="sg-meta">Button — variant × size. Primary is the accent fill, which is where broken accent wiring shows up first.</p>
+        <p class="sg-meta">
+          Button — variant × size. Primary is the INVERSE fill, not the accent: CentiPack's primary
+          action is the ink colour, which inverts with the theme. The accent is what a primary button
+          comes up in on hover, which is where broken accent wiring shows up first.
+        </p>
         <div class="gap-sm flex flex-wrap items-center">
           <Button href="#atoms" variant="primary" size="md">Primary md</Button>
           <Button href="#atoms" variant="secondary" size="md">Secondary md</Button>
@@ -658,8 +710,13 @@ const INDEX = [
           <Button href="#atoms" variant="ghost" size="sm">Ghost sm</Button>
         </div>
         <div class="gap-sm flex flex-wrap items-center">
-          <Button href="#atoms" variant="primary" icon="arrow">icon="arrow" · renders &lt;a&gt;</Button>
-          <Button variant="secondary" icon="play" iconPosition="start">icon at start · renders &lt;button&gt;</Button>
+          {/* Short labels on purpose. These demonstrate the PROPS; a 26-character
+              label was 14px wider than a 320px row could hold, which the sweep's
+              spill assertion reported as a real overflow — correctly, because a
+              button does not wrap its label. The prop being shown is named in
+              the sg-meta line above the row, not inside the control. */}
+          <Button href="#atoms" variant="primary" icon="arrow">icon · &lt;a&gt;</Button>
+          <Button variant="secondary" icon="play" iconPosition="start">start icon</Button>
           <Button href="https://example.com" variant="ghost" external>external</Button>
           <Button variant="secondary" disabled>disabled</Button>
         </div>
@@ -889,17 +946,35 @@ const INDEX = [
           A card is a <strong class="text-primary">pattern, not a component</strong>. There is no generic Card
           shell and no card family in the base kit. The recipe is:
         </p>
-        <pre class="sg-code" tabindex="0"><code>bg-surface + border-line + rounded-md + p-sm | p-md</code></pre>
+        <pre class="sg-code" tabindex="0"><code>bg-subtle + rounded-md + p-sm | p-md          &#8592; CentiPack (AUDIT D4)
+bg-surface + border-line + rounded-md + p-*  &#8592; the house default</code></pre>
         <p class="text-sm text-secondary measure">
-          Project cards — ProductCard, WorkCard, PricingCard — are instantiations of it. They never invent their
-          own surface, border or radius treatment; if one needs a different treatment, that is a token decision
-          made in global.css where every card gets it. They share no structure, so a common parent would be a
-          bordered div, which is a class, not a component.
+          Project cards — ProductCard, CategoryCard — are instantiations of it. They never invent their own
+          surface, border or radius treatment; if one needs a different treatment, that is a token decision made
+          where every card gets it. They share no structure, so a common parent would be a bordered div, which is
+          a class, not a component.
+        </p>
+        <p class="text-sm text-secondary measure">
+          <strong class="text-primary">CentiPack changes the recipe, once.</strong> Every card in the design sits
+          one step <em>away</em> from the ground rather than raised off it — cream on off-white, and one step
+          lighter than the ground in dark — so the surface is <code>bg-subtle</code> and there is no border. That
+          is exactly the "token decision made where every card gets it" the rule above describes, and it is
+          recorded as AUDIT D4 rather than absorbed.
         </p>
       </div>
 
-      <div class="gap-md grid sm:grid-cols-2 lg:grid-cols-3">
-        {items.map((item) => <ItemCard item={item} headingLevel="h4" />)}
+      <div class="gap-sm grid sm:grid-cols-2 lg:grid-cols-3">
+        {products.slice(0, 3).map((product) => <ProductCard product={product} headingLevel={3} />)}
+      </div>
+
+      <p class="text-sm text-secondary measure">
+        The two instantiations side by side. They share the recipe and nothing else — different
+        elements, different internal layout, different interaction — which is exactly why §4.2 makes
+        them siblings rather than subclasses.
+      </p>
+
+      <div class="gap-sm grid sm:grid-cols-2">
+        {categories.slice(0, 2).map((category) => <CategoryCard category={category} headingLevel={3} />)}
       </div>
 
       <div class="gap-2xs flex flex-col">
@@ -1057,7 +1132,35 @@ const INDEX = [
       />
 
       <div class="prose">
-        <ItemBody components={vocabulary} />
+        {/* THE MDX VOCABULARY IS DORMANT IN THIS PROJECT, and the sample is
+            written here rather than pulled from a body because there are no
+            bodies: CentiPack's twelve products carry frontmatter and nothing
+            else, and §4.5 derives the approved list by COUNTING WHAT REAL
+            CONTENT CONTAINS. `src/components/mdx/index.ts` still closes the
+            list, and the first product body that needs a <Figure> is the ruling
+            that wakes it up. */}
+        <Lede>
+          The shipper sets the insulation, the gel packs set the refrigerant load — hold time is the
+          result of both.
+        </Lede>
+        <p>
+          Every size is a row, not a separate product. Payload capacity holds steady across a
+          duration tier while wall thickness and refrigerant scale up. All dimensions are length ×
+          width × height, in inches.
+        </p>
+        <h2>What the tier actually buys</h2>
+        <p>
+          Recommended profile is measured under summer ambient assumptions and is not a guarantee.
+          Actual hold depends on <strong>gel-pack count</strong>, transit and season. A
+          <a href="/contact">quoted build</a> confirms it against your lanes.
+        </p>
+        <ul>
+          <li>24-hour tier — 1 in wall, two to four 24 oz gel packs</li>
+          <li>48-hour tier — 1.5 in wall, three to four 48 oz gel packs</li>
+        </ul>
+        <blockquote>
+          Produced at volume. Sold direct. Nobody in between.
+        </blockquote>
       </div>
 
       <div class="bg-surface border-line p-md gap-xs flex flex-col rounded-md border">
@@ -1113,20 +1216,24 @@ const INDEX = [
       <SectionHeader
         eyebrow="12 · collection"
         heading="Demo collection"
-        lede="Rendered from the items collection through its view-model adapter. glob() today, a CMS loader later, cards unchanged — because no component here has ever seen a CollectionEntry."
+        lede="The twelve products, rendered from the collection through its view-model adapter. glob() today, a Sanity loader later, cards unchanged — because no component here has ever seen a CollectionEntry. Every image slot is pending, which is the state the adapter and Media are built to carry."
         split
       />
 
-      <div class="gap-md grid sm:grid-cols-2 lg:grid-cols-3">
-        {items.map((item) => <ItemCard item={item} headingLevel="h3" />)}
+      <div class="gap-sm grid sm:grid-cols-2 lg:grid-cols-3">
+        {products.map((product) => <ProductCard product={product} headingLevel={3} />)}
       </div>
 
-      <pre class="sg-code" tabindex="0"><code>{`// src/lib/items.ts — the only file that knows where the data came from
-image: {
-  src:    image.src,
-  width:  Number(image.attributes.width),
-  height: Number(image.attributes.height),
-  alt:    entry.data.coverAlt,   // non-null, enforced by the schema
+      <pre class="sg-code" tabindex="0"><code>{`// src/lib/catalogue.ts — the only file that knows where the data came from
+async function toPicture(picture, width) {
+  if (!picture) return undefined;          // absent is a first-class answer
+  const rendered = await getImage({ src: picture.src, format: 'webp', width });
+  return {
+    src:    rendered.src,
+    width:  Number(rendered.attributes.width),
+    height: Number(rendered.attributes.height),
+    alt:    picture.alt,                   // non-null, enforced by the schema
+  };
 }`}</code></pre>
     </div>
   </Section>
@@ -1171,8 +1278,11 @@ image: {
     color: var(--accent);
   }
 
+  /* A fixed height rather than an aspect ratio: the two ramps carry different
+     numbers of steps, so a ratio would make the shorter one's swatches four
+     times as tall as the longer one's. */
   .sg-swatch {
-    aspect-ratio: 1 / 1.4;
+    height: 8rem;
     position: relative;
   }
 
@@ -1220,8 +1330,9 @@ image: {
   }
 
   /* No `opacity` here, and that is the point. It had 0.8, which knocked the
-     tertiary-on-subtle cell — the tightest pair in the light theme at 5.14:1 —
-     down below 4.5 and made this page fail the very rule it exists to show.
+     tertiary-on-subtle cell — the tightest pair in the light theme, 4.73:1 on
+     this project's ramp — down below 4.5 and made this page fail the very rule
+     it exists to show.
      Ad-hoc alpha is banned in markup (§2.3) for exactly this reason; it is banned
      in the styleguide's own furniture for the same one. The ratio renders in the
      cell's real token colour, which is the ratio being demonstrated. */

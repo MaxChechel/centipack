@@ -1,0 +1,128 @@
+---
+import BaseLayout from '../../../components/shells/BaseLayout.astro';
+import Section from '../../../components/Section.astro';
+import Button from '../../../components/atoms/Button.astro';
+import Breadcrumb from '../../../components/blocks/Breadcrumb.astro';
+import SpecTable from '../../../components/blocks/SpecTable.astro';
+import CtaPlate from '../../../components/blocks/CtaPlate.astro';
+import Media from '../../../components/blocks/Media.astro';
+import { getCatalogue, type CategoryView, type ProductView } from '../../../lib/catalogue';
+import { closingBand } from '../../../lib/closing-band';
+import { SITE } from '../../../consts';
+
+/**
+ * Product family — one template, twelve pages (§4.4, §5).
+ *
+ * EVERY OPTIONAL FIELD IS GENUINELY OPTIONAL HERE, and that is not a hedge: the
+ * design writes one product in full (insulated metallic mailers) and the other
+ * eleven are owed. So the lede, the fact list, the contact link and the size
+ * table each self-skip, and a product with none of them renders a trail, a
+ * heading, a picture slot and the closing band — thin, honest, and obviously
+ * incomplete rather than padded with invented copy.
+ *
+ * Copy is verbatim from Figma 788:9125.
+ */
+export async function getStaticPaths() {
+  const catalogue = await getCatalogue();
+  return catalogue.flatMap(({ category, products }) =>
+    products.map((product) => ({
+      params: { category: category.slug, product: product.slug },
+      props: { product, category },
+    })),
+  );
+}
+
+interface Props {
+  product: ProductView;
+  category: CategoryView;
+}
+
+const { product, category } = Astro.props;
+const cta = await closingBand();
+
+/* The six cells are drawn in two rows of three. A <dl> because each one is a
+   term and its value — page markup rather than a block, because this is the one
+   template that renders it (§4.2's counting rule). */
+const facts = product.facts;
+---
+
+<BaseLayout
+  title={`${product.title} — ${category.title} | ${SITE.name}`}
+  description={product.lede ?? `${product.title} — ${product.summary}. ${category.summary}`}
+>
+  <Section spaceTop="nav" spaceBottom="lg" class="bg-subtle">
+    <div class="gap-2xl flex flex-col">
+      <div class="gap-xl md:gap-lg md:grid md:grid-cols-12 md:items-start flex flex-col">
+        <div class="gap-lg md:col-span-7 flex flex-col">
+          <Breadcrumb
+            trail={[
+              /* Home is the first crumb on EVERY trail. It was missing only
+                 here, which made the product page's BreadcrumbList start one
+                 level below the site root while the two pages above it started
+                 at it — a visible inconsistency in the trail and an inconsistent
+                 structured-data graph for the same branch of the site. */
+              { label: 'Home', href: '/' },
+              { label: 'Products', href: '/products' },
+              { label: category.title, href: category.href },
+              { label: product.title },
+            ]}
+          />
+          <h1 class="text-h1 text-primary">{product.title}</h1>
+        </div>
+
+        <div class="gap-md md:col-span-4 md:col-start-9 flex flex-col items-start">
+          {product.lede && <p class="text-body text-secondary">{product.lede}</p>}
+          {
+            product.contactLinkLabel && (
+              <Button href={SITE.contactHref} variant="ghost" size="link" icon="arrow">
+                {product.contactLinkLabel}
+              </Button>
+            )
+          }
+        </div>
+      </div>
+
+      <Media
+        image={product.image}
+        label={`${product.title} — main`}
+        ratio="1344 / 541"
+        loading="eager"
+        fetchpriority="high"
+        class="rounded-md"
+      />
+
+      {/* SELF-SKIP: eleven of the twelve products have no facts yet. */}
+      {
+        facts.length > 0 && (
+          <dl class="gap-x-lg gap-y-2xl grid sm:grid-cols-2 lg:grid-cols-3">
+            {facts.map((fact) => (
+              <div class="border-line pt-md gap-lg flex flex-col border-t">
+                <dt class="text-body text-secondary">{fact.label}</dt>
+                <dd class="text-h4 text-primary">{fact.value}</dd>
+              </div>
+            ))}
+          </dl>
+        )
+      }
+    </div>
+  </Section>
+
+  {/* SELF-SKIP: the sizes are not standardised yet, so most products have no
+      table and this whole band disappears rather than leaving a heading with
+      nothing under it (§4.2). */}
+  {
+    product.specTable && (
+      <Section space="lg">
+        <SpecTable table={product.specTable} heading="Sizes and specifications" />
+      </Section>
+    )
+  }
+
+  <Section space="md" spaceTop="lg">
+    <CtaPlate {...cta} />
+  </Section>
+</BaseLayout>
+
+<script>
+  import '../../../scripts/rail';
+</script>

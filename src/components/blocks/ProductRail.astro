@@ -1,0 +1,79 @@
+---
+import ProductCard from './ProductCard.astro';
+import type { ProductView } from '../../lib/catalogue';
+
+/**
+ * A row of products — a grid at desktop, a scroll-snap rail below it (§4.2).
+ *
+ * EXTRACTED, NOT INVENTED. The products index and every category page draw the
+ * same object at different column counts: the grid, the rail, the snap points,
+ * the keyboard-reachability contract and the pagination bar are identical, and
+ * only the number of columns differs. Two copies of that in two templates is
+ * exactly the drift a block exists to prevent — the second one would have
+ * grown a fix the first did not.
+ *
+ * `columns` is a prop with a complete-class lookup, never `grid-cols-${n}`: the
+ * Tailwind scanner reads source as text, so an assembled class name generates
+ * nothing and the grid silently loses its columns.
+ *
+ * THE COLUMN IS THE UNIT, NOT THE ROW. A two-product category's cards sit at the
+ * same width as a five-product one's rather than stretching to fill — which is
+ * what the design draws, and the right call: a card that grew because its
+ * category is short would read as a different kind of thing.
+ *
+ * The pagination bar ships `hidden` and is revealed by src/scripts/rail.ts only
+ * where the rail actually overflows. Without JavaScript that leaves a working
+ * rail and no bar, rather than a bar frozen at zero that lies about where you
+ * are.
+ */
+interface Props {
+  products: readonly ProductView[];
+  /** Desktop column count. The design draws 5 on the index, 3 on a category. */
+  columns: 3 | 5;
+  /** Names the rail for a screen reader when it is scrollable. */
+  label: string;
+  /** Heading level of each card's title. One h1 per page, zero skips. */
+  headingLevel?: 2 | 3;
+  class?: string;
+}
+
+const { products, columns, label, headingLevel = 3, class: className } = Astro.props as Props;
+
+/* Complete class strings. `grid-cols-${columns}` would generate neither. */
+const COLUMNS = {
+  3: 'product-rail-3',
+  5: 'product-rail-5',
+} as const;
+
+/* SELF-SKIP (§4.2): an empty category renders nothing, not an empty rail. */
+const hasContent = products.length > 0;
+---
+
+{hasContent && (
+<div class:list={['gap-md flex flex-col', className]}>
+  <!-- `data-bleed` declares to the sweep that this element deliberately extends
+       past its parent's box: the rail cancels the page gutter with a negative
+       margin so the cards run to the screen edge and the next one peeks. Without
+       it the spill assertion reports the rail's parent on four pages at every
+       mobile width. See scripts/verify/sweep.mjs. -->
+  <ul
+    class:list={['product-rail list-bare gap-sm grid', COLUMNS[columns]]}
+    tabindex="0"
+    data-rail={label}
+    aria-label={label}
+    data-bleed
+  >
+    {
+      products.map((product) => (
+        <li class="product-rail-item flex">
+          <ProductCard product={product} headingLevel={headingLevel} class="w-full" />
+        </li>
+      ))
+    }
+  </ul>
+
+  <div class="rail-progress" data-rail-progress hidden aria-hidden="true">
+    <span class="rail-progress-thumb"></span>
+  </div>
+</div>
+)}

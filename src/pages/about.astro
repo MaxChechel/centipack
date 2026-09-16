@@ -1,0 +1,67 @@
+---
+import BaseLayout from '../components/shells/BaseLayout.astro';
+import Section from '../components/Section.astro';
+import Media from '../components/blocks/Media.astro';
+import { SITE } from '../consts';
+
+/**
+ * About (§4.4).
+ *
+ * One Section. The design centres a heading, a picture and a single column of
+ * prose — no bands, no cards, no closing banner — so the page is one `narrow`
+ * container and nothing else, which is what the grammar looks like when a page
+ * genuinely is one thing.
+ *
+ * The body is `.prose` rather than a stack of styled paragraphs: it is
+ * long-form copy, and §2.5's scoped prose style is what owns paragraph rhythm.
+ *
+ * Copy is verbatim from Figma 788:9540.
+ */
+---
+
+<BaseLayout
+  title={`About — ${SITE.name}`}
+  description="CentiPack came out of Centigrade Logistics, a cold chain operation. Moving product at 2–8°C teaches you which packaging holds and which fails."
+>
+  <Section width="narrow" spaceTop="nav" space="lg">
+    <div class="gap-2xl flex flex-col items-center">
+      <h1 class="text-h2 text-primary max-w-[27rem] text-center">We came from the cold chain side</h1>
+
+      <Media
+        image={undefined}
+        label="Gel packs and a mailer box, mid-air"
+        ratio="900 / 520"
+        loading="eager"
+        fetchpriority="high"
+        class="rounded-md w-full"
+      />
+
+      <div class="gap-2xl flex flex-col">
+        <div class="prose">
+          <p>
+            Our background is Centigrade Logistics, a cold chain logistics operation. Moving product
+            at 2–8°C teaches you which packaging holds and which fails.
+          </p>
+          <p>
+            When compounding pharmacies moved into high-volume fulfilment, they found a fragmented
+            market — one company selling gel packs, another coolers, a distributor marking up both.
+          </p>
+          <p>
+            CentiPack is that single supplier — shipper, refrigerant, custom box and the formats
+            inside. We produce through our own manufacturing partners and sell direct, which is what
+            keeps pricing competitive and supply dependable at volume.
+          </p>
+          <p>
+            That capacity runs from hundreds of packages a week to tens of thousands — for
+            pharmaceutical, healthcare and other temperature-sensitive products — without giving up
+            consistency, service or speed.
+          </p>
+        </div>
+
+        <p class="text-h5 text-primary measure">
+          Cold chain is what we do.<br />Scale is what we are built for.
+        </p>
+      </div>
+    </div>
+  </Section>
+</BaseLayout>

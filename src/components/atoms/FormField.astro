@@ -152,9 +152,19 @@ const control = [
       </div>
     ) : (
       <Fragment>
-        <label for={fieldId} class="text-sm text-secondary">
+        <label for={fieldId} class="text-body text-primary">
           {label}
-          {required && <span class="sr-only"> (required)</span>}
+          {/* BOTH HALVES, AND THEY ARE NOT THE SAME HALF. The asterisk is the
+              convention sighted users read as "required" and the design draws
+              it; the sr-only word is what a screen reader announces, because an
+              asterisk read aloud is "star". Marking the glyph aria-hidden stops
+              it being announced twice. */}
+          {required && (
+            <Fragment>
+              <span aria-hidden="true">*</span>
+              <span class="sr-only"> (required)</span>
+            </Fragment>
+          )}
         </label>
 
         {type === 'textarea' ? (

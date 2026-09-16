@@ -1,0 +1,114 @@
+---
+import Media from './Media.astro';
+import Button from '../atoms/Button.astro';
+import type { CategoryView } from '../../lib/catalogue';
+
+/**
+ * CategoryCard — the second card-pattern instantiation (§4.2).
+ *
+ * A photograph with the category's name at the top, its paragraph at the bottom
+ * and a link under that. It shares no structure with ProductCard — different
+ * elements, different internal layout, different interaction — so the two are
+ * SIBLINGS rather than subclasses, and a common parent would be a bordered
+ * <div>, which is a class and not a component.
+ *
+ * `data-theme="dark"` IS THE MECHANISM, not a colour choice. Everything here
+ * sits over a photograph darkened by `.media-scrim`, so the region genuinely is
+ * a dark one: marking it says so once, and the heading, the paragraph and the
+ * Button all recolour themselves with no literal anywhere in this file. The same
+ * card on a light ground would need no edit.
+ *
+ * THE IMAGE IS IN FLOW AND THE CONTENT OVERLAYS IT, rather than the other way
+ * round. That is what lets the card's height come from the picture's own aspect
+ * ratio — 5:6, which is the 440 × 532 the design draws — instead of from a
+ * hand-set height that would be wrong at the next width.
+ *
+ * THE WHOLE CARD IS CLICKABLE, and it is still one target. The Button under the
+ * paragraph remains the only anchor; `.category-card-link` stretches its
+ * ::after across the card so the press lands anywhere. The card is NOT wrapped
+ * in an <a> — that would fold the heading, the paragraph and the label into one
+ * announced name. One target, one accessible name, no duplicate announcement.
+ */
+interface Props {
+  category: CategoryView;
+  headingLevel?: 2 | 3;
+  /**
+   * The CROSS-LINK reading: the short body and the sentence-case title another
+   * category or product page uses when it points here.
+   *
+   * A prop rather than a second component, because it is the same card with a
+   * different field selected. The design writes both because a card in a
+   * three-up hero has room a card in a two-up footer does not — that is a
+   * content decision, and the collection carries both strings.
+   */
+  cross?: boolean;
+  /**
+   * Square rather than the 5:6 portrait the home page uses. The cross-link pair
+   * at the foot of a category page is drawn 1:1 in the design — two wide cards
+   * side by side read as a pair, where two tall ones read as a column that lost
+   * its third.
+   */
+  ratio?: '5 / 6' | '1 / 1';
+  class?: string;
+}
+
+const {
+  category,
+  headingLevel = 3,
+  cross = false,
+  ratio = '5 / 6',
+  class: className,
+} = Astro.props as Props;
+
+const title = cross ? category.pageTitle : category.title;
+const body = cross ? category.crossBody : category.cardBody;
+
+/**
+ * THE DARK TREATMENT IS A CONSEQUENCE OF THE PHOTOGRAPH, so it is conditional on
+ * there being one. With the image pending, a scrim has nothing to darken and
+ * `theme="dark"` would paint ink-on-ink: the card renders as a light well
+ * instead, which is legible, obviously unfinished, and reviewable — which is the
+ * whole point of the pending state. One flag, two honest renderings, no second
+ * component.
+ */
+const hasImage = Boolean(category.cardImage);
+---
+
+<article
+  data-theme={hasImage ? 'dark' : undefined}
+  class:list={[
+    'category-card rounded-md relative isolate overflow-hidden',
+    hasImage ? 'media-scrim' : 'bg-subtle',
+    className,
+  ]}
+>
+  <Media image={category.cardImage} label={`${category.title} — card`} ratio={ratio} />
+
+  <div class="p-lg gap-lg absolute inset-0 z-10 flex flex-col justify-between">
+    {
+      /* One step up from h4 at the client's request. The LEVEL is still the
+         prop's — this is the visual size only, which is the whole reason the
+         type scale is named for size rather than for level (§5). */
+      headingLevel === 2 ? (
+        <h2 class="text-h3 text-primary">{title}</h2>
+      ) : (
+        <h3 class="text-h3 text-primary">{title}</h3>
+      )
+    }
+
+    <div class="gap-md flex flex-col items-start">
+      <p class="text-body text-primary">{body}</p>
+      {/* `category-card-link` stretches this link over the whole card — see
+          global.css. Still one target and one accessible name. */}
+      <Button
+        href={category.href}
+        variant="ghost"
+        size="link"
+        icon="arrow"
+        class="category-card-link"
+      >
+        {category.cardLinkLabel}
+      </Button>
+    </div>
+  </div>
+</article>

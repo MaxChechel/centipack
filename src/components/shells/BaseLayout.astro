@@ -1,4 +1,5 @@
 ---
+import { Font } from 'astro:assets';
 import { canonicalUrl, canonicalPath } from '../../lib/urls';
 import { SITE, isNoindexed } from '../../consts';
 import Nav from './Nav.astro';
@@ -61,8 +62,10 @@ const ogImageAbsolute = ogImage ? new URL(ogImage, Astro.site).href : undefined;
       )
     }
 
-    {/* PROJECT: <Font cssVariable="--font-body" preload /> once astro.config.mjs
-        declares a face. Until then --font-sans falls through to system-ui. */}
+    {/* DM Sans, declared in astro.config.mjs. `preload` emits the <link rel="preload">
+        for the one face the site ships; Astro emits the @font-face and the
+        metric-matched fallback alongside it. */}
+    <Font cssVariable="--font-body" preload />
 
     {/* PROJECT: favicons. Nothing loose in public/ except these and the OG image. */}
   </head>

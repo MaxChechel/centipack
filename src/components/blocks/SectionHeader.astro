@@ -2,10 +2,16 @@
 /**
  * Eyebrow + heading + lede (§4.2).
  *
- * `lede` is the EDITORIAL slot — the standfirst under a section heading. It is
- * rendered at `--text-large`, which is named for its size rather than for this
- * job because the same step carries pull quotes and standfirsts elsewhere, and a
- * token named for one of its uses makes the others read as misuse.
+ * `lede` is the EDITORIAL slot — the standfirst under a section heading.
+ *
+ * CENTIPACK RENDERS IT AT `--text-body`, not at `--text-large`. Every lede in
+ * the design is 16px, so `text-large` was simply the wrong step here; this
+ * closes Phase 0's open question 4. `--text-large` keeps its value and its
+ * meaning for the first standfirst that wants it.
+ *
+ * The default slot under the lede is the section's own action — the
+ * "Browse all formats →" the design puts under the supporting column. It
+ * renders only when something is passed, so a header without one is unchanged.
  *
  * HEADING LEVEL IS A PROP, and it is independent of the visual size. The same
  * block renders an <h2> at the top of a page and an <h3> inside a subsection
@@ -59,10 +65,11 @@ const headingClass = SIZE[size];
 
 /* A lede supplied as a slot wins over the prop, for copy that needs markup. */
 const hasLede = Boolean(lede) || Astro.slots.has('lede');
+const hasAction = Astro.slots.has('default');
 
 /* SELF-SKIP (§4.2). With no heading and nothing else to show, this renders
    nothing at all — not an empty wrapper. See the rule in ARCHITECTURE §4.2. */
-const hasContent = Boolean(heading) || Boolean(eyebrow) || hasLede;
+const hasContent = Boolean(heading) || Boolean(eyebrow) || hasLede || hasAction;
 ---
 
 {hasContent && (
@@ -70,7 +77,11 @@ const hasContent = Boolean(heading) || Boolean(eyebrow) || hasLede;
   id={id}
   class:list={[
     'flex flex-col gap-md',
-    split && hasLede && 'md:grid md:grid-cols-12 md:items-end md:gap-lg',
+    /* TOP-ALIGNED, not bottom. Both columns start at y=0 in the design
+       (Figma 788:8574 and 788:8576 are both at the frame's top edge), and
+       bottom-aligning them made a two-line heading and a four-line lede hang
+       off a shared baseline that the design never draws. */
+    split && hasLede && 'md:grid md:grid-cols-12 md:items-start md:gap-lg',
     className,
   ]}
 >
@@ -83,10 +94,15 @@ const hasContent = Boolean(heading) || Boolean(eyebrow) || hasLede;
   </div>
 
   {
-    hasLede && (
-      <p class:list={['text-large text-secondary measure', split && 'md:col-span-5']}>
-        <slot name="lede">{lede}</slot>
-      </p>
+    (hasLede || hasAction) && (
+      <div class:list={['gap-md flex flex-col items-start', split && 'md:col-span-5']}>
+        {hasLede && (
+          <p class="text-body text-secondary measure">
+            <slot name="lede">{lede}</slot>
+          </p>
+        )}
+        <slot />
+      </div>
     )
   }
 </div>

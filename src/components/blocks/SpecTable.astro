@@ -1,0 +1,66 @@
+---
+import type { ProductView } from '../../lib/catalogue';
+
+/**
+ * The size table (§4.2).
+ *
+ * A REAL <table>, because this is tabular data: eight columns of measurements
+ * whose meaning comes from the row and the column together. A grid of divs
+ * would look identical and tell a screen reader nothing about which SKU a wall
+ * thickness belongs to.
+ *
+ * `scope="col"` and `scope="row"` are what make that association explicit, and
+ * the SKU is the row header rather than a cell — it is the thing every other
+ * value in the row is about.
+ *
+ * THE SCROLL CONTAINER IS FOCUSABLE. Eight columns do not fit a phone, so the
+ * table scrolls horizontally inside its own box — and a scrollable region that
+ * cannot be reached by keyboard fails WCAG 2.1.1. `tabindex="0"` plus the
+ * caption as its accessible name is what axe's `scrollable-region-focusable`
+ * asks for. It is in the markup rather than added by a script for the same
+ * reason the product rail's is: it has to be true before any JavaScript runs.
+ *
+ * SELF-SKIPS (§4.2). `specTable` is optional in the schema — the sizes are not
+ * standardised yet and eleven of the twelve products have none — so a product
+ * page without one renders no heading, no table and no footnote rather than an
+ * empty bordered box.
+ */
+interface Props {
+  table: NonNullable<ProductView['specTable']>;
+  headingLevel?: 'h2' | 'h3';
+  heading: string;
+  id?: string;
+}
+
+const { table, heading, headingLevel = 'h2', id } = Astro.props as Props;
+---
+
+<div id={id} class="gap-2xl flex flex-col">
+  <div class="gap-md mx-auto flex max-w-[43rem] flex-col items-center text-center">
+    {headingLevel === 'h3' ? <h3 class="text-h2 text-primary">{heading}</h3> : <h2 class="text-h2 text-primary">{heading}</h2>}
+    <p class="text-body text-secondary">{table.caption}</p>
+  </div>
+
+  <div class="spec-table-scroll border-line rounded-md border" tabindex="0" role="group" aria-label={heading}>
+    <table class="spec-table">
+      <thead>
+        <tr>
+          {table.columns.map((column) => <th scope="col">{column}</th>)}
+        </tr>
+      </thead>
+      <tbody>
+        {
+          table.rows.map((row) => (
+            <tr>
+              {row.map((cell, index) =>
+                index === 0 ? <th scope="row">{cell}</th> : <td>{cell}</td>,
+              )}
+            </tr>
+          ))
+        }
+      </tbody>
+    </table>
+  </div>
+
+  {table.note && <p class="text-caption text-tertiary measure">{table.note}</p>}
+</div>

@@ -1,0 +1,87 @@
+---
+import BaseLayout from '../components/shells/BaseLayout.astro';
+import Section from '../components/Section.astro';
+import Button from '../components/atoms/Button.astro';
+import Breadcrumb from '../components/blocks/Breadcrumb.astro';
+import ProductRail from '../components/blocks/ProductRail.astro';
+import CtaPlate from '../components/blocks/CtaPlate.astro';
+import { getCatalogue } from '../lib/catalogue';
+import { closingBand } from '../lib/closing-band';
+
+/**
+ * Products index (§4.4).
+ *
+ * The SEO hub: every product in the catalogue on one page, grouped by category.
+ * One traversal of the collection feeds all three bands — there is no second
+ * list here any more than there is in the nav or the footer.
+ *
+ * THE BANDS BUTT AGAINST EACH OTHER. `space="md" spaceBottom="none"` on each,
+ * which is exactly what `space="none"` exists for (§4.4): sections separated by
+ * a heading rather than by air. The design draws them that way and the rhythm
+ * only works if nothing adds padding between them.
+ *
+ * Copy is verbatim from Figma 788:8780.
+ */
+const catalogue = await getCatalogue();
+
+const cta = await closingBand();
+---
+
+<BaseLayout
+  title="Everything a compounding pharmacy ships — CentiPack"
+  description="Three layers, nested — the cold chain build, the custom box inside it, and the format the medication ships in. A selection of what we produce; if you need something else, we make it."
+>
+  {/* 1 — Hero. The lede sits in a second column, bottom-aligned with the h1. */}
+  <Section spaceTop="nav" spaceBottom="sm" class="bg-subtle">
+    <div class="gap-xl md:gap-lg md:grid md:grid-cols-12 md:items-end flex flex-col">
+      <div class="gap-lg md:col-span-7 flex flex-col">
+        <Breadcrumb trail={[{ label: 'Home', href: '/' }, { label: 'Products' }]} />
+        <h1 class="text-h1 text-primary">Everything a compounding pharmacy ships</h1>
+      </div>
+      <p class="text-body text-secondary md:col-span-4 md:col-start-9">
+        Three layers, nested — the cold chain build, the custom box inside it, and the format the
+        medication ships in. A selection of what we produce; if you need something else, we make it.
+      </p>
+    </div>
+  </Section>
+
+  {/*
+    2–4 — One band per category, in catalogue order.
+
+    THE GRID IS FIVE COLUMNS AND STAYS FIVE, which is why a short category's
+    cards sit at the same width as Cold Chain's five rather than stretching to
+    fill the row. The column is the unit here, not the row — a short category that
+    inflated its cards would read as a different kind of thing.
+
+    The grid, the rail and the pagination all live in `ProductRail`, which a
+    category page renders at three columns instead of five.
+  */}
+  {
+    catalogue.map(({ category, products }) => (
+      <Section space="md" spaceBottom="none">
+        <div class="gap-xl flex flex-col">
+          <div class="gap-md md:gap-2xl md:flex-row md:items-end flex flex-col items-start">
+            <div class="gap-2xs flex flex-1 flex-col">
+              <h2 class="text-h3 text-primary">{category.title}</h2>
+              <p class="text-body text-secondary">{category.summary}</p>
+            </div>
+            <Button href={category.href} variant="ghost" size="link" icon="arrow">
+              {category.guideLinkLabel}
+            </Button>
+          </div>
+
+          <ProductRail products={products} columns={5} label={`${category.title} products`} />
+        </div>
+      </Section>
+    ))
+  }
+
+  {/* 5 — The closing band. */}
+  <Section space="md" spaceTop="lg">
+    <CtaPlate {...cta} />
+  </Section>
+
+  <script>
+    import '../scripts/rail';
+  </script>
+</BaseLayout>

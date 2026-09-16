@@ -1,0 +1,72 @@
+---
+import Media from './Media.astro';
+import type { ProductView } from '../../lib/catalogue';
+
+/**
+ * ProductCard — an instantiation of the card pattern (§4.2), not a Card
+ * subclass.
+ *
+ * The recipe for this project is `bg-subtle` + `--radius-md` + interior padding,
+ * with NO border: CentiPack's cards sit one step away from the ground rather
+ * than raised off it. That is a token decision recorded as AUDIT D4 — this
+ * component does not invent its own surface, it wears the house one.
+ *
+ * NO FIXED SIZE. The design draws this card at four widths — 259 on the products
+ * index, 416 on a category page, 312 in the nav panel, 370 on mobile — which is
+ * a fact about the GRID it sits in, not about the card. Its height comes from
+ * the 1:1 image slot the client's own image plan specifies, so a row of them
+ * lines up without anyone setting a height.
+ *
+ * THE WHOLE CARD IS THE TARGET, and the arrow is decorative. One <a> stretched
+ * over the card by `::after` beats wrapping the card in a link — which would put
+ * the image and the summary inside the link's accessible name — and beats a
+ * second link on the arrow, which would give a screen reader two links to one
+ * place.
+ */
+interface Props {
+  product: ProductView;
+  /** The heading level this card sits under. One h1 per page, zero skips. */
+  headingLevel?: 2 | 3;
+  class?: string;
+}
+
+const { product, headingLevel = 3, class: className } = Astro.props as Props;
+
+const link = 'product-card-link rounded-sm';
+---
+
+<article class:list={['product-card bg-subtle rounded-md p-md gap-md', className]}>
+  <div class="gap-2xs flex flex-col">
+    {
+      headingLevel === 2 ? (
+        <h2 class="text-h5 text-primary">
+          <a href={product.href} class={link}>
+            {product.title}
+          </a>
+        </h2>
+      ) : (
+        <h3 class="text-h5 text-primary">
+          <a href={product.href} class={link}>
+            {product.title}
+          </a>
+        </h3>
+      )
+    }
+    <p class="text-caption text-secondary">{product.summary}</p>
+  </div>
+
+  {/* 1:1, not 4:3. The product photography is exported square — each item
+      centred on a plain ground with its own margin — and `object-cover` in a 4:3
+      box crops the top and bottom off every one of them. The frame follows the
+      artwork here rather than the artwork being cut to fit the frame. */}
+  <Media image={product.image} label={product.title} ratio="1 / 1" class="rounded-sm" />
+
+  {/* Out of flow — see `.product-card-go` in global.css. It is the last child so
+      it paints over the picture, and `pointer-events: none` keeps it from
+      intercepting the press the stretched link is there to receive. */}
+  <span class="product-card-go border-line" aria-hidden="true">
+    <svg class="size-icon-inline" viewBox="0 0 16 16" fill="none">
+      <path d="M4.5 11.5 11.5 4.5M6 4.5h5.5V10" stroke="currentColor" stroke-width="1.25"></path>
+    </svg>
+  </span>
+</article>

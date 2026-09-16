@@ -19,7 +19,11 @@ import {
   parseThemeScopes,
   textMatrix,
   accentMatrix,
+  inverseMatrix,
   lineMatrix,
+  rootDeclaration,
+  fadeMatrix,
+  themeCompleteness,
   AA,
 } from './lib/contrast.mjs';
 import { result, line, passed } from './lib/report.mjs';
@@ -48,6 +52,8 @@ export function contrast() {
   const groups = [
     { label: 'text × background', rows: textMatrix(scopes) },
     { label: 'accent', rows: accentMatrix(scopes) },
+    { label: 'inverse fill', rows: inverseMatrix(scopes) },
+    { label: 'inactive fade, composited', rows: fadeMatrix(scopes) },
     { label: 'line', rows: lineMatrix(scopes) },
   ];
 
@@ -72,6 +78,40 @@ export function contrast() {
     }
   }
 
+  /* Structural, not arithmetic: a token declared on :root in terms of another
+     token does not follow a theme that moves that dependency, because var() in a
+     custom property is substituted where it is declared. */
+  const completeness = themeCompleteness(scopes);
+  const incomplete = completeness.filter((r) => !r.pass);
+  checks += completeness.length;
+  failures += incomplete.length;
+  notes.push(
+    `theme completeness: ${completeness.length} dependent tokens, ${incomplete.length} not re-declared`,
+  );
+  for (const r of incomplete) {
+    notes.push(
+      `    ${r.token} depends on ${r.deps.join(', ')} — which [data-theme="${r.theme}"] ` +
+        `re-declares — but ${r.token} is not re-declared there, so it keeps its :root value`,
+    );
+  }
+
+  /* Declaration, not contrast: a token that exists only under a [data-theme]
+     selector is missing on every page that carries no such attribute, and every
+     ratio above still passes. See the note on rootDeclaration for the bug that
+     shipped through exactly this gap. */
+  const rooted = rootDeclaration(scopes);
+  const orphans = rooted.filter((r) => !r.pass);
+  checks += rooted.length;
+  failures += orphans.length;
+  notes.push(`root declaration: ${rooted.length} tokens, ${orphans.length} missing from :root`);
+  for (const o of orphans) {
+    notes.push(
+      `    ${o.token} is declared only inside a [data-theme] block — on an ` +
+        `unthemed page it does not exist, and every rule using it dies at ` +
+        `computed-value time`,
+    );
+  }
+
   /* A matrix that shrank is a matrix that stopped checking something. The core
      text group is fixed by §2.3 at three texts × three backgrounds × two themes;
      if a token is renamed out from under this check, resolveColor() throws — but
@@ -85,7 +125,7 @@ export function contrast() {
   return result('contrast matrix', {
     checks,
     failures,
-    unit: `token pairs at ${AA}:1 (and 3:1 for control boundaries)`,
+    unit: `token pairs at ${AA}:1 (3:1 for control boundaries), plus :root declaration`,
     notes,
   });
 }

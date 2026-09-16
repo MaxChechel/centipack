@@ -5,6 +5,12 @@ dist/
 # dependencies
 node_modules/
 
+# the font-authoring venv. scripts/subset-fonts.py needs fonttools + brotli, and
+# they stay out of package.json because they are a build-time authoring tool
+# rather than a dependency of the site (§7). The venv is local; the SUBSET OUTPUT
+# under src/assets/fonts/ is committed, so a fresh clone builds without Python.
+.venv/
+
 # local env
 .env
 .env.production

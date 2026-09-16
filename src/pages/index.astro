@@ -1,67 +1,328 @@
 ---
-/**
- * Home — the starter's own front page.
- *
- * Kept deliberately thin, and thinner than it was. It exists to show the page
- * grammar (§4.4) with nothing else in the way: a stack of Sections, atoms and
- * blocks inside, no spacing decisions, no containers, no spacer divs.
- *
- * There is no "about this repo" section, because there was nothing here a
- * client project would keep — a starter's placeholder prose is prose the next
- * person has to notice and delete, and half of them will not. What the repo is
- * belongs in README.md, which is where someone looks for it. A page that exists
- * to demonstrate the grammar should contain the grammar and little else.
- */
 import BaseLayout from '../components/shells/BaseLayout.astro';
 import Section from '../components/Section.astro';
-import SectionHeader from '../components/blocks/SectionHeader.astro';
 import Button from '../components/atoms/Button.astro';
-import CtaBanner from '../components/blocks/CtaBanner.astro';
-import ItemCard from '../components/blocks/ItemCard.astro';
-import { getItems } from '../lib/items';
+import SectionHeader from '../components/blocks/SectionHeader.astro';
+import CategoryCard from '../components/blocks/CategoryCard.astro';
+import Media from '../components/blocks/Media.astro';
+import { getCategories } from '../lib/catalogue';
 import { SITE } from '../consts';
+import heroImage from '../assets/home/hero-vial-kit-in-cooler.jpg';
+import volumeCooler from '../assets/home/volume-eps-cooler.jpg';
+import volumeGelPack from '../assets/home/volume-gel-pack.jpg';
+import volumeMailer from '../assets/home/volume-metallic-mailer.jpg';
+import volumeVialKit from '../assets/home/volume-vial-kit.jpg';
+import volumeBox from '../assets/home/volume-presentation-box.jpg';
+import { Image, getImage } from 'astro:assets';
 
-const items = await getItems();
+/**
+ * Home (§4.4).
+ *
+ * A stack of Sections, and nothing else. No spacing decision is made on this
+ * page: `space` is the only rhythm control and there is no such thing as a
+ * spacer div. Nothing below a Section sets a gutter, a max-width or a page
+ * centering — most of which do not compile, deliberately.
+ *
+ * The three cards in section 3 are the CATEGORIES COLLECTION, through its
+ * adapter, from the first commit — not a hardcoded trio that would have to be
+ * migrated later (§5).
+ *
+ * Copy is verbatim from Figma 788:8519. One deliberate departure, recorded as
+ * open question 16: the design drops the hero lede at 1440 and keeps it at 402.
+ * It ships at both widths here, because hiding content at one breakpoint is a
+ * content-loss pattern rather than a layout, and because that sentence is also
+ * the site's meta description.
+ */
+const categories = await getCategories();
+
+/**
+ * The hero picture. Normalized here the way the adapter normalizes a
+ * collection's — same `{ src, width, height, alt }` shape — because Media takes
+ * one thing and should not care that this one is a page asset rather than a
+ * content field.
+ */
+const hero = await getImage({ src: heroImage, format: 'webp', width: 2400 });
+const heroPicture = {
+  src: hero.src,
+  width: Number(hero.attributes.width),
+  height: Number(hero.attributes.height),
+  alt: 'A vial kit in an open white mailer box, beside a gel pack and an EPS foam cooler.',
+};
+
+/**
+ * The closing collage. Five product shots placed AT THE FIGMA OFFSETS rather
+ * than in a grid: the arrangement is the point — two of them bleed past the
+ * container into the gutters — and it is what the motion pass will animate.
+ *
+ * The numbers are percentages of the 1344 × 967 container the design draws them
+ * in, which is why they are data here rather than utility classes: they are
+ * measurements, and a measurement in a class name is a measurement nobody can
+ * check against the source.
+ */
+const collage = [
+  { image: volumeCooler, alt: 'An open EPS foam cooler with its lid resting beside it.', left: 39.79, top: -0.05, width: 22.99 },
+  { image: volumeGelPack, alt: 'A gel pack and a pill bottle on a plain ground.', left: -3.57, top: 24.6, width: 13.39 },
+  { image: volumeMailer, alt: 'An insulated metallic mailer, sealed.', left: 92.86, top: 22.68, width: 10.71 },
+  { image: volumeVialKit, alt: 'An open vial kit showing two blue-capped vials.', left: 69.07, top: 65.51, width: 19.42 },
+  { image: volumeBox, alt: 'A blue magnetic-closure presentation box holding four vials.', left: 21.5, top: 73.73, width: 19.12 },
+];
+
+/**
+ * The hero's three claims. Page-local because they are three sentences about
+ * this page, not a repeating content type — a collection for three numbers that
+ * appear once is the abstraction §4.5 says to wait for.
+ */
+/**
+ * THE LABELS ARE FIGMA'S AGAIN. Two of the three were not: "point of contact"
+ * and "years in cold chain industry" appear NOWHERE in the design file —
+ * searched, zero nodes — and the brief says copy is lifted verbatim. The
+ * design's own strings are below, and they are also what the client's reference
+ * image shows.
+ *
+ * Worth knowing before trusting this: both Figma frames carrying these labels
+ * (788:8317 and 788:8559) are marked `hidden="true"`, i.e. the band is switched
+ * off in the design file. The band exists on this page because it was asked for
+ * in review, not because the design draws it — so "which of these is canonical"
+ * is a question for the human, recorded as open question 32.
+ */
+const stats = [
+  { value: '1', label: 'supplier, not five' },
+  { value: '0', label: 'distributors in between' },
+  { value: '20', label: 'years in cold chain before this' },
+];
 ---
 
-<BaseLayout title={`${SITE.name} — the Astro starter`} description={SITE.description}>
-  <Section spaceTop="nav" spaceBottom="lg">
-    <div class="gap-lg flex flex-col items-start">
-      <SectionHeader
-        eyebrow="Starter"
-        heading="A page is a stack of Sections."
-        headingLevel="h1"
-        size="h1"
-        lede="Section owns all vertical rhythm, the container and the theme. Everything below it composes with grid, flex, gap and the token vocabulary — and nothing below it re-applies a gutter, a max-width or a page centre."
-        split
-      />
-      <div class="gap-sm flex flex-wrap">
-        <Button href="/styleguide" variant="primary" icon="arrow">Open the styleguide</Button>
-        <Button href="/contact" variant="secondary">Contact</Button>
+<BaseLayout
+  title={`${SITE.name} — cold chain packaging for compounding pharmacies`}
+  description={SITE.description}
+>
+  {/*
+    1 — Text hero.
+
+    `main`, NOT `narrow`, AND THE HEADLINE CARRIES ITS OWN MEASURE. The design
+    sets this h1 in TWO lines inside a 912px text box, and `narrow` is exactly
+    that box — 63rem less two gutters is 912px at 1440, which is the design's own
+    number. It still came out in three lines, and the reason is not the layout:
+
+      natural width of the line, measured at 64px   1876px
+      two lines therefore need at least             938px each
+      the narrow column gives                       912px
+
+    Two lines are arithmetically impossible at 912px; the browser sets this
+    string about 3.5% wider than Figma does at the same size and tracking.
+    Measured by sweeping the cap: 980px → three lines, 1000px → two, at [888,
+    988]. So the Section widens and the HEADLINE takes the measure instead —
+    which is what `.measure` already does for body copy, one step up. The flex
+    column centres it, so nothing here needs `mx-auto` (§3.1).
+  */}
+  <Section width="main" spaceTop="nav" spaceBottom="lg" class="text-center">
+    <div class="gap-xl flex flex-col items-center">
+      <h1 class="hero-headline text-h1 text-primary">
+        Cold chain packaging for high-volume compounding pharmacies
+      </h1>
+      {/* No lede here. The design does not draw one at either width; the
+          sentence lives on as the page's meta description, which is where it
+          was doing its real work. Closes open question 16. */}
+      <div class="gap-sm flex flex-wrap justify-center">
+        <Button href={SITE.contactHref} variant="primary" icon="square" iconPosition="start">
+          Contact us
+        </Button>
+        <Button href="/products" variant="secondary">Explore products</Button>
       </div>
     </div>
   </Section>
 
-  <Section id="pattern" space="lg" class="bg-subtle">
-    <div class="gap-lg flex flex-col">
-      <SectionHeader
-        eyebrow="The card pattern"
-        heading="A card is a recipe, not a component"
-        lede="bg-surface + border-line + rounded-md + padding from the spacing scale. Project cards are instantiations of it; they never invent their own surface, border or radius treatment."
-        split
+  {/*
+    2 — The hero picture, and the three claims that sit on it.
+
+    `width="full"` keeps the Section wrapper — theme and rhythm behave identically
+    — and drops only the max-width and the gutter, which is what full-bleed means
+    here. The stat cards are REAL CARDS over the photograph: `bg-overlay` and
+    `border-overlay` are named translucent tokens (§2.3), not ad-hoc alpha, and
+    `data-theme="dark"` is what makes them resolve white over the scrim.
+
+    A <dl> rather than three divs: each card is a term and its value, and that is
+    what a description list is for.
+  */}
+  <Section width="full" space="none">
+    <div
+      data-theme={heroPicture ? 'dark' : undefined}
+      class:list={['relative isolate', heroPicture && 'media-scrim']}
+    >
+      <Media
+        image={heroPicture}
+        label="Home hero — vial kit, mailer and cooler"
+        ratio="5 / 3"
+        loading="eager"
+        fetchpriority="high"
+        class="hero-media"
       />
-      <div class="gap-md grid sm:grid-cols-2 lg:grid-cols-3">
-        {items.map((item) => <ItemCard item={item} />)}
+
+      {/*
+        Three across at EVERY width, which is what the design draws and what the
+        band has room for — stacking them overflowed the 4:5 crop and landed on
+        the hero above it.
+
+        ONE TYPE STEP AT BOTH WIDTHS, and that is the system refusing something
+        rather than a compromise: `md:text-h5` is not a utility, because the type
+        scale is not in @theme (§2.1) and the named styles are the only way to
+        apply type. Type never jumps at a breakpoint here. The tokens are already
+        fluid — the value is 36px at 402 and 64px at 1440, which is exactly what
+        the design draws — so the only thing the breakpoint changes is padding.
+      */}
+      <div class="container-main pb-md md:pb-2xl absolute inset-x-0 bottom-0 z-10">
+        {/*
+          ONE PLATE ON MOBILE, THREE CARDS FROM md. Below the breakpoint the
+          three claims share a single glass panel divided by hairlines; from md
+          they separate into the three cards the desktop design draws. That is
+          two different objects, not one object with a gap that changes, so the
+          whole treatment lives in `.hero-stats` / `.hero-stat` rather than in
+          utilities here — a utility cannot be removed at a breakpoint, and
+          utilities outrank the component layer, so leaving the card classes in
+          the markup would have made the mobile plate impossible to express.
+        */}
+        <dl class="hero-stats grid grid-cols-3">
+          {
+            stats.map((stat) => (
+              <div class="hero-stat flex flex-col">
+                <dt class="text-h1 text-primary">{stat.value}</dt>
+                {/* HYPHENATED, because three cards across 320px leaves 67px of
+                    text and "distributors" is 97px of it. Measured: the label
+                    spilled 30px past its own card and over the one beside it at
+                    320, 16px at 360, 6px at 390 — invisible to the page-level
+                    overflow sweep, because the document never scrolled.
+                    The alternatives were worse. Stacking overflowed the 4:5 crop
+                    (recorded above); a smaller type step at a breakpoint is the
+                    one thing this type scale refuses (§2.1). Hyphenation is what
+                    the browser has for exactly this, it needs the <html lang>
+                    that is already there, and it does nothing at all at any width
+                    where the word fits. */}
+                <dd class="text-h5 text-primary hyphens-auto">{stat.label}</dd>
+              </div>
+            ))
+          }
+        </dl>
       </div>
     </div>
   </Section>
 
-  <Section id="contact" space="lg" spaceBottom="lg">
-    <CtaBanner
-      theme="dark"
-      heading="Start here"
-      body="Copy the template, swap the primitives, verify, ship."
-      primary={{ label: 'Open the styleguide', href: '/styleguide' }}
-    />
+  {/* 3 — Three layers. The band the design sets on the cream ground. */}
+  <Section space="lg" class="bg-subtle">
+    <div class="gap-2xl flex flex-col">
+      <SectionHeader heading="Three layers of the package, one supplier" headingLevel="h2" size="h2" split>
+        <Fragment slot="lede">
+          You know your product. We supply everything around it — the format it is dispensed in, the
+          custom box, and the shipper that keeps it at 2–8°C. One supplier, one invoice. And this is
+          a selection — if you need something else, we produce that too.
+        </Fragment>
+        <Button href="/products" variant="ghost" size="link" icon="arrow">Browse all formats</Button>
+      </SectionHeader>
+
+      {/*
+        NESTED ORDER, NOT CATALOGUE ORDER. The lede above names them inward-out —
+        "the format it is dispensed in, the custom box, and the shipper" — and
+        the heading calls them three layers, so the cards read in that same
+        order. The nav and the footer keep the catalogue's own order, which is
+        the order someone browsing a menu expects. Same three records, ordered
+        for the sentence they sit under.
+      */}
+      <ul class="list-bare gap-sm grid md:grid-cols-3">
+        {
+          [...categories].reverse().map((category) => (
+            <li class="flex">
+              <CategoryCard category={category} headingLevel={3} class="w-full" />
+            </li>
+          ))
+        }
+      </ul>
+    </div>
+  </Section>
+
+  {/*
+    4 — Testimonial. One instance on one page, so page markup, not a block.
+
+    TWO RULES, AND THEY ARE DIFFERENT RULES. The section carries a bottom border
+    across the full width; the card inside it carries left and right borders,
+    inset by one step from the page edge. That pair is what makes the quote read
+    as a plate set into the page rather than as another band — it is drawn that
+    way in Figma (788:8623) and it is the one place on this page where `--line`
+    does structural work.
+  */}
+  {/* `bg-base`, not `bg-surface`: neither this band nor the one after it
+      declares a fill in Figma, so both inherit the page ground. The rules are
+      what separate this section, not a change of ground — which is the whole
+      reason it is drawn with borders. */}
+  <Section space="none" class="border-line border-b">
+    <figure class="border-line py-5xl px-lg gap-3xl flex flex-col items-center border-x text-center">
+      <svg class="text-primary w-icon" viewBox="0 0 44 28.66" fill="currentColor" aria-hidden="true">
+        <path d="M22.17 28.66 33.8 0H44l-6.05 28.66zM0 28.66 11.53 0h10.3L15.8 28.66z"></path>
+      </svg>
+      {/* 794px is the measure the design sets for this one quote, and no token
+          lands on it: `measure` is 66ch of the CURRENT size, which at 32px is
+          over a thousand pixels. An arbitrary value with its reason stated, per
+          §4.2 — the second display quote that wants this width makes it a
+          token. */}
+      <blockquote class="text-h3 text-primary max-w-[49.625rem]">
+        <p>
+          CentiPack has been great to work with. As our pharmacy has grown, they've been able to
+          scale right along with us. They're reliable, easy to work with, and their pricing has been
+          some of the best we've seen.
+        </p>
+      </blockquote>
+      <figcaption class="text-body text-secondary">Compounding pharmacy client</figcaption>
+    </figure>
+  </Section>
+
+  {/* 5 — Volume. This page's closing CTA; there is no CtaBanner on Home. */}
+  <Section space="lg" width="main">
+    <div class="volume relative isolate flex flex-col items-center text-center">
+      {/* 620px is the column the design centres this block in, and the collage
+          is placed around it — so the width is load-bearing rather than
+          cosmetic: at the container's full 1344 the heading runs under the two
+          side shots. An arbitrary value with its reason stated (§4.2); this is
+          the second editorial width on the page, and a third makes it a token. */}
+      <div class="gap-lg relative z-10 flex max-w-[38.75rem] flex-col items-center">
+        <h2 class="text-h2 text-primary">We produce at volume. You get the price that comes with it.</h2>
+        <p class="text-body text-secondary measure">
+          Mass volume through our own manufacturing partners — no distributors, no markup in
+          between. Quoted to your volumes and lanes.
+        </p>
+        <Button href={SITE.contactHref} variant="primary" icon="square" iconPosition="start">
+          Contact us
+        </Button>
+      </div>
+
+      {/*
+        The collage, placed. Absolute from `md` up at the design's own offsets —
+        two of them deliberately bleed past the container into the gutters, which
+        is the whole character of the arrangement and the reason a grid could not
+        stand in for it. Below `md` there is no room to scatter anything, so they
+        fall back to a two-up flow that reads as a strip.
+
+        `aria-hidden`: these five are decoration around a heading that already
+        says what they are. Five alt texts describing product photographs here
+        would be five interruptions on the way to the button.
+      */}
+      <!-- `data-bleed`: two of the five hang into the gutter on purpose (see
+           above), which is content outside its own box — declared here so the
+           sweep's spill assertion reads it as art direction rather than a
+           defect. -->
+      <ul
+        class="volume-collage list-bare gap-sm mt-2xl grid w-full grid-cols-2 sm:grid-cols-3 md:mt-0 md:block"
+        aria-hidden="true"
+        data-bleed
+      >
+        {
+          collage.map((shot) => (
+            <li
+              class="volume-collage-item"
+              style={`--at-left:${shot.left}%;--at-top:${shot.top}%;--at-width:${shot.width}%`}
+            >
+              <Image src={shot.image} alt="" widths={[240, 480, 720]} class="rounded-md w-full" />
+            </li>
+          ))
+        }
+      </ul>
+    </div>
   </Section>
 </BaseLayout>

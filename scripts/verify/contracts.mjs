@@ -238,9 +238,65 @@ function asPropReservedForSection() {
   return { checks, failures, notes };
 }
 
+/**
+ * `slot` IS RESERVED BY ASTRO ON EVERY COMPONENT, and a component that declares
+ * it as a prop is a component that silently disappears.
+ *
+ * `slot` is how Astro assigns a child to a named slot of its parent. So a
+ * component whose Props include `slot` works fine wherever it sits inside plain
+ * markup — and the moment it is a DIRECT CHILD of another component, the
+ * attribute is read as a slot assignment instead of a prop. If the parent has no
+ * slot by that name, the element is dropped from the output. No error, no
+ * warning, nothing in `astro check`, nothing in the console.
+ *
+ * Paid for: `Media` took a `label` prop called `slot`, which worked on every page
+ * where it sat inside a <div> and vanished on the one page where it was a direct
+ * child of <Section>. The category pages shipped with no hero image and the build
+ * was green.
+ *
+ * Same shape of rule as the `as` check above, for the same reason — the failure
+ * is the ABSENCE of an error, so reading the source for the name is the only
+ * reliable detector.
+ */
+function slotIsReserved() {
+  const notes = [];
+  let checks = 0;
+  let failures = 0;
+
+  const components = [];
+  const walkSrc = (dir) => {
+    for (const entry of readdirSync(dir)) {
+      const full = join(dir, entry);
+      if (statSync(full).isDirectory()) walkSrc(full);
+      else if (full.endsWith('.astro')) components.push(full);
+    }
+  };
+  walkSrc('src/components');
+
+  for (const file of components) {
+    const source = readFileSync(file, 'utf8');
+    const frontmatter = /^---\n([\s\S]*?)\n---/.exec(source)?.[1];
+    if (!frontmatter) continue;
+    checks++;
+    /* Only an interface member, not a mention in prose — the docs above these
+       components explain the trap and must not trip the check that enforces it. */
+    if (!/^\s*slot\??\s*:\s*(string|number|boolean)/m.test(frontmatter)) continue;
+    failures++;
+    notes.push(
+      `${file}: declares a \`slot\` prop. Astro reserves that attribute for slot ` +
+        'assignment, so this component is DROPPED whenever it is a direct child of ' +
+        'another component. Rename it (label, name, caption …).',
+    );
+  }
+
+  notes.push(`${checks} component(s) scanned for a reserved \`slot\` prop`);
+  return { checks, failures, notes };
+}
+
 const CONTRACTS = [
   ['form ships disabled (§8)', formShipsDisabled],
   ['`as` reserved for Section (§4.2)', asPropReservedForSection],
+  ['`slot` reserved by Astro', slotIsReserved],
   ['production omits styleguide (§2.4)', productionOmitsStyleguide],
 ];
 

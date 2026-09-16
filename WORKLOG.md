@@ -2303,3 +2303,74 @@ a photograph, only its `summary` is still mine. One added:
     read as the vial kit and the pair of empty bottles as pill bottles. If that
     is the wrong way round it is a two-line swap — worth a glance before the
     client sees it.
+
+---
+
+## 2026-09-16 — Entry 19. Vercel serves this build differently to Cloudflare
+
+Staging went up on Vercel. Home rendered; **every other page 404'd**.
+
+Not a build problem — the build is correct and unchanged. It is the one line in
+`astro.config.mjs` that was written for the target we are not on:
+
+```js
+// Extensionless URLs on Cloudflare Pages come from `file` format: it emits
+// /work.html, which Pages serves at /work.
+build: { format: 'file' },
+```
+
+So `dist/` holds `products.html`, not `products/index.html`. Cloudflare Pages
+maps `/products` → `products.html` as a matter of course. **Vercel does not** —
+by default it serves that file only at `/products.html`, so every extensionless
+link on the site missed. Home was the exception because `index.html` is served at
+`/` on every host there is, which is exactly why the failure looked stranger than
+it was.
+
+`vercel.json` at the repo root:
+
+```json
+{ "cleanUrls": true, "trailingSlash": false }
+```
+
+`cleanUrls` restores the Cloudflare behaviour — serve `products.html` at
+`/products` and redirect the `.html` form to it. `trailingSlash: false` matches
+`trailingSlash: 'never'` in the Astro config, so the two hosts agree on the
+canonical shape of a URL rather than each picking one.
+
+Cloudflare ignores `vercel.json` entirely, so this costs the real target nothing.
+It does not reach `dist/` — it sits at the repo root, not in `public/` — so the
+build output is byte-identical: 20 HTML files before and after.
+
+### The general point, for TEMPLATE-NOTES
+
+`build.format: 'file'` is a **host-coupled decision**, and the template's config
+documents it as a Cloudflare fact without saying that it is one. Any project that
+deploys this template anywhere else meets the same 404 on every page but the
+home page. Worth stating in the config comment itself, next to the line that
+causes it.
+
+### Still Cloudflare-only on this deploy
+
+Recorded so the staging link is not mistaken for a working site:
+
+- `functions/api/contact.ts` does not run — Vercel does not execute Cloudflare
+  Pages Functions. Invisible in practice, because the form ships disabled without
+  a Turnstile key.
+- `public/_headers` is ignored: no CSP, no HSTS, no `X-Frame-Options`, no
+  cache-control on this deploy.
+- `public/_redirects` is ignored — currently empty, so nothing is lost.
+- There is still no `404.html` (open question 25), so a genuine miss shows
+  Vercel's own page rather than the site's.
+
+### Open questions
+
+Unchanged: **22**–**33**. One added:
+
+34. **The staging deploy is publicly indexable.** No `robots.txt`, and
+    `_headers` — which is where an `X-Robots-Tag` would live — does not apply on
+    Vercel. A client-review URL that Google indexes is duplicate content against
+    the real domain before the real domain exists, on a project whose stated
+    driver is SEO. Two fixes, both one step: Deployment Protection in the Vercel
+    dashboard (human, nothing in the repo), or `robots.txt` plus an
+    `X-Robots-Tag: noindex` header in the `vercel.json` above. Flagged twice,
+    not yet decided.

@@ -2608,3 +2608,74 @@ Unchanged: 22, 23, 24, 25, 26, 28–34, 36. One added:
     actually uses before launch — the failure is columns that need a click at
     1440, not a broken page, but it is the first place this project depends on
     the selector for layout rather than motion.
+
+---
+
+## 2026-09-17 — Entry 23. Animating the footer reveal, and measuring which trick works
+
+Asked for a transition on the footer accordion, with the `grid-template-rows:
+0fr → 1fr` trick suggested. Built it that way first — it has the better support
+story, needing nothing but grid and transitions where the FAQ's approach needs
+`interpolate-size`, which is the narrowest-support declaration in this file.
+
+**It does not animate.** Sampled on every animation frame, inside the page:
+
+```
+1ms 0px · 55ms 102.391px · 123ms 102.391px · 189ms 102.391px · …
+```
+
+One frame from closed to fully open. The declaration was right —
+`transition-property: grid-template-rows, content-visibility / 0.4s, 0.4s` — and
+nothing interpolated.
+
+### The control is why that conclusion is trustworthy
+
+An instant reading is exactly what a blind measurement looks like, and this
+project has already been caught twice reporting results from evidence that could
+not have shown a failure. So before concluding anything, the same sampler was
+pointed at the FAQ accordion, which uses the other technique, in the same
+browser, on the same run:
+
+```
+13ms 0px · 95ms 48.2188px · 179ms 96.7656px · 262ms 117.828px · 346ms 124.219px · 428ms 125.5px
+```
+
+The sampler sees animation when there is animation. So the grid track genuinely
+was not interpolating out of `content-visibility: hidden` — not a measurement
+artefact, and not the headless transition problem recorded in entry 11.
+
+Switched to `interpolate-size` + `block-size: 0 → auto`, which is now the one
+disclosure animation technique on the site rather than two. Measured after:
+
+```
+open   0 → 39.4 → 79.0 → 96.1 → 101.3 → 102.4px   (~406ms)
+close  102.4 → 63.1 → 23.5 → 6.3 → 1.0 → 0px      (~421ms)
+```
+
+Both directions, spring curve visible in the spacing of the samples — fast then
+settling, which is `--ease-spring-soft` doing its job.
+
+Desktop is untouched: panels still 189 / 102 / 168 / 102 and the transition set
+to `none` there, since there is nothing to animate on something always open.
+
+### What this is worth keeping
+
+The grid-row trick is the widely-recommended answer for animating a disclosure,
+and it is the right answer for a `div` toggled by a class. It is **not** the
+answer for `<details>`, because the thing being revealed leaves
+`content-visibility: hidden` and a track list has no rendered start state to
+interpolate from. `block-size: 0 → auto` does, because the base rule declares the
+zero. That distinction belongs in the template notes.
+
+### Measurements
+
+| | |
+| --- | --- |
+| verify | 8 checks, **532 assertions**, 0 failures |
+| JS | unchanged — still zero script behind any of the three disclosures |
+| reveal | ~406ms open, ~421ms close, spring-eased |
+
+### Open questions
+
+Unchanged: 22, 23, 24, 25, 26, 28–34, 36, 37. **The FAQ/footer inconsistency
+that would have been question 38 does not exist** — both use the same mechanism.

@@ -2110,6 +2110,44 @@
     rotate: 0deg;
   }
 
+  /* THE REVEAL. Same mechanism as the FAQ accordion above, and that is
+     deliberate — it is the one that measurably works here.
+
+     `grid-template-rows: 0fr → 1fr` was tried first, on the reasoning that it
+     needs no `interpolate-size` and so has wider support. It does not animate:
+     sampled on every animation frame, the row went 0px → 102.391px between the
+     first frame and the second and stayed there. The FAQ, sampled the same way
+     in the same browser, runs 0 → 48 → 96 → 117 → 125.5px across 430ms. So the
+     measurement was not blind and the grid track simply was not interpolating
+     out of `content-visibility: hidden`.
+
+     `interpolate-size` is scoped to the element rather than set on `:root`, so
+     it does not change auto-interpolation site-wide, and
+     `transition-behavior: allow-discrete` carries the discrete
+     content-visibility flip across the same duration instead of snapping it at
+     the start. `overflow: hidden` clips the list while the panel closes rather
+     than letting it spill over the column below.
+
+     Where `::details-content` or `interpolate-size` is unsupported this is
+     ignored and the toggle is instant — the pre-animation behaviour, so nothing
+     can end up stuck closed. */
+  .footer-fold {
+    interpolate-size: allow-keywords;
+  }
+
+  .footer-fold::details-content {
+    block-size: 0;
+    overflow: hidden;
+    transition:
+      block-size var(--transition-duration-spring-soft) var(--ease-spring-soft),
+      content-visibility var(--transition-duration-spring-soft) var(--ease-spring-soft);
+    transition-behavior: allow-discrete;
+  }
+
+  .footer-fold[open]::details-content {
+    block-size: auto;
+  }
+
   /* From lg every column is open and the summary is a heading again, not a
      control: no pointer target, no marker, and the panel forced visible. */
   @media (min-width: 62rem) {
@@ -2125,6 +2163,7 @@
     .footer-fold::details-content {
       content-visibility: visible;
       block-size: auto;
+      transition: none;
     }
   }
 }

@@ -309,6 +309,25 @@ with both `10 5 4` and `auto 4 3`: `betwee / n`, `industr / y`. The browser's ow
 dictionary breaks the same words at `be-tween` and `in-dustry`, which is correct
 English and the whole reason `<html lang>` is set. Leave the limits alone.
 
+### C10a. The grid-row trick does not animate `<details>`
+
+`grid-template-rows: 0fr → 1fr` is the widely-recommended way to animate a
+disclosure open, and it is the right answer for a `div` toggled by a class. It is
+**not** the answer for `<details>`: the panel leaves `content-visibility: hidden`
+on open, and a track list has no rendered start state to interpolate from, so it
+jumps in a single frame. Measured — one frame from `0px` to `102.391px`, with the
+transition correctly declared.
+
+`block-size: 0 → auto` on `::details-content`, with `interpolate-size:
+allow-keywords` scoped to the element, does animate, because the base rule
+declares the zero. Add `transition-behavior: allow-discrete` so the discrete
+content-visibility flip is carried across the duration rather than snapping at
+the start.
+
+**Always run a control.** An instant reading looks identical to a blind
+measurement. Point the same sampler at something known to animate, in the same
+browser on the same run, before concluding anything from a flat curve.
+
 ### C10. A table that scrolls must say so
 
 Touch platforms draw scrollbars as an overlay that fades to nothing when idle, so

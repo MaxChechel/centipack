@@ -2070,6 +2070,65 @@
   }
 }
 
+/* --- The footer's mobile accordion ---------------------------------------
+   Figma 788:8518. Each column collapses below lg behind a `+` that becomes a
+   `−`; from lg all four are open and the marker is gone.
+
+   The marker is two bars, one rotated — no glyph, no asset, and it inherits
+   `currentColor` so the dark footer needs no second colour. Only `rotate` is
+   animated (§12.3): the compositor moves it with no layout and no paint. */
+@layer components {
+  .footer-fold > summary::-webkit-details-marker {
+    display: none;
+  }
+
+  .footer-fold-marker {
+    position: relative;
+    display: block;
+    flex: none;
+    inline-size: 0.75rem;
+    block-size: 0.75rem;
+  }
+
+  .footer-fold-marker::before,
+  .footer-fold-marker::after {
+    content: '';
+    position: absolute;
+    inset-inline: 0;
+    inset-block-start: 50%;
+    block-size: var(--border-width);
+    background-color: currentcolor;
+    translate: 0 -50%;
+  }
+
+  .footer-fold-marker::after {
+    rotate: 90deg;
+    transition: rotate var(--transition-duration-spring-soft) var(--ease-spring-soft);
+  }
+
+  .footer-fold[open] .footer-fold-marker::after {
+    rotate: 0deg;
+  }
+
+  /* From lg every column is open and the summary is a heading again, not a
+     control: no pointer target, no marker, and the panel forced visible. */
+  @media (min-width: 62rem) {
+    .footer-fold > .footer-fold-summary {
+      cursor: default;
+      pointer-events: none;
+    }
+
+    .footer-fold-marker {
+      display: none;
+    }
+
+    .footer-fold::details-content {
+      content-visibility: visible;
+      block-size: auto;
+    }
+  }
+}
+
 /* --- The inactive fade ---------------------------------------------------
    Hovering one link in a column drops its siblings back, so the row being read
    separates itself from the ones that are not. Applied to the LIST rather than

@@ -41,26 +41,51 @@ const linkClass = 'link-underline text-body text-primary';
       </ul>
     </div>
 
-    <nav aria-label="Footer" class="gap-xl lg:col-span-3 grid sm:grid-cols-2 lg:grid-cols-4">
+    {/* COLLAPSIBLE BELOW lg, FOUR OPEN COLUMNS ABOVE IT (Figma 788:8518).
+        The mobile footer in the design is an accordion — each column a row with
+        a `+` on the right, the first open and the rest closed — because four
+        expanded columns of products is most of a screen of links under content
+        nobody scrolled that far to read.
+
+        Native <details> again, so this costs no JavaScript: the browser owns
+        the state and the keyboard, and it works before any script runs. Desktop
+        forces every panel open through `::details-content` rather than by
+        stamping `open` on all four, which would leave mobile expanded too.
+
+        Where `::details-content` is unsupported the columns stay collapsible at
+        desktop widths as well — every title is still visible and still opens on
+        click. A degradation, not a break, and worth stating rather than
+        discovering. */}
+    <nav aria-label="Footer" class="gap-lg lg:gap-xl lg:col-span-3 grid lg:grid-cols-4">
       {
-        columns.map((column) => (
-          <div class="gap-sm flex flex-col">
-            <p class="text-eyebrow">{column.title}</p>
+        columns.map((column, index) => (
+          <details class="footer-fold" open={index === 0}>
+            <summary class="footer-fold-summary gap-md flex cursor-pointer list-none items-center justify-between">
+              <span class="text-eyebrow">{column.title}</span>
+              <span class="footer-fold-marker" aria-hidden="true" />
+            </summary>
+
             {/* One fade group per column: hovering a link drops its siblings
                 back, and the group is the column because that is the set the
                 reader is scanning. */}
-            <ul class="fade-group list-bare gap-sm flex flex-col">
+            <ul class="fade-group list-bare gap-sm pt-md flex flex-col">
               {column.links.map(({ href, label }) => (
                 <li><a href={href} class={linkClass}>{label}</a></li>
               ))}
             </ul>
-          </div>
+          </details>
         ))
       }
     </nav>
   </div>
 
-  <div class="border-line mt-5xl pt-md gap-md flex flex-col border-t sm:flex-row sm:items-center sm:justify-between">
+  {/* 192px of air above the legal row is the DESKTOP measure — it is what the
+      review asked for at 1440, where the columns are four across and short. On
+      a phone the columns stack and that gap became most of a screen of nothing
+      between the last link and the copyright. The design's mobile footer sets
+      80px there; 64 is the step below on the scale and the complaint was too
+      much, not too little. */}
+  <div class="border-line mt-3xl md:mt-5xl pt-md gap-md flex flex-col border-t sm:flex-row sm:items-center sm:justify-between">
     <p class="text-caption text-tertiary">&copy; {year} {SITE.name}. All rights reserved.</p>
     {/* The social marks were here and are gone at the client's request. The
         wrapper that held them beside the legal row went with them — a flex row

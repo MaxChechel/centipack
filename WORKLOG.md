@@ -2535,3 +2535,76 @@ screenshotted above.
 
 **35 closes** — the menu now follows the design's structure, confirmed against
 both panels rather than one. Unchanged: 22, 23, 24, 25, 26, 28–34, 36.
+
+---
+
+## 2026-09-17 — Entry 22. The footer's mobile accordion
+
+Same shape as the nav in entry 21, found the same way — by reading the component
+instance rather than the page that embeds it. `788:8518` "Footer mobile" is an
+`<instance>`, so its children were not in the page-level metadata dump at all;
+fetching the node directly is what showed the structure:
+
+```
+Cold Chain & Shipping   label + "+"   List 370x175   ← open
+Branded Boxes           label + "+"   List hidden="true"
+Pharmacy Formats        label + "+"   List hidden="true"
+Company                 label + "+"   List hidden="true"
+```
+
+Four columns, each a row with a **`+`** on the right, the first open and the rest
+closed. Ours stacked all four expanded — four columns of product links under
+content nobody scrolled that far to read.
+
+A third native `<details>`, so the whole site still ships **zero JavaScript for
+disclosure**: the nav burger, the nav's product fold, and now each footer column.
+The browser owns the state and the keyboard in all three.
+
+The marker is two bars with one rotated — no glyph, no asset, `currentColor` so
+the dark footer needs no second value, and only `rotate` animates (§12.3).
+
+### Desktop forces open rather than stamping `open`
+
+Putting `open` on all four would have left mobile expanded, which is the thing
+being fixed. So `lg` forces the panels visible through `::details-content` and
+turns the summary back into a heading — `pointer-events: none`, marker hidden.
+
+**Stated rather than discovered:** where `::details-content` is unsupported the
+columns stay collapsible at desktop widths too. Every title is visible and every
+panel still opens on click, so it degrades rather than breaking. The same
+selector already carries the FAQ animation, where the note says the same thing.
+
+Measured after: desktop panel heights 189 / 102 / 168 / 102 — all four open — and
+the marker computing to `display: none`.
+
+### The bottom gap
+
+`mt-5xl` — 192px above the legal row — is the DESKTOP measure, and it is what the
+second review round explicitly asked for at 1440 where the columns are four
+across and short. On a phone the columns stack and that became most of a screen
+of nothing between the last link and the copyright. The design's mobile footer
+sets 80px; 64 is the step below on the scale and the complaint was too much, not
+too little. `mt-3xl md:mt-5xl`.
+
+Mobile footer 667px tall now, with three of the four columns closed.
+
+### Measurements
+
+| | |
+| --- | --- |
+| verify | 8 checks, **532 assertions**, 0 failures |
+| JS | unchanged — three disclosures on this site, no script behind any of them |
+| footer, mobile | 667px, first column open |
+| footer, desktop | 598px, four columns open, markers hidden |
+
+Both states screenshotted before this was written, per entry 21.
+
+### Open questions
+
+Unchanged: 22, 23, 24, 25, 26, 28–34, 36. One added:
+
+37. **`::details-content` is now load-bearing for the desktop footer**, where it
+    was only cosmetic for the FAQ. Worth a look in whatever the client's team
+    actually uses before launch — the failure is columns that need a click at
+    1440, not a broken page, but it is the first place this project depends on
+    the selector for layout rather than motion.

@@ -64,7 +64,10 @@ const cta = await closingBand();
           <div class="gap-md md:gap-2xl md:flex-row md:items-end flex flex-col items-start">
             <div class="gap-2xs flex flex-1 flex-col">
               <h2 class="text-h3 text-primary">{category.title}</h2>
-              <p class="text-body text-secondary">{category.summary}</p>
+              {/* Capped at 60ch. This ran the full column before — fine for the
+                  one-line summaries it was written against, and a very long
+                  line once the redline replaced them with two sentences. */}
+              <p class="text-body text-secondary measure-tight">{category.summary}</p>
             </div>
             <Button href={category.href} variant="ghost" size="link" icon="arrow">
               {category.guideLinkLabel}

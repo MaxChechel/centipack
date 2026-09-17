@@ -2789,3 +2789,37 @@ Unchanged: 22, 23, 24, 25, 26, 28–34, 36, 37. Three added:
     unchanged while adding a Testing standard row citing ISTA protocol guidance.
     Unconfirmed numbers under a testing claim is a worse combination than either
     alone.
+
+---
+
+## 2026-09-17 — Entry 25. A second measure token
+
+The three section standfirsts on the products index had **no measure at all** —
+not 66ch that wanted tightening, but the full column. That was invisible while
+they were one short line each ("The 2–8°C range, specified as one system.") and
+obvious the moment the redline replaced them with two sentences, at which point
+they ran the better part of a metre at 1440.
+
+`--container-measure-tight: 60ch`, with a `measure-tight` utility beside
+`measure`, following the existing token-plus-utility pair exactly.
+
+**A second token, justified by role rather than by being a different number.**
+66ch is a standfirst someone settles in to read — the contact page's, which is
+what that token was written for. 60ch is a section's own one-line explanation,
+which sits in a row beside a link and wants to turn over before it reaches it.
+Two roles, two measures; had the only difference been "this one feels a bit long"
+it would have belonged in the existing token or nowhere.
+
+Measured: cap 656.64px, all three wrapping to two lines at 1440, and irrelevant
+below the breakpoint where the viewport is narrower than the cap anyway.
+
+### Measurements
+
+| | |
+| --- | --- |
+| verify | 8 checks, **536 assertions**, 0 failures |
+| standfirst at 1440 | full column → 657px, two lines |
+
+### Open questions
+
+Unchanged: 22, 23, 24, 25, 26, 28–34, 36–40.

@@ -487,6 +487,13 @@
   /* A text-measure cap applied INSIDE content, never a page container. Long
      copy gets it; a grid of cards does not. */
   --container-measure: 66ch;  /* the 530px measure of the contact page's standfirst */
+  /* A SECOND, TIGHTER MEASURE, and it earns its place by role rather than by
+     being a different number. 66ch is a standfirst someone settles in to read;
+     60ch is a section's own one-line explanation, which sits beside a link in a
+     row and wants to turn over before it reaches it. Three of them on the
+     products index, which is where the redline's longer copy made the want
+     obvious — at full column width those lines ran the better part of a metre. */
+  --container-measure-tight: 60ch;
 
   /* The width cap on a third-party wordmark. Outside @theme with the rest of the
      container group, so no `max-w-logo` exists to be applied to something that
@@ -1244,6 +1251,11 @@
    never as a page container. */
 @utility measure {
   max-width: var(--container-measure);
+}
+
+/* See --container-measure-tight above for why there are two. */
+@utility measure-tight {
+  max-width: var(--container-measure-tight);
 }
 
 /* Visible only to screen readers, until focused. Used by the skip link. */

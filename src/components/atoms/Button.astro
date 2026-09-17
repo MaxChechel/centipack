@@ -146,7 +146,18 @@ const ICON_FILLED: Partial<Record<ButtonIcon, boolean>> = { square: true };
   rel={external ? 'noopener noreferrer' : undefined}
   target={external ? '_blank' : undefined}
   class:list={[
-    'inline-flex items-center justify-center rounded-sm border whitespace-nowrap',
+    /* `whitespace-nowrap` IS RIGHT FOR A BOX AND WRONG FOR A TEXT LINK.
+       A filled or outlined button is a fixed target and a label that wrapped
+       inside one would look broken. `size="link"` has no box: it is a sentence
+       with an arrow after it, and the design writes long ones — "How to choose
+       the right cold chain configuration →" is 367px on one line, which
+       overflowed a 320px viewport the moment the client's redline landed. The
+       sweep caught it at 320 and 360.
+       So the boxed sizes keep nowrap and the link size wraps, with `items-start`
+       so a wrapped label's arrow sits on the first line rather than centring
+       itself against two. */
+    'inline-flex justify-center rounded-sm border',
+    size === 'link' ? 'items-start' : 'items-center whitespace-nowrap',
     // Springs are the default character of the system (§12), including here.
     'transition-colors duration-spring-soft ease-spring-soft',
     // A disabled control must read as disabled.

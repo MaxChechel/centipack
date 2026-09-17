@@ -2765,7 +2765,11 @@
     }
   }
 
-  .hero-stat + .hero-stat::before {
+  /* THE DIVIDER GOES ON THE ITEM THAT HAS A NEIGHBOUR TO ITS LEFT, which below
+     md is every EVEN item — the band is two columns there, so item 3 opens a new
+     row and a left-hand hairline on it would sit against the plate's own edge.
+     `+` is right for a single row and wrong for a grid that wraps. */
+  .hero-stat:nth-child(2n)::before {
     content: '';
     position: absolute;
     inset-block: var(--spacing-md);
@@ -2773,6 +2777,15 @@
     inline-size: var(--border-width);
     background-color: var(--line-overlay);
   }
+
+  /* The payoff line the redline adds under each label. Caption size, and it
+     keeps the label's ink rather than dropping to secondary: it sits on a
+     photograph behind a scrim, where the tertiary ramp would not clear AA. */
+  .hero-stat-payoff {
+    margin-block-start: var(--spacing-2xs);
+    text-wrap: pretty;
+  }
+
 
   @media (min-width: 48rem) {
     /* Three cards. The plate's own treatment comes off and moves onto each
@@ -2794,7 +2807,8 @@
     }
 
 
-    .hero-stat + .hero-stat::before {
+    /* Separate cards from md, so nothing needs a hairline between them. */
+    .hero-stat:nth-child(2n)::before {
       content: none;
     }
   }

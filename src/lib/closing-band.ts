@@ -28,7 +28,7 @@ export async function closingBand() {
   });
 
   return {
-    heading: 'Produced at volume. Sold direct. Nobody in between.',
+    heading: 'Produced at scale.',
     /* NO BODY, ON ANY PAGE. This shipped with a paragraph on the category and
        product pages and without one on the products index, on the reading that a
        page arrived at from a narrower context wants the extra sentence. Ruled

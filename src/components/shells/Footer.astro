@@ -20,10 +20,10 @@ import { SITE } from '../../consts';
  */
 const year = new Date().getFullYear();
 const columns = await getFooterColumns();
-const contact = [
-  { href: 'mailto:info@centipack.com', label: 'info@centipack.com' },
-  { href: 'tel:+18773502799', label: '(877) 350-2799' },
-];
+/* Redline v7 §9: the phone number comes off site-wide. Removed rather than
+   hidden — a `tel:` link nobody should call is still a link a crawler indexes
+   and a screen reader announces. */
+const contact = [{ href: 'mailto:info@centipack.com', label: 'info@centipack.com' }];
 
 /* Same rule as the nav: the underline is the hover, not a colour. See
    `.link-underline` in global.css. */
@@ -86,7 +86,8 @@ const linkClass = 'link-underline text-body text-primary';
       80px there; 64 is the step below on the scale and the complaint was too
       much, not too little. */}
   <div class="border-line mt-3xl md:mt-5xl pt-md gap-md flex flex-col border-t sm:flex-row sm:items-center sm:justify-between">
-    <p class="text-caption text-tertiary">&copy; {year} {SITE.name}. All rights reserved.</p>
+    <p class="text-caption text-tertiary">&copy; {year} {SITE.name}. Cold chain packaging built for compounding pharmacy. All rights
+      reserved.</p>
     {/* The social marks were here and are gone at the client's request. The
         wrapper that held them beside the legal row went with them — a flex row
         around a single child is a div doing nothing. `socialLinks` and

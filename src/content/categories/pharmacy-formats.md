@@ -4,17 +4,17 @@ pageTitle: "Pharmacy formats"
 slug: pharmacy-formats
 order: 3
 summary: >-
-  What the medication itself ships in — same supplier, same invoice.
+  The primary format the medication is dispensed and shipped in — produced to pharmaceutical standards. Available individually or as part of a complete solution.
 lede: >-
-  What the medication itself is dispensed and shipped in. Vial kits lead the range.
+  The primary format the medication is dispensed and shipped in — produced to pharmaceutical standards. Vial kits lead the range, with formats covering GLP-1, peptide, oral, nasal, and topical compounded medications.
 cardBody: >-
-  Vial kits, pill bottles, spray bottles, pump dispensers and jars — what the medication itself is dispensed and shipped in.
+  Vial kits, pill bottles, spray bottles, pump dispensers, and jars — the primary format the medication is dispensed in. Produced to pharmaceutical presentation standards.
 cardLinkLabel: >-
   Browse formats
 selectionHeading: >-
   A selection of our pharmacy formats
 crossBody: >-
-  Vial kits, bottles, dispensers and jars — what the medication is dispensed in.
+  Vial kits, bottles, dispensers, and jars — the primary format the medication is dispensed in, produced to pharmaceutical standards.
 navLinkLabel: >-
   Browse pharmacy formats
 rangeImage:
@@ -26,5 +26,5 @@ cardImage:
   alt: >-
     Pill bottles, a pump dispenser and spray bottles in a row.
 guideLinkLabel: >-
-  How to choose a format
+  How to choose the right pharmacy format
 ---

@@ -4,17 +4,17 @@ pageTitle: "Custom boxes"
 slug: custom-boxes
 order: 2
 summary: >-
-  The box the patient opens, made to your spec.
+  The box the patient opens — made to your spec on size, closure, finish, and print. Produced to pharmaceutical presentation standards.
 lede: >-
-  The box the patient opens, made to your spec — size, closure, finish and print are all open.
+  The box the patient opens — made to your spec on size, closure, finish, and print. Produced to pharmaceutical presentation standards for compounding pharmacy and direct-to-patient programs.
 cardBody: >-
-  Magnetic-closure boxes, rigid presentation boxes, trays, inserts and seals — the layer between the vial and the shipper, and the one the patient actually opens.
+  Magnetic-closure boxes, rigid presentation boxes, trays, inserts, and seals — made to your spec, and the first thing your patient sees.
 cardLinkLabel: >-
   Browse formats
 selectionHeading: >-
   A selection of our custom boxes
 crossBody: >-
-  The box the patient opens, between the medication and the shipper.
+  Custom secondary packaging — made to your spec, and the first thing your patient sees.
 navLinkLabel: >-
   Browse custom boxes
 rangeImage:
@@ -26,5 +26,5 @@ cardImage:
   alt: >-
     A magnetic-closure presentation box open beside a blue printed mailer box.
 guideLinkLabel: >-
-  How the layer works
+  How custom boxes fit the build
 ---

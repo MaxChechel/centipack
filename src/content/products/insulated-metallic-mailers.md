@@ -3,9 +3,9 @@ title: "Insulated metallic mailers"
 slug: insulated-metallic-mailers
 category: cold-chain-shipping
 order: 2
-summary: "6 sizes · 1–1.5 in wall"
+summary: "6 sizes · 1 in and 1.5 in wall · validated for 24 and 48-hour 2–8°C profiles"
 lede: >-
-  Foam-lined metallic mailers for 2–8°C injectables. Six sizes, two wall thicknesses — the workhorse of GLP-1 fulfilment at volume.
+  Foam-lined metallic mailers for 2–8°C injectables. Six sizes, two wall thicknesses — the workhorse of GLP-1 fulfillment at volume. Configurations validated under summer ambient conditions for 24 and 48-hour transit profiles.
 contactLinkLabel: >-
   Talk to us about this mailer
 facts:
@@ -13,14 +13,19 @@ facts:
     value: 2–8°C
   - label: Recommended hold
     value: 24–48 h, by configuration
+  # Added in the client's redline v7. Placed directly after the hold claim
+  # because it is what qualifies it — a hold time is only meaningful beside the
+  # conditions it was measured under.
+  - label: Testing standard
+    value: Validated under summer ambient conditions (≥35°C external) per ISTA protocol guidance
   - label: Minimum order
     value: Confirmed at quote
-  - label: Customisation
-    value: Logo, colour and print on exterior
+  - label: Customization
+    value: Logo, color, and print on exterior
   - label: Production
-    value: Made to order — produced to your run, not held in stock
+    value: Made to order — produced to your confirmed run. Lead times and minimums confirmed at quote. Supply consistency backed by our manufacturing network.
   - label: Disposal
-    value: Metallised film. Eco liner available where patients ask about disposal.
+    value: Metallized film. Eco liner available where patients ask about disposal.
 specTable:
   caption: >-
     Every size is a row, not a separate product. Payload capacity holds steady across a duration tier while wall thickness and refrigerant scale up. All dimensions are length × width × height, in inches.

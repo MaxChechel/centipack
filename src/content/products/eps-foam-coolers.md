@@ -3,7 +3,7 @@ title: "EPS foam coolers"
 slug: eps-foam-coolers
 category: cold-chain-shipping
 order: 3
-summary: "Corrugated outer included"
+summary: "Rigid insulated systems with corrugated outer included · validated for demanding 48–72 hour thermal applications"
 images:
   main:
     src: ../../assets/products/eps-foam-coolers.avif

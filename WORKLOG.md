@@ -2679,3 +2679,113 @@ zero. That distinction belongs in the template notes.
 
 Unchanged: 22, 23, 24, 25, 26, 28–34, 36, 37. **The FAQ/footer inconsistency
 that would have been question 38 does not exist** — both use the same mechanism.
+
+---
+
+## 2026-09-17 — Entry 24. Client copy redline v7
+
+Applied across the content collections, six pages and the footer. Copy is data
+here, so most of it landed in `src/content/` and reached every surface at once —
+a product's one-line summary is written in one file and appears on the products
+index, its category page, its own page and the nav.
+
+### Applied
+
+| Redline | Where |
+| --- | --- |
+| 1.2 key numbers | three items became **four**, each with a number, a label and a payoff line |
+| 1.3, 1.4 | section heading, the full body replacement, testimonial attribution |
+| 2.1–2.4 | products index hero and all three section bodies |
+| product short descriptions | all twelve, in `src/content/products/*.md` |
+| 2.5 CTA | `closingBand()` — "Produced at scale." on all 17 product pages from one string |
+| 3.x, 4.x, 5.x | three category files: summary, lede, cardBody, crossBody, selectionHeading, guide link |
+| 3.3/4.3/5.3 | "the rest of the build" heading — one literal in `[category].astro`, identical on all three by construction |
+| 6.x | mailers lede, the new **Testing standard** row, Customization, Production |
+| 7.1 | About paragraph 1, the new fourth paragraph, the closing line |
+| 8.1 | contact body |
+| 9 | phone number removed, copyright line extended |
+
+All five of §10's global checks pass, run against **built HTML** rather than
+source: no "proven", no British spellings anywhere including meta and alt text,
+no phone number and no `telephone` in JSON-LD, "Produced at scale." on all 17
+product pages, and the rest-of-the-build heading identical across the three
+categories.
+
+### The key numbers needed a ruling
+
+The redline offers two shapes: "split at the em dash if the component has
+separate fields; otherwise use the full line." The full line runs to ninety
+characters — at 12px in a quarter of a phone's width that is six lines of body
+copy laid over a photograph. So the fields are separate and the payoff sits under
+the label at caption size, which is the redline's own first preference and the
+only one of the two that leaves the band legible.
+
+Four items also forced the grid: `grid-cols-2 md:grid-cols-4`. That broke the
+divider rule — `.hero-stat + .hero-stat` is right for one row and wrong for a
+grid that wraps, because item 3 opens a new row and was drawing a hairline
+against the plate's own left edge. Now `:nth-child(2n)`, which is the item that
+actually has a neighbour to its left.
+
+**The band is now 327px tall at 390, against roughly 120 before.** It covers most
+of a 488px hero picture. That is what this copy does at this size, not a bug —
+flagged below rather than quietly re-designed.
+
+### The sweep caught a real overflow
+
+`/products` overflowed at 320 and 360 the moment the copy landed:
+
+```
+/products @320px — overflows (367 > 320); unclipped: a.inline-flex, svg.size-icon-inline
+```
+
+`Button` set `whitespace-nowrap` on every size. That is right for a box — a
+filled button whose label wrapped would look broken — and wrong for `size="link"`,
+which has no box: it is a sentence with an arrow after it. "How to choose the
+right cold chain configuration →" is 367px on one line. The boxed sizes keep
+nowrap; the link size wraps, with `items-start` so the arrow sits on the first
+line rather than centring itself against two.
+
+Worth noting what happened here: a pure copy change broke the layout, and the
+only reason it was caught before the client saw it is that the sweep runs seven
+widths on every page. Longer copy is exactly the kind of change that feels safe.
+
+### Two items in the redline have no target on this site
+
+Both are section 1, and both look like the redline was written against a
+different build:
+
+- **1.1 hero body.** The "Current" text is not on this site and the home hero has
+  no body element — the review on 2026-09-12 explicitly ruled "hero: no subtext",
+  and `SITE.description` carries different copy again. Adding a paragraph here
+  would reverse that ruling, so it is not applied.
+- **1.5 CTA heading.** "Thermal integrity. Proven performance. Manufacturing
+  scale." appears nowhere. The home page's closing band reads "We produce at
+  volume. You get the price that comes with it." Applying the New text would mean
+  replacing a heading the client did not quote, so it is not applied.
+
+Global check 1 ("proven" → "validated") therefore has nothing to change; the word
+does not appear on the site.
+
+### Measurements
+
+| | |
+| --- | --- |
+| verify | 8 checks, **535 assertions**, 0 failures |
+| hero stat band at 390 | ~120px → **327px** |
+| pages touched by one CTA string | 17 |
+
+### Open questions
+
+Unchanged: 22, 23, 24, 25, 26, 28–34, 36, 37. Three added:
+
+38. **Redline 1.1 and 1.5 have no target on this site** — see above. Both need a
+    decision: is the redline against an older build, or is the home page meant to
+    gain a hero body and a different closing heading?
+39. **The hero band is now 327px on a 488px picture.** Faithful to the copy and
+    heavy on the design. Options are a shorter payoff, payoffs on desktop only,
+    or accepting it.
+40. **Question 23 is now sharper.** The mailers table footnote still says
+    "Placeholder values — client to confirm", and the redline explicitly left it
+    unchanged while adding a Testing standard row citing ISTA protocol guidance.
+    Unconfirmed numbers under a testing claim is a worse combination than either
+    alone.

@@ -3,7 +3,7 @@ title: "Pump dispensers"
 slug: pump-dispensers
 category: pharmacy-formats
 order: 4
-summary: "For creams and gels"
+summary: "Metered dispensing · for compounded creams, gels, and serums"
 images:
   main:
     src: ../../assets/products/pump-dispensers.avif

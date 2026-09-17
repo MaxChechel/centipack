@@ -3,7 +3,7 @@ title: "Puncture Pack"
 slug: puncture-pack
 category: cold-chain-shipping
 order: 4
-summary: "Expands at pack-out"
+summary: "Self-expanding insulated packaging · low dimensional weight · temperature-sensitive pharmaceutical distribution"
 images:
   main:
     src: ../../assets/products/puncture-pack.avif

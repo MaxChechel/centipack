@@ -5,7 +5,7 @@ import Button from '../components/atoms/Button.astro';
 import SectionHeader from '../components/blocks/SectionHeader.astro';
 import CategoryCard from '../components/blocks/CategoryCard.astro';
 import Media from '../components/blocks/Media.astro';
-import { getCategories } from '../lib/catalogue';
+import { getCategories, toPageImage } from '../lib/catalogue';
 import { SITE } from '../consts';
 import heroImage from '../assets/home/hero-vial-kit-in-cooler.jpg';
 import volumeCooler from '../assets/home/volume-eps-cooler.jpg';
@@ -13,7 +13,7 @@ import volumeGelPack from '../assets/home/volume-gel-pack.jpg';
 import volumeMailer from '../assets/home/volume-metallic-mailer.jpg';
 import volumeVialKit from '../assets/home/volume-vial-kit.jpg';
 import volumeBox from '../assets/home/volume-presentation-box.jpg';
-import { Image, getImage } from 'astro:assets';
+import { Image } from 'astro:assets';
 
 /**
  * Home (§4.4).
@@ -41,13 +41,15 @@ const categories = await getCategories();
  * one thing and should not care that this one is a page asset rather than a
  * content field.
  */
-const hero = await getImage({ src: heroImage, format: 'webp', width: 2400 });
-const heroPicture = {
-  src: hero.src,
-  width: Number(hero.attributes.width),
-  height: Number(hero.attributes.height),
+/* PROJECT: drop the portrait-framed hero in beside the wide one and pass it as
+   `mobile` below. Media renders <picture> the moment it is there; until then the
+   wide file is cropped to 1:1.25 on mobile by `.hero-media`. */
+// import heroImageMobile from '../assets/home/hero-vial-kit-in-cooler-mobile.jpg';
+const heroPicture = await toPageImage({
+  src: heroImage,
+  // mobile: heroImageMobile,
   alt: 'A vial kit in an open white mailer box, beside a gel pack and an EPS foam cooler.',
-};
+});
 
 /**
  * The closing collage. Five product shots placed AT THE FIGMA OFFSETS rather
@@ -60,11 +62,11 @@ const heroPicture = {
  * check against the source.
  */
 const collage = [
-  { image: volumeCooler, alt: 'An open EPS foam cooler with its lid resting beside it.', left: 39.79, top: -0.05, width: 22.99 },
+  { image: volumeCooler, alt: 'An open EPS foam cooler with its lid resting beside it.', left: 39.79, top: -0.05, width: 22.99, mobile: { left: 38, top: 1, width: 24 } },
   { image: volumeGelPack, alt: 'A gel pack and a pill bottle on a plain ground.', left: -3.57, top: 24.6, width: 13.39 },
   { image: volumeMailer, alt: 'An insulated metallic mailer, sealed.', left: 92.86, top: 22.68, width: 10.71 },
-  { image: volumeVialKit, alt: 'An open vial kit showing two blue-capped vials.', left: 69.07, top: 65.51, width: 19.42 },
-  { image: volumeBox, alt: 'A blue magnetic-closure presentation box holding four vials.', left: 21.5, top: 73.73, width: 19.12 },
+  { image: volumeVialKit, alt: 'An open vial kit showing two blue-capped vials.', left: 69.07, top: 65.51, width: 19.42, mobile: { left: 60, top: 76, width: 22 } },
+  { image: volumeBox, alt: 'A blue magnetic-closure presentation box holding four vials.', left: 21.5, top: 73.73, width: 19.12, mobile: { left: 14, top: 83, width: 21 } },
 ];
 
 /**
@@ -170,7 +172,11 @@ const stats = [
         fluid — the value is 36px at 402 and 64px at 1440, which is exactly what
         the design draws — so the only thing the breakpoint changes is padding.
       */}
-      <div class="container-main pb-md md:pb-2xl absolute inset-x-0 bottom-0 z-10">
+      {/* FULL BLEED BELOW md, contained above it. No gutter and no bottom
+          padding on mobile — the band runs edge to edge and sits flush on the
+          bottom of the picture; the page's gutter comes back as the columns'
+          own padding. From md the three cards want the container again. */}
+      <div class="md:container-main md:pb-2xl absolute inset-x-0 bottom-0 z-10">
         {/*
           ONE PLATE ON MOBILE, THREE CARDS FROM md. Below the breakpoint the
           three claims share a single glass panel divided by hairlines; from md
@@ -253,7 +259,10 @@ const stats = [
       what separate this section, not a change of ground — which is the whole
       reason it is drawn with borders. */}
   <Section space="none" class="border-line border-b">
-    <figure class="border-line py-5xl px-lg gap-3xl flex flex-col items-center border-x text-center">
+    {/* 64px of air on mobile rather than 192. `py-5xl` is the desktop
+        measure and on a phone it pushed the quote most of a screen away from
+        anything either side of it. */}
+    <figure class="border-line py-3xl md:py-5xl px-lg gap-xl md:gap-3xl flex flex-col items-center border-x text-center">
       <svg class="text-primary w-icon" viewBox="0 0 44 28.66" fill="currentColor" aria-hidden="true">
         <path d="M22.17 28.66 33.8 0H44l-6.05 28.66zM0 28.66 11.53 0h10.3L15.8 28.66z"></path>
       </svg>
@@ -308,7 +317,7 @@ const stats = [
            sweep's spill assertion reads it as art direction rather than a
            defect. -->
       <ul
-        class="volume-collage list-bare gap-sm mt-2xl grid w-full grid-cols-2 sm:grid-cols-3 md:mt-0 md:block"
+        class="volume-collage list-bare"
         aria-hidden="true"
         data-bleed
       >
@@ -316,7 +325,14 @@ const stats = [
           collage.map((shot) => (
             <li
               class="volume-collage-item"
-              style={`--at-left:${shot.left}%;--at-top:${shot.top}%;--at-width:${shot.width}%`}
+              data-on-mobile={shot.mobile ? '' : undefined}
+              style={[
+                `--at-left:${shot.left}%;--at-top:${shot.top}%;--at-width:${shot.width}%`,
+                shot.mobile &&
+                  `--at-left-m:${shot.mobile.left}%;--at-top-m:${shot.mobile.top}%;--at-width-m:${shot.mobile.width}%`,
+              ]
+                .filter(Boolean)
+                .join(';')}
             >
               <Image src={shot.image} alt="" widths={[240, 480, 720]} class="rounded-md w-full" />
             </li>

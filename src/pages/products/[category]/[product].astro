@@ -88,15 +88,25 @@ const facts = product.facts;
         ratio="1344 / 541"
         loading="eager"
         fetchpriority="high"
-        class="rounded-md"
+        class="page-hero-media rounded-md"
       />
 
-      {/* SELF-SKIP: eleven of the twelve products have no facts yet. */}
+      {/* SELF-SKIP: eleven of the twelve products have no facts yet.
+
+          SPACING, TIGHTENED AND EVENED OUT. The row gap was 48px and the
+          label-to-value gap 24, which left every value stranded clear of its
+          own label and crowded against the next rule. The design reads rule,
+          label, value as one group with the air AFTER it: 24 between rows, 12
+          inside one, 24 below the value.
+
+          The comment sits here and not beside the <dl> because a `&&` branch
+          takes a single root element and a comment beside it is a second — the
+          same Astro rule that bit the Breadcrumb ternary in entry 14. */}
       {
         facts.length > 0 && (
-          <dl class="gap-x-lg gap-y-2xl grid sm:grid-cols-2 lg:grid-cols-3">
+          <dl class="gap-x-lg gap-y-lg grid sm:grid-cols-2 lg:grid-cols-3">
             {facts.map((fact) => (
-              <div class="border-line pt-md gap-lg flex flex-col border-t">
+              <div class="border-line pt-md pb-lg gap-sm flex flex-col border-t">
                 <dt class="text-body text-secondary">{fact.label}</dt>
                 <dd class="text-h4 text-primary">{fact.value}</dd>
               </div>

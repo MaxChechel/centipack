@@ -50,6 +50,13 @@ export interface Picture {
   width: number;
   height: number;
   alt: string;
+  /**
+   * The art-directed mobile file: a DIFFERENT framing of the same subject, for
+   * a portrait screen. No `alt` of its own — it shows the same thing, and two
+   * descriptions of one subject is two things to keep in sync. Absent means the
+   * desktop file serves both, which is the case for everything not yet reshot.
+   */
+  mobile?: { src: string; width: number; height: number };
 }
 
 export interface ProductView {
@@ -102,17 +109,52 @@ export const productHref = (category: CategorySlug, slug: string): string =>
 const CARD_WIDTH = 880;
 const WIDE_WIDTH = 2400;
 
-type RawPicture = { src: ImageMetadata; alt: string } | undefined;
+type RawPicture = { src: ImageMetadata; alt: string; mobile?: ImageMetadata } | undefined;
+
+/** One number per surface, so every caller asks for the same asset. */
+const MOBILE_WIDTH = 900;
 
 async function toPicture(picture: RawPicture, width: number): Promise<Picture | undefined> {
   if (!picture) return undefined;
   const rendered = await getImage({ src: picture.src, format: 'webp', width });
+  const mobile = picture.mobile
+    ? await getImage({ src: picture.mobile, format: 'webp', width: MOBILE_WIDTH })
+    : undefined;
   return {
     src: rendered.src,
     width: Number(rendered.attributes.width ?? width),
     height: Number(rendered.attributes.height ?? width),
     alt: picture.alt,
+    ...(mobile && {
+      mobile: {
+        src: mobile.src,
+        width: Number(mobile.attributes.width ?? MOBILE_WIDTH),
+        height: Number(mobile.attributes.height ?? MOBILE_WIDTH),
+      },
+    }),
   };
+}
+
+/**
+ * The same normalisation, for a PAGE ASSET rather than a collection field.
+ *
+ * The home hero and the closing band import their photographs directly — they
+ * are page furniture, not content anybody edits — and both were rebuilding the
+ * `{ src, width, height, alt }` shape by hand with their own `getImage()` call
+ * and their own `Number(...)` casts. Two copies of one conversion is two places
+ * for the art-directed `mobile` file to be forgotten, so it lives here with the
+ * collection's version and both call it.
+ *
+ * Exported because pages may call it; components still receive only `Picture`.
+ */
+export async function toPageImage(
+  picture: { src: ImageMetadata; alt: string; mobile?: ImageMetadata },
+  width = WIDE_WIDTH,
+): Promise<Picture> {
+  const result = await toPicture(picture, width);
+  /* Non-null: `picture` is required here, so `toPicture`'s undefined branch —
+     which exists for optional collection fields — cannot be reached. */
+  return result!;
 }
 
 async function toProduct(entry: CollectionEntry<'products'>): Promise<ProductView> {

@@ -2374,3 +2374,90 @@ Unchanged: **22**–**33**. One added:
     dashboard (human, nothing in the repo), or `robots.txt` plus an
     `X-Robots-Tag: noindex` header in the `vercel.json` above. Flagged twice,
     not yet decided.
+
+---
+
+## 2026-09-17 — Entry 20. Mobile round, and an art direction bug that never applied
+
+### The bug under three of the requests
+
+`Media` writes the aspect ratio as an **inline custom property**, and its own
+comment defended the choice: a custom property "can be beaten by a class, which
+an inline `aspect-ratio` would not allow". Half right, and the useless half — an
+inline style beats every selector short of `!important`, so an inline
+`--media-ratio` cannot be beaten by a class either.
+
+So `.hero-media { --media-ratio: 4 / 5 }` never won. **The home hero has been 5:3
+at every width since it was written**, portrait crop and all, and the art
+direction the comment describes has never once applied. It looked like a value to
+change; it was a mechanism that did not work.
+
+An art-directing class must set `aspect-ratio` itself — the inline style does not
+touch that property, and `.media-slot` is what resolves the custom property into
+it, so a later rule in the same layer wins cleanly. `.hero-media` and the new
+`.page-hero-media` both do that now. Measured after: 0.800 at 390, 1.667 at 1440.
+
+### Mobile changes
+
+| | |
+| --- | --- |
+| Home hero | 1:1.25 on mobile, 5:3 from md |
+| Category and product heroes | same, via one `.page-hero-media` that reads the desktop ratio back out of the inline property rather than restating 1344/541 and 1440/700 in CSS |
+| Hero stats | full-bleed band, no border, flush to the picture, 32px numbers and 12px labels |
+| Quote | 64px of air on mobile instead of 192 |
+| Product facts | 24px between rows, 12 inside one, 24 below the value — the design groups rule/label/value with the air after it, not before |
+| Spec table | border, surface fill and scroll shadow all removed; it now bleeds past the right gutter so the sliced next column IS the affordance |
+| Mobile menu | product links indented under their category label, rows at 32px (Figma 788:7961) |
+| Volume collage | placed absolutely on mobile, two side shots dropped |
+
+**32px and 12px are tokens, not literals.** `--text-h2`'s clamp floor is exactly
+2rem and `--text-caption` is 0.75rem, so the design's numbers are already the
+system's words. Same for the menu indent: the design sets 40px, the scale runs
+…24, 32, 48…, and 32 is what a scale is for — a `--spacing-40` for one indent
+would be a token pretending to be a system. Recorded rather than silently
+rounded.
+
+**The spec table's scroll shadow is gone, four entries after it was added.** It
+existed to say "there is more this way". The design says it better: let the table
+run past the gutter so the next column is visibly cut by the screen edge. A thing
+half off the screen is the most legible scroll affordance there is, and it costs
+no CSS. The surface fill went with it — it only existed to give the shadow's
+cover layers something to paint in.
+
+### `<picture>`, and what it is for
+
+Three requests asked for separate desktop and mobile files. `Media` now renders
+`<picture>` when `Picture.mobile` is present: the desktop file behind a
+`min-width` query, the mobile file on the `<img>` itself, so the smallest screen
+downloads the smallest file and a browser ignoring `<source>` still works. Absent,
+nothing changes — a plain `<img>`, as before.
+
+One `alt` covers both: it is the same subject, and a second description is a
+second thing to keep in sync.
+
+`display: contents` on the `<picture>` keeps the wrapper out of layout, so every
+rule written against `.media-slot` as a direct child still matches. Without it,
+adding a second source would silently change the box model of every slot that
+gained one.
+
+`toPageImage()` in the adapter now does for a page asset what `toPicture()` does
+for a collection field. The home hero and the closing band were each rebuilding
+that shape by hand with their own `getImage()` and `Number()` casts — two copies
+of one conversion, which is two places to forget the mobile file. The import
+lines for the mobile files are in place and commented out, waiting on the
+photography.
+
+### Open questions
+
+**27 closes** — the collage is placed on mobile now, not a ragged two-up.
+Unchanged: 22, 23, 24, 25, 26, 28–34. Two added:
+
+35. **The mobile menu follows coordinates, not a picture.** The reference
+    screenshots were too large to reach me, so the indent and rhythm come from
+    the Figma node geometry (788:7961). The structure is right; the exact
+    spacing wants a human glance.
+36. **The contact form is still gated on Turnstile, deliberately.** Asked to
+    enable it for field testing on staging. Not done in code: the gate is §8's
+    and it has its own contract assertion. The answer is Cloudflare's published
+    Turnstile TEST keys as environment variables — the form enables itself, the
+    "not live yet" notice disappears on its own, and nothing is weakened.

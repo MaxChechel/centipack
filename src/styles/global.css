@@ -2408,47 +2408,30 @@
    allowed to exceed its container so the scroll box has something to scroll,
    and must fill it when there is room. */
 @layer components {
-  /* THE TABLE SCROLLS, AND IT HAS TO SAY SO.
-     Eight columns on a 320px phone means the last visible cell is cut mid-value
-     — "10 x 8..." — with no scrollbar to be seen, because every touch platform
-     draws scrollbars as an overlay that fades to nothing when idle. A reader who
-     cannot tell the table continues stops reading at the crop.
+  /* THE CUT COLUMN IS THE SCROLL AFFORDANCE.
+     This carried a border, a surface fill and a four-layer CSS scroll shadow —
+     the shadow to say "there is more this way". The design says it differently
+     and better: the table BLEEDS PAST THE RIGHT GUTTER, so the next column is
+     visibly sliced by the screen edge and no one has to infer anything from a
+     gradient. A thing half off the screen is the most legible "scroll me" there
+     is.
 
-     The classic four-layer scroll shadow, and it is CSS ALONE: two COVER layers
-     painted in the table's own ground with `background-attachment: local`, so
-     they travel with the content, parked over two SHADOW layers attached to the
-     scrollport. At the left end the left cover sits on the left shadow and hides
-     it; scroll right and the cover moves away, revealing it. The shadow at the
-     far end disappears the same way when you reach it. No script, no resize
-     listener, no state — the shadow is a fact about the scroll position because
-     it IS the scroll position.
+     All three came off together. The border and radius drew a box the design
+     does not draw; the fill existed only to give the shadow's cover layers
+     something to paint in, so with the shadow gone it has no job and would read
+     as an unexplained lighter block on the page ground.
 
-     The shadow colour is mixed inline rather than stored in a :root custom
-     property on purpose: substitution happens where a property is DECLARED, so a
-     stored `--shadow: color-mix(... var(--text-primary) ...)` would resolve once
-     at :root and paint the light theme's ink inside every dark region. That is
-     WORKLOG Entry 11, and the rule it left behind is this one. Used directly in
-     a rule, `var(--text-primary)` resolves per element, per theme, correctly. */
+     Bleed below lg only: at 1024 the container is 954px and the table's natural
+     width is ~924, so from there it fits and there is nothing to scroll. */
   .spec-table-scroll {
     overflow-x: auto;
-    background-color: var(--bg-surface);
-    background-image:
-      linear-gradient(to right, var(--bg-surface) 30%, transparent),
-      linear-gradient(to left, var(--bg-surface) 30%, transparent),
-      linear-gradient(to right, color-mix(in oklab, var(--text-primary) 14%, transparent), transparent),
-      linear-gradient(to left, color-mix(in oklab, var(--text-primary) 14%, transparent), transparent);
-    background-position:
-      0 0,
-      100% 0,
-      0 0,
-      100% 0;
-    background-repeat: no-repeat;
-    background-size:
-      3rem 100%,
-      3rem 100%,
-      1rem 100%,
-      1rem 100%;
-    background-attachment: local, local, scroll, scroll;
+    margin-inline-end: calc(var(--site-margin) * -1);
+  }
+
+  @media (min-width: 62rem) {
+    .spec-table-scroll {
+      margin-inline-end: 0;
+    }
   }
 
   .spec-table {
@@ -2562,6 +2545,44 @@
   }
 }
 
+/* --- The collage on a phone ----------------------------------------------
+   PLACED, NOT STACKED. This used to fall back to a two-up grid below md — five
+   items in two columns, so the fifth sat alone, which was recorded as open
+   question 27. The design places them on mobile too, just differently: one shot
+   centred above the heading and two below the button, with the two side shots
+   dropped entirely because there is no gutter to hang them in.
+
+   The container reserves the room with percentage padding — percentages resolve
+   against the container's WIDTH, so the space above and below scales with the
+   screen instead of being a magic pixel height that is wrong at the next size. */
+@layer components {
+  @media (max-width: 47.99rem) {
+    .volume {
+      padding-block: 30% 34%;
+    }
+
+    .volume-collage {
+      position: absolute;
+      inset: 0;
+      z-index: 0;
+      margin: 0;
+    }
+
+    .volume-collage-item {
+      position: absolute;
+      left: var(--at-left-m);
+      top: var(--at-top-m);
+      width: var(--at-width-m);
+    }
+
+    /* Two of the five have no mobile position, and that is the design's call:
+       they hang in the desktop gutters, and a phone has none. */
+    .volume-collage-item:not([data-on-mobile]) {
+      display: none;
+    }
+  }
+}
+
 /* --- Media slots ---------------------------------------------------------
    The shape a picture holds before it loads, and the one thing about it that is
    art-directed. `--media-ratio` is set inline per slot by Media; a class may
@@ -2569,6 +2590,15 @@
 @layer components {
   .media-slot {
     aspect-ratio: var(--media-ratio, 1 / 1);
+  }
+
+  /* An art-directed slot wraps its <img> in <picture>. `display: contents`
+     removes that wrapper from layout entirely, so the <img> stays the flex or
+     grid item its parent expects and every rule written against `.media-slot`
+     as a direct child keeps matching. Without it, adding a second source would
+     silently change the box model of every slot that gained one. */
+  .media-picture {
+    display: contents;
   }
 
   /* --- The hero's three claims ------------------------------------------
@@ -2588,10 +2618,13 @@
      and are re-declared per theme — they have to be, because they are mixed from
      `--text-primary`, and a single :root declaration would paint the light
      theme's black into every dark region. That is WORKLOG Entry 11. */
+  /* MOBILE IS A FULL-BLEED BAND, not a plate. No border and no radius: it runs
+     to both screen edges and sits flush on the bottom of the picture, so there
+     is no edge for a border to describe. The page's gutter comes back as the
+     columns' own padding, which is what keeps the first number on the same line
+     as every heading on the page. */
   .hero-stats {
     background-color: var(--bg-overlay);
-    border: var(--border-width) solid var(--line-overlay);
-    border-radius: var(--radius-md);
     backdrop-filter: blur(var(--blur-overlay));
     /* The plate is one box: the columns butt together and the hairline is what
        separates them, so there is no gap to close. */
@@ -2602,13 +2635,25 @@
 
   .hero-stat {
     position: relative;
-    /* Inline padding is one step down from the block padding, and that is a
-       measurement rather than a taste: at 12px each side a column at 390 gives
-       95px of text and "distributors" is 97px, so the label hyphenated two
-       pixels short of fitting. 8px gives 103px and it sets clean. Below 360 it
-       hyphenates anyway and should — see the note on the label in index.astro. */
-    padding: var(--spacing-md) var(--spacing-xs);
+    padding: var(--spacing-md);
     gap: var(--spacing-2xs);
+  }
+
+  /* 32px and 12px, as tokens rather than literals: --text-h2's clamp floor IS
+     2rem and --text-caption IS 0.75rem, so these are the design's numbers
+     said in the system's words. The h1/h5 classes in the markup still supply
+     the weight, leading and tracking; only the size changes here, and only
+     below md, where the band is one object rather than three cards.
+     Descendant selectors (0,1,1) outrank the .text-h1 / .text-h5 classes
+     (0,1,0) they override — no !important, no utility fight. */
+  @media (max-width: 47.99rem) {
+    .hero-stat dt {
+      font-size: var(--text-h2);
+    }
+
+    .hero-stat dd {
+      font-size: var(--text-caption);
+    }
   }
 
   .hero-stat + .hero-stat::before {
@@ -2625,9 +2670,7 @@
        column, which is the desktop design. */
     .hero-stats {
       background-color: transparent;
-      border-color: transparent;
       backdrop-filter: none;
-      border-radius: 0;
       overflow: visible;
       gap: var(--spacing-lg);
     }
@@ -2640,6 +2683,7 @@
       padding: var(--spacing-md) var(--spacing-lg) var(--spacing-lg);
       gap: var(--spacing-sm);
     }
+
 
     .hero-stat + .hero-stat::before {
       content: none;
@@ -2658,16 +2702,44 @@
     max-inline-size: 62.5rem;
   }
 
-  /* The home hero is drawn twice: portrait at 402, landscape at 1440. One
-     picture, two crops — which is a real art direction decision and not a
-     responsive accident, so it lives here rather than in the page. */
+  /* The home hero is drawn twice: portrait on mobile, landscape at 1440. One
+     picture, two crops — a real art direction decision, not a responsive
+     accident, so it lives here rather than in the page.
+
+     IT SETS `aspect-ratio`, NOT `--media-ratio`, AND THAT IS THE WHOLE FIX.
+     Media writes the ratio as an INLINE custom property, and an inline style
+     beats every selector short of !important — including this one. So
+     `--media-ratio: 4 / 5` here never won, and the hero has been 5:3 at every
+     width since it was written, portrait crop and all. Media's own comment
+     claimed a custom property could be beaten by a class "which an inline
+     aspect-ratio would not allow"; half right — the indirection buys nothing
+     while the property itself is inline.
+     `.media-slot` resolves the inline value into `aspect-ratio`. Setting
+     `aspect-ratio` here instead overrides that declaration, which the inline
+     style does not touch. Same layer, later in the file, so it wins. */
   .hero-media {
-    --media-ratio: 4 / 5;
+    aspect-ratio: 1 / 1.25;
   }
 
   @media (min-width: 48rem) {
     .hero-media {
-      --media-ratio: 5 / 3;
+      aspect-ratio: 5 / 3;
+    }
+  }
+
+  /* The category and product page heroes: portrait on a phone, and the wide
+     crop the design draws from md up. One class for both because it is one
+     rule — only the desktop ratio differs, and that already arrives as the
+     inline `--media-ratio` the caller passes, so this reads it back rather
+     than restating 1344/541 and 1440/700 in CSS where nobody would check them
+     against the design. */
+  .page-hero-media {
+    aspect-ratio: 1 / 1.25;
+  }
+
+  @media (min-width: 48rem) {
+    .page-hero-media {
+      aspect-ratio: var(--media-ratio);
     }
   }
 }

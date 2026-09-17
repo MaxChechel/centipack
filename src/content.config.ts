@@ -60,7 +60,18 @@ const CATEGORY = z.enum(['cold-chain-shipping', 'custom-boxes', 'pharmacy-format
  * records how that box gets removed.
  */
 const picture = (image: () => z.ZodType) =>
-  z.object({ src: image(), alt: z.string() });
+  z.object({
+    src: image(),
+    alt: z.string(),
+    /**
+     * OPTIONAL SECOND FILE, for art direction — a different framing of the same
+     * subject shot for a portrait screen, not the desktop file rescaled. One
+     * `alt` covers both: it is the same subject, and a second description is a
+     * second thing to keep in sync. Absent means the desktop file serves every
+     * width, which is true of everything not yet reshot.
+     */
+    mobile: image().optional(),
+  });
 
 const products = defineCollection({
   loader: glob({ pattern: '**/*.md', base: './src/content/products' }),

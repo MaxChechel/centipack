@@ -1,5 +1,9 @@
-import { getImage } from 'astro:assets';
+import { toPageImage } from './catalogue';
 import image from '../assets/shared/cta-produced-at-volume.jpg';
+/* PROJECT: drop the portrait-framed version of this shot in beside the wide one
+   and import it here. Media renders <picture> the moment it exists; until then
+   the wide file serves both widths, exactly as before. */
+// import imageMobile from '../assets/shared/cta-produced-at-volume-mobile.jpg';
 
 /**
  * The closing band, in one place (§5's "one source per list", applied to copy).
@@ -15,7 +19,13 @@ import image from '../assets/shared/cta-produced-at-volume.jpg';
  * becomes a collection — and this function is the only thing that changes.
  */
 export async function closingBand() {
-  const rendered = await getImage({ src: image, format: 'webp', width: 2400 });
+  const rendered = await toPageImage({
+    src: image,
+    // mobile: imageMobile,
+    /* Decorative: the heading beside it says what it is, and naming three
+       packaging formats here would be three interruptions before the button. */
+    alt: '',
+  });
 
   return {
     heading: 'Produced at volume. Sold direct. Nobody in between.',
@@ -26,14 +36,7 @@ export async function closingBand() {
        appears. The `body` prop went with it — CtaPlate self-skips on content, so
        there is nothing left for it to skip. */
     action: { label: 'Contact us', href: '/contact' },
-    image: {
-      src: rendered.src,
-      width: Number(rendered.attributes.width),
-      height: Number(rendered.attributes.height),
-      /* Decorative: the heading beside it says what it is, and naming three
-         packaging formats here would be three interruptions before the button. */
-      alt: '',
-    },
+    image: rendered,
     imageLabel: 'Closing band — mailers, a corrugated outer and an EPS cooler',
   };
 }

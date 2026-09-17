@@ -57,8 +57,16 @@ interface Props {
    * Applied as a CUSTOM PROPERTY rather than as `aspect-ratio` directly, because
    * an inline `aspect-ratio` cannot be beaten by a class and some slots are
    * art-directed: the home hero is 4:5 at 402 and 5:3 at 1440, one picture, two
-   * crops. A caller redefines `--media-ratio` in a media query and this prop is
-   * the fallback. See `.hero-media` in global.css.
+   * crops. A caller redefines the ratio in a media query and this prop is the
+   * fallback. See `.hero-media` in global.css.
+   *
+   * CORRECTION. That note used to claim an inline custom property "can be beaten
+   * by a class, which an inline aspect-ratio would not allow". Half true, and
+   * the useless half: an inline style beats every selector short of !important,
+   * so an inline `--media-ratio` cannot be beaten by a class either. The home
+   * hero's portrait crop silently never applied for that reason. An
+   * art-directing class must set `aspect-ratio` itself — which the inline style
+   * does not touch — and `.hero-media` now does.
    */
   ratio: string;
   loading?: 'eager' | 'lazy';
@@ -74,10 +82,44 @@ const {
   fetchpriority = 'auto',
   class: className,
 } = Astro.props as Props;
+
+/**
+ * ART DIRECTION IS A SECOND FILE, NOT A SECOND CROP.
+ *
+ * `Picture.mobile` is a different photograph of the same subject — framed for a
+ * portrait screen — not the desktop file rescaled. `object-fit` can crop one
+ * image two ways, and where that is enough it stays one <img>; where the
+ * SUBJECT has to change, only a second source will do.
+ *
+ * When it is present this renders <picture> with the DESKTOP behind a
+ * `min-width` query and the mobile file on the <img> itself, so the smallest
+ * screen downloads the smallest file and a browser that ignores <source> still
+ * gets a working image. When it is absent nothing changes: a plain <img>,
+ * exactly as before.
+ *
+ * `display: contents` on the <picture> keeps it out of layout entirely, so
+ * every rule that targets `.media-slot` as a child still matches.
+ */
+const artDirected = Boolean(image?.mobile);
 ---
 
 {
-  image ? (
+  image && artDirected ? (
+    <picture class="media-picture">
+      <source media="(min-width: 48rem)" srcset={image.src} width={image.width} height={image.height} />
+      <img
+        src={image.mobile!.src}
+        width={image.mobile!.width}
+        height={image.mobile!.height}
+        alt={image.alt}
+        loading={loading}
+        fetchpriority={fetchpriority}
+        decoding="async"
+        class:list={['media-slot h-full w-full object-cover', className]}
+        style={`--media-ratio:${ratio}`}
+      />
+    </picture>
+  ) : image ? (
     <img
       src={image.src}
       width={image.width}

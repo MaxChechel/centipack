@@ -192,40 +192,53 @@ const linkClass = 'link-underline text-body text-primary aria-[current=page]:tex
           <!-- Full-bleed band, container inside it: the panel's links land on
                the same gutter line as the logo above them. -->
           <div class="border-line bg-base absolute inset-x-0 top-full max-h-[80svh] overflow-y-auto border-y">
-            {/* FOLLOWING THE DESIGN'S MOBILE MENU (Figma 788:7961).
-                Two things differ from what shipped, and both are structural
-                rather than decorative: the product links are INDENTED under
-                their category label — the design sets the label at the gutter
-                and the links 40px in, so the group reads as a group without a
-                rule or a box drawing it — and the rows are roughly 40px apart
-                rather than 33, which is what stops five formats reading as a
-                block of text.
+            {/* THE DESIGN'S MOBILE MENU IS AN ACCORDION (Figma 788:7961).
+                Two panels exist in the file: 402x800 collapsed, 402x1292
+                expanded. Collapsed is a single row — the group's label with a
+                chevron on the right — and expanding it reveals the category
+                labels with their links indented under each.
 
-                40px is not on the spacing scale (…24, 32, 48…). 32 is the step
-                below and is what a scale is for; inventing a --spacing-40 for
-                one indent would be a token pretending to be a system. */}
-            <div class="container-main py-lg gap-xl flex flex-col">
+                What shipped before was the expanded state and only that: all
+                thirteen products, always, 677px of list on a 390px screen. The
+                spacing was tuned and the structure was still wrong, which is
+                why it read as unchanged.
+
+                A NESTED <details>, so it still costs zero JavaScript. The outer
+                one is the burger; this is the second, and the browser owns both.
+                No aria-expanded to keep in sync, and it works before any script
+                runs — the same argument that put the burger in a <details> in
+                the first place. */}
+            <div class="container-main py-lg gap-lg flex flex-col">
               {
                 navigation.map((item) =>
                   isGroup(item) ? (
-                    item.columns.map((column) => (
-                      <div class="gap-md flex flex-col">
-                        <p class="text-eyebrow">{column.title}</p>
-                        <ul class="list-bare gap-md pl-xl flex flex-col">
-                          {column.links.map((link) => (
-                            <li>
-                              <a
-                                href={link.href}
-                                class="link-underline text-body text-primary aria-[current=page]:text-accent"
-                                aria-current={isCurrent(link.href) ? 'page' : undefined}
-                              >
-                                {link.label}
-                              </a>
-                            </li>
-                          ))}
-                        </ul>
+                    <details class="nav-fold">
+                      <summary class="nav-fold-summary text-h6 text-primary gap-md flex cursor-pointer list-none items-center justify-between">
+                        {item.label}
+                        <span class="nav-caret" aria-hidden="true" />
+                      </summary>
+
+                      <div class="pt-lg gap-xl flex flex-col">
+                        {item.columns.map((column) => (
+                          <div class="gap-md flex flex-col">
+                            <p class="text-eyebrow">{column.title}</p>
+                            <ul class="list-bare gap-md pl-xl flex flex-col">
+                              {column.links.map((link) => (
+                                <li>
+                                  <a
+                                    href={link.href}
+                                    class="link-underline text-body text-primary aria-[current=page]:text-accent"
+                                    aria-current={isCurrent(link.href) ? 'page' : undefined}
+                                  >
+                                    {link.label}
+                                  </a>
+                                </li>
+                              ))}
+                            </ul>
+                          </div>
+                        ))}
                       </div>
-                    ))
+                    </details>
                   ) : (
                     <a
                       href={item.href}

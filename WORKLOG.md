@@ -2461,3 +2461,77 @@ Unchanged: 22, 23, 24, 25, 26, 28–34. Two added:
     and it has its own contract assertion. The answer is Cloudflare's published
     Turnstile TEST keys as environment variables — the form enables itself, the
     "not live yet" notice disappears on its own, and nothing is weakened.
+
+---
+
+## 2026-09-17 — Entry 21. Correcting entry 20: two things reported fixed were not
+
+Both came back as "you haven't fixed this at all", and both times that was fair.
+The root cause is the same in each: **I changed the code, confirmed the classes
+reached the built HTML, and never looked at the rendered page.** Entry 20 claimed
+both as done on that basis. The classes were there; the result was wrong.
+
+### The mobile menu was a structure problem, not a spacing problem
+
+Entry 20 tuned the indent and the row rhythm from the Figma node geometry. The
+geometry was read correctly and the conclusion was still wrong, because it was
+read off ONE of the two panels in the file:
+
+```
+788:7961  Menu panel  402 x 800   ← collapsed
+788:8043  Menu panel  402 x 1292  ← expanded
+```
+
+Collapsed is a single row — the group's label with a chevron on the right.
+Expanded reveals the category labels and their indented links. What shipped was
+the expanded state and only the expanded state: **all thirteen products, always,
+677px of list on a 390px screen.** Tuning its spacing could never have fixed
+that, which is exactly why it read as untouched.
+
+Now a nested `<details>`, so it still costs **zero JavaScript** — the outer one is
+the burger, this is the second, and the browser owns both. No `aria-expanded` to
+keep in sync and it works before any script runs, which is the same argument that
+put the burger in a `<details>` to begin with.
+
+Measured: panel 677px → **112px** collapsed, 712px expanded, caret rotating on
+`[open]`.
+
+### The product facts were bottom-heavy, not merely loose
+
+Entry 20 cut the row gap from 48 to 24 and the label-to-value gap from 24 to 12,
+which was the right direction and the wrong shape. Measured after that change:
+
+```
+above the label 17px · label to value 12px · below the value 48px
+```
+
+Every value sat close under its own label and then a third of the block's height
+of nothing before the next rule. The design spaces a row EVENLY — the rule, the
+label, the value, and the same air below as above. The fix was not smaller
+numbers, it was removing `gap-y` entirely so the rows stack rule to rule and the
+padding alone sets the rhythm. Measured now: **25 / 12 / 24**.
+
+### The lesson, and it is a repeat
+
+Entry 13 recorded that "every check in the suite asked about the document and
+none asked about the box". This is the next rung of the same ladder: a class in
+`dist/` is not a rendered result, and `grep` is not a screenshot. The sweep
+cannot catch either of these — a flat menu and a bottom-heavy row are both
+perfectly valid layouts — so the only check that would have caught them is
+looking, which costs one screenshot and was skipped twice in one entry.
+
+**Nothing is reported as done on the strength of a grep again.** Both are
+screenshotted above.
+
+### Measurements
+
+| | |
+| --- | --- |
+| verify | 8 checks, **527 assertions**, 0 failures |
+| mobile menu, collapsed | 677px → 112px |
+| product fact row | 17/12/48 → 25/12/24 |
+
+### Open questions
+
+**35 closes** — the menu now follows the design's structure, confirmed against
+both panels rather than one. Unchanged: 22, 23, 24, 25, 26, 28–34, 36.

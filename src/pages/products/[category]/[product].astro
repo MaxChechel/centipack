@@ -104,9 +104,9 @@ const facts = product.facts;
           same Astro rule that bit the Breadcrumb ternary in entry 14. */}
       {
         facts.length > 0 && (
-          <dl class="gap-x-lg gap-y-lg grid sm:grid-cols-2 lg:grid-cols-3">
+          <dl class="gap-x-lg grid sm:grid-cols-2 lg:grid-cols-3">
             {facts.map((fact) => (
-              <div class="border-line pt-md pb-lg gap-sm flex flex-col border-t">
+              <div class="border-line pt-lg pb-lg gap-sm flex flex-col border-t">
                 <dt class="text-body text-secondary">{fact.label}</dt>
                 <dd class="text-h4 text-primary">{fact.value}</dd>
               </div>

@@ -1937,6 +1937,17 @@
       visibility 0s;
   }
 
+  /* The mobile menu's nested disclosure. Native <details>, so the caret is the
+     only thing CSS has to say — the browser owns the state, the toggle and the
+     keyboard. */
+  .nav-fold > summary::-webkit-details-marker {
+    display: none;
+  }
+
+  .nav-fold[open] > .nav-fold-summary .nav-caret::before {
+    transform: translateY(25%) rotate(225deg);
+  }
+
   /* Same rotated-footprint rule as .faq-chevron above; see the note there. */
   .nav-caret {
     display: grid;

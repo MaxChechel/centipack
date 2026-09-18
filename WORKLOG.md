@@ -2823,3 +2823,64 @@ below the breakpoint where the viewport is narrower than the cap anyway.
 ### Open questions
 
 Unchanged: 22, 23, 24, 25, 26, 28–34, 36–40.
+
+---
+
+## 2026-09-18 — Entry 26. The last pending box
+
+The About photograph arrived as `Centipack_Mystic_2026-09-18_09-26-54 1.avif`,
+1928 × 1076. Renamed `warehouse-eps-coolers.avif` to match the house convention
+— subject, no prefix, role carried by the folder.
+
+Checked the edges first, per entry 12: 0% neutral on the top and bottom rows and
+a flat 12–18% down the sides, which is the photograph, not a baked frame.
+
+**The `label` was wrong and has been corrected.** The slot read "Gel packs and a
+mailer box, mid-air"; the picture is a warehouse aisle racked floor to ceiling
+with EPS coolers on pallets. That label had been describing a photograph that was
+never taken, which is precisely the state the pending box exists to make visible
+— it said the right thing until the moment a different picture arrived.
+
+Rendered at 1800px rather than the adapter's 2400 default: the slot is 900px
+inside the narrow container, so 1800 is the 2x file and anything beyond it is
+bytes nobody sees. The source is 1928, so this is also very nearly the original.
+
+### Zero pending boxes on the site
+
+```
+=== pending boxes left on the whole site ===
+(no rows = none)
+```
+
+Every one of the 39 slots in the client's image plan that this build renders now
+has a photograph. That crosses a threshold `Media.astro` wrote down for itself in
+Phase 2:
+
+> "When the photographs land, every label disappears with them; when the last one
+> lands, this component collapses to the `<img>` branch and the `label`/`ratio`
+> props go with it. That removal is the point, and it is the thing to check at
+> the Phase 4 gate."
+
+**Not removing it now**, and that is deliberate rather than an oversight: the
+schema keeps every image field optional because a thirteenth product with no
+photograph is a normal state for this catalogue, and the pending box is what
+makes that state visible instead of silently empty. It becomes removable when the
+client confirms the range is closed. Recorded below.
+
+### Measurements
+
+| | |
+| --- | --- |
+| verify | 8 checks, **534 assertions**, 0 failures |
+| pending image boxes, site-wide | 1 → **0** |
+| about photograph | 1800 × 1005 in a 912 × 527 slot |
+
+### Open questions
+
+Unchanged: 22, 23, 24, 25, 26, 28–34, 36–40. One added:
+
+41. **The pending box is now unused and stays anyway.** Phase 4 should decide
+    whether the range is closed. If it is, `Media` loses its second branch and
+    the `label` prop with it; if products will keep arriving without photography,
+    it stays exactly as it is. Not a decision to make by noticing the count hit
+    zero.

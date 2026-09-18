@@ -2,7 +2,9 @@
 import BaseLayout from '../components/shells/BaseLayout.astro';
 import Section from '../components/Section.astro';
 import Media from '../components/blocks/Media.astro';
+import { toPageImage } from '../lib/catalogue';
 import { SITE } from '../consts';
+import aboutImage from '../assets/about/warehouse-eps-coolers.avif';
 
 /**
  * About (§4.4).
@@ -17,6 +19,21 @@ import { SITE } from '../consts';
  *
  * Copy is verbatim from Figma 788:9540.
  */
+
+/**
+ * The one photograph on this page, and the last pending box on the site.
+ *
+ * 1800px rather than the adapter's 2400 default: the slot is 900px wide inside
+ * the narrow container, so 1800 is the 2x file and anything beyond it is bytes
+ * nobody sees. The source is 1928px, so this is also very nearly the original.
+ */
+const aboutPicture = await toPageImage(
+  {
+    src: aboutImage,
+    alt: 'A warehouse aisle racked to the ceiling with EPS foam coolers on pallets.',
+  },
+  1800,
+);
 ---
 
 <BaseLayout
@@ -28,8 +45,8 @@ import { SITE } from '../consts';
       <h1 class="text-h2 text-primary max-w-[27rem] text-center">We came from the cold chain side</h1>
 
       <Media
-        image={undefined}
-        label="Gel packs and a mailer box, mid-air"
+        image={aboutPicture}
+        label="A warehouse aisle racked with EPS foam coolers"
         ratio="900 / 520"
         loading="eager"
         fetchpriority="high"

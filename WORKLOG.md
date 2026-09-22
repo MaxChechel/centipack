@@ -3259,3 +3259,40 @@ added:
 46. **The footer's social marks are out and the reference shows them in.** Entry
     18 removed them on instruction; these screens predate or ignore that. One
     line to restore if the instruction has changed.
+
+---
+
+## 2026-09-28 — Entry 32. The one line that differed
+
+"Copy is not correct" on the products index. Dumped the page's visible text and
+compared it line by line against the reference rather than re-reading the screen:
+**37 strings, one difference.**
+
+`exterior-mailer-box`'s summary read "The corrugated shipping outer" — mine,
+written in entry 16 because the product was added after the design and had no
+line to lift, and flagged ever since as open question 30. The reference supplies
+one, so the placeholder is gone.
+
+It is word for word Bottle & pump boxes' summary, on both the products index and
+the custom boxes page. Entry 31 declined to apply it on exactly that ground and
+said so; asked again, that is the client's call to make and it is applied. Two
+products now carry one sentence. The reason sits in the file beside the field, so
+whoever edits it next sees the duplication is known rather than accidental.
+
+**The lesson is about the flag, not the line.** Entry 31 reported this as one of
+three things deliberately left alone. That report was accurate and it was still
+the thing that came back — a caveat in a summary is easy to miss, and "I did not
+do this" reads as done unless it is the headline. Open questions are for the log;
+anything the human has to *decide* belongs at the top of the reply.
+
+### Measurements
+
+| | |
+| --- | --- |
+| verify | 8 checks, 538 assertions, 0 failures |
+| strings compared | 37 on /products, 1 differing |
+
+### Open questions
+
+**30 closes** — the summary is the client's now, not mine. Unchanged: 22, 23, 24,
+25, 26, 28, 29, 31–34, 36, 37, 40, 41, 43, 44, 45, 46.

@@ -2300,27 +2300,36 @@
    positioned against the card, and a positioned child plus a three-row track is
    a layout, not a class list. */
 @layer components {
+  /* 260:320, the design's own proportion (259.2 x 321 in Figma). A ratio rather
+     than a height because the card is drawn at four widths across the site —
+     259 on the products index, 416 on a category page, 312 in the nav panel,
+     370 on mobile — so the proportion is the fact and the pixels are not.
+
+     No grid any more: the picture is absolutely positioned and the content
+     overlays it, so there are no rows to define. That also retires the
+     `minmax(0, 1fr)` column note that used to live here — the media no longer
+     sits in a track whose width its aspect ratio could inflate. */
   .product-card {
     position: relative;
     isolation: isolate;
-    display: grid;
-    /* MEASURED BUG, and the reason this column is declared at all. Without it
-       the grid has one IMPLICIT column, which sizes to its widest item — and the
-       media slot's `aspect-ratio` turns its row height into a width. At 1440 that
-       made a 249px-wide box inside a 227px content area: the picture overflowed
-       the card by 22px and dragged the arrow six pixels past the card's right
-       edge. `minmax(0, 1fr)` is what stops a grid item from growing its track. */
-    grid-template-columns: minmax(0, 1fr);
-    /* `1fr`, NOT `minmax(0, 1fr)`: the zero floor let the picture row collapse to
-       57px when the aspect ratio stopped defining it. `1fr` is `minmax(auto,
-       1fr)` — it holds the content's own height and grows when the row is
-       stretched by a taller sibling card. */
-    /* TWO ROWS NOW, not three. The arrow used to occupy the third; it is
-       absolutely positioned (below), so a third track would have reserved an
-       empty row and a second 16px gap under the picture. */
-    grid-template-rows: auto 1fr;
+    aspect-ratio: 260 / 320;
     overflow: hidden;
     transition: background-color var(--transition-duration-spring-soft) var(--ease-spring-soft);
+  }
+
+  /* THE PICTURE IS THE GROUND, filling the card edge to edge and cropped by it.
+     Two-class specificity (0,2,0) so `aspect-ratio: auto` beats `.media-slot`'s
+     `aspect-ratio: var(--media-ratio)` (0,1,0) wherever the two sit in the file
+     — the inline custom property Media writes is still there and still
+     untouchable, which is exactly why this overrides the RESOLVED property
+     rather than the variable feeding it (entry 20). */
+  .product-card .product-card-media {
+    position: absolute;
+    inset: 0;
+    aspect-ratio: auto;
+    block-size: 100%;
+    inline-size: 100%;
+    object-fit: cover;
   }
 
   /* TWO TITLE LINES RESERVED, ON THE BLOCK RATHER THAN ON THE TITLE.

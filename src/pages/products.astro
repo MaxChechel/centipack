@@ -7,7 +7,6 @@ import ProductRail from '../components/blocks/ProductRail.astro';
 import CtaPlate from '../components/blocks/CtaPlate.astro';
 import { getCatalogue } from '../lib/catalogue';
 import { closingBand } from '../lib/closing-band';
-import OrderingSteps from '../components/blocks/OrderingSteps.astro';
 
 /**
  * Products index (§4.4).
@@ -79,10 +78,6 @@ const cta = await closingBand();
       </Section>
     ))
   }
-
-  <Section space="lg">
-    <OrderingSteps />
-  </Section>
 
 
   {/* 5 — The closing band. */}

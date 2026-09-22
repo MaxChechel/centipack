@@ -3123,3 +3123,75 @@ Unchanged: 22, 23, 24, 25, 26, 28–34, 36, 37, 39, 40, 41, 43, 44.
 ambiguity in the same place — one branded jar opened to show vials, one closed
 navy bottle — and was read the same way. Two independent passes agreeing is not
 the same as the client confirming, and it is still a two-line swap.
+
+---
+
+## 2026-09-28 — Entry 30. The card becomes its picture
+
+Asked for the image to cover the full card and the card to be strictly 260:320.
+Checked the design before restructuring rather than inferring a layout from two
+sentences — `935:7693` is a collapsed component instance, so its internals had to
+be fetched directly, the same trick the footer needed in entry 22.
+
+What it shows:
+
+```
+Product card                      259.2 x 321          ← 260:320
+  rounded-rectangle (the photo)   x=-43  w=346         ← oversized, clipped
+  Container                       x=16  y=16  w=227.2  ← the 16px inset
+    Text        "Gel packs"
+    Paragraph   "3–32 oz · 4 variants"
+    Frame 1948765252 (the arrow)  bottom-right
+```
+
+So the picture is not a slot with text above it — **it is the card's ground**,
+laid in oversized with negative offsets and cropped by the card, with the title,
+summary and arrow overlaid in a container inset by the card's own padding.
+
+### What changed
+
+`.product-card` is now `position: relative` + `aspect-ratio: 260 / 320` and
+nothing else structural. **The grid is gone**, and with it the `minmax(0, 1fr)`
+column note that had lived there since Phase 2 — that existed because the media
+sat in a track whose width its own aspect ratio could inflate. It no longer sits
+in a track.
+
+The media is absolute, `inset: 0`, `object-fit: cover`. Overriding it needs
+`aspect-ratio: auto` to beat `.media-slot`'s `aspect-ratio: var(--media-ratio)`,
+so the rule is written at two-class specificity — `.product-card
+.product-card-media`. The inline custom property Media writes is still there and
+still untouchable, which is precisely why this overrides the RESOLVED property
+rather than the variable feeding it. Entry 20's lesson, applied rather than
+rediscovered.
+
+Measured: card 259 × 319, image 259 × 319, ratio 0.812.
+
+### "How ordering works" comes off the products index
+
+Removed from `/products` and its import with it. **It remains on the three
+category pages**, which is where the design also places it — if it should go
+everywhere, that is one more line in each.
+
+### One thing to look at rather than fix
+
+With the text over the picture, legibility now depends on where the subject sits
+in frame. Most of the thirteen are shot with the subject low and the top clear,
+which is what makes the design work. **"Eco liners" is not** — the box reaches
+into the top-right and the summary's last line crosses it. Nothing here can fix
+that; it is a crop, and it belongs to whoever shoots the next version.
+
+### Measurements
+
+| | |
+| --- | --- |
+| verify | 8 checks, **539 assertions**, 0 failures |
+| card | 259 × 319 at 1440, ratio 0.812 |
+| ordering steps | 4 pages → 3 |
+
+### Open questions
+
+Unchanged: 22, 23, 24, 25, 26, 28–34, 36, 37, 39, 40, 41, 43, 44. One added:
+
+45. **The eco-liners thumbnail crowds its own caption.** Text over picture only
+    works while the subject stays low in frame. One of thirteen does not, and it
+    is a reshoot or a re-crop rather than a code change.

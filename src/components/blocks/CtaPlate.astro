@@ -28,6 +28,8 @@ import type { Picture } from '../../lib/catalogue';
  */
 interface Props {
   heading: string;
+  /** One short paragraph under the heading. Self-skips when absent. */
+  body?: string;
   /** Document outline. Visual size is fixed at h2 — this is a closing band. */
   headingLevel?: 'h2' | 'h3';
   action?: { label: string; href: string };
@@ -40,6 +42,7 @@ interface Props {
 
 const {
   heading,
+  body,
   headingLevel = 'h2',
   action,
   image,
@@ -49,7 +52,7 @@ const {
 } = Astro.props as Props;
 
 /* SELF-SKIP (§4.2). A band with no heading and no action is an empty picture. */
-const hasContent = Boolean(heading) || Boolean(action);
+const hasContent = Boolean(heading) || Boolean(body) || Boolean(action);
 ---
 
 {hasContent && (
@@ -80,6 +83,7 @@ const hasContent = Boolean(heading) || Boolean(action);
     }
 
     <div class="gap-lg flex flex-col items-center">
+      {body && <p class="text-body text-primary max-w-[27rem]">{body}</p>}
       {action && (
         <Button href={action.href} variant="primary" icon="square" iconPosition="start">
           {action.label}

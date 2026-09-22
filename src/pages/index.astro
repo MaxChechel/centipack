@@ -88,34 +88,16 @@ const collage = [
  * is a question for the human, recorded as open question 32.
  */
 /**
- * Client redline v7, section 1.2 — four items now, not three, each with a
- * number, a label and a payoff line.
- *
- * THE REDLINE OFFERS TWO SHAPES and this takes the first: "split at the em dash
- * if the component has separate fields; otherwise use the full line." The full
- * line runs to ninety characters, which at 12px in a quarter of a phone's width
- * is six lines of body copy laid over a photograph — so the fields are separate
- * and the payoff sits under the label at caption size. That is the redline's own
- * preference, and it is the only one of the two that leaves the band legible.
+ * NO PAYOFF LINES. The v7 redline gave each number a label AND a payoff
+ * sentence; the reference screens show the label alone, which is also what the
+ * band can carry — the payoffs ran to ninety characters and took the band from
+ * 120px to 327px on a phone (open question 39, now moot).
  */
 const stats = [
-  {
-    value: '1',
-    label: 'dedicated contact',
-    payoff: 'one person, fully accountable, who knows your build and your volumes',
-  },
-  { value: '0', label: 'distributors between you and your packaging' },
-  {
-    value: '20+',
-    label: 'years of combined cold-chain expertise',
-    payoff: 'we know what holds temperature and what fails',
-  },
-  {
-    value: '3',
-    label: 'integrated layers',
-    payoff:
-      'pharmacy formats, custom boxes, and cold chain components — available individually or as a complete solution',
-  },
+  { value: '1', label: 'dedicated contact' },
+  { value: '0', label: 'distributors in between' },
+  { value: '20+', label: 'years of combined cold-chain expertise' },
+  { value: '3', label: 'integrated layers' },
 ];
 ---
 
@@ -237,7 +219,6 @@ const stats = [
                     that is already there, and it does nothing at all at any width
                     where the word fits. */}
                 <dd class="text-h5 text-primary hyphens-auto">{stat.label}</dd>
-                {stat.payoff && <dd class="text-caption text-primary hero-stat-payoff">{stat.payoff}</dd>}
               </div>
             ))
           }

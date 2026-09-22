@@ -3195,3 +3195,67 @@ Unchanged: 22, 23, 24, 25, 26, 28–34, 36, 37, 39, 40, 41, 43, 44. One added:
 45. **The eco-liners thumbnail crowds its own caption.** Text over picture only
     works while the subject stays low in frame. One of thirteen does not, and it
     is a reshoot or a re-crop rather than a code change.
+
+---
+
+## 2026-09-28 — Entry 31. Copy matched to the rendered reference screens
+
+Five full-page references supplied and asked to match 100%. Diffed each against
+the live build rather than reading for differences.
+
+### Applied
+
+| | |
+| --- | --- |
+| Hero key numbers | payoff lines **dropped** — label only, and #2 reads "distributors in between", not "distributors between you and your packaging" |
+| Home category cards | all three `cardBody` strings are shorter than v8's: pharmacy formats loses "the primary format the medication is dispensed in", custom boxes becomes "rigid boxes" and splits at a full stop, cold chain collapses to "validated for 24, 48, and 72-hour 2–8°C transit" |
+| About | one paragraph → **three**, as drawn |
+| Closing band | the body is **back** on every product page |
+
+**The payoff lines closing open question 39 is the useful part.** That question
+recorded the band at 327px on a 488px picture, carrying roughly four times the
+text the design draws. The references settle it by not having them — the v7
+redline asked for a payoff per number and the rendered design shows the label
+alone. Question 39 closes, and `.hero-stat-payoff` came out of the stylesheet
+with it.
+
+**The closing band's body has now been removed and restored.** It shipped with a
+paragraph, was cut in review — "we don't have subtext for all instances" — and
+the references show it on every product page again. Latest instruction wins. Both
+turns are recorded at the site of the change so the next reversal is a decision
+rather than a rediscovery.
+
+### Three things the references disagree with, left alone
+
+1. **The footer shows social icons.** They were removed on explicit instruction
+   in entry 18, and `socialLinks` was deleted rather than commented out. An
+   explicit "remove this" outranks a screenshot that predates it, so they stay
+   out until someone says otherwise. Git has them.
+2. **"Exterior mailer box" carries Bottle & pump boxes' summary**, word for word,
+   on both the products index and the custom boxes page — "Custom secondary
+   packaging for oral and topical formats · matched to bottle and pump
+   dimensions". That is a copy-paste in the design, not copy. Matching it would
+   put the same sentence under two different products. Ours stays (open question
+   30 — the line is still mine and still wants replacing).
+3. **The two category references disagree with each other** about the pharmacy
+   formats cross-card. The cold chain page shows the old short line, the custom
+   boxes page shows the current longer one. `crossBody` is one field on one
+   record and cannot be both; kept the version two of the three screens agree on.
+
+### Measurements
+
+| | |
+| --- | --- |
+| verify | 8 checks, **538 assertions**, 0 failures |
+| About | 3 paragraphs |
+| closing band body | on 17 product pages from one string |
+
+### Open questions
+
+**39 closes** — the payoff lines are gone, so the band is back to its drawn
+height. Unchanged: 22, 23, 24, 25, 26, 28–34, 36, 37, 40, 41, 43, 44, 45. One
+added:
+
+46. **The footer's social marks are out and the reference shows them in.** Entry
+    18 removed them on instruction; these screens predate or ignore that. One
+    line to restore if the instruction has changed.

@@ -8,7 +8,7 @@ summary: >-
 lede: >-
   Insulation and refrigerant are chosen separately — hold time is the result of both. Validated under summer ambient conditions.
 cardBody: >-
-  Gel packs, insulated metallic mailers, EPS coolers, Puncture Pack, and eco liners — cold-chain packaging designed to maintain 2–8°C throughout pharmaceutical distribution. Configurations validated for 24, 48, and 72-hour transit profiles.
+  Gel packs, insulated metallic mailers, EPS coolers, Puncture Pack, and eco liners — validated for 24, 48, and 72-hour 2–8°C transit.
 cardLinkLabel: >-
   Browse formats
 selectionHeading: >-

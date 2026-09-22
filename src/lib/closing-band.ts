@@ -29,7 +29,15 @@ export async function closingBand() {
 
   return {
     heading: 'Produced at scale.',
-    /* NO BODY, ON ANY PAGE. This shipped with a paragraph on the category and
+    /* THE BODY IS BACK, and the history is the point rather than an
+       embarrassment: it shipped with a paragraph, was removed in review
+       ("we don't have subtext for all instances"), and the reference screens
+       show it on every product page again. Latest instruction wins; recorded so
+       the next reversal is a decision rather than a discovery. */
+    body:
+      'Own manufacturing partners, no distributor markup — the best price for the spec. ' +
+      'Tell us what you ship.',
+    /* PREVIOUSLY: This shipped with a paragraph on the category and
        product pages and without one on the products index, on the reading that a
        page arrived at from a narrower context wants the extra sentence. Ruled
        the other way in review: the band is a heading and a button everywhere it

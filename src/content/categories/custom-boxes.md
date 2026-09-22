@@ -8,7 +8,7 @@ summary: >-
 lede: >-
   The box the patient opens — your size, closure, finish, and print. Produced to pharmaceutical presentation standards for compounding pharmacy and direct-to-patient programs.
 cardBody: >-
-  Magnetic-closure boxes, rigid presentation boxes, trays, inserts, and seals — made to your spec, and the first thing your patient sees.
+  Magnetic-closure boxes, rigid boxes, trays, inserts, and seals — made to your spec. The first thing your patient sees.
 cardLinkLabel: >-
   Browse formats
 selectionHeading: >-

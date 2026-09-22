@@ -2799,13 +2799,6 @@
     background-color: var(--line-overlay);
   }
 
-  /* The payoff line the redline adds under each label. Caption size, and it
-     keeps the label's ink rather than dropping to secondary: it sits on a
-     photograph behind a scrim, where the tertiary ramp would not clear AA. */
-  .hero-stat-payoff {
-    margin-block-start: var(--spacing-2xs);
-    text-wrap: pretty;
-  }
 
 
   @media (min-width: 48rem) {

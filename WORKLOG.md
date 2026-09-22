@@ -3352,3 +3352,69 @@ history in the file gets one more line.
 
 **43 closes** — the ordering steps are gone, and with them the four missing
 titles. Unchanged: 22, 23, 24, 25, 26, 28, 29, 31–34, 36, 37, 40, 41, 44, 45, 46.
+
+---
+
+## 2026-09-22 — Entry 34. The index card's summary is one line
+
+"Copy on product cards on the all products page should be less copy." Entry 33
+had compared the strings, found them identical to the references, and reported
+no difference. **The strings were identical and the report was still wrong**: the
+instruction was about how much text is on that page, and the reference screen
+answers it in the rendering rather than in the words.
+
+### What the reference actually shows
+
+The five-up card is 259px wide and the summary is a 40-to-100 character
+sentence. The design draws **one line, cut mid-word by the card edge** —
+"3–32 oz · regular, flat-profile, and condensatio". The build wrapped the same
+string to three lines and pushed the photograph down. The same sentence on a
+416px category card takes two lines and reads fine, which is why the category
+screens show it whole and only this page does not.
+
+### What changed
+
+`white-space: nowrap` on `.product-rail-5 .product-card-summary`, and nothing
+else. `.product-card` already carries `overflow: hidden`, so the card does the
+cutting — hence no ellipsis, which is also what the design draws.
+
+**At every width, not just where the five-up grid exists.** Scoped to `lg`
+first; the screenshot at 900 showed why that was wrong — below 62rem the index
+is a scroll rail at 26% of the viewport, 234px, *narrower* than the desktop card,
+so the wrap it was meant to fix was worse there. One page, one behaviour.
+
+**Nothing is removed from the document.** The full sentence is still in the HTML,
+a screen reader reads all of it, and the card links to the page that carries it.
+The three-up category rail is untouched.
+
+**The sweep stays quiet, and not by accident.** Its spill assertion excludes
+content whose ancestor clips (`overflow-x` not `visible`), which is exactly this
+case — the check is not being dodged, it is being answered: the text is
+contained by the card, not spilling the page. 56 page/width checks still pass.
+
+### The process note
+
+Entry 32 recorded that a caveat in a summary reads as done. This is the same
+lesson one level up: **a string-by-string diff answers "are the words right", and
+the instruction was "is there too much text".** Six reference screens were read
+as copy and not as renderings. The tell was in the screenshot the whole time —
+text cut mid-word is a layout instruction, not a typo.
+
+### Measurements
+
+| | |
+| --- | --- |
+| verify | 8 checks, **537 assertions**, 0 failures |
+| distinct classes | 290 → **291** (`product-card-summary`) |
+| index card summary | 3 lines → 1 at 1440; 3 → 1 at 900; 2 → 1 at 390 |
+| category card summary | 2 lines, unchanged |
+
+### Open questions
+
+Unchanged: 22, 23, 24, 25, 26, 28, 29, 31–34, 36, 37, 40, 41, 44, 45, 46. One
+added:
+
+47. **Eight of thirteen index summaries now cut mid-word.** That is what the
+    design draws and it is applied as drawn, but a line written to fit 259px
+    would read better than a sentence trimmed by a card edge. Thirteen short
+    lines, if the client wants them.

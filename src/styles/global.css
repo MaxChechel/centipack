@@ -2347,6 +2347,32 @@
      Cards in a row are still equal height (the grid stretches them); what varies
      now is where the picture begins inside each one. */
 
+  /* ONE LINE ON THE PRODUCTS INDEX, CUT BY THE CARD'S OWN EDGE.
+     The five-up card is 259px wide and the summary is a 40-to-100 character
+     sentence, so it wraps to three lines there and crowds the photograph —
+     while the same string takes two lines on a 416px category card and reads
+     fine. The design draws the index card with a single line running under the
+     card edge, mid-word, and that is the instruction: less copy on this page,
+     not different copy.
+
+     `white-space: nowrap` and nothing else. `.product-card` already has
+     `overflow: hidden`, so the card does the cutting — which is why there is no
+     ellipsis, and why the sweep's spill assertion stays quiet: content inside an
+     ancestor that clips is contained, not spilled (sweep.mjs).
+
+     NOTHING IS LOST. The full sentence is still in the HTML, so a screen reader
+     reads all of it, and the card links to the page that carries it in full.
+
+     THE INDEX RAIL AT EVERY WIDTH, not just where the five-up grid exists.
+     Scoping it to `lg` left the narrower widths worse than the case that
+     prompted this: below 62rem the index is a scroll rail at 26% of the
+     viewport — 234px at 900, narrower than the 259px desktop card — so the same
+     sentence wrapped to three lines and ran over the photograph. One page, one
+     behaviour. The three-up category rail is untouched at every width. */
+  .product-rail-5 .product-card-summary {
+    white-space: nowrap;
+  }
+
   /* The whole card is one target. `::after` here rather than an
      `after:content-['']` utility in markup: the empty-string arbitrary value is
      escaped on its way into the HTML attribute, so the class ships and the rule

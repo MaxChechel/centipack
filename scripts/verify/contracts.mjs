@@ -60,7 +60,33 @@ const hasDisabledAttribute = (tag) => {
   return /\sdisabled(\s|=|\/?>)/.test(namesOnly);
 };
 
-function formShipsDisabled() {
+/**
+ * §8, RESTATED. This asserted that every control shipped `disabled` until a
+ * Turnstile key existed, because a form posting into an unverified endpoint
+ * swallows a real enquiry SILENTLY.
+ *
+ * Submission is no longer a native POST (WORKLOG entry 15): it is an intercepted
+ * fetch that renders whatever the endpoint answers, and the endpoint answers
+ * precisely — 503 without a Turnstile secret, 400 for a missing token, 502 with
+ * no delivery provider. A submission on an unconfigured build therefore fails IN
+ * FRONT OF THE VISITOR rather than vanishing, and disabling the controls is no
+ * longer what prevents the loss.
+ *
+ * WHAT PREVENTS IT NOW IS THE LIVE REGION, so that is what this asserts.
+ *
+ * Note that simply letting the old check pass would have been worse than
+ * deleting it: it short-circuited on `data-contact-ready` with "enable path
+ * allowed", so a form that is always ready would have sailed through asserting
+ * NOTHING while still printing a reassuring green line.
+ *
+ * Three things, all load-bearing:
+ *   1. a submit control exists at all;
+ *   2. a status element exists inside the form carrying an ARIA live role —
+ *      without it every failure is silent again;
+ *   3. the honeypot is present and NOT disabled, because a bot has to be able to
+ *      fill it. That is the one control whose enabled state is the mechanism.
+ */
+function formReportsFailure() {
   const notes = [];
   let checks = 0;
   let failures = 0;
@@ -73,75 +99,38 @@ function formShipsDisabled() {
       if (!/data-contact-form/.test(form)) continue;
       checks++;
 
-      const ready = /data-contact-ready/.test(form);
       const submits = [...form.matchAll(/<(button|input)\b[^>]*type=["']submit["'][^>]*>/g)].map((m) => m[0]);
+      const status = /<[a-z]+\b[^>]*data-contact-status[^>]*>/.exec(form)?.[0] ?? '';
+      const live = /role=["']status["']/.test(status) || /aria-live=/.test(status);
+      const honeypot = /<input\b[^>]*company_website[^>]*>/.exec(form)?.[0] ?? '';
 
-      /* `<fieldset disabled>` disables every control inside it, per the HTML
-         spec, and that is the correct way to make a radio group inert — so a
-         contract that only looked for the attribute on each control would
-         false-positive on correct markup. Model the real rule, not a convention:
-         collect the character ranges covered by a disabled fieldset, and treat
-         anything inside one as disabled. A contract people have to work around
-         is a contract people delete. */
-      const disabledRanges = [];
-      for (const m of form.matchAll(/<fieldset\b[^>]*>/g)) {
-        if (!hasDisabledAttribute(m[0])) continue;
-        const close = form.indexOf('</fieldset>', m.index);
-        disabledRanges.push([m.index, close === -1 ? form.length : close]);
-      }
-      const insideDisabledFieldset = (at) => disabledRanges.some(([a, b]) => at > a && at < b);
-
-      const controls = [...form.matchAll(/<(input|textarea|select|button)\b[^>]*>/g)]
-        .map((m) => ({ tag: m[0], element: m[1], at: m.index }))
-        // The honeypot is deliberately not disabled: a bot must be able to fill
-        // it, which is the entire mechanism.
-        .filter((c) => !/company_website/.test(c.tag))
-        // Nothing types into a hidden input.
-        .filter((c) => !/type=["']hidden["']/.test(c.tag));
-
-      if (ready) {
-        notes.push(`${file}: contact form is configured (data-contact-ready) — enable path allowed`);
-        continue;
-      }
-
-      /* Report the population by type. "8 controls" hides a control type falling
-         out of the form; "checkbox 1, radio 3, select 1" does not. */
-      const kindOf = (c) => {
-        const type = /type=["']([a-z]+)["']/.exec(c.tag)?.[1];
-        return c.element === 'input' ? (type ?? 'text') : c.element;
-      };
-      const breakdown = {};
-      for (const c of controls) breakdown[kindOf(c)] = (breakdown[kindOf(c)] ?? 0) + 1;
-      const census = Object.entries(breakdown)
-        .sort()
-        .map(([k, n]) => `${k} ${n}`)
-        .join(', ');
-
-      const enabledSubmits = submits.filter((c) => !hasDisabledAttribute(c));
-      const enabled = controls.filter((c) => !hasDisabledAttribute(c.tag) && !insideDisabledFieldset(c.at));
-
-      if (submits.length === 0) {
-        failures++;
-        notes.push(`${file}: contact form has no submit control — cannot verify the ships-disabled rule`);
-      } else if (enabledSubmits.length) {
-        failures++;
-        notes.push(
-          `${file}: SUBMIT CONTROL IS ENABLED on a build with no configured endpoint (§8). ` +
-            'An unverified endpoint must not be reachable.',
+      const problems = [];
+      if (submits.length === 0) problems.push('no submit control — nothing can be sent');
+      if (!status) {
+        problems.push(
+          'NO [data-contact-status] ELEMENT. The submit is intercepted, so the endpoint answer ' +
+            'has nowhere to go and every failure is silent — the exact loss §8 exists to prevent.',
         );
-        notes.push(`    ${enabledSubmits[0].slice(0, 140)}`);
-      } else if (enabled.length) {
-        failures++;
-        for (const c of enabled) {
-          notes.push(
-            `${file}: ${kindOf(c).toUpperCase()} CONTROL "${/name=["']([^"']*)["']/.exec(c.tag)?.[1] ?? '?'}" ` +
-              'IS ENABLED with no configured endpoint (§8). A control that accepts input invites someone ' +
-              'to fill this form and lose it.',
-          );
-          notes.push(`    ${c.tag.slice(0, 140)}`);
-        }
+      } else if (!live) {
+        problems.push(
+          'the status element carries no role="status" and no aria-live, so the answer is drawn but never announced',
+        );
+      }
+      if (!honeypot) problems.push('honeypot field is missing');
+      else if (hasDisabledAttribute(honeypot)) {
+        problems.push('honeypot is DISABLED — a bot cannot fill it, which removes the trap entirely');
+      }
+
+      if (problems.length) {
+        failures += problems.length;
+        for (const problem of problems) notes.push(`${file}: ${problem}`);
       } else {
-        notes.push(`${file}: ships disabled — ${controls.length} controls (${census}), no endpoint configured`);
+        const controls = [...form.matchAll(/<(input|textarea|select|button)\b[^>]*>/g)]
+          .filter((m) => !/company_website/.test(m[0]))
+          .filter((m) => !/type=["']hidden["']/.test(m[0]));
+        notes.push(
+          `${file}: ${controls.length} live control(s), submit present, failures reported into a live region`,
+        );
       }
     }
   }
@@ -150,17 +139,6 @@ function formShipsDisabled() {
   return { checks, failures, notes };
 }
 
-/**
- * §2.4 / §10 — A PRODUCTION BUILD EMITS NO STYLEGUIDE ROUTE.
- *
- * The gate is an injected route rather than a `noindex`, because `noindex` is a
- * request and not existing is a fact. But "the integration does the right thing"
- * is exactly the kind of claim that stays true until someone edits the config, so
- * it gets asserted: run a real production build into a scratch directory and look.
- *
- * A leaked styleguide on a client site publishes that client's token values,
- * component inventory and internal notes to anyone who guesses the URL.
- */
 function productionOmitsStyleguide() {
   const notes = [];
   const out = '.verify/production';
@@ -294,7 +272,7 @@ function slotIsReserved() {
 }
 
 const CONTRACTS = [
-  ['form ships disabled (§8)', formShipsDisabled],
+  ['form reports failure (§8)', formReportsFailure],
   ['`as` reserved for Section (§4.2)', asPropReservedForSection],
   ['`slot` reserved by Astro', slotIsReserved],
   ['production omits styleguide (§2.4)', productionOmitsStyleguide],

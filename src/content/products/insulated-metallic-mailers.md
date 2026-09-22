@@ -5,7 +5,7 @@ category: cold-chain-shipping
 order: 2
 summary: "6 sizes · 1 in and 1.5 in wall · validated for 24 and 48-hour 2–8°C profiles"
 lede: >-
-  Foam-lined metallic mailers for 2–8°C injectables. Six sizes, two wall thicknesses — the workhorse of GLP-1 fulfillment at volume. Configurations validated under summer ambient conditions for 24 and 48-hour transit profiles.
+  Foam-lined metallic mailers for 2–8°C injectables — the GLP-1 workhorse. Six sizes, two wall thicknesses, validated for 24 and 48-hour summer transit.
 contactLinkLabel: >-
   Talk to us about this mailer
 facts:
@@ -23,12 +23,12 @@ facts:
   - label: Customization
     value: Logo, color, and print on exterior
   - label: Production
-    value: Made to order — produced to your confirmed run. Lead times and minimums confirmed at quote. Supply consistency backed by our manufacturing network.
+    value: Made to order to your confirmed run. Lead times and minimums at quote; supply backed by our manufacturing network.
   - label: Disposal
     value: Metallized film. Eco liner available where patients ask about disposal.
 specTable:
   caption: >-
-    Every size is a row, not a separate product. Payload capacity holds steady across a duration tier while wall thickness and refrigerant scale up. All dimensions are length × width × height, in inches.
+    Every size is a row, not a separate product. Payload holds steady within a duration tier; wall thickness and refrigerant scale up. Dimensions are L × W × H, inches.
   note: >-
     * Recommended profile under summer ambient assumptions, not a guarantee. Actual hold depends on gel-pack count, transit and season. Placeholder values — client to confirm.
   columns:

@@ -147,6 +147,14 @@ const stats = [
       <h1 class="hero-headline text-h1 text-primary">
         Cold chain packaging for high-volume compounding pharmacies
       </h1>
+      {/* v8 DRAWS A HERO BODY, reversing the "hero: no subtext" call from the
+          2026-09-12 review. The design's own mobile frame carries this line, so
+          the later instruction wins — flagged in the WORKLOG rather than
+          silently overriding an earlier one. */}
+      <p class="text-body text-secondary measure">
+        Insulated shippers, refrigerants, custom boxes, and pharmacy formats — one supplier, built
+        for pharmacies producing at scale.
+      </p>
       {/* No lede here. The design does not draw one at either width; the
           sentence lives on as the page's meta description, which is where it
           was doing its real work. Closes open question 16. */}
@@ -243,13 +251,10 @@ const stats = [
     <div class="gap-2xl flex flex-col">
       <SectionHeader heading="Three integrated layers. Available individually or as a complete solution. Built to perform." headingLevel="h2" size="h2" split>
         <Fragment slot="lede">
-          Your product deserves more than packaging — it requires a cold-chain system built to
-          maintain thermal integrity from packout through delivery. We manufacture the complete
-          solution: insulated shippers, refrigerants, custom secondary packaging, and pharmacy
-          formats — with cold chain shippers designed for 2–8°C performance from 24 to 72 hours, and
-          pharmacy formats and custom boxes built to the same standard of quality. Backed by 20+
-          years of combined cold-chain expertise and a supply chain built to serve the largest
-          compounding programs.
+          A cold-chain system, not just packaging: shippers and refrigerants validated for 2–8°C
+          from 24 to 72 hours, with formats and custom boxes built to the same standard. Behind it,
+          20+ years of combined cold-chain expertise and supply built for the largest compounding
+          programs.
         </Fragment>
         <Button href="/products" variant="ghost" size="link" icon="arrow">Browse all formats</Button>
       </SectionHeader>
@@ -321,7 +326,7 @@ const stats = [
           side shots. An arbitrary value with its reason stated (§4.2); this is
           the second editorial width on the page, and a third makes it a token. */}
       <div class="gap-lg relative z-10 flex max-w-[38.75rem] flex-col items-center">
-        <h2 class="text-h2 text-primary">We produce at volume. You get the price that comes with it.</h2>
+        <h2 class="text-h2 text-primary">Thermal integrity. Validated performance. Manufacturing scale.</h2>
         <p class="text-body text-secondary measure">
           Mass volume through our own manufacturing partners — no distributors, no markup in
           between. Quoted to your volumes and lanes.

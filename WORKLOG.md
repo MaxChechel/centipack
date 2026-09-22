@@ -2884,3 +2884,97 @@ Unchanged: 22, 23, 24, 25, 26, 28–34, 36–40. One added:
     the `label` prop with it; if products will keep arriving without photography,
     it stays exactly as it is. Not a decision to make by noticing the count hit
     zero.
+
+---
+
+## 2026-09-22 — Entry 27. The form goes live, and copy v8
+
+### §8's guarantee moved rather than lapsed
+
+The form shipped every control `disabled` until a Turnstile key existed. Asked
+three times to enable it for testing; answered three times with "set the test
+keys", which did not serve the request. Doing it properly instead.
+
+The original fear was exact and correct: **a form that posts into an unverified
+endpoint swallows a real enquiry silently.** That fear was written when
+submission was a native POST. It has not been one since entry 15 — submission is
+an intercepted fetch that renders whatever the endpoint answers, and the endpoint
+answers precisely: 503 with no Turnstile secret, 400 for a missing token, 502
+with no delivery provider. **A submission on an unconfigured build now fails in
+front of the visitor, in words.** Nothing is swallowed, so nothing needs
+disabling to prevent the swallowing.
+
+So the controls are live, the notice is gone, and the rule the contract enforces
+has moved to the thing that now carries it: **a form whose submit is intercepted
+must have a live region to report into.**
+
+**Letting the old check pass would have been worse than deleting it.** It
+short-circuited on `data-contact-ready` with "enable path allowed" — so a form
+that is always ready would have sailed through asserting NOTHING while printing
+a reassuring green line. `formShipsDisabled` is replaced by
+`formReportsFailure`, which asserts three load-bearing things: a submit control
+exists, a `[data-contact-status]` element exists carrying `role="status"` or
+`aria-live`, and the honeypot is present and NOT disabled — that last one being
+the single control whose enabled state IS the mechanism.
+
+Fault-injected, per §9. Removing the status element:
+
+```
+FAIL  build contracts
+      contact.html: NO [data-contact-status] ELEMENT. The submit is intercepted,
+      so the endpoint answer has nowhere to go and every failure is silent —
+      the exact loss §8 exists to prevent.
+```
+
+Tested end to end in the browser: 7 controls, 0 disabled, no notice, every field
+accepting input, and a real submit against the un-deployed endpoint rendering
+*"Could not reach the server. Please email info@centipack.com."* — visible,
+which is the whole point.
+
+### Copy v8
+
+A newer pass than the v7 redline applied on the 17th — Figma 934:28182, frames
+named "… v8 copy tightened". Mostly shorter versions of the same lines. Applied
+to the home hero, the three-layers body, the volume heading, the products index
+hero, all three category summaries and ledes, the mailers lede, production row
+and table caption, the About prose, and the contact body.
+
+**Two things v8 settles that were open questions.** Question 38 recorded that
+redline 1.1 and 1.5 had no target on this site. v8 supplies both: the home hero
+DOES take a body, and the volume band's heading IS "Thermal integrity. Validated
+performance. Manufacturing scale." Question 38 closes.
+
+The hero body reverses the "hero: no subtext" call from the 2026-09-12 review.
+The later instruction wins, but an earlier explicit ruling is not something to
+overturn quietly — recorded here, and trivial to put back.
+
+**About collapsed from four paragraphs to one.** v8 writes it as a single block;
+the closing line is unchanged.
+
+### Measurements
+
+| | |
+| --- | --- |
+| verify | 8 checks, **536 assertions**, 0 failures |
+| contact form | 7 controls, 0 disabled |
+| keyboard assertions | 3 → **6**, the form's controls now being reachable |
+
+### Open questions
+
+**38 closes.** Unchanged: 22, 23, 24, 25, 26, 28–34, 36, 37, 39, 40, 41. Three
+added:
+
+42. **v8 shows the hero key numbers as THREE, with the pre-redline labels** —
+    "supplier, not five", "distributors in between", "years in cold chain before
+    this". v7 §1.2 replaced them with four, each with a payoff line, and that is
+    what is live. Either v8 reverts it or that frame is a stale instance. Not
+    guessed at; left as applied from v7 until someone says.
+43. **v8 adds a section this site does not have: "How ordering works"** — a
+    four-step timeline (Week 1 · Week 2 · Up to 12 weeks · Every run after) with
+    real copy for each step. That is a new block to build, not a copy edit. It
+    also contains *"Lorem ipsum dolor sit amet consectetur…"* in the design, so
+    at least one field is unwritten.
+44. **The v8 frames carry copy from other projects** — "Deploy solar
+    installations with Solarpunk in weeks", "The world's most advanced supply
+    chain and logistics teams run their operations on Pallet", "Jan 11, 2050".
+    Template leftovers, not CentiPack copy, and none of it was applied.

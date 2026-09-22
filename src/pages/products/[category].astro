@@ -9,6 +9,7 @@ import CtaPlate from '../../components/blocks/CtaPlate.astro';
 import Media from '../../components/blocks/Media.astro';
 import { getCatalogue, type CategoryView, type ProductView } from '../../lib/catalogue';
 import { closingBand } from '../../lib/closing-band';
+import OrderingSteps from '../../components/blocks/OrderingSteps.astro';
 
 /**
  * Category — one template, three pages (§4.4, §5).
@@ -103,6 +104,10 @@ const cta = await closingBand();
   </Section>
 
   {/* 5 — The closing band. */}
+  <Section space="lg">
+    <OrderingSteps />
+  </Section>
+
   <Section space="md" spaceTop="lg">
     <CtaPlate {...cta} />
   </Section>

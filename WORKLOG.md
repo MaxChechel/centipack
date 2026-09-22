@@ -2978,3 +2978,82 @@ added:
     installations with Solarpunk in weeks", "The world's most advanced supply
     chain and logistics teams run their operations on Pallet", "Jan 11, 2050".
     Template leftovers, not CentiPack copy, and none of it was applied.
+
+---
+
+## 2026-09-28 — Entry 28. Copy 1:1 with v8, checked by diff rather than by eye
+
+Asked to make the site match Figma 934:28182 exactly. Did it as a **diff** rather
+than a reading: extracted all 70 text strings from the node, normalised
+whitespace, and searched the whole built site for each one. That turns "is it
+1:1" into a list instead of an opinion.
+
+First pass: **22 absent.** Three categories.
+
+### Thirteen were false positives, and saying why matters
+
+- **Arrow labels** — "Browse all formats →", "How custom boxes fit the build →"
+  and four more. The label text is on the site; the arrow is an inline SVG, not a
+  "→" character. Matching the string literally would mean putting a glyph next to
+  the icon that already means it.
+- **Breadcrumbs** — "Home / Products / Cold Chain & Shipping" is one Figma text
+  node and four elements here, with the separators between them. The words are
+  all present.
+
+### Two were real, and both are now fixed
+
+- **The testimonial used straight apostrophes** where the design uses typographic
+  ones: "they've" for "they’ve". Three of them in one quote.
+- **"How ordering works" did not exist.** Built as `OrderingSteps.astro` and
+  placed on the four pages the design puts it on — products index and all three
+  categories — before the closing band. One block, four pages, one copy of the
+  content, the same rule that puts the closing band's copy in `lib/`.
+
+### And three were a trap worth recording
+
+The three hero stat labels — "supplier, not five", "distributors in between",
+"years in cold chain before this" — are in the v8 file and not on the site, which
+reads as a straightforward miss. It is the opposite. **Their container,
+`935:7438`, is marked `hidden="true"`.** The stats band is switched off in v8, so
+that frame's contents are stale leftovers from before the v7 redline replaced
+them with four items.
+
+Reverting to match would have undone a deliberate client instruction on the
+evidence of a layer nobody can see. Open question 42 closes on that, and the
+general point is the one worth keeping: **a string's presence in a Figma file is
+not evidence it is in the design.** Check the hidden flag on the way up.
+
+### What was deliberately not matched
+
+- **The step titles.** Each of the four steps has a title field, and all four
+  read "Analyse" — one unedited component default repeated, sitting in the same
+  frame as a "Lorem ipsum dolor sit amet consectetur…" paragraph. Four steps
+  titled "Analyse" is placeholder text, and the brief says flag it. The steps
+  ship with their time label and their body, both of which are written.
+- **Copy from other projects** in the same frames: "Deploy solar installations
+  with Solarpunk in weeks", "…run their operations on Pallet", "Jan 11, 2050".
+- **The product breadcrumb.** v8 writes it "Products / Cold Chain & Shipping /
+  Insulated Metallic Mailers" with no Home, while its own category frames start
+  at Home. Entry 14 added Home precisely to fix that inconsistency, and the
+  BreadcrumbList it emits should start at the site root. Kept.
+
+Second pass after the fixes: **3 absent, all of them the hidden-frame labels.**
+
+### Measurements
+
+| | |
+| --- | --- |
+| verify | 8 checks, **538 assertions**, 0 failures |
+| v8 strings reconciled | 70 of 70, minus 3 from a hidden frame |
+| new block | `OrderingSteps`, on 4 pages, 0 bytes of JavaScript |
+
+### Open questions
+
+**42 closes** — v8 does not revert the key numbers; the frame is hidden.
+Unchanged: 22, 23, 24, 25, 26, 28–34, 36, 37, 39, 40, 41, 44. One rewritten:
+
+43. **The ordering steps have no titles.** The design's title field reads
+    "Analyse" on all four. Each step currently shows its time label and its body,
+    which is honest and reads well, but the design clearly intends a title per
+    step — "Analyse / Specify / Produce / Reorder" or similar. Needs four words
+    from the client.

@@ -1,0 +1,80 @@
+---
+import SectionHeader from './SectionHeader.astro';
+
+/**
+ * "How ordering works" — the four-step timeline (Figma 934:28182, v8).
+ *
+ * ONE BLOCK, FOUR PAGES. It appears on the products index and on all three
+ * category pages, with identical content, so the steps live here rather than
+ * being typed into four templates — the same rule that puts the closing band's
+ * copy in `lib/closing-band.ts` (§5's "one source per list", applied to copy).
+ *
+ * An <ol>, not a grid of divs: this is a sequence, and the order carries meaning
+ * a screen reader should hear. The time labels are the term and the description
+ * is the definition, which is what makes them a list rather than four cards.
+ *
+ * ORDERED CHRONOLOGICALLY, NOT IN FIGMA'S LAYER ORDER. The file lists them Week
+ * 1, Up to 12 weeks, Week 2, Every run after — a two-column grid filled down
+ * rather than across. The body above them says "eight to twelve weeks from
+ * first call to first delivery", so the sequence is the reading.
+ *
+ * NO STEP TITLES, AND THAT IS DELIBERATE. The design gives each step a title
+ * field and all four read "Analyse" — one unedited component default repeated,
+ * exactly like the "Lorem ipsum" paragraph sitting beside them in the same
+ * frame. Shipping four steps titled "Analyse" would be shipping placeholder
+ * text; the brief says flag it instead. Open question 43.
+ */
+const STEPS = [
+  {
+    when: 'Week 1',
+    body:
+      'What you ship, where it goes, how much, and which season hurts. We will also ask what you ' +
+      'pay now — cost versus performance is the conversation.',
+  },
+  {
+    when: 'Week 2',
+    body:
+      'A recommended build — shipper, wall thickness, refrigerant, formats, custom box — in ' +
+      'writing. Expect some back and forth.',
+  },
+  {
+    when: 'Up to 12 weeks',
+    body: 'Made to order through our manufacturing partners, with the date agreed up front and in writing.',
+  },
+  {
+    when: 'Every run after',
+    body:
+      'No wait after the first run. We hold your spec and plan around your cadence — a repeat ' +
+      'order is a message, not a project.',
+  },
+];
+
+interface Props {
+  /** Document outline. One h1 per page, zero skips. */
+  headingLevel?: 'h2' | 'h3';
+}
+
+const { headingLevel = 'h2' } = Astro.props as Props;
+---
+
+<div class="gap-2xl flex flex-col">
+  <SectionHeader
+    eyebrow="How ordering works"
+    heading="The first order is a project. Every one after is a repeat."
+    headingLevel={headingLevel}
+    size="h2"
+    lede="Everything is made to order — expect eight to twelve weeks from first call to first delivery. After that, reordering is routine."
+    split
+  />
+
+  <ol class="list-bare gap-lg grid sm:grid-cols-2 lg:grid-cols-4">
+    {
+      STEPS.map((step) => (
+        <li class="border-line pt-md gap-sm flex flex-col border-t">
+          <p class="text-eyebrow">{step.when}</p>
+          <p class="text-body text-secondary">{step.body}</p>
+        </li>
+      ))
+    }
+  </ol>
+</div>

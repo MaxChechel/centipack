@@ -8,5 +8,5 @@ images:
   main:
     src: ../../assets/products/cream-ointment-jars.avif
     alt: >-
-      A closed green ointment jar beside an open cream-coloured one.
+      A closed navy wide-mouth ointment jar.
 ---

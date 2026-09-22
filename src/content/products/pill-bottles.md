@@ -8,5 +8,5 @@ images:
   main:
     src: ../../assets/products/pill-bottles.avif
     alt: >-
-      A white pharmacy bottle with its lid off beside a navy branded bottle.
+      A closed navy pharmacy bottle.
 ---

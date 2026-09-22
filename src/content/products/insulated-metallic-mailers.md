@@ -51,5 +51,5 @@ images:
   main:
     src: ../../assets/products/insulated-metallic-mailers.avif
     alt: >-
-      A blue mailer printed "Open Me." beside a foil-lined metallic mailer.
+      A sealed blue insulated mailer printed "Refrigerate upon opening".
 ---

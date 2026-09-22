@@ -8,5 +8,5 @@ images:
   main:
     src: ../../assets/products/eco-liners.avif
     alt: >-
-      A corrugated box opened to show its moulded kraft paper liner.
+      A corrugated box opened to show its kraft paper liner.
 ---

@@ -3057,3 +3057,69 @@ Unchanged: 22, 23, 24, 25, 26, 28–34, 36, 37, 39, 40, 41, 44. One rewritten:
     which is honest and reads well, but the design clearly intends a title per
     step — "Analyse / Specify / Produce / Reorder" or similar. Needs four words
     from the client.
+
+---
+
+## 2026-09-28 — Entry 29. The product photography is replaced
+
+Thirteen new thumbnails arrived as `Product card (2).avif`, `Product card-1
+(1).avif` … — and the thirteen named files were **deleted**, not added to. So
+this was a replacement, and `npm run build` was already failing:
+
+```
+[ImageNotFound] Could not find requested image `../../assets/products/vial-presentation-boxes.avif`
+```
+
+Renamed to the thirteen slugs, which is all the wiring needed — the markdown
+already points at `assets/products/<slug>.avif`, so no content file changed for
+the images themselves.
+
+**The mapping was re-derived, not reused.** The filenames carry the same numbers
+as the first set but nothing guarantees the same order, and three of the shots
+name themselves: #7 is printed with "Puncture Here" targets, #8 is a kraft liner
+in a corrugated box, #6 is an EPS cooler in its outer. Those three fix their
+categories and the rest follow. The result matches the previous mapping, which
+is a check on both rather than an assumption carried forward.
+
+### The card ratio follows the artwork, for the third time
+
+4:3 originally, 1:1 when the first photography arrived square, and now **4:5** —
+the new set is 1037 × 1284, portrait. The rule has not changed, only the files:
+each item is centred on a plain ground with its own margin, so `object-cover` in
+a squarer box crops the top and bottom off all thirteen. Cards are 259 × 411 at
+1440, image 227 × 290.
+
+### Alt text rewritten
+
+Twelve of the thirteen descriptions were of the OLD photographs — different
+framing, different styling, in one case a different colour of jar entirely
+("a closed green ointment jar beside an open cream-coloured one" for a shot that
+is now a single navy jar). Alt text that describes a photograph nobody is looking
+at is worse than none, because it reads as correct.
+
+That also cleared the last British spelling on the site: "cream-coloured" was
+sitting in alt text, which the redline's global check reaches but a reader never
+sees.
+
+One nicety worth recording: `pump-dispensers` needed no change — the new shot and
+the old one are both "a navy airless pump bottle with its cap alongside". The
+script asserted that every replacement changed something and tripped on that,
+which is the assertion being too strict rather than the data being wrong.
+
+### Measurements
+
+| | |
+| --- | --- |
+| verify | 8 checks, **538 assertions**, 0 failures |
+| product thumbnails | 13 replaced, 13 alts rewritten |
+| card | 259 × 411 at 1440, image 4:5 |
+
+### Open questions
+
+Unchanged: 22, 23, 24, 25, 26, 28–34, 36, 37, 39, 40, 41, 43, 44.
+
+**33 is worth re-reading rather than closing.** It recorded that `vial-kits` and
+`pill-bottles` were inferred rather than confirmed. The new set has the same
+ambiguity in the same place — one branded jar opened to show vials, one closed
+navy bottle — and was read the same way. Two independent passes agreeing is not
+the same as the client confirming, and it is still a two-line swap.

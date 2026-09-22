@@ -8,5 +8,5 @@ images:
   main:
     src: ../../assets/products/eps-foam-coolers.avif
     alt: >-
-      A closed EPS foam cooler beside its corrugated outer, printed with refrigerate and up arrows.
+      An EPS foam cooler inside its open corrugated outer, printed rush, perishable, insulated.
 ---

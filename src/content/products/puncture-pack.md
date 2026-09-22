@@ -8,5 +8,5 @@ images:
   main:
     src: ../../assets/products/puncture-pack.avif
     alt: >-
-      Two padded mailers, one white and one blue, marked with puncture points.
+      A padded blue mailer marked with puncture points.
 ---

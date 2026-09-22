@@ -8,5 +8,5 @@ images:
   main:
     src: ../../assets/products/spray-bottles.avif
     alt: >-
-      A lavender spray bottle and a white fine-mist bottle with its cap alongside.
+      A navy spray bottle with its cap alongside.
 ---

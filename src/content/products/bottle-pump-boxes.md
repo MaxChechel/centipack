@@ -8,5 +8,5 @@ images:
   main:
     src: ../../assets/products/bottle-pump-boxes.avif
     alt: >-
-      An open blue printed box holding two blue bottles in a fitted insert.
+      An open blue mailer box holding two bottles in a fitted insert.
 ---

@@ -14,5 +14,5 @@ images:
   main:
     src: ../../assets/products/exterior-mailer-box.avif
     alt: >-
-      An open corrugated mailer packed with a branded box, a jar and a bottle on a foil liner.
+      An open white corrugated mailer holding two branded boxes.
 ---

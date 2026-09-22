@@ -55,11 +55,13 @@ const link = 'product-card-link rounded-sm';
     <p class="text-caption text-secondary">{product.summary}</p>
   </div>
 
-  {/* 1:1, not 4:3. The product photography is exported square — each item
-      centred on a plain ground with its own margin — and `object-cover` in a 4:3
-      box crops the top and bottom off every one of them. The frame follows the
-      artwork here rather than the artwork being cut to fit the frame. */}
-  <Media image={product.image} label={product.title} ratio="1 / 1" class="rounded-sm" />
+  {/* 4:5, FOLLOWING THE ARTWORK AGAIN. This was 4:3, then 1:1 when the
+      photography arrived square, and the replacement set is 1037 x 1284 —
+      portrait. The rule has not changed, only the files: each item is centred on
+      a plain ground with its own margin, so `object-cover` in a squarer box
+      crops the top and bottom off all thirteen. The frame follows the artwork
+      rather than the artwork being cut to fit the frame. */}
+  <Media image={product.image} label={product.title} ratio="4 / 5" class="rounded-sm" />
 
   {/* Out of flow — see `.product-card-go` in global.css. It is the last child so
       it paints over the picture, and `pointer-events: none` keeps it from

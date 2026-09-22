@@ -8,5 +8,5 @@ images:
   main:
     src: ../../assets/products/vial-presentation-boxes.avif
     alt: >-
-      A white magnetic-closure box and a blue drawer box, each holding two vials.
+      A blue drawer box slid open to show two vials in a fitted insert.
 ---

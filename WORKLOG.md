@@ -3296,3 +3296,59 @@ anything the human has to *decide* belongs at the top of the reply.
 
 **30 closes** — the summary is the client's now, not mine. Unchanged: 22, 23, 24,
 25, 26, 28, 29, 31–34, 36, 37, 40, 41, 43, 44, 45, 46.
+
+---
+
+## 2026-09-22 — Entry 33. Six reference screens, two differences
+
+Six full-page references supplied — home, about, products index and all three
+categories — with "update copy on all pages". Cut each into full-resolution
+tiles and read them against the built pages' visible text, string by string.
+**Home and the three category pages match already. Two differences, both
+applied.**
+
+### Applied
+
+| | |
+| --- | --- |
+| Products index closing band | **no body** — "Produced at scale." and the button. The three category screens keep the sentence, and so do product pages, which were not supplied |
+| About closing statement | **one paragraph**, not three lines — the `<br />`s are out, and it wraps where the measure puts it |
+| "How ordering works" | **off the category pages.** This was already deleted in the working tree when the session began — `OrderingSteps.astro` gone, its use removed from `[category].astro`. None of the six screens draws it, so it is committed as found, with one stray blank line tidied |
+
+**The closing band is on its fourth turn.** It originally had the body on
+categories and products but not on the index. Then it was a heading and a button
+everywhere. Entry 31 put the body back everywhere, and now the index goes without
+it again. That first reading was right all along. `closing-band.ts` stays the one
+string; the index drops it at the call site with `body={undefined}`, and the
+history in the file gets one more line.
+
+### Not matched, and why
+
+1. **The pharmacy formats cross-card on the cold chain screen** reads "Vial kits,
+   bottles, dispensers and jars — what the medication is dispensed in." Entry 31
+   kept the other version on a two-screens-to-one vote. The real reason is
+   firmer: `git log -S` shows that line is the **initial commit's copy, replaced
+   by client redline v7** (3d35096). That frame is out of date. It has not been
+   revised. The custom boxes screen shows the v7 line, and that stays.
+2. **"Exterior mailer box:"** — with a trailing colon, on the custom boxes screen
+   only. The products index screen draws the same card without it. A colon after
+   a product name is a typo in the design, not a title.
+3. **The footer** shows the social marks (open question 46, unchanged) and lists
+   two custom boxes where the catalogue has three. The column is generated from
+   the collection, and the drawing predates the product (entry 16). Removing a
+   live product from the footer to match it would be wrong.
+
+### Measurements
+
+| | |
+| --- | --- |
+| verify | 8 checks, **536 assertions**, 0 failures |
+| assertion delta | −2, both in build contracts (54 → 52): the `as` and `slot` scans each cover one fewer component now that `OrderingSteps.astro` is deleted. Confirmed by running verify on a clean HEAD worktree. Nothing loosened |
+| distinct classes | 290 → 290 |
+| closing band body | 16 pages (was 17) |
+| ordering steps | 3 pages → 0 |
+
+### Open questions
+
+**43 closes** — the ordering steps are gone, and with them the four missing
+titles. Unchanged: 22, 23, 24, 25, 26, 28, 29, 31–34, 36, 37, 40, 41, 44, 45, 46.

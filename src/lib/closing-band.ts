@@ -33,7 +33,10 @@ export async function closingBand() {
        embarrassment: it shipped with a paragraph, was removed in review
        ("we don't have subtext for all instances"), and the reference screens
        show it on every product page again. Latest instruction wins; recorded so
-       the next reversal is a decision rather than a discovery. */
+       the next reversal is a decision rather than a discovery.
+       EXCEPT THE PRODUCTS INDEX, which the next set of screens draws as heading
+       and button only — the original reading below, back again. The index drops
+       it at the call site; this stays the one string everywhere else. */
     body:
       'Own manufacturing partners, no distributor markup — the best price for the spec. ' +
       'Tell us what you ship.',

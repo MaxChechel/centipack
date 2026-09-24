@@ -3624,3 +3624,57 @@ amended:
 47. **Thirteen short lines are now the only way to make this page quieter.**
     Truncation has been tried in both forms and ruled out. One sentence per
     product, written for a 227px card, from the client.
+
+---
+
+## 2026-09-24 — Entry 38. `text-wrap: balance` on every heading and paragraph
+
+Asked for as a default. Applied as one rule in the type-scale block, and **the
+interesting part is that the first version of it did nothing.**
+
+### The rule that lost
+
+Written first as `@layer base { h1…h6, p { text-wrap: balance } }`, beside the
+`overflow-wrap` net that lives there. The build was green, a probe that forced
+the property showed 39 blocks improving, and the page **still rendered exactly
+as before**.
+
+`.text-large / .text-body / .text-sm / .text-caption` set `text-wrap: pretty`,
+and they live in `@layer components`, which outranks `@layer base` whatever the
+specificity. Nearly every paragraph on this site carries one of those classes,
+so nearly every paragraph kept `pretty`.
+
+**What caught it was reading the built page, not the stylesheet:**
+`getComputedStyle(p).textWrap` → `"pretty"` while the source said `balance`, on
+the one paragraph whose line break — "…and 72-" / "hour transit." — had not
+moved in the screenshot. §2's thesis, one more time: the compiler's reality
+outranks the CSS in your head. **A probe that injects `!important` measures a
+hypothesis, not a page.** It was right about the improvement and silent about
+whether the rule applied.
+
+Now written where it wins, next to the classes it has to beat:
+
+```
+:is(h1, h2, h3, h4, h5, h6, p),
+:is(h1, h2, h3, h4, h5, h6, p):is(.text-large, .text-body, .text-sm, .text-caption)
+```
+
+The compound selector outranks the size class; the bare one covers anything
+with no size class at all. `pretty` stays as the floor for everything else
+wearing a size class — a label, a link, a table cell.
+
+### Measured, on the built pages
+
+| | |
+| --- | --- |
+| headings + paragraphs computing `balance` | **121 of 121** across 6 pages, 0 exceptions |
+| list items and table cells affected | **0** — a balanced `<li>` reads as a ragged column, and a balanced cell fights the spec table's column widths |
+| blocks whose breaks move | 39 of 60 multi-line blocks |
+| blocks made more ragged | **0.** Every one of the 39 has a longer shortest line |
+| line counts at 390 / 768 / 1024 / 1440 | **identical** — nothing gains a line, so nothing below it moves |
+| worst case fixed | About's closing statement: an 89px last line on a 448px measure. The section subtext went 645/85 → 360/366 |
+| verify | 8 checks, 536 assertions, 0 failures |
+
+### Open questions
+
+Unchanged: 22, 23, 24, 25, 26, 28, 29, 31–34, 36, 37, 40, 41, 44, 45, 47, 48, 49.

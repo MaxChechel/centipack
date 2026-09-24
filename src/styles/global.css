@@ -914,6 +914,7 @@
     overflow-wrap: break-word;
   }
 
+
   /* An identifier has no natural break points at all — `anywhere` is the only
      value that will break PUBLIC_TURNSTILE_SITE_KEY, and code is the one place
      where breaking mid-token is expected rather than a typographic failure. */
@@ -1072,7 +1073,46 @@
     font-weight: var(--font-weight-regular);
     line-height: var(--leading-body);
     letter-spacing: var(--tracking-tight);
+    /* `pretty` is the floor for anything wearing a size class — a label, a
+       table cell, a link. Headings and paragraphs take `balance` on top of it,
+       two rules down. */
     text-wrap: pretty;
+  }
+
+  /* BALANCED LINES ON EVERY HEADING AND PARAGRAPH.
+     `pretty` above buys the last line an orphan check and nothing else.
+     `balance` evens a block's lines against each other, which is what this
+     design's centred headings and short standfirsts want: a two-line heading
+     whose second line is two words, or the section subtext ending on "hour
+     transit.", is the shape it removes.
+
+     BY ELEMENT, AND IT HAS TO OUTRANK THE SIZE CLASS. A base-layer `p { }` rule
+     was written first and lost — `@layer components` beats `@layer base`, so
+     every paragraph carrying `.text-body` still computed `pretty`. The built
+     page said so (`getComputedStyle` → "pretty") while a probe that forced the
+     property showed the improvement, which is the §2 lesson exactly: the
+     stylesheet in your head is not the cascade on the page. The compound
+     selector is what makes it win; the bare one covers anything with no size
+     class at all.
+
+     MEASURED — six pages, four widths, every heading and paragraph compared
+     against `pretty` through the range's own line boxes:
+
+       · 39 of 60 multi-line blocks break differently, from a two-line heading to
+         the About page's four-line paragraph. Balancing is quadratic so browsers
+         cap it by line count, but nothing here is long enough to hit that cap.
+       · Every one of the 39 has a LONGER shortest line. Not one is more ragged.
+         The worst was About's closing statement: an 89px last line on a 448px
+         measure.
+       · Line counts are identical at 390, 768, 1024 and 1440, so no block gains
+         a line and nothing below one moves.
+
+     Headings and paragraphs only. Not `li`, not table cells: a balanced list
+     item reads as a ragged column, and a balanced cell fights the column widths
+     the spec table sets. */
+  :is(h1, h2, h3, h4, h5, h6, p),
+  :is(h1, h2, h3, h4, h5, h6, p):is(.text-large, .text-body, .text-sm, .text-caption) {
+    text-wrap: balance;
   }
 
   .text-large { font-size: var(--text-large); }

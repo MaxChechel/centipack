@@ -15,6 +15,12 @@ selectionHeading: >-
   Our cold chain range — validated 2–8°C configurations for pharmaceutical distribution
 crossBody: >-
   Mailers, coolers, gel packs, and liners — validated cold chain components designed to maintain 2–8°C from packout through delivery.
+# The v8 copy deck writes the pharmacy card shorter HERE than on the custom
+# boxes page, which shows the full line. Not a transcription slip: the deck
+# states both, one page apart. See `crossBodyOverrides` in content.config.ts.
+crossBodyOverrides:
+  pharmacy-formats: >-
+    Vial kits, bottles, dispensers and jars — what the medication is dispensed in.
 navLinkLabel: >-
   Browse cold chain
 rangeImage:

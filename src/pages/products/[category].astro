@@ -94,7 +94,16 @@ const cta = await closingBand();
         {
           others.map((other) => (
             <li class="flex">
-              <CategoryCard category={other} headingLevel={3} cross ratio="1 / 1" class="w-full" />
+              {/* This page's own line for that card, where the copy deck gives
+                  it one — see `crossBodyOverrides` in the content schema. */}
+              <CategoryCard
+                category={other}
+                headingLevel={3}
+                cross
+                ratio="1 / 1"
+                body={category.crossBodyOverrides?.[other.slug]}
+                class="w-full"
+              />
             </li>
           ))
         }

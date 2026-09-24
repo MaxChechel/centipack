@@ -49,6 +49,13 @@ interface Props {
    * its third.
    */
   ratio?: '5 / 6' | '1 / 1';
+  /**
+   * Replaces the body this card would otherwise select. One page uses it: the
+   * cold chain page's pharmacy card, which the copy deck writes shorter than
+   * the same card on the custom boxes page. The host passes the string; the
+   * card does not know why.
+   */
+  body?: string;
   class?: string;
 }
 
@@ -57,11 +64,12 @@ const {
   headingLevel = 3,
   cross = false,
   ratio = '5 / 6',
+  body: bodyOverride,
   class: className,
 } = Astro.props as Props;
 
 const title = cross ? category.pageTitle : category.title;
-const body = cross ? category.crossBody : category.cardBody;
+const body = bodyOverride ?? (cross ? category.crossBody : category.cardBody);
 
 /**
  * THE DARK TREATMENT IS A CONSEQUENCE OF THE PHOTOGRAPH, so it is conditional on

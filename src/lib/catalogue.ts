@@ -91,6 +91,8 @@ export interface CategoryView {
   navLinkLabel: string;
   selectionHeading: string;
   crossBody: string;
+  /** Per-host cross-card copy: `{ [slug of the card]: what it says here }`. */
+  crossBodyOverrides?: Partial<Record<CategorySlug, string>>;
   href: string;
   rangeImage?: Picture;
   cardImage?: Picture;
@@ -187,6 +189,7 @@ async function toCategory(entry: CollectionEntry<'categories'>): Promise<Categor
     navLinkLabel: entry.data.navLinkLabel,
     selectionHeading: entry.data.selectionHeading,
     crossBody: entry.data.crossBody,
+    crossBodyOverrides: entry.data.crossBodyOverrides,
     href: categoryHref(entry.data.slug),
     rangeImage: await toPicture(entry.data.rangeImage, WIDE_WIDTH),
     cardImage: await toPicture(entry.data.cardImage, CARD_WIDTH),

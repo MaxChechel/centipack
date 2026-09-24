@@ -182,6 +182,29 @@ const categories = defineCollection({
          * three-up hero has room a card in a two-up footer does not.
          */
         crossBody: z.string(),
+        /**
+         * WHAT ANOTHER CATEGORY'S CROSS-CARD SAYS **ON THIS PAGE**, keyed by
+         * that category's slug. Absent means it says its own `crossBody`, which
+         * is what all but one of the six cards do.
+         *
+         * A per-host override rather than a second field on the target, because
+         * the v8 copy deck writes the difference that way: the cold chain page's
+         * pharmacy card reads "Vial kits, bottles, dispensers and jars — what
+         * the medication is dispensed in", and the custom boxes page's reads the
+         * longer line. One record cannot hold both, and the deck is explicit
+         * enough that guessing which page is stale is no longer the job
+         * (WORKLOG 31, 33, 35).
+         *
+         * Keyed by the CATEGORY enum, so a slug that does not exist fails the
+         * build with the bad key named rather than silently rendering the
+         * default — the failure mode was run before this shipped (§9).
+         *
+         * `partialRecord`, not `record`: zod 4's `z.record(enum, …)` is
+         * EXHAUSTIVE — it demanded all three slugs on a map that exists to name
+         * one. Measured, not assumed; the build said
+         * "crossBodyOverrides.custom-boxes: Required".
+         */
+        crossBodyOverrides: z.partialRecord(CATEGORY, z.string()).optional(),
 
         /** The wide "range header" shot: the whole category in one picture. */
         rangeImage: picture(image).optional(),

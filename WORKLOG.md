@@ -3418,3 +3418,99 @@ added:
     design draws and it is applied as drawn, but a line written to fit 259px
     would read better than a sentence trimmed by a card edge. Thirteen short
     lines, if the client wants them.
+
+---
+
+## 2026-09-24 — Entry 35. The copy deck arrives, and settles three arguments
+
+A written copy deck — "CentiPack — Site Copy (v8, copy tightened)", eight page
+sections plus shared nav and footer, "apply verbatim on staging". **A deck that
+states the copy outranks a screenshot the copy has to be inferred from**, and it
+decides three things this log has gone back and forth on.
+
+Diffed it the way entry 32 did the index: **86 strings from the deck against the
+six built pages, string by string. Two were wrong.** The product template and the
+contact page — neither of which had a reference screen, and neither of which had
+been checked before — match the deck exactly, including the seven spec rows, the
+eight-column size table, its footnote, and all five form placeholders.
+
+### Applied
+
+| | |
+| --- | --- |
+| Products index closing band | the body is **back**. The deck writes it out under this page's own "Produced at scale." |
+| Cold chain page's pharmacy card | the **short** line: "Vial kits, bottles, dispensers and jars — what the medication is dispensed in." The custom boxes page keeps the long one |
+
+**The closing band's body has now moved five times** — on the categories and
+products but not the index, then off everywhere, then on everywhere (entry 31),
+then off the index again (entry 33, reading the screen), and now on everywhere
+because the deck says so. Entry 33 was a reasonable reading of a picture and it
+was still wrong, which is the argument for a deck over a screen in one line.
+
+### The cross-card is per-page, and now the data says so
+
+Entries 31 and 33 both treated the two category screens disagreeing as one of
+them being stale — first by vote, then by `git log -S`, which showed the short
+line was pre-redline-v7 copy. **The deck writes both, one page apart, and flags
+neither**, where it does flag two other Figma artifacts. That is no longer a
+transcription slip to be adjudicated; it is the copy.
+
+`crossBodyOverrides` on the category record: what another category's card says
+**on this page**, keyed by that category's slug. One record, one entry — the cold
+chain page's pharmacy card. Everything else still reads the target's own
+`crossBody`. `CategoryCard` gains a `body` prop that replaces the field it would
+otherwise select; it is not told why.
+
+**The host owns the override, not the target.** A `crossBodyShort` on
+pharmacy-formats would have needed the template to know which pages take the
+short one — a rule hardcoded in markup rather than data, and the next page would
+rediscover it.
+
+**Two things measured rather than assumed:**
+
+1. `z.record(CATEGORY, z.string())` is **exhaustive** in zod 4 — it demanded all
+   three slugs on a map whose purpose is to name one. The build said
+   `crossBodyOverrides.custom-boxes: Required`. `z.partialRecord` is the one.
+2. **The red path was run** (§9). Renaming the key to `pharmacy-format` fails the
+   build with `Unrecognized key: "pharmacy-format"` and the file named — so a
+   typo in an override cannot silently fall back to the default line. Reverted,
+   rebuilt clean.
+
+### Not applied
+
+1. **The footer's Custom Boxes column lists two products; the catalogue has
+   three.** The deck omits Exterior mailer box there, as the screens do. The
+   column is generated from the collection, and this is the product that was
+   added after the design (entry 16) and whose description the client supplied
+   later (entry 32). Dropping its only footer link to match a transcription of
+   the old frame would orphan a live product. **Flagged to the human rather than
+   applied** — one line if the answer is yes.
+2. **"Exterior mailer box:"** — the deck itself notes the stray colon as a Figma
+   artifact. Not copy.
+3. **Its description is still Bottle & pump boxes'** — the deck carries the
+   duplicate and marks it "needs its own copy", which is the client agreeing with
+   entry 31 rather than a new line to apply.
+
+### Measurements
+
+| | |
+| --- | --- |
+| verify | 8 checks, **537 assertions**, 0 failures |
+| deck strings checked | **86 across 6 pages, 0 missing** after the change |
+| pages the deck covers that had never been diffed | 2 (product template, contact) |
+| schema | +1 optional field, +1 card prop, 1 override in one record |
+
+### Open questions
+
+**46 closes** — the deck's footer section lists the columns and the legal line
+and has no social row, which agrees with the instruction in entry 18. The marks
+stay out.
+
+Unchanged: 22, 23, 24, 25, 26, 28, 29, 31–34, 36, 37, 40, 41, 44, 45, 47. Two
+added:
+
+48. **The footer's Custom Boxes column: two products or three?** See above. The
+    deck says two; the catalogue says three and the third has a live page.
+49. **Exterior mailer box still needs its own description.** Open question 30
+    closed when the client supplied the duplicate as deliberate; the deck now
+    marks the same line "needs its own copy". One sentence, from the client.

@@ -80,10 +80,11 @@ const cta = await closingBand();
   }
 
 
-  {/* 5 — The closing band. Heading and button only on the index; the category
-       and product pages carry the body (reference screens, entry 33). */}
+  {/* 5 — The closing band. The body is here too: the v8 copy deck writes it out
+       for this page, and it outranks the rendered screen that entry 33 read it
+       off (entry 35). */}
   <Section space="md" spaceTop="lg">
-    <CtaPlate {...cta} body={undefined} />
+    <CtaPlate {...cta} />
   </Section>
 
   <script>

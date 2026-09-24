@@ -34,9 +34,11 @@ export async function closingBand() {
        ("we don't have subtext for all instances"), and the reference screens
        show it on every product page again. Latest instruction wins; recorded so
        the next reversal is a decision rather than a discovery.
-       EXCEPT THE PRODUCTS INDEX, which the next set of screens draws as heading
-       and button only — the original reading below, back again. The index drops
-       it at the call site; this stays the one string everywhere else. */
+       FIVE TURNS ON, IT IS ON EVERY PAGE INCLUDING THE INDEX. Entry 33 took it
+       off the index because the reference screen shows the band without it;
+       the v8 copy deck then wrote the sentence out under the index's own
+       "Produced at scale." A deck that states the copy outranks a screenshot it
+       has to be inferred from, and one string serves all five page types again. */
     body:
       'Own manufacturing partners, no distributor markup — the best price for the spec. ' +
       'Tell us what you ship.',

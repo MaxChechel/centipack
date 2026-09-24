@@ -3780,3 +3780,97 @@ product, because the caption is two lines now. Unchanged: 22, 23, 24, 25, 26, 28
 
 50. **The category card photographs are darkened twice.** See above — one token,
     if the client's files already include the design's gradient.
+
+---
+
+## 2026-09-24 — Entry 40. The scrim comes off the cards, and the hero is the range
+
+Three instructions in one turn: remove the overlay from the category cards, use
+the new home hero, and borrow product shots for the closing collage until its
+own arrive.
+
+### Correction to entry 39
+
+That entry reported **four** images swept into entry 38's commit by `git add -A`.
+It was **five** — `centipack-home-hero.avif` went in with them, which is why it
+was already tracked when the instruction to use it arrived. The lesson stands
+and is now paid for twice: this entry's commit stages named paths.
+
+### The card scrim is gone, and here is what it costs
+
+`.media-scrim` off `CategoryCard`, and `--scrim-strength: 1` with it. The
+client's card files carry the design's gradient already (mean luminance 96/255
+against the 157 of the shots they replace), so the card was darkening a darkened
+picture.
+
+Sampled on the built page at 1440, white text over the photograph:
+
+| | with scrim | without |
+| --- | --- | --- |
+| body (Pharmacy / Cold Chain) | 16.5 / 16.3 : 1 | **16.8 / 15.1 : 1** |
+| "Browse formats" link | 16.3 : 1 | **13.9 : 1** |
+| **heading (Pharmacy)** | 3.43 : 1 | **3.05 : 1** |
+| **heading (Cold Chain)** | 3.40 : 1 | **2.99 : 1** |
+
+The bottom of each card is deep in the file's own gradient, so the paragraph and
+the link are untouchable either way. **The heading is not**: it sits at the top,
+where the picture is lightest, and it was already thin at 3.4. Without the scrim
+it lands on the WCAG large-text floor — 3.05 on one card, **2.99 on another,
+which is under it.**
+
+**Left as instructed, and raised rather than quietly re-scrimmed.** The heading
+is large text (`text-h3`), so 3:1 is its bar, not 4.5:1, and one card misses it
+by 0.01. Three ways out, none of them mine to pick: darker crops at the top of
+the card files, a top-edge gradient behind the heading alone, or accept it.
+Open question 51.
+
+### The home hero is the whole range
+
+`centipack-home-hero.avif` — the full line-up on cream, 4223 x 2053 — replaces
+the vial-kit-in-a-cooler shot, whose file is deleted. Alt text rewritten to what
+the picture shows.
+
+**The design's crop trims it.** `.hero-media` is 5:3 at desktop and 1:1.25 on a
+phone, and the file is 2.057:1, so `cover` takes about 19% off the width: the
+jars, the pump bottle and the white mailer at the right end are outside the
+frame. That is the design's box, not a bug, and the picture still reads — but a
+line-up shot wants the line-up. Open question 52.
+
+### The collage borrows, temporarily
+
+Five product-catalogue shots stand in for the collage's own, on instruction.
+Imported from `assets/products` rather than copied, so there is one file per
+product and swapping back is five lines. The five `volume-*.jpg` files are
+deleted; git has them.
+
+**They broke the composition, and the fix is worth more than the swap.** Every
+product file is 1037 x 1284, where the design's five slots run from 288:540 to
+618:593. Dropped in, the tallest slot grew down over "Thermal integrity." —
+visible in the first render, not in any check. `--at-ratio` now carries **the
+drawn box** per slot and the photograph is cropped into it, so the composition
+holds whatever proportion the next file has. That is the durable half of a
+temporary change.
+
+### Measurements
+
+| | |
+| --- | --- |
+| verify | 8 checks, **536 assertions**, 0 failures |
+| card heading contrast | 3.43 / 3.40 → **3.05 / 2.99** |
+| card body + link | 13.9–16.8 : 1, unaffected |
+| hero | 4223 x 2053, cropped 19% at 5:3 |
+| files deleted | 6 (one hero, five collage) |
+
+### Open questions
+
+**50 closes** — the double-darkening is gone. Unchanged: 22, 23, 24, 25, 26, 28,
+29, 31–34, 36, 37, 40, 41, 44, 48. Three added:
+
+51. **The category card heading is at the large-text contrast floor** — 3.05:1
+    on one card and 2.99:1 on another, against a 3:1 bar. Darker crops, a
+    heading-only gradient, or accepted as drawn.
+52. **The home hero loses its right-hand third to the design's 5:3 crop.** The
+    file is 2.057:1. Change the box to the picture, or crop the picture for the
+    box.
+53. **The closing collage is borrowing product shots.** Temporary on
+    instruction; five imports to swap when its own land.

@@ -2263,9 +2263,11 @@
    pointing anywhere at it lifts the picture 1%. `scale` and nothing else: the
    card's box must not move, and `overflow: hidden` crops the extra percent. */
 @layer components {
-  .category-card {
-    --scrim-strength: 1;
-  }
+  /* `.category-card` used to set `--scrim-strength: 1` — the design's own
+     full-strength ramp, since this is the card that has to carry a paragraph
+     and a link over a photograph. The scrim itself came off when the client's
+     pre-darkened photographs landed (WORKLOG 40), and the strength went with
+     it rather than sitting here unused. */
 
   /* THE WHOLE CARD IS THE TARGET, and it is still ONE target with ONE
      accessible name: the link that was already the card's only route to the
@@ -2728,6 +2730,19 @@
       top: var(--at-top);
       width: var(--at-width);
     }
+  }
+
+  /* THE SLOT KEEPS ITS DRAWN SHAPE WHATEVER IS PUT IN IT. The five shots are
+     borrowed from the product catalogue until the collage's own arrive, and
+     those are one portrait size for all thirteen products — dropped into boxes
+     drawn between 288:540 and 618:593, the tallest slot grew down over the
+     heading. `--at-ratio` carries the design's box and the photograph is
+     cropped into it, so a replacement file of any proportion lands in the same
+     composition. Both widths, because the mobile placement has the same
+     problem. */
+  .volume-collage-item img {
+    aspect-ratio: var(--at-ratio);
+    object-fit: cover;
   }
 }
 

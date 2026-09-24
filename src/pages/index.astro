@@ -7,12 +7,17 @@ import CategoryCard from '../components/blocks/CategoryCard.astro';
 import Media from '../components/blocks/Media.astro';
 import { getCategories, toPageImage } from '../lib/catalogue';
 import { SITE } from '../consts';
-import heroImage from '../assets/home/hero-vial-kit-in-cooler.jpg';
-import volumeCooler from '../assets/home/volume-eps-cooler.jpg';
-import volumeGelPack from '../assets/home/volume-gel-pack.jpg';
-import volumeMailer from '../assets/home/volume-metallic-mailer.jpg';
-import volumeVialKit from '../assets/home/volume-vial-kit.jpg';
-import volumeBox from '../assets/home/volume-presentation-box.jpg';
+import heroImage from '../assets/home/centipack-home-hero.avif';
+/* TEMPORARY, ON INSTRUCTION. The collage's own five shots are owed; until they
+   arrive it borrows the product catalogue's, which are the same objects on the
+   same ground. They are imported from `assets/products` rather than copied into
+   `assets/home`, so there is one file per product and swapping back is five
+   lines. */
+import volumeCooler from '../assets/products/eps-foam-coolers.avif';
+import volumeGelPack from '../assets/products/gel-packs.avif';
+import volumeMailer from '../assets/products/insulated-metallic-mailers.avif';
+import volumeVialKit from '../assets/products/vial-kits.avif';
+import volumeBox from '../assets/products/vial-presentation-boxes.avif';
 import { Image } from 'astro:assets';
 
 /**
@@ -44,11 +49,12 @@ const categories = await getCategories();
 /* PROJECT: drop the portrait-framed hero in beside the wide one and pass it as
    `mobile` below. Media renders <picture> the moment it is there; until then the
    wide file is cropped to 1:1.25 on mobile by `.hero-media`. */
-// import heroImageMobile from '../assets/home/hero-vial-kit-in-cooler-mobile.jpg';
+// import heroImageMobile from '../assets/home/centipack-home-hero-mobile.avif';
 const heroPicture = await toPageImage({
   src: heroImage,
   // mobile: heroImageMobile,
-  alt: 'A vial kit in an open white mailer box, beside a gel pack and an EPS foam cooler.',
+  alt:
+    'The CentiPack range in one line-up: two insulated mailers, blue mailer and drawer boxes, an EPS foam cooler in its corrugated outer, jars, a pump bottle, and a white mailer box.',
 });
 
 /**
@@ -61,12 +67,20 @@ const heroPicture = await toPageImage({
  * measurements, and a measurement in a class name is a measurement nobody can
  * check against the source.
  */
+/* `ratio` IS THE DRAWN BOX, not the file's own proportion — and it exists
+   because the borrowed shots are all one portrait 1037 x 1284 while the design's
+   five boxes run from 288:540 to 618:593. Without it the tall crop at the top of
+   the collage grew down over "Thermal integrity." Each number below is the pixel
+   size of the shot this slot used to hold, which is the design's box; the
+   photograph is cropped INTO it rather than the composition bending around a
+   photograph. Measured on the built page, not guessed: the five files are
+   identical in size, so every slot needed this. */
 const collage = [
-  { image: volumeCooler, alt: 'An open EPS foam cooler with its lid resting beside it.', left: 39.79, top: -0.05, width: 22.99, mobile: { left: 38, top: 1, width: 24 } },
-  { image: volumeGelPack, alt: 'A gel pack and a pill bottle on a plain ground.', left: -3.57, top: 24.6, width: 13.39 },
-  { image: volumeMailer, alt: 'An insulated metallic mailer, sealed.', left: 92.86, top: 22.68, width: 10.71 },
-  { image: volumeVialKit, alt: 'An open vial kit showing two blue-capped vials.', left: 69.07, top: 65.51, width: 19.42, mobile: { left: 60, top: 76, width: 22 } },
-  { image: volumeBox, alt: 'A blue magnetic-closure presentation box holding four vials.', left: 21.5, top: 73.73, width: 19.12, mobile: { left: 14, top: 83, width: 21 } },
+  { image: volumeCooler, alt: 'An EPS foam cooler inside its open corrugated outer, printed rush, perishable, insulated.', left: 39.79, top: -0.05, width: 22.99, ratio: '618 / 593', mobile: { left: 38, top: 1, width: 24 } },
+  { image: volumeGelPack, alt: 'Five gel packs in printed pillow pouches, stacked together.', left: -3.57, top: 24.6, width: 13.39, ratio: '360 / 628' },
+  { image: volumeMailer, alt: 'A sealed blue insulated mailer printed "Refrigerate upon opening".', left: 92.86, top: 22.68, width: 10.71, ratio: '288 / 540' },
+  { image: volumeVialKit, alt: 'A branded jar opened to show vials inside.', left: 69.07, top: 65.51, width: 19.42, ratio: '522 / 628', mobile: { left: 60, top: 76, width: 22 } },
+  { image: volumeBox, alt: 'A blue drawer box slid open to show two vials in a fitted insert.', left: 21.5, top: 73.73, width: 19.12, ratio: '514 / 504', mobile: { left: 14, top: 83, width: 21 } },
 ];
 
 /**
@@ -168,7 +182,7 @@ const stats = [
     >
       <Media
         image={heroPicture}
-        label="Home hero — vial kit, mailer and cooler"
+        label="Home hero — the CentiPack range in one line-up"
         ratio="5 / 3"
         loading="eager"
         fetchpriority="high"
@@ -343,7 +357,7 @@ const stats = [
               class="volume-collage-item"
               data-on-mobile={shot.mobile ? '' : undefined}
               style={[
-                `--at-left:${shot.left}%;--at-top:${shot.top}%;--at-width:${shot.width}%`,
+                `--at-left:${shot.left}%;--at-top:${shot.top}%;--at-width:${shot.width}%;--at-ratio:${shot.ratio}`,
                 shot.mobile &&
                   `--at-left-m:${shot.mobile.left}%;--at-top-m:${shot.mobile.top}%;--at-width-m:${shot.mobile.width}%`,
               ]

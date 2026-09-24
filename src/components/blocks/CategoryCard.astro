@@ -13,10 +13,11 @@ import type { CategoryView } from '../../lib/catalogue';
  * <div>, which is a class and not a component.
  *
  * `data-theme="dark"` IS THE MECHANISM, not a colour choice. Everything here
- * sits over a photograph darkened by `.media-scrim`, so the region genuinely is
- * a dark one: marking it says so once, and the heading, the paragraph and the
- * Button all recolour themselves with no literal anywhere in this file. The same
- * card on a light ground would need no edit.
+ * sits over a photograph that is dark in the file itself — the scrim came off
+ * at the client's request once their own shots arrived pre-darkened — so the
+ * region genuinely is a dark one: marking it says so once, and the heading, the
+ * paragraph and the Button all recolour themselves with no literal anywhere in
+ * this file. The same card on a light ground would need no edit.
  *
  * THE IMAGE IS IN FLOW AND THE CONTENT OVERLAYS IT, rather than the other way
  * round. That is what lets the card's height come from the picture's own aspect
@@ -73,7 +74,7 @@ const body = bodyOverride ?? (cross ? category.crossBody : category.cardBody);
 
 /**
  * THE DARK TREATMENT IS A CONSEQUENCE OF THE PHOTOGRAPH, so it is conditional on
- * there being one. With the image pending, a scrim has nothing to darken and
+ * there being one. With the image pending there is nothing dark to sit on and
  * `theme="dark"` would paint ink-on-ink: the card renders as a light well
  * instead, which is legible, obviously unfinished, and reviewable — which is the
  * whole point of the pending state. One flag, two honest renderings, no second
@@ -86,7 +87,13 @@ const hasImage = Boolean(category.cardImage);
   data-theme={hasImage ? 'dark' : undefined}
   class:list={[
     'category-card rounded-md relative isolate overflow-hidden',
-    hasImage ? 'media-scrim' : 'bg-subtle',
+    /* NO SCRIM. The client's card photographs arrive with the design's own
+       gradient already burned in — mean luminance 96/255 against the 157 of the
+       shots they replace — so `.media-scrim` was darkening a darkened picture
+       and the product inside it went to mud. Removed on instruction; the
+       measured contrast is in WORKLOG 40. A card shot without that gradient
+       would need it back. */
+    hasImage ? undefined : 'bg-subtle',
     className,
   ]}
 >

@@ -3989,3 +3989,41 @@ slot crops the new frame to a strip. It still reads as a blue mailer, which is
 all that slot has ever shown.
 
 verify: 8 checks, 536 assertions, 0 failures.
+
+---
+
+## 2026-09-43 — Entry 43. The card summary opts out of balancing
+
+One exception to entry 38's site-wide `text-wrap: balance`: the product card's
+summary wraps plainly.
+
+`text-wrap: wrap` on `.product-card p.text-caption` — the SHORTHAND, which
+resets the omitted longhand to its initial `auto`, i.e. the default asked for.
+Two classes so it beats the site-wide rule on specificity rather than on source
+order; the site-wide selector computes to (0,1,1) and a rule that wins only by
+sitting lower in the file is a rule the next reorder breaks.
+
+**Why the card is the exception.** Balancing evens a block's lines against each
+other, which is what a standfirst under a heading wants. In a 227px card it buys
+a tidier ragged edge by stopping the FIRST line early, so a two-line summary
+reads as though the sentence were shorter than it is. Measured at 1440, the five
+cold chain cards' line widths:
+
+| | balanced | plain |
+| --- | --- | --- |
+| Gel packs | 166, 142 | **174, 134** |
+| Insulated metallic mailers | 158, 102 | **226, 34** |
+| EPS foam coolers | 178, 132 | **223, 87** |
+| Puncture Pack | 145, 119 | **161, 103** |
+| Eco liners | 168, 112 | **209, 71** |
+
+Every first line is longer and every second is shorter, which is the point: the
+line reads to the card's edge and the remainder falls under it.
+
+**Scope confirmed on the built page, not assumed**: the five summaries compute
+`wrap`, and the section subtext beside them still computes `balance`. The rule
+was also read back out of `dist` — `product-card p.text-caption{text-wrap:wrap}`
+— because entry 41's dropdown was a rule that looked right in source and was not
+there in the build.
+
+verify: 8 checks, 536 assertions, 0 failures.

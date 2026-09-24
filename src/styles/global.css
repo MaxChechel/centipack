@@ -2408,6 +2408,23 @@
      Nothing replaces it, which is why there is no rule here: the paragraph is a
      paragraph, and `.product-card-summary` came out of the markup with it. */
 
+  /* THE SUMMARY WRAPS PLAINLY, where every other paragraph on the site
+     balances. `text-wrap: balance` evens a block's lines against each other,
+     which is right for a standfirst under a heading and wrong in a 227px card:
+     evening three lines there buys a tidier ragged edge at the cost of a first
+     line that stops early, and the card reads as if the sentence were shorter
+     than it is.
+
+     The SHORTHAND, not `text-wrap-style`, and that is deliberate: `text-wrap:
+     wrap` resets the omitted longhand to its initial `auto`, which is the
+     default asked for. Written at two classes so it beats the site-wide rule on
+     specificity rather than on source order, which a reordering would silently
+     flip. Checked in the built stylesheet, not just here — the last rule that
+     looked right in source and vanished in dist cost a working dropdown. */
+  .product-card p.text-caption {
+    text-wrap: wrap;
+  }
+
   /* The whole card is one target. `::after` here rather than an
      `after:content-['']` utility in markup: the empty-string arbitrary value is
      escaped on its way into the HTML attribute, so the class ships and the rule

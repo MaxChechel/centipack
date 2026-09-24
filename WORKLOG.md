@@ -3963,3 +3963,29 @@ Two added:
     low; `@starting-style`, `:popover-open` and anything newer are silently
     stripped at that floor. Nothing warns. Worth a check that greps `dist` for
     rules the source declares and the build removed.
+
+---
+
+## 2026-09-24 — Entry 42. Two product shots replaced
+
+Found in the working tree at push time, not announced: new files for
+`insulated-metallic-mailers` and `puncture-pack`. Both are the same products
+reshot with the printed branding — "PEEL > PACK > SHIP", "Protective thermal
+mailer", the puncture marks. **Checked rather than pushed blind** (entry 39's
+lesson, and the reason this is its own commit).
+
+| | was | now |
+| --- | --- | --- |
+| insulated-metallic-mailers | 1037 x 1284 | 1037 x 1284, same frame |
+| puncture-pack | 1122 x 1402 | **1037 x 1284** — now identical to the other twelve |
+
+**Alt text still true**, checked against each picture rather than assumed: the
+mailer is still "printed 'Refrigerate upon opening'" and the pack is still
+"marked with puncture points". Nothing to rewrite.
+
+**Four surfaces each**, all looked at: the products index card, the category
+card, the product page, and — for the mailer — the home collage, whose 288:540
+slot crops the new frame to a strip. It still reads as a blue mailer, which is
+all that slot has ever shown.
+
+verify: 8 checks, 536 assertions, 0 failures.

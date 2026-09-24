@@ -2355,10 +2355,18 @@
      card edge, mid-word, and that is the instruction: less copy on this page,
      not different copy.
 
-     `white-space: nowrap` and nothing else. `.product-card` already has
-     `overflow: hidden`, so the card does the cutting — which is why there is no
-     ellipsis, and why the sweep's spill assertion stays quiet: content inside an
-     ancestor that clips is contained, not spilled (sweep.mjs).
+     THE LINE ENDS INSIDE THE CARD'S PADDING, NOT AT ITS EDGE. `nowrap` alone
+     let the text paint straight through the 16px inset every other element on
+     the card respects and get cut by the card's own `overflow: hidden` — 525px
+     of text in a 227px box, the last characters sitting on the padding with no
+     sign they had been cut. Measured at 1440. The design draws that hard cut,
+     and it reads as a broken card rather than as a trimmed line.
+
+     So the paragraph clips itself: `overflow: hidden` gives `text-overflow`
+     something to act on, and the ellipsis is the part the design was missing —
+     one glyph that says the sentence continues on the page this card links to.
+     The sweep's spill assertion stays quiet either way, because content inside
+     an element that clips is contained, not spilled (sweep.mjs).
 
      NOTHING IS LOST. The full sentence is still in the HTML, so a screen reader
      reads all of it, and the card links to the page that carries it in full.
@@ -2371,6 +2379,8 @@
      behaviour. The three-up category rail is untouched at every width. */
   .product-rail-5 .product-card-summary {
     white-space: nowrap;
+    overflow: hidden;
+    text-overflow: ellipsis;
   }
 
   /* The whole card is one target. `::after` here rather than an

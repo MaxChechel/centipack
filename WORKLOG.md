@@ -3514,3 +3514,61 @@ added:
 49. **Exterior mailer box still needs its own description.** Open question 30
     closed when the client supplied the duplicate as deliberate; the deck now
     marks the same line "needs its own copy". One sentence, from the client.
+
+---
+
+## 2026-09-24 — Entry 36. The trimmed line now says it was trimmed
+
+Two reports against /products: cap the section subtext at 60ch, and "see why
+subtext is overflowing card". **One was already done and the other was mine.**
+
+### The card summary ends inside the padding now
+
+Entry 34 set `white-space: nowrap` and let `.product-card`'s `overflow: hidden`
+do the cutting, because that is what the design draws — the line runs under the
+card's edge, mid-word, with nothing to say it had been cut.
+
+Measured at 1440 through CDP rather than eyeballed: **525px of text in a 227px
+box.** The overflow paints straight through the 16px inset every other element
+on the card respects, so the last characters sit on the padding and stop dead at
+the card's edge. Faithful to the frame, and it reads as a broken card.
+
+`overflow: hidden` + `text-overflow: ellipsis` on the paragraph. The line now
+ends where the title ends, with one glyph saying the sentence continues on the
+page the card links to. Design's hard cut in, design's hard cut out — **the
+instruction was "less copy on this page", and the ellipsis serves it without
+pretending a word ends in "conden".**
+
+### The subtext was already at 60ch
+
+`measure-tight` has been on that paragraph since the v7 redline, and
+`--container-measure-tight` is `60ch`. Measured: **`max-width: 656.64px`, and
+656.64 / 60 = 10.94px, which is DM Sans's zero at 16px.** Exactly 60ch, on all
+three section subtexts. Nothing to change.
+
+**`ch` is the width of the digit zero, not of an average character**, so a 60ch
+cap holds about 85 characters of prose and wraps this sentence to two lines. If
+the ask was sixty CHARACTERS per line rather than the CSS unit, that is ~44ch
+(480px) and it is one token. Raised with the numbers rather than guessed at.
+
+Every other text block on the page was measured in the same pass: the hero body
+and the closing band's body are 432px, both from their containers, neither
+uncapped.
+
+### Measurements
+
+| | |
+| --- | --- |
+| verify | 8 checks, **537 assertions**, 0 failures |
+| card summary | text 525px, box 227px, card 259px — now clipped at 227 with an ellipsis |
+| section subtext | 656.64px = 60ch, unchanged, ×3 |
+
+### Open questions
+
+Unchanged: 22, 23, 24, 25, 26, 28, 29, 31–34, 36, 37, 40, 41, 44, 45, 48, 49.
+One amended:
+
+47. **Eight of thirteen index summaries are still trimmed** — now with an
+    ellipsis inside the card rather than a mid-word cut at its edge, which is
+    honest but still not written for the space. Thirteen lines built for a 227px
+    box would beat thirteen trimmed sentences, if the client wants them.

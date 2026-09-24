@@ -18,13 +18,13 @@ crossBody: >-
 navLinkLabel: >-
   Browse pharmacy formats
 rangeImage:
-  src: ../../assets/categories/range-pharmacy-formats.jpg
+  src: ../../assets/categories/range-pharmacy-formats.avif
   alt: >-
-    Vial kits, pill bottles, spray bottles, pump dispensers and jars in a row.
+    Navy CentiPack jars, a spray bottle and a pump dispenser grouped together, one jar open.
 cardImage:
-  src: ../../assets/categories/category-pharmacy-formats.jpg
+  src: ../../assets/categories/category-pharmacy-formats.avif
   alt: >-
-    Pill bottles, a pump dispenser and spray bottles in a row.
+    Navy CentiPack jars, a spray bottle and a pump dispenser, one jar open to its threaded neck.
 guideLinkLabel: >-
   How to choose the right pharmacy format
 ---

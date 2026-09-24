@@ -3,7 +3,7 @@ title: "Eco liners"
 slug: eco-liners
 category: cold-chain-shipping
 order: 5
-summary: "Curbside-recyclable · validated insulated liner for pharmaceutical cold chain · patient-facing disposal"
+summary: "Curbside-recyclable insulated liner · 2–8°C validated"
 images:
   main:
     src: ../../assets/products/eco-liners.avif

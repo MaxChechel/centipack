@@ -3,7 +3,7 @@ title: "Pill bottles"
 slug: pill-bottles
 category: pharmacy-formats
 order: 2
-summary: "Amber and clear · child-resistant closures · matched to compounded oral formats"
+summary: "Amber and clear · child-resistant closures"
 images:
   main:
     src: ../../assets/products/pill-bottles.avif

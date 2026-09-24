@@ -3001,6 +3001,43 @@
     opacity: var(--scrim-strength, 0.7);
     pointer-events: none;
   }
+
+  /* THE CLOSING PLATE NEEDS A FLOOR, NOT A STEEPER RAMP.
+     Its text is CENTRED, and a bottom-up ramp is nearly transparent where
+     centred text sits. That was survivable while the photograph was a grey
+     warehouse shot; the replacement is a product group on cream, and it is the
+     brightest picture on the site.
+
+     Measured on the built page, white text over the plate at 1440:
+
+       | | old photo | new photo | with this floor |
+       | heading | 3.32:1 | **2.04:1** | 4.52:1 |
+       | body    | 3.91:1 | **2.49:1** | 4.82:1 |
+
+     70% is where the measurement landed, not where the arithmetic guessed: 55%
+     predicted 4.0 / 4.8 and rendered 3.73 / 4.16, because the ramp under the
+     floor contributes less at the heading's height than the model assumed. The
+     number was moved until the page said 4.5, twice.
+
+     So the new picture broke a pair that was already thin — the body line has
+     never met 4.5:1 on this band — and the fix is a flat tint under the ramp
+     rather than a darker ramp, because the problem is the middle of the plate,
+     not its foot. A token, not ad-hoc alpha (§2.3): a translucent surface is a
+     design decision with a contrast consequence, so it gets a name.
+
+     THE CONTRAST MATRIX CANNOT CHECK THIS — what sits behind is a photograph,
+     not a token — so the numbers above come from sampling the rendered pixels
+     at the 40th percentile under each text run, which is the backdrop rather
+     than the glyphs. Re-measure after any change to this picture. */
+  .cta-plate {
+    --scrim-plate-floor: color-mix(in oklab, var(--gray-950) 70%, transparent);
+  }
+
+  .cta-plate.media-scrim::after {
+    background-image:
+      linear-gradient(var(--scrim-plate-floor), var(--scrim-plate-floor)),
+      linear-gradient(to bottom, transparent, var(--gray-950));
+  }
 }
 
 /* --- Third-party wordmarks -----------------------------------------------

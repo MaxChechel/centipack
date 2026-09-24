@@ -24,13 +24,13 @@ crossBodyOverrides:
 navLinkLabel: >-
   Browse cold chain
 rangeImage:
-  src: ../../assets/categories/range-cold-chain.jpg
+  src: ../../assets/categories/range-cold-chain.avif
   alt: >-
-    Gel packs, insulated metallic mailers and an EPS foam cooler photographed together.
+    A CentiPack gel pack standing beside a flat refrigerant pouch, next to an EPS foam cooler in its open corrugated outer.
 cardImage:
-  src: ../../assets/categories/category-cold-chain.jpg
+  src: ../../assets/categories/category-cold-chain.avif
   alt: >-
-    Gel packs, insulated metallic mailers and an EPS foam cooler, packed together.
+    A CentiPack gel pack and a flat refrigerant pouch beside an open EPS foam cooler in its corrugated outer.
 guideLinkLabel: >-
   How to choose the right cold chain configuration
 ---

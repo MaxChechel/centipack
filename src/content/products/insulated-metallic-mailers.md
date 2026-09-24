@@ -3,7 +3,7 @@ title: "Insulated metallic mailers"
 slug: insulated-metallic-mailers
 category: cold-chain-shipping
 order: 2
-summary: "6 sizes · 1 in and 1.5 in wall · validated for 24 and 48-hour 2–8°C profiles"
+summary: "6 sizes · 1 in and 1.5 in wall · 24 and 48-hour 2–8°C"
 lede: >-
   Foam-lined metallic mailers for 2–8°C injectables — the GLP-1 workhorse. Six sizes, two wall thicknesses, validated for 24 and 48-hour summer transit.
 contactLinkLabel: >-

@@ -18,13 +18,13 @@ crossBody: >-
 navLinkLabel: >-
   Browse custom boxes
 rangeImage:
-  src: ../../assets/categories/range-custom-boxes.jpg
+  src: ../../assets/categories/range-custom-boxes.avif
   alt: >-
-    A vial presentation box and a bottle box photographed together.
+    A blue mailer box holding two bottles, a blue drawer box of vials, and a white mailer packed with a branded box and a blue pouch.
 cardImage:
-  src: ../../assets/categories/category-custom-boxes.jpg
+  src: ../../assets/categories/category-custom-boxes.avif
   alt: >-
-    A magnetic-closure presentation box open beside a blue printed mailer box.
+    An open blue mailer box of bottles and a blue drawer box of vials, beside a white mailer holding a branded box.
 guideLinkLabel: >-
   How custom boxes fit the build
 ---

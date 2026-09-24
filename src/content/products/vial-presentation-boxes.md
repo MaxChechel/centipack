@@ -3,7 +3,7 @@ title: "Vial presentation boxes"
 slug: vial-presentation-boxes
 category: custom-boxes
 order: 1
-summary: "Magnetic or tuck closure · custom size, finish, and print · for GLP-1, peptide, and other injectable presentation"
+summary: "Magnetic or tuck closure · custom size, finish, and print"
 images:
   main:
     src: ../../assets/products/vial-presentation-boxes.avif

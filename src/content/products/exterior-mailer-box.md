@@ -3,11 +3,11 @@ title: "Exterior mailer box"
 slug: exterior-mailer-box
 category: custom-boxes
 order: 3
-# Copy from the client's reference screens. It is word for word the Bottle &
-# pump boxes summary, on both the products index and the custom boxes page —
-# flagged as a probable copy-paste in the design and applied anyway on
-# instruction. Two products now carry one sentence; see open question 30.
-summary: "Custom secondary packaging for oral and topical formats · matched to bottle and pump dimensions"
+# ITS OWN LINE AT LAST. This carried Bottle & pump boxes' summary word for word
+# — a copy-paste in the design, applied on instruction and flagged twice (open
+# questions 30 and 49). The client supplied this one with the thirteen short
+# card lines; both questions close with it.
+summary: "Branded outer mailer · sized to the full packout"
 images:
   main:
     src: ../../assets/products/exterior-mailer-box.avif

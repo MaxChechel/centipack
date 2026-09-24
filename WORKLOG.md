@@ -3678,3 +3678,105 @@ wearing a size class — a label, a link, a table cell.
 ### Open questions
 
 Unchanged: 22, 23, 24, 25, 26, 28, 29, 31–34, 36, 37, 40, 41, 44, 45, 47, 48, 49.
+
+---
+
+## 2026-09-24 — Entry 39. Seven photographs, thirteen lines, and one contrast failure they caused
+
+Client images dropped into `src/assets`, and the thirteen short card lines open
+question 47 has been asking for since entry 34. Applied together because the
+second is what makes the first legible.
+
+### First, a correction against myself
+
+**Four of the seven images were committed in entry 38 without being mentioned.**
+`git add -A` on the `text-wrap` commit swept up `Cold Chain & Shipping -
+card.avif`, `Custom Boxes - card.avif`, `Pharmacy Formats-card.avif` and
+`Pharmacy formats - hero.avif`, which had landed in the working tree while that
+change was in progress. They were not in that commit's message, its diff review
+or its report. `git add -A` in a tree the human is also writing to is a commit
+whose contents I did not choose — **`git add <path>` from here.**
+
+### The images
+
+Renamed to the role-first convention the folder already uses, and the seven jpgs
+they replace are deleted (git has them):
+
+| supplied | now | used as |
+| --- | --- | --- |
+| Cold chain packaging.avif | range-cold-chain.avif | category hero |
+| Custom boxes - hero.avif | range-custom-boxes.avif | category hero |
+| Pharmacy formats - hero.avif | range-pharmacy-formats.avif | category hero |
+| *Category* - card.avif ×3 | category-*.avif | CategoryCard, home and cross-links |
+| cta-bg.avif | cta-produced-at-volume.avif | the closing band, all 17 pages |
+
+**The shapes confirmed the mapping before anything was wired**: the three heroes
+are 2.056:1 against the template's 1440/700 = 2.057, and the three cards are
+0.827 against the CategoryCard's 5/6 = 0.833. Alt text is rewritten per image
+from looking at each one — the old lines describe photographs that are gone.
+
+### The contrast failure, measured
+
+The new closing-band photograph is a product group on cream: mean luminance
+**198.7 against the old shot's 137.8**. The band's text is centred and its scrim
+is a bottom-up ramp, which is nearly transparent where centred text sits.
+Sampling the rendered pixels under each text run at 1440:
+
+| | old photo | new photo | after the fix |
+| --- | --- | --- | --- |
+| heading | 3.32:1 | **2.04:1** | **4.52:1** |
+| body | 3.91:1 | **2.49:1** | **4.82:1** |
+
+So the band was already thin — the body line has never met 4.5:1 here — and the
+brighter picture pushed the heading under even the 3:1 large-text floor. Fixed
+with a flat tint UNDER the ramp (`--scrim-plate-floor`, a color-mix token per
+§2.3, not ad-hoc alpha), because the problem is the middle of the plate and not
+its foot.
+
+**Two passes, because the arithmetic was wrong.** 55% predicted 4.0 / 4.8 and
+rendered 3.73 / 4.16. 70% renders 4.52 / 4.82. The page decided it, twice.
+
+**The contrast matrix cannot see any of this** and says so in its own comment:
+what sits behind is a photograph, not a token. Nothing in `verify` would have
+caught white-on-cream at 2.04:1 — it took sampling the built pixels.
+
+### The thirteen lines
+
+The client's own short summaries, replacing sentences of 60–110 characters with
+40–60. The index card's three-line caption is now two, and the crowding that
+entries 34, 36 and 37 tried to solve in the layout is gone from the copy, which
+is where it lived.
+
+**Exterior mailer box has its own line at last** — "Branded outer mailer · sized
+to the full packout" — after carrying Bottle & pump boxes' sentence since entry
+16.
+
+### Not changed, one to look at
+
+The three card images arrive **pre-darkened** (mean 96 against the old 157) and
+the CategoryCard scrim then darkens them again at full strength. Text contrast
+is well clear, and the cards read as intended, but the photographs are muddier
+than the frames they were cut from. If the client's files already carry the
+design's gradient, `--scrim-strength` on `.category-card` is the one number to
+drop — left alone rather than guessed at.
+
+### Measurements
+
+| | |
+| --- | --- |
+| verify | 8 checks, **536 assertions**, 0 failures |
+| images applied | 7, replacing 7 |
+| card summaries | 13 rewritten, 60–110 chars → 40–60 |
+| closing-band contrast | 2.04 / 2.49 → **4.52 / 4.82** |
+| dist | 2.0 MB total |
+
+### Open questions
+
+**47 closes** — the thirteen lines exist, and the index card holds two tidy lines
+without truncation. **49 closes** — Exterior mailer box has its own copy.
+**45 closes too**: the eco liners and Puncture Pack captions no longer reach the
+product, because the caption is two lines now. Unchanged: 22, 23, 24, 25, 26, 28,
+29, 31–34, 36, 37, 40, 41, 44, 48. One added:
+
+50. **The category card photographs are darkened twice.** See above — one token,
+    if the client's files already include the design's gradient.

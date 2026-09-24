@@ -3874,3 +3874,92 @@ temporary change.
     box.
 53. **The closing collage is borrowing product shots.** Temporary on
     instruction; five imports to swap when its own land.
+
+---
+
+## 2026-09-24 — Entry 41. The band's own picture, and a dropdown that opened onto nothing
+
+### The closing band is the client's shot, with no scrim
+
+`cta-banner.avif`, 3360 x 1500 — **2.24:1, which is the plate's own
+`1344 / 600` exactly**, so the file was cut for this slot. It replaces
+`cta-produced-at-volume.avif` (deleted) on all 17 pages that end on this band.
+
+`.media-scrim` off `CtaPlate` on instruction, and `--scrim-plate-floor` — added
+two entries ago for the picture this one replaces — removed with it. **Restore
+both together or neither**, which the comment left in its place says.
+
+**And the contrast goes back where it was.** Sampled on the built page at 1440,
+white text over the new plate:
+
+| | entry 39, tinted | now |
+| --- | --- | --- |
+| heading | 4.52:1 | **2.07:1** |
+| body | 4.82:1 | **2.59:1** |
+
+The picture is darker overall than the one it replaces (mean 128.8 against
+198.7) but its **centre is the lightest part of it**, and the centre is where the
+type sits. This is not the marginal miss the category-card headings are: 2.59:1
+on a body line is text a reader with ordinary eyesight will struggle with, on
+every product page.
+
+**Left off, as instructed, and raised rather than re-added quietly.** The tint
+that fixed it is four lines and its value was measured — 70% brought the old
+picture to 4.5:1, and this one needs less. One word restores it. Open question 54.
+
+### The contact dropdown opened onto nothing
+
+Reported as "not working". It was, and **the cause was in `dist`, not in the
+source.**
+
+The picker is styled through `appearance: base-select`: a base rule drew the
+popup at `opacity: 0`, and a second rule — `::picker(select):popover-open` with
+an `@starting-style` fade — brought it in. Correct in source. In the built
+stylesheet: **one occurrence of the rule that hides it, zero of either rule that
+reveals it.**
+
+`vite.build.cssTarget` is `chrome111 / safari17.2 / firefox112 / edge111`, set
+deliberately in astro.config.mjs so the `linear()` spring tokens survive
+minification. esbuild drops what that target cannot parse, and `:popover-open`
+is Chrome 114, `@starting-style` Chrome 117. Both rules were stripped on the way
+out. **The target that protects the springs ate the dropdown.**
+
+Measured before touching anything, by driving Chrome: the select opened
+(`:open` true), focus moved into an option, the option had a 550 x 36 box, white
+background, hover — **and the screenshot showed nothing at all.** Forcing
+`opacity: 1` from the console drew the full list.
+
+The fix is the base state: the picker is now visible when the browser shows it,
+so nothing about whether it can be SEEN depends on a rule a minifier is willing
+to remove. The fade is gone and is worth less than a dropdown that opens; it
+returns if the target is ever raised past Chrome 117.
+
+**Nothing in `verify` could have caught this**, and it is worth naming why: the
+keyboard check proved the control is reachable and operable, axe proved it is
+labelled and announced, the JS census proved the Enter-to-open script ships. All
+true, all passing, on a control that painted an invisible menu. A popup that
+opens empty is a pixel fact, and §2 says so: read the built output.
+
+### Measurements
+
+| | |
+| --- | --- |
+| verify | 8 checks, **536 assertions**, 0 failures |
+| band image | 3360 x 1500, 2.24:1 — the plate's ratio to the decimal |
+| band contrast | 4.52 / 4.82 → **2.07 / 2.59** |
+| picker rules in dist | hide: 1, reveal: **0** → now visible in the base state |
+| options drawn | 0 → 6 |
+
+### Open questions
+
+Unchanged: 22, 23, 24, 25, 26, 28, 29, 31–34, 36, 37, 40, 41, 44, 48, 51, 52, 53.
+Two added:
+
+54. **The closing band's text is at 2.07:1 and 2.59:1.** The scrim came off on
+    instruction and the picture's centre is its lightest part. Four lines to
+    restore a measured tint; the alternative is a band shot whose middle is dark
+    enough to carry white type.
+55. **`cssTarget` decides which modern CSS survives the build.** Springs need it
+    low; `@starting-style`, `:popover-open` and anything newer are silently
+    stripped at that floor. Nothing warns. Worth a check that greps `dist` for
+    rules the source declares and the build removed.

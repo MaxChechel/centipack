@@ -1,9 +1,9 @@
 import { toPageImage } from './catalogue';
-import image from '../assets/shared/cta-produced-at-volume.avif';
+import image from '../assets/shared/cta-banner.avif';
 /* PROJECT: drop the portrait-framed version of this shot in beside the wide one
    and import it here. Media renders <picture> the moment it exists; until then
    the wide file serves both widths, exactly as before. */
-// import imageMobile from '../assets/shared/cta-produced-at-volume-mobile.avif';
+// import imageMobile from '../assets/shared/cta-banner-mobile.avif';
 
 /**
  * The closing band, in one place (§5's "one source per list", applied to copy).

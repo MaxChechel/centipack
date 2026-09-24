@@ -23,8 +23,13 @@ import type { Picture } from '../../lib/catalogue';
  * everything else.
  *
  * `data-theme="dark"` comes WITH the picture and not before it — the same rule
- * CategoryCard follows. A scrim has nothing to darken when there is no
- * photograph, and ink-on-ink is not a state worth shipping to get there.
+ * CategoryCard follows. There is nothing dark to sit on without a photograph,
+ * and ink-on-ink is not a state worth shipping to get there.
+ *
+ * NO SCRIM, as of the client's own band image: it arrives with the gradient
+ * burned in and a clear centre for the type, so the overlay this block used to
+ * add was darkening a darkened picture. The contrast it leaves is measured in
+ * WORKLOG 41. A band shot without that gradient needs it back.
  */
 interface Props {
   heading: string;
@@ -67,7 +72,7 @@ const hasContent = Boolean(heading) || Boolean(body) || Boolean(action);
        as the closing plate. A min-height rather than a height, so long copy
        at a narrow width still grows it instead of being clipped. */
     'cta-plate rounded-lg relative isolate flex items-center justify-center overflow-hidden',
-    image ? 'media-scrim' : 'bg-subtle',
+    image ? undefined : 'bg-subtle',
     className,
   ]}
 >

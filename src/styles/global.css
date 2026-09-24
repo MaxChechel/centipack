@@ -1699,24 +1699,27 @@
          alone does not say "this is above that". It is a token so the dark theme
          can reach it. */
       box-shadow: var(--shadow-popover);
-      opacity: 0;
-      transform: translateY(-0.25rem);
-      transition:
-        opacity var(--transition-duration-spring-soft) var(--ease-spring-soft),
-        transform var(--transition-duration-spring-soft) var(--ease-spring-soft),
-        overlay var(--transition-duration-spring-soft) allow-discrete,
-        display var(--transition-duration-spring-soft) allow-discrete;
     }
 
-    .select-wrap select::picker(select):popover-open {
-      opacity: 1;
-      transform: none;
+    /* THE PICKER IS VISIBLE IN ITS BASE STATE, AND THAT IS THE BUG FIX.
+       It used to open at `opacity: 0` and be revealed by a second rule —
+       `::picker(select):popover-open { opacity: 1 }` with an `@starting-style`
+       fade. In source that reads correctly. **In dist neither rule exists.**
 
-      @starting-style {
-        opacity: 0;
-        transform: translateY(-0.25rem);
-      }
-    }
+       `vite.build.cssTarget` is `chrome111 / safari17.2 / firefox112 / edge111`
+       (astro.config.mjs, deliberately, to keep `linear()` springs), and esbuild
+       drops what that target cannot parse: `:popover-open` arrived in Chrome
+       114 and `@starting-style` in 117, so both rules were stripped and only
+       `opacity: 0` shipped. Measured in the built stylesheet: zero occurrences
+       of either, one occurrence of the rule that hides it.
+
+       The control still opened — the picker had geometry, the options had
+       hover, the keyboard worked — and nothing was drawn. Every check passed,
+       because none of them can see a popup that renders empty.
+
+       So visibility no longer depends on a rule a minifier is willing to
+       remove. The entry fade is gone with it; it is worth less than a dropdown
+       that opens, and it comes back by raising the target (WORKLOG 41). */
 
     .select-wrap select option {
       display: flex;
@@ -3017,42 +3020,14 @@
     pointer-events: none;
   }
 
-  /* THE CLOSING PLATE NEEDS A FLOOR, NOT A STEEPER RAMP.
-     Its text is CENTRED, and a bottom-up ramp is nearly transparent where
-     centred text sits. That was survivable while the photograph was a grey
-     warehouse shot; the replacement is a product group on cream, and it is the
-     brightest picture on the site.
+  /* THE PLATE'S FLOOR CAME OFF WITH THE PICTURE IT WAS WRITTEN FOR.
+     A `--scrim-plate-floor` token used to sit here: the previous band shot was
+     a product group on bright cream and centred white text measured 2.04:1 on
+     it, so a flat tint went under the ramp to reach 4.52:1 (WORKLOG 39). The
+     client's own band image replaces it — pre-darkened, with a clear centre for
+     the type — and the whole scrim came off with the tint (WORKLOG 41).
+     Restore both together, never one of them. */
 
-     Measured on the built page, white text over the plate at 1440:
-
-       | | old photo | new photo | with this floor |
-       | heading | 3.32:1 | **2.04:1** | 4.52:1 |
-       | body    | 3.91:1 | **2.49:1** | 4.82:1 |
-
-     70% is where the measurement landed, not where the arithmetic guessed: 55%
-     predicted 4.0 / 4.8 and rendered 3.73 / 4.16, because the ramp under the
-     floor contributes less at the heading's height than the model assumed. The
-     number was moved until the page said 4.5, twice.
-
-     So the new picture broke a pair that was already thin — the body line has
-     never met 4.5:1 on this band — and the fix is a flat tint under the ramp
-     rather than a darker ramp, because the problem is the middle of the plate,
-     not its foot. A token, not ad-hoc alpha (§2.3): a translucent surface is a
-     design decision with a contrast consequence, so it gets a name.
-
-     THE CONTRAST MATRIX CANNOT CHECK THIS — what sits behind is a photograph,
-     not a token — so the numbers above come from sampling the rendered pixels
-     at the 40th percentile under each text run, which is the backdrop rather
-     than the glyphs. Re-measure after any change to this picture. */
-  .cta-plate {
-    --scrim-plate-floor: color-mix(in oklab, var(--gray-950) 70%, transparent);
-  }
-
-  .cta-plate.media-scrim::after {
-    background-image:
-      linear-gradient(var(--scrim-plate-floor), var(--scrim-plate-floor)),
-      linear-gradient(to bottom, transparent, var(--gray-950));
-  }
 }
 
 /* --- Third-party wordmarks -----------------------------------------------

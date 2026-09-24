@@ -3992,7 +3992,7 @@ verify: 8 checks, 536 assertions, 0 failures.
 
 ---
 
-## 2026-09-43 — Entry 43. The card summary opts out of balancing
+## 2026-09-24 — Entry 43. The card summary opts out of balancing
 
 One exception to entry 38's site-wide `text-wrap: balance`: the product card's
 summary wraps plainly.

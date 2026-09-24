@@ -2347,41 +2347,21 @@
      Cards in a row are still equal height (the grid stretches them); what varies
      now is where the picture begins inside each one. */
 
-  /* ONE LINE ON THE PRODUCTS INDEX, CUT BY THE CARD'S OWN EDGE.
-     The five-up card is 259px wide and the summary is a 40-to-100 character
-     sentence, so it wraps to three lines there and crowds the photograph —
-     while the same string takes two lines on a 416px category card and reads
-     fine. The design draws the index card with a single line running under the
-     card edge, mid-word, and that is the instruction: less copy on this page,
-     not different copy.
+  /* THE SUMMARY FLOWS. No nowrap, no clip, no ellipsis — the sentence wraps
+     to as many lines as it needs on every card on the site.
 
-     THE LINE ENDS INSIDE THE CARD'S PADDING, NOT AT ITS EDGE. `nowrap` alone
-     let the text paint straight through the 16px inset every other element on
-     the card respects and get cut by the card's own `overflow: hidden` — 525px
-     of text in a 227px box, the last characters sitting on the padding with no
-     sign they had been cut. Measured at 1440. The design draws that hard cut,
-     and it reads as a broken card rather than as a trimmed line.
+     THREE TURNS, RECORDED SO THE FOURTH IS A DECISION. It wrapped to three
+     lines on the 259px index card and crowded the photograph; the design draws
+     that card with one line cut by the card edge, so entry 34 set `nowrap` and
+     let `.product-card`'s `overflow: hidden` do the cutting; entry 36 moved the
+     cut inside the 16px inset with an ellipsis, because 525px of text in a 227px
+     box painted over the padding. Ruled the other way at that point: no
+     truncation anywhere. A trimmed sentence was never the ask — less copy was,
+     and that is thirteen shorter lines when the client writes them (open
+     question 47), not a line the layout hides the end of.
 
-     So the paragraph clips itself: `overflow: hidden` gives `text-overflow`
-     something to act on, and the ellipsis is the part the design was missing —
-     one glyph that says the sentence continues on the page this card links to.
-     The sweep's spill assertion stays quiet either way, because content inside
-     an element that clips is contained, not spilled (sweep.mjs).
-
-     NOTHING IS LOST. The full sentence is still in the HTML, so a screen reader
-     reads all of it, and the card links to the page that carries it in full.
-
-     THE INDEX RAIL AT EVERY WIDTH, not just where the five-up grid exists.
-     Scoping it to `lg` left the narrower widths worse than the case that
-     prompted this: below 62rem the index is a scroll rail at 26% of the
-     viewport — 234px at 900, narrower than the 259px desktop card — so the same
-     sentence wrapped to three lines and ran over the photograph. One page, one
-     behaviour. The three-up category rail is untouched at every width. */
-  .product-rail-5 .product-card-summary {
-    white-space: nowrap;
-    overflow: hidden;
-    text-overflow: ellipsis;
-  }
+     Nothing replaces it, which is why there is no rule here: the paragraph is a
+     paragraph, and `.product-card-summary` came out of the markup with it. */
 
   /* The whole card is one target. `::after` here rather than an
      `after:content-['']` utility in markup: the empty-string arbitrary value is

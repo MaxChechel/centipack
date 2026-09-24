@@ -3572,3 +3572,55 @@ One amended:
     ellipsis inside the card rather than a mid-word cut at its edge, which is
     honest but still not written for the space. Thirteen lines built for a 227px
     box would beat thirteen trimmed sentences, if the client wants them.
+
+---
+
+## 2026-09-24 — Entry 37. The summary flows
+
+"For subtext on cards, we can just make it flow naturally, no truncating, no
+overflow thing." **The one-line rule comes out**, and with it
+`.product-card-summary`, which existed only to carry it.
+
+### The three turns, so the fourth is a decision
+
+| | |
+| --- | --- |
+| 33 | strings match the references; the wrap was never looked at |
+| 34 | "should be less copy" → `nowrap`, cut by the card's own `overflow: hidden`, as the design draws it |
+| 36 | the cut moved inside the 16px inset with an ellipsis — 525px of text in a 227px box was painting over the padding |
+| 37 | **no truncation anywhere.** The paragraph is a paragraph |
+
+**The design's frame was faithfully reproduced twice and rejected twice.** The
+instruction under all three turns is the same one — less copy on the index card —
+and the answer to it was never in the layout. It is thirteen lines written for a
+227px box (open question 47), and until those exist the full sentence wrapping is
+the honest rendering: nothing hidden, nothing to expand, nothing that ends in
+"conden…".
+
+### What it looks like now
+
+Back to three lines on the 259px card, which is where entry 30 left it. Worth
+one look rather than one fix: with the text over the picture, the third line
+lands on the product itself on **two of the five cold chain cards** — Puncture
+Pack and Eco liners, the two shot with the subject high in frame. That is open
+question 45 widening from one card to two, and it is a crop, not a rule.
+
+### Measurements
+
+| | |
+| --- | --- |
+| verify | 8 checks, **536 assertions**, 0 failures |
+| distinct classes | 291 → **290** (`product-card-summary` gone from markup and stylesheet) |
+| index card summary | 1 line + ellipsis → 3 lines, flowing |
+
+### Open questions
+
+Unchanged: 22, 23, 24, 25, 26, 28, 29, 31–34, 36, 37, 40, 41, 44, 48, 49. Two
+amended:
+
+45. **Two thumbnails crowd their own caption**, not one: Eco liners and Puncture
+    Pack. With the summary flowing again, a three-line caption reaches further
+    down the card than it did when this was first logged. A re-crop, not a rule.
+47. **Thirteen short lines are now the only way to make this page quieter.**
+    Truncation has been tried in both forms and ruled out. One sentence per
+    product, written for a 227px card, from the client.

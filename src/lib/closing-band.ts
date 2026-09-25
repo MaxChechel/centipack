@@ -34,14 +34,20 @@ export async function closingBand() {
        ("we don't have subtext for all instances"), and the reference screens
        show it on every product page again. Latest instruction wins; recorded so
        the next reversal is a decision rather than a discovery.
+       THE SENTENCE ITSELF IS THE CLIENT'S NOW, supplied directly and replacing
+       the deck's "Own manufacturing partners, no distributor markup — the best
+       price for the spec. Tell us what you ship." It is longer and it promises
+       a reply, which the old one did not (WORKLOG 45). The home page's closing
+       band is a different block with its own copy and is untouched.
+
        FIVE TURNS ON, IT IS ON EVERY PAGE INCLUDING THE INDEX. Entry 33 took it
        off the index because the reference screen shows the band without it;
        the v8 copy deck then wrote the sentence out under the index's own
        "Produced at scale." A deck that states the copy outranks a screenshot it
        has to be inferred from, and one string serves all five page types again. */
     body:
-      'Own manufacturing partners, no distributor markup — the best price for the spec. ' +
-      'Tell us what you ship.',
+      'Our own manufacturing partners, no distributor markup — the best price you will find ' +
+      'for the spec. Tell us what you ship and we come back with a build and a number.',
     /* PREVIOUSLY: This shipped with a paragraph on the category and
        product pages and without one on the products index, on the reading that a
        page arrived at from a narrower context wants the extra sentence. Ruled

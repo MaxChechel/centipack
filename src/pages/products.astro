@@ -27,9 +27,15 @@ const catalogue = await getCatalogue();
 const cta = await closingBand();
 ---
 
+{/* THE DESCRIPTION IS THE HERO'S FIRST SENTENCE, not the whole line. They were
+    one string until the client's replacement copy arrived at 261 characters — a
+    meta description is cut off around 160, so shipping it whole would have put
+    an ellipsis mid-clause in the search result. The first sentence is 148 and
+    says what the page is; the second is a caveat about scope that belongs on
+    the page and not in a snippet. */}
 <BaseLayout
   title="Everything a compounding pharmacy ships — CentiPack"
-  description="The shipper, the custom box, and the format inside — three layers, one supplier. Additional configurations engineered to your spec."
+  description="Three integrated layers — the temperature-controlled shipper, the custom secondary packaging, and the primary format the medication is dispensed in."
 >
   {/* 1 — Hero. The lede sits in a second column, bottom-aligned with the h1. */}
   <Section spaceTop="nav" spaceBottom="sm" class="bg-subtle">
@@ -38,9 +44,16 @@ const cta = await closingBand();
         <Breadcrumb trail={[{ label: 'Home', href: '/' }, { label: 'Products' }]} />
         <h1 class="text-h1 text-primary">Everything a compounding pharmacy ships</h1>
       </div>
+      {/* The client's own line, supplied directly, replacing the v8 deck's
+          "The shipper, the custom box, and the format inside — three layers,
+          one supplier. Additional configurations engineered to your spec."
+          Same ruling as the home hero (WORKLOG 44, 45): a string handed over
+          outranks the deck, and both sit here so the next revision is a
+          decision rather than an excavation. */}
       <p class="text-body text-secondary md:col-span-4 md:col-start-9">
-        The shipper, the custom box, and the format inside — three layers, one supplier. Additional
-        configurations engineered to your spec.
+        Three integrated layers — the temperature-controlled shipper, the custom secondary
+        packaging, and the primary format the medication is dispensed in. A representative selection
+        of our capabilities, with additional configurations engineered to your specification.
       </p>
     </div>
   </Section>

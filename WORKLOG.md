@@ -4071,3 +4071,79 @@ Unchanged: 22, 23, 24, 25, 26, 28, 29, 31–34, 36, 37, 40, 41, 44, 48, 51, 52,
 56. **"20+ years of combined cold chain expertise" now appears twice above the
     fold** — in the new hero line and in the stat band under the picture. One
     of the two is a repetition the client may want removed.
+
+---
+
+## 2026-09-25 — Entry 45. Five ledes, supplied directly
+
+Four instructions in one turn, all copy the client wrote and handed over: the
+products index hero, all three category heroes, and the closing band on every
+page but Home.
+
+### A near-miss, recorded first because it nearly shipped
+
+The three category ledes live in YAML front matter, and the first attempt
+replaced them with a regex: `^lede: >-\n(?:  .*\n)+?(?=^\w)`. The lazy repeat
+plus that lookahead **ran past the end of the block and ate every field after
+it** — `cardBody`, `crossBody`, `crossBodyOverrides`, both image records, the
+lot. Cold chain went from 36 lines to 12.
+
+It was caught because the script printed the length of what it replaced: 1313
+characters for a 126-character line. **The number did not match the thing, and
+that is the only reason this is a near-miss rather than an entry about restoring
+deleted content.** `git checkout` put it back; the replacement is now an exact
+full-string match with a `count == 1` assertion, which cannot run past anything.
+
+The wider rule: **a script that edits content files states what it expects to
+find and fails if it does not find exactly that.** A regex that matches "roughly
+the right region" is a deletion waiting for a file whose shape it did not
+anticipate.
+
+### Applied
+
+| | was | now |
+| --- | --- | --- |
+| Products index hero | 131 chars | **261** |
+| Cold chain lede | 126 | **160** |
+| Pharmacy formats lede | 142 | **214** |
+| Custom boxes lede | 173 | **189** |
+| Closing band body, 17 pages | 100 | **164** |
+
+**The products index's description split off from its hero.** They were one
+string; at 261 characters the hero copy is a meta description cut off mid-clause
+in a search result. The description is now the hero's first sentence — 148
+characters, says what the page is — and the second sentence, a caveat about
+scope, stays on the page where it belongs.
+
+**The closing band is one string in `lib/`, so the client's new sentence reached
+17 pages from one edit** — the whole argument for that file, demonstrated
+rather than asserted. Home's closing band is a different block with its own
+copy, which is what "except homepage" asked for; it is untouched and verified
+untouched in the built output.
+
+### Not split, and worth a decision
+
+The three category ledes are still doing double duty as their pages' meta
+descriptions — that is pre-existing, and the new copy makes it worse: **pharmacy
+formats is 214 characters and will truncate in a search result.** The products
+index now has the pattern that fixes it, but applying it to categories means a
+second field on the content type, which is the client's call rather than mine.
+Open question 57.
+
+### Measurements
+
+| | |
+| --- | --- |
+| verify | 8 checks, **536 assertions**, 0 failures |
+| pages carrying the new band line | **17**, from one string |
+| home band | unchanged, confirmed in `dist` |
+| category files | 36 / 30 / 30 lines before and after, one changed line each |
+
+### Open questions
+
+Unchanged: 22, 23, 24, 25, 26, 28, 29, 31–34, 36, 37, 40, 41, 44, 48, 51, 52,
+53, 54, 55, 56. One added:
+
+57. **Category ledes are their own meta descriptions, and one is now 214
+    characters.** Either a `metaDescription` field on the category type, or
+    accept truncation on that page.

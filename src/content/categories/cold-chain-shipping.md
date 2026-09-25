@@ -6,7 +6,7 @@ order: 1
 summary: >-
   Choose your insulation format, pair it with the right refrigerant. Validated for 24, 48, and 72-hour transit.
 lede: >-
-  Insulation and refrigerant are chosen separately — hold time is the result of both. Validated under summer ambient conditions.
+  The insulation format and the refrigerant are chosen separately — hold time is the result of both. Configurations are validated under summer ambient conditions.
 cardBody: >-
   Gel packs, insulated metallic mailers, EPS coolers, Puncture Pack, and eco liners — validated for 24, 48, and 72-hour 2–8°C transit.
 cardLinkLabel: >-

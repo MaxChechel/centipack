@@ -6,7 +6,7 @@ order: 3
 summary: >-
   The format the medication ships in — produced to pharmaceutical standards.
 lede: >-
-  The format the medication ships in, produced to pharmaceutical standards. Vial kits lead the range — GLP-1, peptide, oral, nasal, and topical.
+  The primary format the medication is dispensed and shipped in — produced to pharmaceutical standards. Vial kits lead the range, with formats covering GLP-1, peptide, oral, nasal, and topical compounded medications.
 cardBody: >-
   Vial kits, pill bottles, spray bottles, pump dispensers, and jars — produced to pharmaceutical presentation standards.
 cardLinkLabel: >-

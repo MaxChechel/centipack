@@ -4027,3 +4027,47 @@ was also read back out of `dist` — `product-card p.text-caption{text-wrap:wrap
 there in the build.
 
 verify: 8 checks, 536 assertions, 0 failures.
+
+---
+
+## 2026-09-25 — Entry 44. The home hero's subtext, supplied directly
+
+One line, given verbatim:
+
+> We manufacture complete packaging for temperature-sensitive medications —
+> shippers, refrigerants, custom boxes and pharmacy formats — backed by 20+ years
+> of combined cold chain expertise.
+
+It replaces the v8 deck's "Insulated shippers, refrigerants, custom boxes, and
+pharmacy formats — one supplier, built for pharmacies producing at scale." —
+**the deck this log spent entry 35 arguing outranks a screenshot.** A line
+handed over directly outranks the deck in turn; the order is recency, not
+format. Both strings are now at the site of the change so the next revision is a
+decision rather than an excavation.
+
+**What it changes about the page, worth noticing rather than just applying:**
+it leads with *manufacture*, which nothing else above the fold says — the deck's
+line led with the product list, and the list is already the three cards below.
+It also moves "20+ years of combined cold chain expertise" above the fold, where
+the stat band repeats it 400px later. Duplication the client may want, or may
+not have noticed. Open question 56.
+
+Two sentences elsewhere on this page are untouched and still the deck's: the
+stat labels and the section body under "Three integrated layers".
+
+The meta description is a separate string in `consts.ts` (open question 16
+closed it there deliberately) and does not move with this.
+
+| | |
+| --- | --- |
+| verify | 8 checks, 536 assertions, 0 failures |
+| rendering | 2 lines at 1440, 4 at 390, balanced, no overflow at any of the 7 swept widths |
+
+### Open questions
+
+Unchanged: 22, 23, 24, 25, 26, 28, 29, 31–34, 36, 37, 40, 41, 44, 48, 51, 52,
+53, 54, 55. One added:
+
+56. **"20+ years of combined cold chain expertise" now appears twice above the
+    fold** — in the new hero line and in the stat band under the picture. One
+    of the two is a repetition the client may want removed.

@@ -4147,3 +4147,17 @@ Unchanged: 22, 23, 24, 25, 26, 28, 29, 31–34, 36, 37, 40, 41, 44, 48, 51, 52,
 57. **Category ledes are their own meta descriptions, and one is now 214
     characters.** Either a `metaDescription` field on the category type, or
     accept truncation on that page.
+
+---
+
+## 2026-09-25 — Entry 46. The mailer shot again
+
+`insulated-metallic-mailers.avif` replaced a second time, found in the tree at
+push time. Same frame, same 1037 x 1284, same exposure; the "Protective thermal
+mailer" line is off the pack, leaving "PEEL > PACK > SHIP" and "Refrigerate upon
+opening".
+
+The alt text — *A sealed blue insulated mailer printed "Refrigerate upon
+opening"* — was re-read against the picture and still describes it exactly.
+
+verify: 8 checks, 536 assertions, 0 failures.

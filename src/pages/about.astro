@@ -2,6 +2,7 @@
 import BaseLayout from '../components/shells/BaseLayout.astro';
 import Section from '../components/Section.astro';
 import Media from '../components/blocks/Media.astro';
+import Breadcrumb from '../components/blocks/Breadcrumb.astro';
 import { toPageImage } from '../lib/catalogue';
 import { SITE } from '../consts';
 import aboutImage from '../assets/about/warehouse-eps-coolers.avif';
@@ -37,11 +38,19 @@ const aboutPicture = await toPageImage(
 ---
 
 <BaseLayout
+  pageType="AboutPage"
   title={`About — ${SITE.name}`}
   description="We come from Centigrade Logistics, a cold chain operation — running one teaches you which packaging holds and which fails."
 >
   <Section width="narrow" spaceTop="nav" space="lg">
     <div class="gap-2xl flex flex-col items-center">
+      {/* The trail every other page carries. It was missing here and on
+          Contact, which left two of the seven launch pages out of the
+          BreadcrumbList graph and, more visibly, out of the one navigation
+          affordance the rest of the site is consistent about. Centred, because
+          this page is centred — placement follows the page, the component does
+          not impose one. */}
+      <Breadcrumb trail={[{ label: 'Home', href: '/' }, { label: 'About' }]} />
       <h1 class="text-h2 text-primary max-w-[27rem] text-center">We came from the cold chain side</h1>
 
       <Media

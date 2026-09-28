@@ -23,7 +23,7 @@ const columns = await getFooterColumns();
 /* Redline v7 §9: the phone number comes off site-wide. Removed rather than
    hidden — a `tel:` link nobody should call is still a link a crawler indexes
    and a screen reader announces. */
-const contact = [{ href: 'mailto:info@centipack.com', label: 'info@centipack.com' }];
+const contact = [{ href: `mailto:${SITE.email}`, label: SITE.email }];
 
 /* Same rule as the nav: the underline is the hover, not a colour. See
    `.link-underline` in global.css. */

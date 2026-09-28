@@ -4,6 +4,7 @@ import { canonicalUrl, canonicalPath } from '../../lib/urls';
 import { SITE, isNoindexed } from '../../consts';
 import Nav from './Nav.astro';
 import Footer from './Footer.astro';
+import JsonLd from '../atoms/JsonLd.astro';
 import '../../styles/global.css';
 
 /**
@@ -25,15 +26,113 @@ interface Props {
   noindex?: boolean;
   /** Renders without the site chrome. */
   bare?: boolean;
+  /**
+   * What KIND of page this is, for the `WebPage` node in the structured data.
+   *
+   * schema.org's page subtypes are a closed list and this union is the subset
+   * this site has pages for — a string prop would let a typo ship a type no
+   * consumer recognises, which fails silently because structured data has no
+   * runtime.
+   */
+  pageType?: 'WebPage' | 'AboutPage' | 'ContactPage' | 'CollectionPage';
 }
 
-const { title, description = SITE.description, ogImage = SITE.ogImage, noindex = false, bare = false } =
-  Astro.props as Props;
+const {
+  title,
+  description = SITE.description,
+  ogImage = SITE.ogImage,
+  noindex = false,
+  bare = false,
+  pageType = 'WebPage',
+} = Astro.props as Props;
 
 const canonical = canonicalUrl(Astro.url.pathname, Astro.site);
 const path = canonicalPath(Astro.url.pathname);
 const isNoindex = noindex || isNoindexed(path);
 const ogImageAbsolute = ogImage ? new URL(ogImage, Astro.site).href : undefined;
+
+/**
+ * SITE-WIDE STRUCTURED DATA (§8).
+ *
+ * Until now the only JSON-LD on this site was the `BreadcrumbList` that
+ * `Breadcrumb` emits with its own trail — so four pages carried one type, and
+ * Home, About and Contact carried nothing. **Nothing anywhere said that
+ * CentiPack is an organisation**, which is the node a search engine attaches a
+ * brand to.
+ *
+ * ONE `@graph`, NOT THREE SEPARATE BLOCKS. The three nodes reference each other
+ * by `@id` — the page is `isPartOf` the site, the site is `publisher`ed by the
+ * organisation — and a graph is how you say that once. Three unlinked blocks
+ * describe three unrelated things that happen to share a page.
+ *
+ * `BreadcrumbList` stays where it is, emitted by the component that draws the
+ * visible trail. That coupling is the point (see Breadcrumb.astro): a page
+ * cannot get the structured trail without the one a person can see, and moving
+ * it here would break exactly that.
+ *
+ * EVERY VALUE IS SOMETHING THE SITE ALREADY SAYS. No address, no telephone, no
+ * `sameAs`, no `foundingDate` — none of them are published anywhere on this
+ * site, and structured data is the wrong place to debut a fact nobody can check
+ * against the page. The phone was deliberately removed site-wide (Footer), and
+ * the social accounts do not exist.
+ *
+ * NO `parentOrganization` EITHER, which is the one that was tempting: About says
+ * "We come from Centigrade Logistics, a cold chain operation". That is a
+ * sentence about where the founders came from. It is not a claim about
+ * corporate structure, and asserting one from it would be inventing a fact in
+ * the one format that reads as authoritative precisely because a machine wrote
+ * it.
+ */
+const ORG_ID = `${SITE.origin}/#organization`;
+const SITE_ID = `${SITE.origin}/#website`;
+
+const structuredData = {
+  '@context': 'https://schema.org',
+  '@graph': [
+    {
+      '@type': 'Organization',
+      '@id': ORG_ID,
+      name: SITE.name,
+      url: SITE.origin,
+      description: SITE.description,
+      email: SITE.email,
+      logo: {
+        '@type': 'ImageObject',
+        url: new URL('/apple-touch-icon.png', SITE.origin).href,
+        width: 180,
+        height: 180,
+      },
+      contactPoint: {
+        '@type': 'ContactPoint',
+        contactType: 'sales',
+        email: SITE.email,
+        url: new URL(SITE.contactHref, SITE.origin).href,
+      },
+    },
+    {
+      '@type': 'WebSite',
+      '@id': SITE_ID,
+      url: SITE.origin,
+      name: SITE.name,
+      description: SITE.description,
+      publisher: { '@id': ORG_ID },
+      inLanguage: SITE.locale,
+      /* NO `SearchAction`. It is the one thing everybody copies into a WebSite
+         node, and it declares a search endpoint — this site has no search, so
+         it would point at a URL that 404s. */
+    },
+    {
+      '@type': pageType,
+      '@id': `${canonical}#webpage`,
+      url: canonical,
+      name: title,
+      description,
+      isPartOf: { '@id': SITE_ID },
+      inLanguage: SITE.locale,
+      ...(ogImageAbsolute && { primaryImageOfPage: ogImageAbsolute }),
+    },
+  ],
+};
 ---
 
 <!doctype html>
@@ -83,6 +182,10 @@ const ogImageAbsolute = ogImage ? new URL(ogImage, Astro.site).href : undefined;
     <link rel="icon" href="/favicon.ico" sizes="32x32" />
     <link rel="icon" href="/favicon.svg" type="image/svg+xml" />
     <link rel="apple-touch-icon" href="/apple-touch-icon.png" />
+
+    {/* The Organization / WebSite / WebPage graph. A page's own BreadcrumbList
+        is emitted separately by Breadcrumb, beside the trail it describes. */}
+    <JsonLd schema={structuredData} />
   </head>
 
   <body>

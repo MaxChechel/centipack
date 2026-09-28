@@ -4941,3 +4941,123 @@ Unchanged: 22–26, 28, 29, 31–34, 36, 37, 40, 41, 44, 48, 51–66. One added:
     generic — headline plus lockup — which is right for Home and weaker for a
     category page a buyer lands on from search. Per-page share images are a real
     improvement and a real cost; the `ogImage` prop is already there to take one.
+
+---
+
+## 2026-09-28 — Entry 55. Structured data, which was one type on four pages
+
+Asked what the site had. Read out of `dist` rather than answered from memory,
+and the answer was thinner than it looked:
+
+| page | before |
+| --- | --- |
+| Home | **nothing** |
+| About | **nothing** |
+| Contact | **nothing** |
+| Products index | `BreadcrumbList` |
+| 3 category pages | `BreadcrumbList` |
+
+One type, on four of seven pages, and **nothing anywhere saying CentiPack is an
+organisation** — the node a search engine attaches a brand to.
+
+The plumbing was never the problem. The `JsonLd` atom works, and `Breadcrumb`
+emits its own `BreadcrumbList` beside the trail it describes, so a page cannot
+get one without the other. Nothing else had been wired.
+
+### One `@graph`, not three blocks
+
+`Organization`, `WebSite` and a page node, in `BaseLayout`, referencing each
+other by `@id`: the page `isPartOf` the site, the site `publisher`ed by the
+organisation. Three unlinked blocks would describe three unrelated things that
+happen to share a page.
+
+`BreadcrumbList` deliberately stays where it is. Moving it into the graph would
+break the coupling that makes it trustworthy — it is emitted by the component
+that draws the visible trail, from the same array.
+
+`pageType` is a closed union, not a string: `WebPage` | `AboutPage` |
+`ContactPage` | `CollectionPage`. A typo in structured data fails silently
+because structured data has no runtime, so the compiler is the only thing that
+can catch it.
+
+### What was left OUT, which took longer to decide than what went in
+
+No address, no telephone, no `sameAs`, no `foundingDate` — **none of them appear
+anywhere on this site.** The phone was deliberately removed site-wide and the
+social accounts do not exist. Structured data is the worst place to debut a fact
+nobody can check against the page.
+
+**No `parentOrganization`, and this was the tempting one.** About says *"We come
+from Centigrade Logistics, a cold chain operation."* That is a sentence about
+where the founders came from. It is not a claim about corporate structure, and
+turning it into one would be inventing a fact in the single format that reads as
+authoritative precisely because a machine wrote it.
+
+**No `SearchAction` on the WebSite node** — the thing everybody copies. It
+declares a search endpoint, and this site has no search, so it would name a URL
+that 404s.
+
+**No `Product` schema**, ruled against and agreed: with product pages gated there
+is no URL, no price, no availability and no offer. Incomplete `Product` markup
+earns Search Console warnings rather than rich results, and it would assert
+purchasable entities the site does not back with a page. It arrives with the
+pages.
+
+### The email became one source on the way
+
+`info@centipack.com` was typed independently into the footer and the contact
+page, and the `Organization.email` would have been a third. **A machine-readable
+address that can drift from the visible one is worse than none**, because the
+copy nobody proofreads is the one a crawler believes. Now `SITE.email`, consumed
+three times.
+
+### Breadcrumbs on About and Contact are a DESIGN change, and were taken as one
+
+Those two pages had no trail, so they had no `BreadcrumbList`. Adding the schema
+alone would have been markup describing a UI that is not there — so the visible
+trail went in too, and both were rendered and read at 1440: centred on About,
+because that page is centred, and left-aligned above the h1 on Contact, matching
+the products and category pages. Placement follows the page; the component does
+not impose one.
+
+### `ItemList` follows the launch gate rather than repeating a decision
+
+Each category page lists its products, derived from the same array the rail
+renders — §5's rule about second sources applies to structured data exactly as
+it does to a nav. The entries carry names and **no `url`**, because
+`product.href` is `undefined` while the pages are gated, and a `ListItem`
+pointing at a route the build does not emit is a 404 asserted authoritatively.
+They gain URLs on the same boolean that gives them pages: no second edit, and no
+window in which the two disagree.
+
+### After
+
+| page | after |
+| --- | --- |
+| Home | `Organization`, `WebSite`, `WebPage` |
+| About | + `AboutPage`, `BreadcrumbList` |
+| Contact | + `ContactPage`, `BreadcrumbList` |
+| Products index | + `CollectionPage` |
+| 3 category pages | + `CollectionPage`, `ItemList` |
+
+### Measurements
+
+| | before | after |
+| --- | --- | --- |
+| verify | 8 checks, 634 assertions | **8 checks, 636 assertions, 0 failures** |
+| pages with structured data | 4 of 7 | **7 of 7** |
+| distinct schema types | 1 | **7** |
+| pages naming the organisation | **0** | **7** |
+| hardcoded copies of the email | 2 | **0** (one source) |
+
+### Open questions
+
+Unchanged: 22–26, 28, 29, 31–34, 36, 37, 40, 41, 44, 48, 51–67. One added:
+
+68. **Nothing validates the structured data.** It is well-formed JSON by
+    construction, and that is all that is proven — no check asserts that the
+    `@id` references resolve within the graph, that a required property has not
+    been dropped, or that the types are ones schema.org defines. A malformed
+    graph fails exactly as silently as a missing one. Google's Rich Results Test
+    is the manual answer; a local check over the emitted blocks is the durable
+    one.

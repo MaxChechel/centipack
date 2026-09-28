@@ -7,6 +7,7 @@ import ProductRail from '../../components/blocks/ProductRail.astro';
 import CategoryCard from '../../components/blocks/CategoryCard.astro';
 import CtaPlate from '../../components/blocks/CtaPlate.astro';
 import Media from '../../components/blocks/Media.astro';
+import JsonLd from '../../components/atoms/JsonLd.astro';
 import { getCatalogue, type CategoryView, type ProductView } from '../../lib/catalogue';
 import { closingBand } from '../../lib/closing-band';
 
@@ -40,9 +41,40 @@ interface Props {
 
 const { category, products, others } = Astro.props;
 const cta = await closingBand();
+
+/**
+ * The products on this page, as an `ItemList`.
+ *
+ * DERIVED FROM THE SAME ARRAY THE RAIL RENDERS, which is the only reason it is
+ * worth emitting: a hand-kept list beside a rendered one is two lists, and
+ * §5's rule about second sources applies to structured data exactly as it does
+ * to a nav.
+ *
+ * `url` FOLLOWS THE LAUNCH GATE. `product.href` is `undefined` while product
+ * detail pages are out of scope (src/consts.ts), and a `ListItem` pointing at a
+ * route the build does not emit is a 404 stated in a format that reads as
+ * authoritative. So the entries carry names now and gain URLs on the same flag
+ * that gives them pages — no second edit, and no window where the two disagree.
+ */
+const itemList = {
+  '@context': 'https://schema.org',
+  '@type': 'ItemList',
+  name: category.selectionHeading,
+  numberOfItems: products.length,
+  itemListElement: products.map((product, index) => ({
+    '@type': 'ListItem',
+    position: index + 1,
+    name: product.title,
+    ...(product.href && { url: new URL(product.href, Astro.site).href }),
+  })),
+};
 ---
 
-<BaseLayout title={`${category.pageTitle} — ${category.title} | CentiPack`} description={category.lede}>
+<BaseLayout
+  pageType="CollectionPage"
+  title={`${category.pageTitle} — ${category.title} | CentiPack`}
+  description={category.lede}
+>
   {/* 1 — Hero. Same shape as the products index: trail, h1, lede in column two. */}
   <Section spaceTop="nav" spaceBottom="sm" class="bg-subtle">
     <div class="gap-xl md:gap-lg md:grid md:grid-cols-12 md:items-end flex flex-col">
@@ -77,6 +109,9 @@ const cta = await closingBand();
     <div class="gap-2xl flex flex-col">
       <h2 class="text-h2 text-primary">{category.selectionHeading}</h2>
       <ProductRail products={products} columns={3} label={`${category.title} products`} />
+      {/* Emitted beside the rail it describes, for the same reason Breadcrumb
+          emits its own: the markup and the structured data come from one array. */}
+      <JsonLd schema={itemList} />
     </div>
   </Section>
 

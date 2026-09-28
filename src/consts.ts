@@ -44,6 +44,16 @@ export const SITE = {
   contactHref: '/contact',
 
   /**
+   * The published address, stated once.
+   *
+   * It was typed into the footer and the contact page independently, and the
+   * structured data would have been a third — an `Organization.email` that can
+   * drift from the address a visitor can actually see is worse than no
+   * structured data, because a machine reads the one nobody proofreads.
+   */
+  email: 'info@centipack.com',
+
+  /**
    * The default share image, root-relative.
    *
    * 1200 × 630, which is the size `BaseLayout` writes into `og:image:width` and

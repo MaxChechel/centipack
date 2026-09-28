@@ -5479,3 +5479,87 @@ Unchanged: 22–26, 28, 29, 31–34, 36, 37, 40, 41, 44, 48, 51–71. One added:
     heroes and the home collage all still ship one fixed width — `toPicture` now
     takes a `widths` argument and they simply do not pass one. The heroes are the
     next most valuable: `WIDE_WIDTH` is 2400, sent whole to a 390px phone.
+
+---
+
+## 2026-09-61 — Entry 61. The card that was actually blurry
+
+Reported, with justified irritation: *"category card is 656px wide, i exported
+from figma 440px wide image as 5x, it's ridiculous."*
+
+**Both numbers were right and entry 60 had fixed the wrong component.** When the
+first report said "product card" I measured `ProductCard`, which is 440px on a
+category page. `CategoryCard` is a different object and is drawn **656px** in
+the two-up cross-link pair at the foot of a category page. It was still being
+served the single 880px file, from a 2200px source.
+
+| | drawn at | was served | source |
+| --- | --- | --- | --- |
+| product card | 259–440px | srcset (entry 60) | 1037px |
+| **category card** | 288–**656px** | **one 880px file** | **2200px** |
+| **range / page hero** | 390–1440px | **one 2400px file** | **4096px** |
+
+656px at 2x wants 1312 and at 3x wants 1968. The resolution was supplied and the
+pipeline was discarding it — a 5x export downsampled to 880 and then stretched
+back over a 656px card.
+
+### Three ladders, because they are three different objects
+
+`CARD_WIDTHS` (product), `CATEGORY_CARD_WIDTHS` and `WIDE_WIDTHS` — each built
+from measured drawn widths rather than a generic ladder:
+
+```
+              320    360    390    430    768    1024   1440
+home 3-up      288    328    358    396    230    310    440px
+cross 2-up     288    328    358    396    341    461    656px
+```
+
+The same component at 440 and at 656 depending on the page, which is exactly why
+`sizes` cannot live in the component. Home passes `CARD_SIZES_3UP`, the category
+page passes `CARD_SIZES_2UP`, and the full-bleed pictures pass `100vw`.
+
+### Result
+
+| context | card | needs | served | |
+| --- | --- | --- | --- | --- |
+| cross 2-up @1440 2x | 656px | 1312 | **1320w** | sharp |
+| cross 2-up @1440 3x | 656px | 1968 | **1970w** | sharp |
+| cross 2-up @1024 2x | 461px | 922 | 1320w | sharp |
+| home 3-up @1440 2x | 440px | 880 | 880w | sharp |
+| range hero @1440 2x | 1440px | 2880 | **3840w** | sharp |
+| range hero @390 2x | 390px | 780 | **960w** | sharp |
+
+**The hero was the worst offender in the other direction**: one 2400px file sent
+to every visitor, so a 390px phone downloaded 73 KB where it now takes 10 KB —
+and a retina desktop was served 2400 where it wanted 2880 and now gets 3840. Too
+much and not enough, simultaneously, from the same file.
+
+### A measurement that read zero, and was not
+
+The first pass reported `0w` for every cross card. They are below the fold and
+`loading="lazy"`, so nothing had been fetched and `currentSrc` was an empty
+string — the srcset was correct all along. Scrolling them into view first is
+what makes the reading real.
+
+Third measurement artifact in two entries, all three the same shape: **the tool
+reported confidently about something it had not actually observed.** Cached
+candidate, DPR-scaled `naturalWidth`, unloaded lazy image. None was a bug in the
+site.
+
+### Measurements
+
+| | before | after |
+| --- | --- | --- |
+| verify | 8 checks, 641 assertions | **8 checks, 641 assertions, 0 failures** |
+| category card candidates | 1 | **6** (360–1970) |
+| hero candidates | 1 | **6** (640–3840) |
+| hero bytes to a 390px phone | 73,136 B | **10,282 B** |
+| contexts served too small | 3 | **0** |
+
+### Open questions
+
+Unchanged: 22–26, 28, 29, 31–34, 36, 37, 40, 41, 44, 48, 51–71.
+
+72 closes: category cards, range shots and page heroes all carry a srcset now.
+The home collage still ships fixed widths, and is the one remaining case —
+small, decorative, five images, and deliberately left.

@@ -172,6 +172,34 @@ const WIDE_WIDTH = 2400;
  */
 const CARD_WIDTHS = [260, 440, 520, 880, 1320] as const;
 
+/**
+ * The same, for a CATEGORY card — which is a different object at a different
+ * size, and was the one actually being complained about.
+ *
+ * A category card is drawn WIDER than a product card and wider than it looks:
+ *
+ *            320    360    390    430    768    1024   1440
+ *   home 3-up  288    328    358    396    230    310    440px
+ *   cross 2-up 288    328    358    396    341    461    656px
+ *
+ * **656px on a category page**, which at 2x wants 1312 and at 3x wants 1968 —
+ * against the single 880px file every one of them was served. The source
+ * photographs are 2200px wide, so the resolution was there and the pipeline was
+ * throwing it away.
+ */
+const CATEGORY_CARD_WIDTHS = [360, 440, 660, 880, 1320, 1970] as const;
+
+/**
+ * And for the full-bleed page pictures — the category range shot and the page
+ * heroes.
+ *
+ * These are drawn at the VIEWPORT width, so the ladder is the viewport ladder
+ * rather than a card ladder: 390 at 2x is 780, 1440 at 2x is 2880, 1440 at 3x
+ * is 4320. One 2400px file served all of them, which is three times too much
+ * for a phone and not quite enough for a retina desktop at the same time.
+ */
+const WIDE_WIDTHS = [640, 960, 1280, 1920, 2560, 3840] as const;
+
 type RawPicture = { src: ImageMetadata; alt: string; mobile?: ImageMetadata } | undefined;
 
 /** One number per surface, so every caller asks for the same asset. */
@@ -250,8 +278,9 @@ async function toPicture(
 export async function toPageImage(
   picture: { src: ImageMetadata; alt: string; mobile?: ImageMetadata },
   width = WIDE_WIDTH,
+  widths: readonly number[] = WIDE_WIDTHS,
 ): Promise<Picture> {
-  const result = await toPicture(picture, width);
+  const result = await toPicture(picture, width, widths);
   /* Non-null: `picture` is required here, so `toPicture`'s undefined branch —
      which exists for optional collection fields — cannot be reached. */
   return result!;
@@ -293,8 +322,8 @@ async function toCategory(entry: CollectionEntry<'categories'>): Promise<Categor
     crossBody: entry.data.crossBody,
     crossBodyOverrides: entry.data.crossBodyOverrides,
     href: categoryHref(entry.data.slug),
-    rangeImage: await toPicture(entry.data.rangeImage, WIDE_WIDTH),
-    cardImage: await toPicture(entry.data.cardImage, CARD_WIDTH),
+    rangeImage: await toPicture(entry.data.rangeImage, WIDE_WIDTH, WIDE_WIDTHS),
+    cardImage: await toPicture(entry.data.cardImage, CARD_WIDTH, CATEGORY_CARD_WIDTHS),
   };
 }
 

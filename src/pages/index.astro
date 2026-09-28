@@ -39,6 +39,17 @@ import { Image } from 'astro:assets';
 const categories = await getCategories();
 
 /**
+ * How wide a category card is DRAWN here, as `sizes`.
+ *
+ * Measured at the seven sweep widths, not estimated:
+ *   320:288  360:328  390:358  430:396  768:230  1024:310  1440:440px
+ *
+ * Three-up from md; one per row below it, at roughly 92vw. Above the
+ * container's own max-width the card stops growing, so the top tier is fixed px.
+ */
+const CARD_SIZES_3UP = '(min-width: 90rem) 440px, (min-width: 48rem) 32vw, 92vw';
+
+/**
  * The hero picture. Normalized here the way the adapter normalizes a
  * collection's — same `{ src, width, height, alt }` shape — because Media takes
  * one thing and should not care that this one is a page asset rather than a
@@ -225,6 +236,7 @@ const stats = [
         ratio="5 / 3"
         loading="eager"
         fetchpriority="high"
+        sizes="100vw"
         class="hero-media"
       />
 
@@ -305,7 +317,7 @@ const stats = [
         {
           [...categories].reverse().map((category) => (
             <li class="flex">
-              <CategoryCard category={category} headingLevel={3} class="w-full" />
+              <CategoryCard category={category} headingLevel={3} sizes={CARD_SIZES_3UP} class="w-full" />
             </li>
           ))
         }

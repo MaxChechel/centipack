@@ -43,6 +43,16 @@ const { category, products, others } = Astro.props;
 const cta = await closingBand();
 
 /**
+ * The cross-link pair at the foot of this page is TWO-UP, not three, so each
+ * card is drawn far wider than the same component on the home page. Measured:
+ *   320:288  360:328  390:358  430:396  768:341  1024:461  1440:656px
+ *
+ * 656px is the number that made the single 880px file look soft: at 2x it wants
+ * 1312.
+ */
+const CARD_SIZES_2UP = '(min-width: 90rem) 656px, (min-width: 48rem) 47vw, 92vw';
+
+/**
  * The products on this page, as an `ItemList`.
  *
  * DERIVED FROM THE SAME ARRAY THE RAIL RENDERS, which is the only reason it is
@@ -100,6 +110,7 @@ const itemList = {
       ratio="1440 / 700"
       loading="eager"
       fetchpriority="high"
+      sizes="100vw"
       class="page-hero-media"
     />
   </Section>
@@ -137,6 +148,7 @@ const itemList = {
                 cross
                 ratio="1 / 1"
                 body={category.crossBodyOverrides?.[other.slug]}
+                sizes={CARD_SIZES_2UP}
                 class="w-full"
               />
             </li>

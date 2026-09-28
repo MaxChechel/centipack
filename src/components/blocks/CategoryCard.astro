@@ -57,6 +57,15 @@ interface Props {
    * card does not know why.
    */
   body?: string;
+  /**
+   * How wide this card is DRAWN, forwarded to `Media` as `sizes`.
+   *
+   * The card cannot work it out: it is 440px three-up on the home page and
+   * **656px two-up** at the foot of a category page, and only the page laying it
+   * out knows which. Without this a browser picks its srcset candidate assuming
+   * the image fills the viewport, which is wrong in both directions at once.
+   */
+  sizes?: string;
   class?: string;
 }
 
@@ -66,6 +75,7 @@ const {
   cross = false,
   ratio = '5 / 6',
   body: bodyOverride,
+  sizes,
   class: className,
 } = Astro.props as Props;
 
@@ -97,7 +107,7 @@ const hasImage = Boolean(category.cardImage);
     className,
   ]}
 >
-  <Media image={category.cardImage} label={`${category.title} — card`} ratio={ratio} />
+  <Media image={category.cardImage} label={`${category.title} — card`} ratio={ratio} sizes={sizes} />
 
   <div class="p-lg gap-lg absolute inset-0 z-10 flex flex-col justify-between">
     {

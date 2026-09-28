@@ -4841,3 +4841,103 @@ Unchanged: 22–26, 28, 29, 31–34, 36, 37, 40, 41, 44, 48, 51–65. One added:
     band behind the type, or a check samples rendered pixels behind text on a
     themed card. The measurement above is the method; it is not wired into
     `verify`.
+
+---
+
+## 2026-09-28 — Entry 54. Icons and the share image
+
+Supplied into `src/assets/brand/`: `centipack-icon-light.svg`,
+`centipack-icon-dark.svg` and `centipack-OpenGraph.png` at 1200 × 630. Both the
+favicon and the OG tags were `PROJECT:` placeholders until now — **the site has
+been shipping no icon of any kind and no `og:image` at all**, because
+`BaseLayout`'s `ogImage` prop existed and no page had ever passed it.
+
+### The two sources are one path and two fills
+
+The badge is a solid square with the arrow knocked OUT — a hole, not a second
+shape — so whatever sits behind shows through it. `-dark` fills the square
+`#1F1F1F`, `-light` fills it white; the geometry is byte-identical.
+
+`scripts/build-icons.mjs` extracts that one path and asserts the two sources
+still agree, because `favicon.svg` is built on the assumption that they do. If a
+future export makes them genuinely different artworks the script stops rather
+than silently picking one.
+
+### Four files, and why each is the shape it is
+
+| file | size | why |
+| --- | --- | --- |
+| `favicon.svg` | 541 B | the path plus a `prefers-color-scheme` rule |
+| `favicon.ico` | 444 B | 32 × 32, for browsers that do not read an SVG favicon |
+| `apple-touch-icon.png` | 1,933 B | 180 × 180, opaque |
+| `og-default.png` | 29,912 B | copied, not re-encoded |
+
+**One SVG answers both themes.** A `media` attribute on `<link rel="icon">` is
+not reliably honoured, so the switch is a `@media (prefers-color-scheme: dark)`
+rule *inside* the SVG — dark ink by default for a light tab strip, white under a
+dark one. The arrow is a hole in both, so it takes the tab's own colour and
+needs no second fill.
+
+**The raster icons had to be flattened, and that is not a size decision.** iOS
+composites an apple-touch-icon onto its own rounded square and **renders alpha as
+black** — a transparent arrow would come out as a black arrow on a near-black
+square, i.e. the mark, invisible. Flattening onto white fills the knockout
+instead: a dark badge with a white arrow, which is what the lockup already draws
+on a light ground and is legible on a light or a dark tab.
+
+**`sizes="32x32"` on the `.ico` link is load-bearing**, not decoration: without
+it a browser may take the ICO as the better candidate and never look at the SVG.
+
+### The ICO container is 22 bytes written by hand
+
+`sharp` does not write ICO and neither does `sips`, and an ICO is a 6-byte
+header, a 16-byte directory entry, and then the image — which since Vista may be
+a PNG verbatim. Writing those 22 bytes beat adding a dependency to produce them.
+Verified in the built file: `0000 0100 0100` then `20 20`, one plane, 32bpp,
+offset 22, then PNG magic.
+
+### public/, not src/assets, and the reason is not preference
+
+Everything under `src/assets` gets a fingerprinted filename. **A browser requests
+`/favicon.ico` on its own and iOS requests `/apple-touch-icon.png` on its own —
+neither has read the HTML first**, so both need paths that do not move. The share
+image needs a stable URL for a different reason: scrapers cache by it.
+
+### A script that produces a committed artifact, per the font precedent
+
+`scripts/build-icons.mjs` is run by hand, not wired into the build. The exact
+pattern `scripts/subset-fonts.py` already set for `DMSans.subset.woff2`: these
+four files change when the brand changes, which is roughly never, and a build
+step re-deriving identical bytes on every deploy is machinery earning nothing.
+`sharp` is Astro's own image dependency — nothing added to the tree, and nothing
+here reaches a browser.
+
+The script refuses to run if the share image is not 1200 × 630, because
+`BaseLayout` **declares** those numbers in `og:image:width`/`height` rather than
+deriving them. That check is what keeps the file and the meta from disagreeing.
+
+### The link check picked them up for free
+
+`internalLinksResolve()` went from 118 assertions to **139** — three icon `href`s
+across seven pages — so a missing or misnamed icon file now fails the build
+without anything being added. That was not designed for; it is what a check
+written against `href` generally rather than against a page list generally does.
+
+### Measurements
+
+| | before | after |
+| --- | --- | --- |
+| verify | 8 checks, 613 assertions | **8 checks, 634 assertions, 0 failures** |
+| internal link assertions | 118 | **139** |
+| icons shipped | **0** | 3 |
+| pages carrying `og:image` | **0** | **7** |
+| added bytes in `public/` | — | 32,830 B |
+
+### Open questions
+
+Unchanged: 22–26, 28, 29, 31–34, 36, 37, 40, 41, 44, 48, 51–66. One added:
+
+67. **Every page shares one OG image and one OG title pattern.** The image is
+    generic — headline plus lockup — which is right for Home and weaker for a
+    category page a buyer lands on from search. Per-page share images are a real
+    improvement and a real cost; the `ogImage` prop is already there to take one.

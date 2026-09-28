@@ -44,6 +44,22 @@ export const SITE = {
   contactHref: '/contact',
 
   /**
+   * The default share image, root-relative.
+   *
+   * 1200 × 630, which is the size `BaseLayout` writes into `og:image:width` and
+   * `og:image:height` — those are declared rather than derived, so the file and
+   * the numbers have to agree. `scripts/build-icons.mjs` refuses to run if the
+   * source is any other size, which is what keeps them agreeing.
+   *
+   * Served from `public/` and NOT through `src/assets`, because a share image
+   * needs a stable URL: scrapers cache by it, and a fingerprinted filename would
+   * hand every build a new one.
+   *
+   * A page passes `ogImage` to override it; nothing does yet.
+   */
+  ogImage: '/og-default.png',
+
+  /**
    * Routes that must never be indexed, and never appear in the sitemap.
    *
    * Stated once and consumed twice — `BaseLayout` emits the robots meta and

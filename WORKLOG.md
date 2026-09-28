@@ -4784,3 +4784,60 @@ Unchanged: 22–26, 28, 29, 31–34, 36, 37, 40, 41, 44, 48, 51–65.
 
 Open question 27 — the collage's mobile fallback — stays closed; the placed
 mobile arrangement it was closed with is what these render into.
+
+---
+
+## 2026-09-28 — Entry 53. The custom boxes card shot
+
+`category-custom-boxes.avif` replaced in the tree at push time, 1320 × 1596. An
+open blue mailer box holding two branded bottles, a blue drawer box slid open on
+two vials, and an open white mailer behind them with a long branded box inside.
+
+**The alt was re-read against the picture and stands unchanged** — *"An open blue
+mailer box of bottles and a blue drawer box of vials, beside a white mailer
+holding a branded box."* All four elements confirmed, including a zoom on the two
+containers in the mailer box to check "bottles" against what is actually in
+frame. Entry 46's rule, applied and answered "no change" this time.
+
+### The thing worth checking on this card, and the number
+
+`CategoryCard` sets `data-theme="dark"` whenever it has an image, so the heading,
+the body and the link are **white type sitting directly on the photograph**.
+There is no scrim: it came off in entry 40 when the client's pre-darkened shots
+landed, so every one of these cards depends on the photograph itself carrying the
+contrast. A replacement shot is therefore a contrast change, and nothing in
+`npm run verify` would say so — the contrast matrix reads token pairs from the
+built CSS and has no view of what a photograph does behind a paragraph.
+
+Measured off a rendered screenshot instead: the darkest decile of pixels behind
+each text box, against white.
+
+| card | element | size | contrast | needs | |
+| --- | --- | --- | --- | --- | --- |
+| Pharmacy Formats | heading | 32px | 3.17 | 3.0 | pass |
+| Pharmacy Formats | body | 16px | 18.26 | 4.5 | pass |
+| **Custom Boxes** | heading | 32px | **3.25** | 3.0 | pass |
+| **Custom Boxes** | body | 16px | **17.44** | 4.5 | pass |
+| Cold Chain & Shipping | heading | 32px | 3.17 | 3.0 | pass |
+| Cold Chain & Shipping | body | 16px | 17.39 | 4.5 | pass |
+
+The new shot is the best of the three on the heading. Not a regression — a
+marginal improvement.
+
+**The headings clear 3:1 by 0.17–0.25 across all three cards**, which is thin,
+and it is thin on the two cards nobody changed. They pass only because 32px at
+weight 500 is WCAG "large text"; at the body threshold all three would fail.
+Pre-existing, not introduced here, and now written down with a number rather than
+left as a thing that has always looked fine. Open question 66.
+
+### Open questions
+
+Unchanged: 22–26, 28, 29, 31–34, 36, 37, 40, 41, 44, 48, 51–65. One added:
+
+66. **The three category card headings clear their contrast threshold by under
+    0.3, and only as "large text".** Every future photograph swap on these cards
+    is one shade away from failing, with no check to catch it — the contrast
+    matrix cannot see a photograph. Either the scrim comes back as an insurance
+    band behind the type, or a check samples rendered pixels behind text on a
+    themed card. The measurement above is the method; it is not wired into
+    `verify`.

@@ -308,8 +308,15 @@
      cards — and a backdrop filter is the only way to do that without a second
      image. It is a token rather than an arbitrary value because it appears in
      more than one place, and because `backdrop-blur-sm` resolving to nothing is
-     exactly the silent failure the reset exists to surface. */
-  --blur-overlay: 50px;
+     exactly the silent failure the reset exists to surface.
+
+     16px, DOWN FROM 50. Set on instruction. The two consumers are both the home
+     hero's stats — the full-bleed plate below `md` and the three cards above it
+     — so this token and "the hero stats' blur" are currently the same thing,
+     and changing it here changes nothing else on the site. If a second surface
+     ever frosts at a different strength, that is the moment this stops being one
+     number and the hero takes its own. */
+  --blur-overlay: 16px;
 
   --border-width: 1px;
   --focus-width: 0.125rem;

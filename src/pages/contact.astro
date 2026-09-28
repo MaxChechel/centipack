@@ -2,29 +2,32 @@
 /**
  * Contact (§4.4, §8).
  *
- * THE FORM IS LIVE, AND §8's GUARANTEE MOVED RATHER THAN LAPSED.
+ * THE FORM POSTS TO FORMSPARK. This is a recorded deviation from §8, which
+ * specifies a Cloudflare Pages Function with invisible Turnstile — see AUDIT.md
+ * D7 for the reason and what was given up.
  *
- * It used to ship every control `disabled`, re-enabled only once a Turnstile key
- * existed. The fear was precise and correct: a form that posts into an
+ * §8's GUARANTEE IS UNCHANGED AND IS STILL THE POINT: a form that posts into an
  * unverified endpoint swallows a real enquiry SILENTLY, which is the most
- * expensive failure a marketing site has.
+ * expensive failure a marketing site has. What prevents that here is not a
+ * disabled control — it is the INTERCEPTED SUBMIT plus the live status region.
+ * `src/scripts/contact.ts` fetches with `accept: application/json`, Formspark
+ * answers JSON rather than redirecting, and whatever comes back is rendered on
+ * this page in words. Nothing is swallowed and nothing navigates away.
  *
- * That fear was written when submission was a native POST. It is not any more —
- * WORKLOG entry 15 replaced it with an intercepted fetch that renders whatever
- * the endpoint answers, and the endpoint answers precisely: 503 with no
- * Turnstile secret, 400 for a missing token, 502 when no provider is
- * configured. A submission on an unconfigured build now FAILS IN FRONT OF THE
- * VISITOR, in words, in a live region. Nothing is swallowed, so nothing needs
- * disabling to prevent the swallowing.
+ * That region is the whole guarantee, and `scripts/verify/contracts.mjs` fails
+ * the build without it.
  *
- * What the rule becomes, and what `scripts/verify/contracts.mjs` now asserts:
- * a form whose submit is intercepted MUST have a live status region to report
- * into. That region is the whole guarantee; without it the failure goes back to
- * being silent, and the check fails the build.
+ * THE ENDPOINT IS PUBLIC AND STATIC, so there is no "configured" state any more
+ * and no env var gating this page. The form id is not a secret: it ships in the
+ * `action` attribute of every contact page Formspark has ever documented. The
+ * secret-bearing half of the old design — a Turnstile secret and a Resend key in
+ * the Pages Function's env — no longer exists.
  *
- * Turnstile is still loaded on this page and nowhere else, and still only once a
- * site key exists — no key, no widget, no third-party request. Submitting
- * without one returns "Verification missing." and says so on the page.
+ * NO TURNSTILE. It was removed with the Pages Function that verified it: the
+ * token was only ever checked server-side by `functions/api/contact.ts`, and
+ * Formspark does not check it. A challenge nobody verifies is a step the visitor
+ * pays for and no bot is stopped by. Spam is now Formspark's built-in filtering
+ * plus the honeypot below, which Formspark DOES enforce.
  *
  * NO CTA BAND: this page is the call to action. Copy is verbatim from Figma
  * 788:9565; the five controls are exactly the ones the design draws, mapped onto
@@ -37,10 +40,19 @@ import Button from '../components/atoms/Button.astro';
 import TextLink from '../components/atoms/TextLink.astro';
 import { SITE } from '../consts';
 
-/** PROJECT: set PUBLIC_TURNSTILE_SITE_KEY in the environment. Public by design —
- *  the secret half lives in the Pages Function's env and never in this repo. */
-const turnstileSiteKey = import.meta.env.PUBLIC_TURNSTILE_SITE_KEY as string | undefined;
-const configured = Boolean(turnstileSiteKey);
+/**
+ * The Formspark endpoint.
+ *
+ * NOT A SECRET and not an env var, which is worth saying once because the old
+ * design's endpoint half was both. A Formspark form id is public by
+ * construction — it is the `action` of a plain HTML form, visible in view-source
+ * on every page that carries one. It is written here rather than in the
+ * environment so the form works on a fresh clone with no setup, which is the
+ * same reason `SITE.origin` is a constant.
+ *
+ * Changing the destination is changing this line.
+ */
+const FORM_ENDPOINT = 'https://submit-form.com/bqtIN0U6N';
 
 /**
  * The select's ranges are NOT in the design — only the placeholder is drawn.
@@ -85,22 +97,23 @@ const SHIPMENT_RANGES = [
 
         <form
           method="POST"
-          action="/api/contact"
+          action={FORM_ENDPOINT}
           data-contact-form
-          data-contact-ready
           class="gap-lg flex flex-col"
         >
           <!-- Honeypot. Off-screen rather than display:none — some bots skip
                hidden fields, and none of them are looking at the viewport.
-               aria-hidden + tabindex="-1" keep it away from real users entirely. -->
-          <div class="sr-only" aria-hidden="true">
-            <label for="company_website">Leave this field empty</label>
-            <input id="company_website" type="text" name="company_website" tabindex="-1" autocomplete="off" />
-          </div>
+               aria-hidden + tabindex="-1" keep it away from real users entirely.
 
-          <!-- Stamped in the browser by src/scripts/contact.ts. A build-time
-               value would be baked into the HTML and cached. -->
-          <input type="hidden" name="started_at" value="0" />
+               NAMED `_honeypot`, WHICH IS THE NAME THAT DOES SOMETHING. It was
+               `company_website`, checked by the Pages Function that no longer
+               exists; Formspark enforces this trap only under its own reserved
+               name and would have filed any other field as ordinary form data.
+               A honeypot nothing reads is a hidden input, not a trap. -->
+          <div class="sr-only" aria-hidden="true">
+            <label for="_honeypot">Leave this field empty</label>
+            <input id="_honeypot" type="text" name="_honeypot" tabindex="-1" autocomplete="off" />
+          </div>
 
           <FormField
             label="Full Name"
@@ -139,8 +152,6 @@ const SHIPMENT_RANGES = [
             placeholder="e.g. GLP-1 injectables, nationwide next-day air, 3,000 packages/week"
           />
 
-          {configured && <div class="cf-turnstile" data-sitekey={turnstileSiteKey} data-size="flexible" />}
-
           <Button type="submit" variant="primary" icon="square" iconPosition="start" class="w-full">
             Send request
           </Button>
@@ -175,10 +186,6 @@ const SHIPMENT_RANGES = [
   import '../scripts/contact';
 </script>
 
-{
-  /* Turnstile, on this page only and only when configured. `defer` rather than
-     `async`: the widget must not race the form's own module. */
-  configured && (
-    <script is:inline defer src="https://challenges.cloudflare.com/turnstile/v0/api.js" />
-  )
-}
+{/* The Turnstile script tag was here. It went with the Pages Function that
+    verified its token — nothing checks it now, so loading it would be a
+    third-party request on the launch page's critical path buying nothing. */}

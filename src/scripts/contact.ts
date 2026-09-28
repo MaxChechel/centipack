@@ -1,54 +1,34 @@
 /**
- * Contact form enhancement (§8). Loaded on the contact page only.
+ * Contact form submission (§8). Loaded on the contact page only.
  *
- * Two jobs, both of which must happen in the BROWSER:
+ * ONE JOB: submit the form without leaving the page, and put the answer on it.
  *
- *  1. Stamp `started_at`. The endpoint uses it as a bot floor, and a build-time
- *     value would be baked into the HTML and then cached — every visitor would
- *     submit with the same, increasingly stale, timestamp.
- *  2. Enable the form — but ONLY when the page says the endpoint is configured.
- *     The form ships `disabled` in the markup, and this module is the only thing
- *     that lifts it, so a browser with no JavaScript gets an honest inert form
- *     rather than a button that posts into nothing.
+ * THE INTERCEPT IS THE §8 GUARANTEE, not a nicety. Formspark's documented HTML
+ * setup is a native POST, which navigates: a visitor who filled the form
+ * correctly lands on submit-form.com, and a visitor who hit an error lands on an
+ * error page belonging to a company they have never heard of. Either way they
+ * have left CentiPack, and any failure is something they have to interpret
+ * themselves.
  *
- * THE GATE IS NOT OPTIONAL. An earlier version of this module enabled the form
- * unconditionally, which meant an unconfigured build rendered "this form is not
- * live yet" directly above a working-looking submit button — the two halves of
- * the page disagreeing, with the misleading half being the interactive one.
+ * Fetching with `accept: application/json` makes Formspark answer with JSON
+ * instead of a redirect, so success and failure both get rendered HERE, in
+ * words, in a live region. That region is what `scripts/verify/contracts.mjs`
+ * asserts the existence of, and it is the whole reason a failed enquiry is not
+ * a silent one.
  *
- *  3. Submit the form and put the answer on this page.
+ * NO `started_at`, NO TURNSTILE RESET, NO ENABLE GATE — all three belonged to
+ * the Cloudflare Pages Function this replaced (AUDIT D7). The time floor was
+ * evaluated server-side by code that no longer exists; Formspark would have
+ * filed it as an ordinary form field, so a hidden input named `started_at`
+ * would have been data pretending to be a defence. The honeypot survives
+ * because Formspark genuinely enforces it, under the name `_honeypot`.
  *
- * THAT THIRD JOB WAS MISSING, and this comment used to claim it was not needed:
- * "the endpoint answers with a redirect-friendly status and the browser does the
- * rest". It does not. `functions/api/contact.ts` answers with JSON, and a native
- * POST to a JSON response NAVIGATES — a visitor who filled the form correctly
- * would have left the site and be reading `{"ok":true}` in a blank tab.
- *
- * Intercepting costs nothing that the page had: the form ships `disabled` and
- * only job 2 above lifts it, so there has never been a no-JavaScript path that
- * could submit. What it buys is the error text. The endpoint distinguishes a
- * failed challenge from a bad address from a dead provider, and without a fetch
- * every one of those is the same blank tab.
+ * The form is NOT disabled in markup and nothing here enables it. The endpoint
+ * is public and static — there is no unconfigured state to protect against.
  */
 const form = document.querySelector<HTMLFormElement>('[data-contact-form]');
 
-/* Set by the page only when a Turnstile site key exists. Absent → the endpoint
-   cannot verify a submission, so there is nothing to enable. */
-if (form?.hasAttribute('data-contact-ready')) {
-  const startedAt = form.querySelector<HTMLInputElement>('input[name="started_at"]');
-  if (startedAt) startedAt.value = String(Date.now());
-
-  /* Re-stamp if the page was restored from the back/forward cache, where the
-     original timestamp could be hours old and would trip the MAX_FILL_MS ceiling. */
-  window.addEventListener('pageshow', (event) => {
-    if (event.persisted && startedAt) startedAt.value = String(Date.now());
-  });
-
-  for (const control of form.querySelectorAll<HTMLElement & { disabled: boolean }>('[disabled]')) {
-    control.disabled = false;
-  }
-  form.removeAttribute('data-form-disabled');
-
+if (form) {
   const status = form.querySelector<HTMLParagraphElement>('[data-contact-status]');
   const submit = form.querySelector<HTMLButtonElement>('button[type="submit"]');
 
@@ -72,9 +52,24 @@ if (form?.hasAttribute('data-contact-ready')) {
         body: new FormData(form),
         headers: { accept: 'application/json' },
       });
-      const result = (await response.json()) as { ok?: boolean; error?: string };
 
-      if (result.ok) {
+      /* FORMSPARK'S SHAPE, NOT THE OLD FUNCTION'S. It answers `{"success":true}`
+         on acceptance; the previous endpoint answered `{"ok":true}`. Both are
+         read, and `response.ok` is the backstop — a 2xx with a body this code
+         does not recognise is still an accepted submission, and treating it as a
+         failure would tell a visitor their enquiry was lost when it was not.
+
+         The JSON parse is guarded for the same reason in reverse: a proxy or an
+         outage can return 200 with HTML, and an unguarded `.json()` would throw
+         into the catch below and claim the server was unreachable. */
+      let result: { success?: boolean; ok?: boolean; message?: string; error?: string } = {};
+      try {
+        result = await response.json();
+      } catch {
+        /* Non-JSON body. `response.ok` alone decides. */
+      }
+
+      if (response.ok && result.success !== false && result.ok !== false) {
         /* Replace rather than reset: a sent enquiry is not a form waiting to be
            filled in again, and leaving it fillable invites the double-send.
            Every direct child goes except the status line itself — which is why
@@ -86,7 +81,11 @@ if (form?.hasAttribute('data-contact-ready')) {
         return;
       }
 
-      say(result.error ?? 'Could not send right now. Please email info@centipack.com.');
+      say(
+        result.message ??
+          result.error ??
+          'Could not send right now. Please email info@centipack.com.',
+      );
     } catch {
       /* Offline, DNS, a blocked request — anything that never reached the
          endpoint. The address is in the message because it is the one route
@@ -95,9 +94,5 @@ if (form?.hasAttribute('data-contact-ready')) {
     }
 
     if (submit) submit.disabled = false;
-    /* A Turnstile token is single-use. Without this reset the next attempt
-       posts a spent token and fails verification for a reason the visitor has
-       no way to understand. */
-    (window as unknown as { turnstile?: { reset: () => void } }).turnstile?.reset();
   });
 }

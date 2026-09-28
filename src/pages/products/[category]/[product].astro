@@ -8,10 +8,19 @@ import CtaPlate from '../../../components/blocks/CtaPlate.astro';
 import Media from '../../../components/blocks/Media.astro';
 import { getCatalogue, type CategoryView, type ProductView } from '../../../lib/catalogue';
 import { closingBand } from '../../../lib/closing-band';
-import { SITE } from '../../../consts';
+import { SITE, productPagesShip } from '../../../consts';
 
 /**
  * Product family — one template, twelve pages (§4.4, §5).
+ *
+ * GATED OUT OF THE LAUNCH. `LAUNCH.productPages` is false (src/consts.ts), so
+ * `getStaticPaths` returns an empty list and a build emits no HTML for any of
+ * these routes — the same ruling the styleguide gets in astro.config.mjs, and
+ * for the same reason: `noindex` is a request, not existing is a fact. `npm run
+ * dev` still serves them, so the work stays reviewable while it waits.
+ *
+ * This template is untouched otherwise, and deliberately so: launching these
+ * pages is flipping one boolean, not restoring deleted code.
  *
  * EVERY OPTIONAL FIELD IS GENUINELY OPTIONAL HERE, and that is not a hedge: the
  * design writes one product in full (insulated metallic mailers) and the other
@@ -23,6 +32,10 @@ import { SITE } from '../../../consts';
  * Copy is verbatim from Figma 788:9125.
  */
 export async function getStaticPaths() {
+  /* No paths, no pages. Returning an empty list is what makes the route emit
+     nothing; the template below is never instantiated. */
+  if (!productPagesShip()) return [];
+
   const catalogue = await getCatalogue();
   return catalogue.flatMap(({ category, products }) =>
     products.map((product) => ({

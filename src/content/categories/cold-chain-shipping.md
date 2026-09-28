@@ -32,5 +32,5 @@ cardImage:
   alt: >-
     A CentiPack gel pack and a flat refrigerant pouch beside an open EPS foam cooler in its corrugated outer.
 guideLinkLabel: >-
-  How to choose the right cold chain configuration
+  Browse cold chain
 ---

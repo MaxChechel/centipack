@@ -26,5 +26,5 @@ cardImage:
   alt: >-
     An open blue mailer box of bottles and a blue drawer box of vials, beside a white mailer holding a branded box.
 guideLinkLabel: >-
-  How custom boxes fit the build
+  Browse custom boxes
 ---

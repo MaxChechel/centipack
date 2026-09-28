@@ -31,14 +31,12 @@ const EXPECTED = [
     id: 'contact form submit',
     signature: /data-contact-form/,
     why:
-      'ARCHITECTURE §8 — THREE jobs, and the third is why this budget moved from 500 to 750 B. ' +
-      '(1) The form ships disabled so an unverified endpoint cannot silently swallow an enquiry. ' +
-      '(2) started_at is stamped in the browser, because a build-time value would be baked into cached HTML and every visitor would submit the same stale timestamp. ' +
-      '(3) The submission is intercepted and the answer rendered on the page. That third job was missing and the form was broken without it: functions/api/contact.ts replies with JSON, and a native POST to a JSON response NAVIGATES — a visitor who filled the form correctly left the site and read {"ok":true} in a blank tab. ' +
-      'Intercepting costs no capability the page had, because the form ships disabled and only this module enables it, so there has never been a no-JavaScript path that could submit. What it buys is the error text: the endpoint distinguishes a failed challenge from a bad address from a dead provider, and without a fetch every one of those is the same blank tab. ' +
-      'It also resets the Turnstile widget after a failure, because the token is single-use and a second attempt with a spent one fails for a reason the visitor cannot see. ' +
-      'Measured at 620 B gzipped against the 750 B budget.',
-    maxGzip: 750,
+      'ARCHITECTURE §8, as deviated in AUDIT D7 — ONE job now: intercept the submit and render the answer on the page. ' +
+      'The form posts to Formspark, whose documented HTML setup is a native POST that NAVIGATES — success lands the visitor on submit-form.com and a failure lands them on an error page belonging to a company they have never heard of. Either way they have left CentiPack and have to interpret the outcome themselves. ' +
+      'Fetching with `accept: application/json` makes Formspark answer JSON instead of redirecting, so both outcomes are rendered here, in words, in the live region that contracts.mjs asserts the existence of. That region is what keeps a failed enquiry from being a silent one, which is the whole of §8. ' +
+      'THE BUDGET CAME DOWN FROM 750 B, because three jobs became one: the disabled-until-configured gate, the started_at time floor and the Turnstile reset all belonged to the Cloudflare Pages Function this replaced, and were deleted with it rather than left as code that looks like a defence and is not. ' +
+      'Measured at 519 B gzipped against the 550 B budget, down from 620 B.',
+    maxGzip: 550,
   },
   {
     id: 'select enter-to-open',

@@ -149,15 +149,36 @@ const ICON_FILLED: Partial<Record<ButtonIcon, boolean>> = { square: true };
     /* `whitespace-nowrap` IS RIGHT FOR A BOX AND WRONG FOR A TEXT LINK.
        A filled or outlined button is a fixed target and a label that wrapped
        inside one would look broken. `size="link"` has no box: it is a sentence
-       with an arrow after it, and the design writes long ones — "How to choose
-       the right cold chain configuration →" is 367px on one line, which
-       overflowed a 320px viewport the moment the client's redline landed. The
-       sweep caught it at 320 and 360.
-       So the boxed sizes keep nowrap and the link size wraps, with `items-start`
-       so a wrapped label's arrow sits on the first line rather than centring
-       itself against two. */
-    'inline-flex justify-center rounded-sm border',
-    size === 'link' ? 'items-start' : 'items-center whitespace-nowrap',
+       with an arrow after it, so it wraps rather than pushing the viewport.
+       That much is unchanged — the boxed sizes keep nowrap, the link size wraps.
+
+       THE ARROW IS CENTRED ON THE LABEL, and this reverses an earlier ruling, so
+       here is what changed rather than just the new value.
+
+       `items-start` was correct for one specific reason: the copy deck wrote
+       long tertiary labels — "How to choose the right cold chain configuration
+       →" measured 367px, overflowed a 320px viewport, and the sweep caught it at
+       320 and 360. A label that wraps to two lines wants its arrow on the FIRST
+       line, beside the words, not floating in the middle of the block.
+
+       The cost was paid on every single-line link, which is all of them most of
+       the time: `align-items: start` pins a 16px glyph to the top of a ~20px
+       line box, so the arrow sat visibly high of the label's optical centre —
+       the whole site's tertiary action very slightly out of true.
+
+       THE CONSTRAINT RETIRED ITSELF. Those long labels are gone: every arrow
+       link on the site now reads "Browse cold chain", "Browse custom boxes",
+       "Browse pharmacy formats", "Browse formats", "Browse all formats" or
+       "Talk to us about this mailer" — 28 characters at the longest, which is
+       roughly 190px at `--text-sm` and does not wrap at 320. Nothing is trading
+       against the centring any more, so it goes to centre where it belongs.
+
+       IF A LONG LABEL COMES BACK, this is the line that has to be reconsidered,
+       and the wrapped arrow will centre against the block. It is a real
+       trade-off and not a defect in either position — which is why both are
+       written down. */
+    'inline-flex items-center justify-center rounded-sm border',
+    size !== 'link' && 'whitespace-nowrap',
     // Springs are the default character of the system (§12), including here.
     'transition-colors duration-spring-soft ease-spring-soft',
     // A disabled control must read as disabled.

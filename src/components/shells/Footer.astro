@@ -68,9 +68,21 @@ const linkClass = 'link-underline text-body text-primary';
             {/* One fade group per column: hovering a link drops its siblings
                 back, and the group is the column because that is the set the
                 reader is scanning. */}
+            {/* A NAME WITH NO PAGE IS A <span>, NOT A DEAD <a>. The three
+                catalogue columns still list all thirteen products while product
+                detail pages sit outside the launch scope (src/consts.ts); none
+                of those names is a link, because there is no page to link to.
+                Same ruling as the nav panel, and the same reason it is not an
+                href-less `<a>`: that is still announced as a link. */}
             <ul class="fade-group list-bare gap-sm pt-md flex flex-col">
               {column.links.map(({ href, label }) => (
-                <li><a href={href} class={linkClass}>{label}</a></li>
+                <li>
+                  {href ? (
+                    <a href={href} class={linkClass}>{label}</a>
+                  ) : (
+                    <span class="text-body text-secondary">{label}</span>
+                  )}
+                </li>
               ))}
             </ul>
           </details>
@@ -93,16 +105,22 @@ const linkClass = 'link-underline text-body text-primary';
         around a single child is a div doing nothing. `socialLinks` and
         `.social-link` are deleted rather than left commented out; git has them
         if the accounts ever arrive. */}
-    <ul class="fade-group list-bare gap-lg flex flex-wrap">
-      {
-        legalLinks.map(({ href, label }) => (
-          <li>
-            <a href={href} class="link-underline text-caption text-tertiary">
-              {label}
-            </a>
-          </li>
-        ))
-      }
-    </ul>
+    {/* SELF-SKIP (§4.2): no legal links, no list. `legalLinks` is empty for the
+        soft launch — /terms and /privacy do not exist yet — and an empty <ul>
+        is still a list to a screen reader, announced with zero items. The row
+        collapses to the copyright line on its own. */}
+    {
+      legalLinks.length > 0 && (
+        <ul class="fade-group list-bare gap-lg flex flex-wrap">
+          {legalLinks.map(({ href, label }) => (
+            <li>
+              <a href={href} class="link-underline text-caption text-tertiary">
+                {label}
+              </a>
+            </li>
+          ))}
+        </ul>
+      )
+    }
   </div>
 </Section>

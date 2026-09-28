@@ -1,5 +1,6 @@
 import { getCollection, type CollectionEntry } from 'astro:content';
 import { getImage } from 'astro:assets';
+import { productPagesShip } from '../consts';
 
 /**
  * The catalogue view-model adapter (§5).
@@ -67,7 +68,21 @@ export interface ProductView {
   summary: string;
   lede?: string;
   contactLinkLabel?: string;
-  href: string;
+  /**
+   * Where this product's page is — or `undefined` when product detail pages are
+   * not part of this launch (`LAUNCH.productPages` in src/consts.ts).
+   *
+   * OPTIONAL ON PURPOSE, AND THE OPTIONALITY IS THE MECHANISM. A product with no
+   * page has no URL, and saying so in the type is what makes every consumer —
+   * the card, the nav panel, the mobile fold, the footer — a compile error until
+   * it handles the absence. The alternative, a string that points at a route the
+   * build does not emit, is a 404 that nothing catches: thirteen products across
+   * three lists is 39 dead links on every page of the site.
+   *
+   * `productHref()` below still exists and is still the one place that builds
+   * the URL. What is conditional is whether there is a page at the end of it.
+   */
+  href?: string;
   image?: Picture;
   facts: readonly { label: string; value: string }[];
   specTable?: {
@@ -168,7 +183,11 @@ async function toProduct(entry: CollectionEntry<'products'>): Promise<ProductVie
     summary: entry.data.summary,
     lede: entry.data.lede,
     contactLinkLabel: entry.data.contactLinkLabel,
-    href: productHref(entry.data.category, entry.data.slug),
+    /* THE ONE PLACE THE LAUNCH GATE REACHES THE VIEW MODEL. Every product link
+       on the site is derived from this field, so gating it here gates all of
+       them at once — and cannot leave one list pointing at pages the build does
+       not emit while another has been updated. See src/consts.ts. */
+    href: productPagesShip() ? productHref(entry.data.category, entry.data.slug) : undefined,
     image: await toPicture(entry.data.images.main, CARD_WIDTH),
     facts: entry.data.facts,
     specTable: entry.data.specTable,

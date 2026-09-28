@@ -26,5 +26,5 @@ cardImage:
   alt: >-
     Navy CentiPack jars, a spray bottle and a pump dispenser, one jar open to its threaded neck.
 guideLinkLabel: >-
-  How to choose the right pharmacy format
+  Browse pharmacy formats
 ---

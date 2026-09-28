@@ -4161,3 +4161,247 @@ The alt text — *A sealed blue insulated mailer printed "Refrigerate upon
 opening"* — was re-read against the picture and still describes it exactly.
 
 verify: 8 checks, 536 assertions, 0 failures.
+
+---
+
+## 2026-09-28 — Entry 47. The soft launch: five page types, and the 39 links nobody had counted
+
+Instruction: launch Home, the products index, the three category pages, About
+and Contact. Product cards not clickable, because the individual product pages
+are not launching yet.
+
+### The instruction was about the cards; the work was about the links
+
+The cards were four links. **The nav mega-menu, the mobile nav fold and the
+footer each list all thirteen products, on every page of the site** — read out
+of `dist`, not out of the source — which is 39 anchors per page pointing at
+routes a gated build does not emit. Nothing in the repo would have objected:
+a 404 is not a rendering defect, `astro check` has nothing to check, the sweep
+finds one h1 and no overflow, axe finds no violations. The build would have gone
+green and the site would have shipped broken.
+
+That is the entry. The rest is mechanism.
+
+### One flag, and optionality as the enforcement
+
+`LAUNCH.productPages` in `src/consts.ts`, beside `noindex` where site-scope facts
+already live, with `productPagesShip()` applying the dev override so
+`npm run dev` still serves the unlaunched pages for review.
+
+It reaches exactly one field: **`ProductView.href` became optional.** That is the
+whole design. A product with no page has no URL, and saying so in the type turned
+every consumer into a compile error — card, nav panel, mobile fold, footer — so
+`astro check` enumerated the call sites instead of a grep. Four consumers, found
+by the compiler, zero found by me. `NavLink.href` went optional for the same
+reason and by the same argument.
+
+Each consumer renders a `<span>`, **not an href-less `<a>`**: an anchor with no
+href is still announced as a link and still takes a tab stop, which is the same
+lie with better manners.
+
+`getStaticPaths` returns `[]` when the gate is shut — no paths, no pages. The
+template is otherwise untouched: launching these is flipping one boolean, not
+restoring deleted code.
+
+**Nothing in `global.css` had to change for the inert card,** which is worth
+recording because it is the kind of thing someone goes looking for. Every hover,
+focus and lift rule is written `.product-card:has(.product-card-link:hover)`.
+No link, no `.product-card-link`, and the entire interactive costume stops
+matching on its own. The `→` affordance is removed in markup, on instruction and
+on merit: it is the card's one promise that pressing it goes somewhere.
+
+### The check that should have existed all along
+
+§9 already demands "zero broken refs" for images. `internalLinksResolve()` in
+`scripts/verify/contracts.mjs` is that sentence applied to `href`, asserted
+against **the production build** — not `dist`, which carries the styleguide route
+and would answer for links that only resolve in a build nobody visits.
+
+**It failed on its first run, on something that had nothing to do with this
+work.** `/terms` and `/privacy` were in `legalLinks` and neither page has ever
+existed: 14 dead links, two per page, across all seven pages, shipped for as
+long as the footer has. Removed rather than pointed somewhere plausible — a
+legal link to the wrong page is worse than none, and a footer row is not where
+a privacy policy gets improvised. The row self-skips when the list is empty,
+because an empty `<ul>` is still a list announced with zero items.
+
+Fault-injected per §9 before counting it: `/no-such-page` into the home hero's
+button → `1 failure`, the URL and the page named, exit 1 → reverted.
+
+The production build is now built once and shared by both contracts that read
+it, and its styleguide scan went recursive — the site has nested routes now, and
+a top-level-only scan cannot see into the directory a leak would land in.
+
+### Two page paths came OFF the sweep list, and that is not what it looks like
+
+`/products/cold-chain-shipping/insulated-metallic-mailers` and `.../gel-packs`
+were swept as the two ends of the optional-field range. They are gone from
+`PAGES` because **no build emits them**; sweeping them would 404 through the
+preview server and report structure assertions about an error page, which is the
+port-4321 incident wearing different clothes — real numbers, wrong artifact.
+
+Nothing about those pages was failing. **This is the list following the build,
+not the list being narrowed to reach green,** and the reasoning is written at the
+site in `lib/cdp.mjs` so the next reader does not have to take this entry's word
+for it.
+
+What is genuinely uncovered: the product page template's optional-field skips.
+Open question 58.
+
+### Also in this pass
+
+**The sitemap was missing the category pages.** `staticPaths` can only see routes
+whose filename is the URL, so it dropped everything with a `[` — the three
+category pages have never been in `sitemap.xml`, and they are launch surface.
+Now derived from `getCategories()`, as the file's own PROJECT note always said
+it should be. Product pages follow the same gate, so the sitemap cannot advertise
+a URL the build does not emit. 4 URLs → 7.
+
+**Three `guideLinkLabel` strings**, supplied directly: "How to choose the right
+cold chain configuration" → "Browse cold chain", "How custom boxes fit the
+build" → "Browse custom boxes", "How to choose the right pharmacy format" →
+"Browse pharmacy formats". Exact full-string matches, one field per file, line
+counts 36/30/30 before and after — the assertion entry 45 paid for.
+
+These are now **identical to `navLinkLabel`** in all three files. Two fields
+holding one string is a second source; open question 59.
+
+**The arrow link centres on its label.** `items-start` was correct for a reason
+that has just expired: it existed so a long wrapping label kept its arrow on the
+first line, and the longest arrow-link label on the site is now 28 characters.
+The cost had been paid on every single-line link — a 16px glyph pinned to the
+top of a 20px line box, the tertiary action site-wide very slightly out of true.
+Reversal recorded at the site, both positions written down.
+
+**The home hero's alt text was re-read against the swapped photograph** (entry
+46's rule). It said "two insulated mailers": there is one mailer and one gel
+pack, a different product. It also said "jars" for a single open jar and never
+named the gel pack. Rewritten from the picture. The closing band's `alt: ''` is
+deliberate and unaffected.
+
+### Measurements
+
+| | before | after |
+| --- | --- | --- |
+| verify | 8 checks, 536 assertions, 0 failures | **8 checks, 602 assertions, 0 failures** |
+| pages emitted by a production build | 19 | **7** |
+| links to product detail pages, per page | 39 | **0** |
+| product names still listed, per page | 39 | **39**, as text |
+| internal links asserted to resolve | 0 | **118 across 7 pages** |
+| dead links in the production build | **14** (`/terms`, `/privacy`) | 0 |
+| sitemap URLs | 4 | **7** |
+
+### Open questions
+
+Unchanged: 22, 23, 24, 25, 26, 28, 29, 31–34, 36, 37, 40, 41, 44, 48, 51, 52,
+53, 54, 55, 56, 57. Three added:
+
+58. **The product page template is verified by nothing while the gate is shut.**
+    Its optional-field skips were the reason two product paths were on the sweep
+    list. Both go back when `LAUNCH.productPages` flips; until then the template
+    can rot without the harness noticing.
+59. **`guideLinkLabel` and `navLinkLabel` now hold the same string in all three
+    category files.** Either retire one field, or record why the two surfaces
+    are allowed to diverge later.
+60. **`/terms` and `/privacy` are gone from the footer, not written.** A
+    commercial site launching without either is a decision someone should make
+    deliberately rather than inherit from this entry.
+
+---
+
+## 2026-09-28 — Entry 48. The contact form moves to Formspark
+
+Endpoint supplied directly: `https://submit-form.com/bqtIN0U6N`, set up in
+Formspark, HTML technology selected. Recorded as a deviation from §8 in
+**AUDIT.md D7**; this entry is what it cost and what was found on the way.
+
+### The form has never been able to deliver an enquiry
+
+Reading the code before changing it: `PUBLIC_TURNSTILE_SITE_KEY` gates the
+Turnstile widget at build time, and `functions/api/contact.ts` answers
+`503 Form is not configured.` without a `TURNSTILE_SECRET_KEY`. Neither is in the
+environment. **Every submission since the form shipped has been a 503 rendered
+in the live region** — correctly, visibly, and to no useful end.
+
+So the deviation is not a downgrade from a working system. §8's design was
+correct and was never switched on; Formspark needs no key, no environment and no
+function, and works on a fresh clone.
+
+### What §8's guarantee actually rested on
+
+The rule is that a form must never swallow an enquiry silently. It would have
+been easy to read the Pages Function as the thing enforcing that, and it was not:
+**the intercepted submit and the live status region are the guarantee**, and both
+survive unchanged. `accept: application/json` makes Formspark answer JSON instead
+of redirecting, so the outcome is rendered on the page in words rather than
+navigating the visitor to submit-form.com. `contracts.mjs` still fails the build
+if that region goes missing.
+
+Formspark's own documented HTML setup is a native POST. Taking it would have sent
+a visitor who filled the form correctly to a third party's thank-you page, and a
+visitor who hit an error to a third party's error page. Declined.
+
+### Three defences deleted rather than left looking like defences
+
+- **Turnstile.** Its token was only ever verified by the function that is gone,
+  and Formspark does not check it. Kept, it would have been a visible challenge
+  the visitor pays for that stops nothing. The widget, the script tag and the
+  env gate all go.
+- **The time floor.** `MIN_FILL_MS` / `MAX_FILL_MS` were evaluated server-side by
+  deleted code. `started_at` came out of the markup: **a hidden field no endpoint
+  reads is data wearing the costume of a defence**, and leaving it would have
+  been worse than never having had it, because the next reader would count it.
+- **`sendLead()`.** Delivery is Formspark's now. The seam goes with the function.
+
+**The honeypot survives because it is the one that still does something** — but
+only after being renamed `company_website` → `_honeypot`, which is the reserved
+name Formspark enforces. Under any other name it is an ordinary form field that
+gets filed with the enquiry. The contract assertion follows the field; the
+assertion itself is unchanged.
+
+### Two stale allowances found by following the deletions out
+
+- `scripts/verify/utilities.mjs` carried a `cf-turnstile` entry in
+  `UNSTYLED_BY_DESIGN`. The class no longer reaches any page, so the allowance
+  described a site that no longer exists. Removed — that list is meant to read as
+  the complete set of deliberately unstyled classes.
+- The JS census's justification for this script described all three deleted jobs
+  and the budget set for them. Rewritten, and **the budget came down 750 → 550 B**
+  rather than being left slack: a budget nothing pushes against stops being a
+  budget.
+
+### A number I nearly asserted instead of measuring
+
+The census text was first written with "Measured at 458 B" — **a figure I had not
+taken.** Measured from `dist`: 518 B by hand, and **519 B by the census's own
+`gzipSync(level: 9)`**, which is the number that belongs in the census because it
+is the one the check computes. Corrected twice, and recorded here because a
+plausible invented measurement in a file whose entire purpose is measurement is
+the worst place for one to sit.
+
+### Measurements
+
+| | before | after |
+| --- | --- | --- |
+| verify | 8 checks, 602 assertions, 0 failures | **8 checks, 602 assertions, 0 failures** |
+| contact script | 620 B gzipped / 750 B budget | **519 B / 550 B** |
+| total shipped JavaScript | 14,583 B across 28 scripts | **6,461 B across 15** |
+| third-party requests on /contact | Turnstile api.js | **none** |
+| deliverable enquiries | **0** (503, no secret) | Formspark |
+| repo lines of form endpoint code | 234 | **0** |
+
+The JavaScript total falls for two reasons and only one is this entry's: twelve
+product pages left the build (entry 47), and Turnstile's loader left this page.
+
+### Open questions
+
+Unchanged: 22, 23, 24, 25, 26, 28, 29, 31–34, 36, 37, 40, 41, 44, 48, 51, 52,
+53, 54, 55, 56, 57, 58, 59, 60. Two added:
+
+61. **Lead data now transits a third party.** Formspark stores submissions. That
+    is a processor relationship and belongs in the privacy policy the site does
+    not have — which is open question 60, now with a second reason to close it.
+62. **Nobody has submitted this form end to end.** The endpoint is wired and the
+    build is green, but green here means the markup is right; it does not mean an
+    enquiry arrived. A live submission to the real endpoint, confirmed in the
+    Formspark dashboard, is a human punch-list item before launch.

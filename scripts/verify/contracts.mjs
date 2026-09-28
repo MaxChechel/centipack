@@ -102,7 +102,11 @@ function formReportsFailure() {
       const submits = [...form.matchAll(/<(button|input)\b[^>]*type=["']submit["'][^>]*>/g)].map((m) => m[0]);
       const status = /<[a-z]+\b[^>]*data-contact-status[^>]*>/.exec(form)?.[0] ?? '';
       const live = /role=["']status["']/.test(status) || /aria-live=/.test(status);
-      const honeypot = /<input\b[^>]*company_website[^>]*>/.exec(form)?.[0] ?? '';
+      /* `_honeypot`, renamed from `company_website` when the form moved to
+         Formspark (AUDIT D7): that is the name the endpoint actually enforces.
+         The assertion is unchanged — a honeypot exists and is not disabled —
+         and follows the field rather than relaxing. */
+      const honeypot = /<input\b[^>]*name=["']_honeypot["'][^>]*>/.exec(form)?.[0] ?? '';
 
       const problems = [];
       if (submits.length === 0) problems.push('no submit control — nothing can be sent');
@@ -126,7 +130,7 @@ function formReportsFailure() {
         for (const problem of problems) notes.push(`${file}: ${problem}`);
       } else {
         const controls = [...form.matchAll(/<(input|textarea|select|button)\b[^>]*>/g)]
-          .filter((m) => !/company_website/.test(m[0]))
+          .filter((m) => !/_honeypot/.test(m[0]))
           .filter((m) => !/type=["']hidden["']/.test(m[0]));
         notes.push(
           `${file}: ${controls.length} live control(s), submit present, failures reported into a live region`,
@@ -139,18 +143,51 @@ function formReportsFailure() {
   return { checks, failures, notes };
 }
 
-function productionOmitsStyleguide() {
-  const notes = [];
-  const out = '.verify/production';
-  const build = spawnSync('npx', ['astro', 'build', '--outDir', out], {
+/** Every file under `dir`, recursively, as paths relative to it. */
+function walkRelative(dir, base = dir, out = []) {
+  for (const entry of readdirSync(dir)) {
+    const full = join(dir, entry);
+    if (statSync(full).isDirectory()) walkRelative(full, base, out);
+    else out.push(full.slice(base.length + 1));
+  }
+  return out;
+}
+
+const PRODUCTION_OUT = '.verify/production';
+
+/**
+ * THE PRODUCTION BUILD, BUILT ONCE AND SHARED.
+ *
+ * Two contracts now read it — the styleguide gate and the link check — and it is
+ * a full Astro build, so memoising it is the difference between one and two of
+ * them per `npm run verify`. Memoised on the RESULT, failure included, so a
+ * broken build is reported by both rather than being retried and reported once.
+ */
+let productionBuildResult = null;
+function productionBuild() {
+  if (productionBuildResult) return productionBuildResult;
+  const build = spawnSync('npx', ['astro', 'build', '--outDir', PRODUCTION_OUT], {
     encoding: 'utf8',
     env: { ...process.env, INCLUDE_STYLEGUIDE: '' },
   });
-  if (build.status !== 0) {
-    return { checks: 1, failures: 1, notes: ['production build failed', (build.stderr || build.stdout).slice(-800)] };
-  }
+  productionBuildResult = {
+    ok: build.status === 0,
+    out: PRODUCTION_OUT,
+    log: (build.stderr || build.stdout || '').slice(-800),
+  };
+  return productionBuildResult;
+}
 
-  const leaked = readdirSync(out).filter((f) => /styleguide/i.test(f));
+function productionOmitsStyleguide() {
+  const notes = [];
+  const build = productionBuild();
+  if (!build.ok) return { checks: 1, failures: 1, notes: ['production build failed', build.log] };
+
+  /* RECURSIVE, not `readdirSync` on the top level. The site has nested routes
+     now (`/products/:category`), and a top-level-only scan is a leak detector
+     that cannot see into the directory a leak would most plausibly land in. */
+  const files = walkRelative(build.out);
+  const leaked = files.filter((f) => /styleguide/i.test(f));
   if (leaked.length) {
     return {
       checks: 1,
@@ -158,8 +195,98 @@ function productionOmitsStyleguide() {
       notes: [`PRODUCTION BUILD EMITTED THE STYLEGUIDE: ${leaked.join(', ')} (§2.4/§10)`],
     };
   }
-  notes.push(`production build emits ${readdirSync(out).filter((f) => f.endsWith('.html')).length} page(s), none of them the styleguide`);
+  const pages = files.filter((f) => f.endsWith('.html'));
+  notes.push(`production build emits ${pages.length} page(s), none of them the styleguide`);
+  notes.push(`pages: ${pages.sort().join(', ')}`);
   return { checks: 1, failures: 0, notes };
+}
+
+/**
+ * §8/§9 — EVERY INTERNAL LINK RESOLVES TO A PAGE THIS BUILD EMITS.
+ *
+ * §9 already demands "zero broken refs" for images. This is the same sentence
+ * about `href`, and it was the one link in the chain nothing checked.
+ *
+ * PAID FOR IMMEDIATELY. Taking product detail pages out of the launch scope
+ * left thirteen product names in three lists — the nav panel, the mobile nav
+ * fold, the footer — which is THIRTY-NINE dead links on every page of the site.
+ * Every one of them would have built clean, typed clean, swept clean and passed
+ * axe: a 404 is not a rendering defect, and nothing in a static build objects to
+ * an anchor pointing at a URL that was never written. The only artifact that can
+ * answer the question is the finished build, compared against itself.
+ *
+ * AGAINST THE PRODUCTION BUILD, NOT `dist`. `dist` is built with the styleguide
+ * route on, so it contains a page production does not and would answer for links
+ * that only resolve in a build nobody visits. The question is whether the site
+ * THAT SHIPS is internally whole.
+ *
+ * WHAT IS OUT OF SCOPE, and each is a real limit rather than a convenience:
+ *   - external URLs (`https:`, `mailto:`, `tel:`, protocol-relative) — reaching
+ *     the network from a verification run makes the suite fail on someone else's
+ *     outage;
+ *   - pure `#fragment` links, which never leave the page;
+ *   - the fragment and query on an internal link, stripped before resolving —
+ *     `/contact?utm=x#form` is a link to `/contact`.
+ *
+ * `build.format: 'file'` means `/about` is `about.html`, so that is the primary
+ * resolution. A directory-style `about/index.html` and a literal file
+ * (`/robots.txt`) both count as resolved too — the rule is "something answers
+ * this URL", not "it took the shape I expected".
+ */
+function internalLinksResolve() {
+  const notes = [];
+  const build = productionBuild();
+  if (!build.ok) return { checks: 1, failures: 1, notes: ['production build failed', build.log] };
+
+  const files = walkRelative(build.out);
+  const emitted = new Set(files.map((f) => f.split('/').join('/')));
+  const pages = files.filter((f) => f.endsWith('.html'));
+
+  /** Does anything in this build answer `path`? */
+  const resolves = (path) => {
+    const clean = path.replace(/^\//, '');
+    if (clean === '') return emitted.has('index.html');
+    return emitted.has(`${clean}.html`) || emitted.has(`${clean}/index.html`) || emitted.has(clean);
+  };
+
+  let checks = 0;
+  let failures = 0;
+  /* Grouped by target: thirty-nine instances of one missing page is one broken
+     page, and a report that lists it thirty-nine times buries the other two. */
+  const dead = new Map();
+
+  for (const file of pages) {
+    const html = readFileSync(join(build.out, file), 'utf8');
+    for (const match of html.matchAll(/\shref=["']([^"']*)["']/g)) {
+      const raw = match[1].trim();
+      if (raw === '' || raw.startsWith('#')) continue;
+      if (/^[a-z][a-z0-9+.-]*:/i.test(raw) || raw.startsWith('//')) continue;
+      if (!raw.startsWith('/')) continue;
+
+      const path = raw.split('#')[0].split('?')[0];
+      if (path === '') continue;
+      checks++;
+      if (resolves(path)) continue;
+      failures++;
+      if (!dead.has(path)) dead.set(path, new Set());
+      dead.get(path).add(file);
+    }
+  }
+
+  if (dead.size) {
+    notes.push(`${dead.size} internal link target(s) MISSING from the production build:`);
+    for (const [path, onPages] of [...dead].sort()) {
+      const list = [...onPages].sort();
+      const shown = list.slice(0, 4).join(', ');
+      notes.push(
+        `    ${path} — 404. Linked from ${list.length} page(s): ${shown}${list.length > 4 ? ', …' : ''}`,
+      );
+    }
+  } else {
+    notes.push(`${checks} internal link(s) across ${pages.length} page(s), all resolving`);
+  }
+
+  return { checks, failures, notes };
 }
 
 /**
@@ -276,6 +403,7 @@ const CONTRACTS = [
   ['`as` reserved for Section (§4.2)', asPropReservedForSection],
   ['`slot` reserved by Astro', slotIsReserved],
   ['production omits styleguide (§2.4)', productionOmitsStyleguide],
+  ['internal links resolve (§8/§9)', internalLinksResolve],
 ];
 
 export function contracts() {

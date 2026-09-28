@@ -15,7 +15,20 @@ import { getCatalogue, categoryHref } from '../lib/catalogue';
  * collection, which is exactly the migration §5 says never happens for free.
  */
 export interface NavLink {
-  href: string;
+  /**
+   * Where the entry goes — or `undefined` for an entry that is a NAME rather
+   * than a destination.
+   *
+   * The product entries are nameless-destination entries while product detail
+   * pages sit outside the launch scope (`LAUNCH.productPages`, src/consts.ts):
+   * the catalogue still lists what CentiPack makes, and none of the thirteen
+   * names is a link, because there is no page to link to. Nav and Footer each
+   * render a `<span>` in place of the `<a>`.
+   *
+   * Optional here for the same reason it is optional on `ProductView`: it makes
+   * an unhandled absence a compile error rather than a 404 in the built HTML.
+   */
+  href?: string;
   label: string;
   /** Shown under the label in a mega-menu panel, where there is room for it. */
   description?: string;
@@ -106,11 +119,24 @@ export async function getFooterColumns(): Promise<readonly NavColumn[]> {
   ];
 }
 
-/** The legal row, beside the copyright line. */
-export const legalLinks: readonly NavLink[] = [
-  { href: '/terms', label: 'Terms of Service' },
-  { href: '/privacy', label: 'Privacy & cookies' },
-];
+/**
+ * The legal row, beside the copyright line.
+ *
+ * EMPTY FOR THE SOFT LAUNCH. This carried `/terms` and `/privacy`, and neither
+ * page has ever existed — so every page of the site shipped two 404s in its
+ * footer. Nothing caught it until `internalLinksResolve()` in
+ * scripts/verify/contracts.mjs started asserting that an internal link resolves
+ * to a page the build emits; it found 14 dead links on the first run.
+ *
+ * Removed rather than pointed somewhere plausible: a legal link that goes to the
+ * wrong page is worse than no legal link, and a footer row is not the place to
+ * improvise a privacy policy. The Footer renders nothing for an empty list, so
+ * the row disappears until there is real copy to put behind it.
+ *
+ * Restoring it is two entries plus two pages — and the link check will fail the
+ * build if the entries land before the pages do.
+ */
+export const legalLinks: readonly NavLink[] = [];
 
 /* Site identity lives in src/consts.ts — one module, consumed by BaseLayout,
    urls.ts, robots.txt and sitemap.xml. This file is about links. */

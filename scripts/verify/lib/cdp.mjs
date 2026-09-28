@@ -111,17 +111,40 @@ export const PAGES = [
   '/products',
   /* One of the three category pages — same template, same props shape. */
   '/products/cold-chain-shipping',
-  /* BOTH product states, deliberately. The mailers page is the only one the
-     design writes in full — lede, six facts, an eight-column table — and gel
-     packs is the opposite end: no lede, no facts, no table, every optional block
-     self-skipping. A sweep that only saw the full one would never exercise the
-     skips, which is where a block leaves an empty shell behind. */
-  '/products/cold-chain-shipping/insulated-metallic-mailers',
-  '/products/cold-chain-shipping/gel-packs',
   '/about',
   '/contact',
   '/styleguide',
 ];
+
+/*
+ * THE TWO PRODUCT PAGES CAME OFF THIS LIST, AND WHY IS THE POINT.
+ *
+ * `/products/cold-chain-shipping/insulated-metallic-mailers` and
+ * `/products/cold-chain-shipping/gel-packs` were swept here as the two ends of
+ * the optional-field range — the one product the design writes in full against
+ * one with every optional block self-skipping.
+ *
+ * They are gone because the pages are gone: product detail routes are outside
+ * the launch scope (`LAUNCH.productPages`, src/consts.ts) and NO BUILD EMITS
+ * THEM. Sweeping them would 404 through the preview server and report structure
+ * assertions about an error page — which is the port-4321 incident in §9 wearing
+ * different clothes: real numbers, measured against the wrong artifact.
+ *
+ * THIS IS NOT THE PAGE LIST BEING NARROWED TO REACH GREEN. Nothing about those
+ * two pages was failing. The list follows what the build emits, and it has to,
+ * or a §9 pass stops describing the site. What replaces the coverage is
+ * `internalLinksResolve()` in contracts.mjs, which asserts against the
+ * PRODUCTION build that no page links to a route the build did not emit — the
+ * generalised form of the bug that gating these pages would otherwise have
+ * introduced 39 times per page.
+ *
+ * WHAT IS GENUINELY UNCOVERED WHILE THE GATE IS SHUT: the product page template
+ * itself. Its optional-field skips are exercised by nothing until the gate opens,
+ * at which point both paths go back on this list. Recorded as an open question in
+ * WORKLOG.md rather than left to be rediscovered. The CARD is still covered — the
+ * styleguide renders ProductCard, and the index and category pages render it at
+ * five and three columns.
+ */
 
 /** §9's widths. Not negotiable, and not a sample. */
 export const WIDTHS = [320, 360, 390, 430, 768, 1024, 1440];

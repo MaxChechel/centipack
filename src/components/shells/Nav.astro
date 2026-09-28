@@ -31,14 +31,21 @@ import { canonicalPath } from '../../lib/urls';
 const here = canonicalPath(Astro.url.pathname);
 const navigation = await getNavigation();
 
-/** `aria-current="page"` is the accessible half; the styling hangs off it too. */
-const isCurrent = (href: string): boolean => {
-  if (href.includes('#')) return false;
+/**
+ * `aria-current="page"` is the accessible half; the styling hangs off it too.
+ *
+ * Takes `undefined` because a nav entry may be a name with no destination (see
+ * `NavLink.href`). Nothing is the current page when there is no page: returning
+ * false here is what keeps the accent off an inert product name.
+ */
+const isCurrent = (href: string | undefined): boolean => {
+  if (!href || href.includes('#')) return false;
   return here === canonicalPath(href);
 };
 
-const groupIsCurrent = (group: { columns: readonly { links: readonly { href: string }[] }[] }): boolean =>
-  group.columns.some((column) => column.links.some((link) => isCurrent(link.href)));
+const groupIsCurrent = (group: {
+  columns: readonly { links: readonly { href?: string }[] }[];
+}): boolean => group.columns.some((column) => column.links.some((link) => isCurrent(link.href)));
 
 /* NO HOVER COLOUR. The hover state is `.link-underline` — a hairline drawn in
    from the left — and the fade group already dims the siblings, so a colour
@@ -104,16 +111,29 @@ const linkClass = 'link-underline text-body text-primary aria-[current=page]:tex
                           <p class="text-eyebrow">{column.title}</p>
                           {/* One fade group per column — the set the reader is
                               scanning is the column, not the panel. */}
+                          {/* A NAME WITH NO PAGE IS A <span>, NOT A DEAD <a>.
+                              While product detail pages are outside the launch
+                              scope the panel still lists what CentiPack makes,
+                              and none of those thirteen names is a link. Not an
+                              `<a>` without an href either: that is still a link
+                              to a screen reader, announced and tab-reachable,
+                              that goes nowhere when pressed. `.link-underline`
+                              comes off with it — the hairline is the hover
+                              affordance, and there is nothing to hover. */}
                           <ul class="fade-group list-bare gap-md flex flex-col">
                             {column.links.map((link) => (
                               <li>
-                                <a
-                                  href={link.href}
-                                  class="link-underline text-body text-primary rounded-sm"
-                                  aria-current={isCurrent(link.href) ? 'page' : undefined}
-                                >
-                                  {link.label}
-                                </a>
+                                {link.href ? (
+                                  <a
+                                    href={link.href}
+                                    class="link-underline text-body text-primary rounded-sm"
+                                    aria-current={isCurrent(link.href) ? 'page' : undefined}
+                                  >
+                                    {link.label}
+                                  </a>
+                                ) : (
+                                  <span class="text-body text-secondary">{link.label}</span>
+                                )}
                               </li>
                             ))}
                           </ul>
@@ -222,16 +242,22 @@ const linkClass = 'link-underline text-body text-primary aria-[current=page]:tex
                         {item.columns.map((column) => (
                           <div class="gap-md flex flex-col">
                             <p class="text-eyebrow">{column.title}</p>
+                            {/* Same rule as the desktop panel above: a product
+                                name with no page renders as text. */}
                             <ul class="list-bare gap-md pl-xl flex flex-col">
                               {column.links.map((link) => (
                                 <li>
-                                  <a
-                                    href={link.href}
-                                    class="link-underline text-body text-primary aria-[current=page]:text-accent"
-                                    aria-current={isCurrent(link.href) ? 'page' : undefined}
-                                  >
-                                    {link.label}
-                                  </a>
+                                  {link.href ? (
+                                    <a
+                                      href={link.href}
+                                      class="link-underline text-body text-primary aria-[current=page]:text-accent"
+                                      aria-current={isCurrent(link.href) ? 'page' : undefined}
+                                    >
+                                      {link.label}
+                                    </a>
+                                  ) : (
+                                    <span class="text-body text-secondary">{link.label}</span>
+                                  )}
                                 </li>
                               ))}
                             </ul>

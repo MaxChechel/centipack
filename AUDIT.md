@@ -200,3 +200,52 @@ the product family page and `788:9598` in a hidden Contact section. **Both are
 `hidden="true"` in Figma**, so neither is shipping copy and neither reaches the
 build. Recorded because the brief asks for placeholder text to be flagged rather
 than silently shipped.
+
+---
+
+## D7 — The contact form posts to Formspark, not to a Pages Function
+
+**§8 specifies** a Cloudflare Pages Function with invisible Turnstile, a honeypot
+and a time floor, delivering through a swappable `sendLead()` seam. CentiPack
+deviates: the form posts directly to **Formspark**
+(`https://submit-form.com/bqtIN0U6N`), and `functions/api/contact.ts` is deleted.
+
+**Why.** The spec's design has one precondition the project never met — a
+`TURNSTILE_SECRET_KEY` and a `RESEND_API_KEY` in the deployment environment, plus
+`PUBLIC_TURNSTILE_SITE_KEY` at build time. Without them the function answers
+`503 Form is not configured.` and **no enquiry has ever been deliverable.** The
+form was correct in every respect except the one that matters. Formspark needs no
+key, no environment and no function: the endpoint is public by construction and
+works on a fresh clone.
+
+**What §8's guarantee rests on now, because it has not lapsed.** The rule is that
+a form must never swallow an enquiry silently. What prevented that was never the
+Pages Function — it was the intercepted submit plus the live status region, and
+both are unchanged. `src/scripts/contact.ts` fetches with
+`accept: application/json`, which makes Formspark answer JSON rather than
+redirecting, and renders the outcome on the page in words.
+`scripts/verify/contracts.mjs` still fails the build if that region is missing.
+
+**What was given up, stated plainly rather than minimised:**
+
+- **Turnstile.** Deleted, not disabled. Its token was only ever checked by the
+  function that is gone, and Formspark does not check it. A challenge nobody
+  verifies costs the visitor a step and stops no bot. Spam protection is now
+  Formspark's own filtering plus the honeypot.
+- **The time floor** (`MIN_FILL_MS` / `MAX_FILL_MS`). Evaluated server-side by
+  deleted code. `started_at` was removed rather than left in the markup: a hidden
+  field no endpoint reads is data wearing the costume of a defence.
+- **The `sendLead()` seam.** Delivery is Formspark's. Moving to a CRM means
+  Formspark's own forwarding, or reinstating a function.
+- **Lead data now transits a third party.** Formspark holds submissions. That is
+  a processor relationship and belongs in the privacy policy the site does not
+  yet have (WORKLOG open question 60).
+
+**The honeypot was renamed** `company_website` → `_honeypot`, which is the
+reserved name Formspark actually enforces; under any other name it would have
+been filed as ordinary form data. The contract assertion follows the field and is
+otherwise unchanged.
+
+**When to reopen.** If Turnstile-grade bot filtering becomes necessary, or lead
+data must not leave infrastructure the client controls, the function comes back
+out of git history and §8 applies again unmodified.

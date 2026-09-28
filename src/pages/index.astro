@@ -53,8 +53,14 @@ const categories = await getCategories();
 const heroPicture = await toPageImage({
   src: heroImage,
   // mobile: heroImageMobile,
+  /* RE-READ AGAINST THE PICTURE after the shot was swapped, which is the rule
+     entry 46 set and the only way this string stays true. The previous version
+     said "two insulated mailers": there is ONE mailer — the navy pouch printed
+     "Refrigerate upon opening" — and the second blue pouch is a GEL PACK, a
+     different product in the catalogue. It also said "jars" for a single open
+     jar and did not name the gel pack at all. */
   alt:
-    'The CentiPack range in one line-up: two insulated mailers, blue mailer and drawer boxes, an EPS foam cooler in its corrugated outer, jars, a pump bottle, and a white mailer box.',
+    'The CentiPack range in one line-up: an insulated mailer printed "Refrigerate upon opening", a gel pack, blue drawer and hinged boxes holding vials, a pump bottle, an open jar, an EPS foam cooler in its corrugated outer, and an open white mailer box.',
 });
 
 /**

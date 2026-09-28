@@ -29,6 +29,22 @@ import type { ProductView } from '../../lib/catalogue';
  * the image and the summary inside the link's accessible name — and beats a
  * second link on the arrow, which would give a screen reader two links to one
  * place.
+ *
+ * A CARD WITH NOWHERE TO GO IS NOT A LINK, AND DOES NOT DRESS AS ONE.
+ * `product.href` is undefined while product detail pages are outside the launch
+ * scope (src/consts.ts), and then this card renders its title as plain text and
+ * drops the `→` entirely. The arrow is the card's one promise that pressing it
+ * goes somewhere; leaving it on an inert card is a worse lie than the dead link
+ * it replaced, because it still reads as pressable and now silently does
+ * nothing.
+ *
+ * NOTHING IN global.css NEEDED CHANGING FOR THAT, which is worth stating because
+ * it is easy to go looking. Every hover, focus and lift rule for this card is
+ * written `.product-card:has(.product-card-link:hover)` — keyed off the link.
+ * No link, no `.product-card-link`, and the whole interactive costume stops
+ * applying on its own: no fill, no 1% image lift, no focus ring. The card goes
+ * inert because the selectors stop matching, not because a second set of rules
+ * was written to suppress them.
  */
 interface Props {
   product: ProductView;
@@ -40,36 +56,40 @@ interface Props {
 const { product, headingLevel = 3, class: className } = Astro.props as Props;
 
 const link = 'product-card-link rounded-sm';
+
+/* The card is a link only when there is a page at the other end. */
+const href = product.href;
+
+const Heading = headingLevel === 2 ? 'h2' : 'h3';
 ---
 
 <article class:list={['product-card bg-subtle rounded-md', className]}>
   <Media image={product.image} label={product.title} ratio="4 / 5" class="product-card-media" />
 
   <div class="p-md gap-2xs absolute inset-0 z-10 flex flex-col">
-    {
-      headingLevel === 2 ? (
-        <h2 class="text-h5 text-primary">
-          <a href={product.href} class={link}>
-            {product.title}
-          </a>
-        </h2>
-      ) : (
-        <h3 class="text-h5 text-primary">
-          <a href={product.href} class={link}>
-            {product.title}
-          </a>
-        </h3>
-      )
-    }
+    {/* The heading tag is a variable rather than a ternary over two near-identical
+        branches: with the title now conditionally wrapped too, the ternary form
+        was four copies of one line. `Heading` is capitalised so Astro renders it
+        as the tag its value names. */}
+    <Heading class="text-h5 text-primary">
+      {href ? <a href={href} class={link}>{product.title}</a> : product.title}
+    </Heading>
     <p class="text-caption text-secondary">{product.summary}</p>
   </div>
 
   {/* Out of flow — see `.product-card-go` in global.css. It is the last child so
       it paints over the picture, and `pointer-events: none` keeps it from
-      intercepting the press the stretched link is there to receive. */}
-  <span class="product-card-go border-line" aria-hidden="true">
-    <svg class="size-icon-inline" viewBox="0 0 16 16" fill="none">
-      <path d="M4.5 11.5 11.5 4.5M6 4.5h5.5V10" stroke="currentColor" stroke-width="1.25"></path>
-    </svg>
-  </span>
+      intercepting the press the stretched link is there to receive.
+
+      Absent on an inert card: this is the affordance, and it must not outlive
+      the destination it points at. */}
+  {
+    href && (
+      <span class="product-card-go border-line" aria-hidden="true">
+        <svg class="size-icon-inline" viewBox="0 0 16 16" fill="none">
+          <path d="M4.5 11.5 11.5 4.5M6 4.5h5.5V10" stroke="currentColor" stroke-width="1.25" />
+        </svg>
+      </span>
+    )
+  }
 </article>

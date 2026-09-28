@@ -36,7 +36,11 @@ const DIST = process.env.DIST ?? 'dist';
 const UNSTYLED_BY_DESIGN = [
   { match: /^group$/, why: 'Tailwind variant marker — `group-hover:` styles descendants; the marker itself has no rule.' },
   { match: /^peer$/, why: 'Tailwind variant marker, as above.' },
-  { match: /^cf-turnstile$/, why: 'Cloudflare Turnstile mount point; the widget script styles it (§8).' },
+  /* The `cf-turnstile` exception was here. Turnstile went with the Pages
+     Function that verified its token (AUDIT D7), so the class no longer reaches
+     any page — and an allowance for a class nothing emits is an exception list
+     describing a site that no longer exists. Removed rather than left: this list
+     is meant to be read as the complete set of deliberately unstyled classes. */
   { match: /^(js|no-js)$/, why: 'State flag on <html>; selectors key off it (see the reveal contract in global.css §8), it carries nothing itself.' },
   { match: /^data-reveal$/, why: 'Reveal hook; the attribute form is what CSS targets.' },
 ];

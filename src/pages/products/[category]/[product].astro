@@ -14,10 +14,14 @@ import { SITE, productPagesShip } from '../../../consts';
  * Product family — one template, twelve pages (§4.4, §5).
  *
  * GATED OUT OF THE LAUNCH. `LAUNCH.productPages` is false (src/consts.ts), so
- * `getStaticPaths` returns an empty list and a build emits no HTML for any of
- * these routes — the same ruling the styleguide gets in astro.config.mjs, and
- * for the same reason: `noindex` is a request, not existing is a fact. `npm run
- * dev` still serves them, so the work stays reviewable while it waits.
+ * `getStaticPaths` returns an empty list and no HTML is emitted for any of these
+ * routes — the same ruling the styleguide gets in astro.config.mjs, and for the
+ * same reason: `noindex` is a request, not existing is a fact.
+ *
+ * IN DEV TOO, deliberately. See the note in src/consts.ts: these pages were
+ * briefly dev-only-visible, which made `npm run dev` disagree with the built
+ * site about whether product cards were clickable. To review this template, set
+ * `LAUNCH.productPages` to `true`.
  *
  * This template is untouched otherwise, and deliberately so: launching these
  * pages is flipping one boolean, not restoring deleted code.

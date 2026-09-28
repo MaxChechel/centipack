@@ -87,9 +87,20 @@ export const isNoindexed = (path: string): boolean =>
  * each of those into a type error, so `astro check` finds the consumers rather
  * than a grep.
  *
- * DEV ALWAYS OVERRIDES IT ON. `npm run dev` serves the product pages and links
- * to them, so unlaunched work stays reviewable; only a build gates them out.
- * Flipping this to `true` launches them, and nothing else has to move.
+ * NO DEV OVERRIDE. `npm run dev` gates these pages out exactly as a build does,
+ * and that is a correction rather than the original design: this first shipped
+ * with `|| import.meta.env.DEV`, so unlaunched product pages stayed reviewable
+ * on localhost. The effect was that `npm run dev` served 52 product links and 16
+ * card arrows while the built site served none — **the dev server showing a
+ * different site from the one that ships, on the exact question being reviewed.**
+ * Reported as the cards still being clickable, which they were, in the only
+ * place anybody was looking.
+ *
+ * A preview that disagrees with the artifact is worth less than no preview.
+ *
+ * TO REVIEW THE PRODUCT PAGES, flip this to `true` and run dev; that is one line
+ * and it is honest, because while it is true the pages are genuinely part of the
+ * site. Flipping it is also exactly how they launch.
  */
 export const LAUNCH = {
   /** Product detail pages — `/products/:category/:product`. */
@@ -97,10 +108,10 @@ export const LAUNCH = {
 } as const;
 
 /**
- * Are product detail pages part of THIS build?
+ * Are product detail pages part of this site?
  *
- * `import.meta.env.DEV` is the dev override. Read this rather than `LAUNCH`
- * directly — a consumer that reads the flag alone loses the override and starts
- * disagreeing with the router about whether those pages exist.
+ * A function rather than a bare constant so every consumer asks the same
+ * question in the same words, and so the answer has one place to change if it
+ * ever needs a condition again.
  */
-export const productPagesShip = (): boolean => LAUNCH.productPages || import.meta.env.DEV;
+export const productPagesShip = (): boolean => LAUNCH.productPages;

@@ -4405,3 +4405,83 @@ Unchanged: 22, 23, 24, 25, 26, 28, 29, 31–34, 36, 37, 40, 41, 44, 48, 51, 52,
     build is green, but green here means the markup is right; it does not mean an
     enquiry arrived. A live submission to the real endpoint, confirmed in the
     Formspark dashboard, is a human punch-list item before launch.
+
+---
+
+## 2026-09-28 — Entry 49. The dev override was a preview that lied
+
+**Supersedes the dev-override ruling in entry 47.** That entry gated product
+detail pages out of the build and wrote the gate as
+`LAUNCH.productPages || import.meta.env.DEV`, so `npm run dev` still served the
+pages and still linked to them. The stated reason was that unlaunched work
+should stay reviewable locally. It was wrong, and the way it was wrong is the
+entry.
+
+### What it actually did
+
+Reported as the product cards still being clickable. Both artifacts measured on
+the same commit, same source:
+
+| | `dist` (what ships) | `localhost:4321` (dev) |
+| --- | --- | --- |
+| product links on /products | **0** | **52** |
+| card arrows in markup | **0** | **16** |
+| `/products/cold-chain-shipping/gel-packs` | not emitted | **200** |
+
+The build was correct the whole time. **The dev server was showing a different
+site from the one that ships, on precisely the question under review** — and the
+dev server is where anybody actually looks. So the change appeared not to have
+worked, twice, and the thing being inspected was never the thing being changed.
+
+That is the port-4321 incident's shape again (§9) in a place §9 does not reach:
+real output, honestly rendered, about the wrong artifact. The harness was never
+fooled — `verify` builds and reads `dist`, which is why every run was green and
+green was not the reassurance it looked like.
+
+**A preview that disagrees with the artifact is worth less than no preview.**
+
+### The correction
+
+`productPagesShip()` is now `LAUNCH.productPages` and nothing else. Dev gates the
+pages out exactly as a build does: product URLs 404 in dev, cards render a plain
+`<h3>` with no anchor and no arrow, everywhere.
+
+Reviewing the product page template means setting `LAUNCH.productPages` to
+`true` — one line, and honest, because while it is true those pages genuinely
+are part of the site. It is also exactly how they launch.
+
+### Not removed, and the reason is the same one as last time
+
+`.product-card-go` and `.product-card-link` stay in `global.css` although no
+markup carries either class right now. They are not dead: they are the card's
+interactive costume, and it returns in full the moment the flag flips. The same
+argument left `[product].astro` untouched in entry 47 — **launching is flipping
+one boolean, not restoring deleted code.** The dead-class check reads HTML → CSS
+and so has nothing to say about a rule with no current user; that is the check
+being correctly scoped, not a gap this is slipping through.
+
+Worth knowing when reading dev output: `product-card-go` still appears three
+times in the dev server's HTML because dev inlines the stylesheet, so the CSS
+rule text is in the document. Zero of them are markup. `dist` links the
+stylesheet instead, which is why the same grep returns 0 there — the two numbers
+disagree for a reason that has nothing to do with the cards.
+
+### Measurements
+
+| | |
+| --- | --- |
+| verify | 8 checks, 602 assertions, 0 failures |
+| dev and dist, product links | **0 and 0** |
+| dev and dist, card arrows in markup | **0 and 0** |
+| pages emitted | 7, unchanged |
+
+### Open questions
+
+Unchanged: 22, 23, 24, 25, 26, 28, 29, 31–34, 36, 37, 40, 41, 44, 48, 51, 52,
+53, 54, 55, 56, 57, 58, 59, 60, 61, 62. One added:
+
+63. **Nothing prevents a future gate from growing a dev-only branch again.** The
+    failure was invisible to a green harness because the harness only ever reads
+    `dist`. A check that diffs a dev-rendered page against its built counterpart
+    would catch the whole class; it is not obviously worth the machinery for one
+    flag, which is why this is a question rather than an entry.

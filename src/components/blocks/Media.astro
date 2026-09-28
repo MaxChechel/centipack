@@ -71,6 +71,21 @@ interface Props {
   ratio: string;
   loading?: 'eager' | 'lazy';
   fetchpriority?: 'high' | 'auto';
+  /**
+   * How wide this image is DRAWN, as a `sizes` attribute.
+   *
+   * REQUIRED BY THE CALLER, NOT GUESSED HERE, and that is the honest split: a
+   * `srcset` of width candidates is useless without it, because a browser picks
+   * a candidate BEFORE layout exists and falls back to assuming the image fills
+   * the viewport. On a 1440 screen that makes it choose the largest file for a
+   * 259px card — the opposite of the problem the srcset was added to fix.
+   *
+   * This component cannot know the answer. The same card is 259px on the
+   * products index and 440px on a category page; only whatever laid it out
+   * knows which. So the caller says, and where it says nothing the browser's
+   * 100vw assumption stands — wasteful, never broken.
+   */
+  sizes?: string;
   class?: string;
 }
 
@@ -80,6 +95,7 @@ const {
   ratio,
   loading = 'lazy',
   fetchpriority = 'auto',
+  sizes,
   class: className,
 } = Astro.props as Props;
 
@@ -122,6 +138,8 @@ const artDirected = Boolean(image?.mobile);
   ) : image ? (
     <img
       src={image.src}
+      srcset={image.srcset}
+      sizes={image.srcset ? sizes : undefined}
       width={image.width}
       height={image.height}
       alt={image.alt}

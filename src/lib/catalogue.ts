@@ -52,6 +52,28 @@ export interface Picture {
   height: number;
   alt: string;
   /**
+   * Width-descriptor candidates for the same photograph, as an `srcset` string.
+   *
+   * STILL SOURCE-AGNOSTIC, which is the only reason it belongs in this shape: a
+   * CMS loader builds the identical string from its CDN's resize parameters, and
+   * a component cannot tell where it came from. `src` stays as the fallback a
+   * browser uses when it ignores `srcset`, so nothing breaks if this is absent.
+   *
+   * WHY IT EXISTS. Every card on the site was served ONE fixed 880px file
+   * whatever it was drawn at. Measured on the built page:
+   *
+   *   context                 card CSS   device px needed   shipped
+   *   products index @1x           259                259       880   3.4x waste
+   *   products index @2x           259                518       880   fine
+   *   category page  @2x           440                880       880   exactly 1:1
+   *   category page  @3x           440               1320       880   440 short
+   *
+   * A category card is 440px where an index card is 259, so one number cannot
+   * serve both: it is either wasteful at the small end or soft at the large one,
+   * and it was both.
+   */
+  srcset?: string;
+  /**
    * The art-directed mobile file: a DIFFERENT framing of the same subject, for
    * a portrait screen. No `alt` of its own — it shows the same thing, and two
    * descriptions of one subject is two things to keep in sync. Absent means the
@@ -126,14 +148,74 @@ export const productHref = (category: CategorySlug, slug: string): string =>
 const CARD_WIDTH = 880;
 const WIDE_WIDTH = 2400;
 
+/**
+ * The candidate widths a card image is rendered at.
+ *
+ * NOT ARBITRARY. Each one is a real drawn width times a real pixel density,
+ * measured on the built page rather than picked off a ladder:
+ *
+ *   260   index card at 1x
+ *   440   category card at 1x, index card at ~1.7x
+ *   520   index card at 2x
+ *   880   category card at 2x  — this was the only size that ever shipped
+ *  1320   category card at 3x
+ *
+ * `getImage` will not upscale, so any entry above a source's own width simply
+ * comes back at the source width; the duplicate is dropped below rather than
+ * shipped as two identical candidates under different descriptors.
+ *
+ * THAT CAP IS CURRENTLY BINDING. The product photographs in this repo are
+ * 1037px wide, so 1320 cannot be produced from them and a category card at 3x
+ * is served 1037 — better than the 880 it had, and still short of the 1320 it
+ * wants. Supplying larger sources is what unlocks the top of this list; nothing
+ * here needs to change when they arrive.
+ */
+const CARD_WIDTHS = [260, 440, 520, 880, 1320] as const;
+
 type RawPicture = { src: ImageMetadata; alt: string; mobile?: ImageMetadata } | undefined;
 
 /** One number per surface, so every caller asks for the same asset. */
 const MOBILE_WIDTH = 900;
 
-async function toPicture(picture: RawPicture, width: number): Promise<Picture | undefined> {
+async function toPicture(
+  picture: RawPicture,
+  width: number,
+  /**
+   * Candidate widths for an `srcset`. Omitted for the wide page assets, which
+   * are drawn at one size and gain nothing from a set.
+   */
+  widths?: readonly number[],
+): Promise<Picture | undefined> {
   if (!picture) return undefined;
   const rendered = await getImage({ src: picture.src, format: 'webp', width });
+
+  /* CLAMPED TO THE SOURCE'S OWN WIDTH, and that is not a tidiness measure.
+     `getImage` will not upscale — asking 1320 of a 1037px file returns 1037 —
+     but `attributes.width` reports the width that was REQUESTED, not the one
+     produced. Trusting it shipped `… 1320w` pointing at a 1037px image, which
+     is worse than no srcset: a browser picking by descriptor takes that
+     candidate believing it is 1320 wide and renders it softer than the 880 it
+     would otherwise have chosen. Caught by reading the emitted files, not the
+     emitted HTML.
+
+     So the candidate list is built from `picture.src.width`, which is the
+     source's real intrinsic width, and the cap appears exactly once. */
+  let srcset: string | undefined;
+  if (widths?.length) {
+    const intrinsic = picture.src.width;
+    const candidates = widths.filter((w) => w < intrinsic);
+    if (widths.some((w) => w >= intrinsic)) candidates.push(intrinsic);
+
+    if (candidates.length > 1) {
+      const variants = await Promise.all(
+        candidates.map(async (w) => {
+          const variant = await getImage({ src: picture.src, format: 'webp', width: w });
+          return `${variant.src} ${w}w`;
+        }),
+      );
+      srcset = variants.join(', ');
+    }
+  }
   const mobile = picture.mobile
     ? await getImage({ src: picture.mobile, format: 'webp', width: MOBILE_WIDTH })
     : undefined;
@@ -142,6 +224,7 @@ async function toPicture(picture: RawPicture, width: number): Promise<Picture | 
     width: Number(rendered.attributes.width ?? width),
     height: Number(rendered.attributes.height ?? width),
     alt: picture.alt,
+    ...(srcset && { srcset }),
     ...(mobile && {
       mobile: {
         src: mobile.src,
@@ -188,7 +271,7 @@ async function toProduct(entry: CollectionEntry<'products'>): Promise<ProductVie
        them at once — and cannot leave one list pointing at pages the build does
        not emit while another has been updated. See src/consts.ts. */
     href: productPagesShip() ? productHref(entry.data.category, entry.data.slug) : undefined,
-    image: await toPicture(entry.data.images.main, CARD_WIDTH),
+    image: await toPicture(entry.data.images.main, CARD_WIDTH, CARD_WIDTHS),
     facts: entry.data.facts,
     specTable: entry.data.specTable,
   };

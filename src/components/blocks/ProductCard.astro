@@ -50,10 +50,15 @@ interface Props {
   product: ProductView;
   /** The heading level this card sits under. One h1 per page, zero skips. */
   headingLevel?: 2 | 3;
+  /**
+   * How wide this card is drawn, forwarded to `Media` as `sizes`. The rail
+   * knows, because the rail is what sets the column count; this card does not.
+   */
+  sizes?: string;
   class?: string;
 }
 
-const { product, headingLevel = 3, class: className } = Astro.props as Props;
+const { product, headingLevel = 3, sizes, class: className } = Astro.props as Props;
 
 const link = 'product-card-link rounded-sm';
 
@@ -64,7 +69,7 @@ const Heading = headingLevel === 2 ? 'h2' : 'h3';
 ---
 
 <article class:list={['product-card bg-subtle rounded-md', className]}>
-  <Media image={product.image} label={product.title} ratio="4 / 5" class="product-card-media" />
+  <Media image={product.image} label={product.title} ratio="4 / 5" sizes={sizes} class="product-card-media" />
 
   <div class="p-md gap-2xs absolute inset-0 z-10 flex flex-col">
     {/* The heading tag is a variable rather than a ternary over two near-identical

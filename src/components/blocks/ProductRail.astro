@@ -45,6 +45,34 @@ const COLUMNS = {
   5: 'product-rail-5',
 } as const;
 
+/**
+ * How wide a card is DRAWN at each breakpoint, as a `sizes` attribute.
+ *
+ * THIS COMPONENT IS THE ONLY ONE THAT CAN SAY. A browser picks an `srcset`
+ * candidate before layout exists, so without `sizes` it assumes the image fills
+ * the viewport and takes the largest file for a 259px card. The card cannot
+ * know its own width — it is 259px on the index and 440px on a category page —
+ * and the difference is exactly the column count this component owns.
+ *
+ * MEASURED ON THE BUILT PAGE at the seven sweep widths, not estimated:
+ *
+ *            320    360    390    430    768    1024   1440
+ *   5-col    61vw   62vw   62vw   63vw   24vw   18vw   259px
+ *   3-col    61vw   62vw   62vw   63vw   35vw   30vw   440px
+ *
+ * Below `md` both are the same scroll-snap rail, which is why the small end of
+ * the two strings agrees. Above the container's own max-width the card stops
+ * growing, so the largest tier is a fixed px rather than a vw.
+ *
+ * Rounded UP throughout. `sizes` that under-states the drawn width makes the
+ * browser choose a file too small and the card renders soft — the failure this
+ * whole srcset exists to fix — where over-stating it costs only bytes.
+ */
+const SIZES = {
+  3: '(min-width: 90rem) 440px, (min-width: 64rem) 31vw, (min-width: 48rem) 36vw, 65vw',
+  5: '(min-width: 90rem) 260px, (min-width: 64rem) 19vw, (min-width: 48rem) 25vw, 65vw',
+} as const;
+
 /* SELF-SKIP (§4.2): an empty category renders nothing, not an empty rail. */
 const hasContent = products.length > 0;
 ---
@@ -66,7 +94,7 @@ const hasContent = products.length > 0;
     {
       products.map((product) => (
         <li class="product-rail-item flex">
-          <ProductCard product={product} headingLevel={headingLevel} class="w-full" />
+          <ProductCard product={product} headingLevel={headingLevel} sizes={SIZES[columns]} class="w-full" />
         </li>
       ))
     }

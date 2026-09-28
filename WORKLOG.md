@@ -5364,3 +5364,118 @@ re-export closes this instance and not the class.
 ### Open questions
 
 Unchanged: 22–26, 28, 29, 31–34, 36, 37, 40, 41, 44, 48, 51–65, 66, 67–71.
+
+---
+
+## 2026-09-28 — Entry 60. One image width for every card, and the srcset that replaced it
+
+Reported as blurry product cards. Measured rather than adjusted: every product
+card on the site was served **one fixed 880px file**, whatever it was drawn at,
+at whatever pixel density.
+
+`toPicture()` called `getImage({ width: 880 })` once and `Media` emitted a plain
+`<img src>`. No `srcset` existed anywhere in the system.
+
+| context | card CSS | device px needed | shipped | |
+| --- | --- | --- | --- | --- |
+| index @1x | 259 | 259 | 880 | **3.4× oversized** |
+| index @2x | 259 | 518 | 880 | fine |
+| phone 430 @3x | 269 | 808 | 880 | marginal |
+| category @2x | 440 | 880 | 880 | **exactly 1:1, no headroom** |
+| category @3x | 440 | 1320 | 880 | **440 short** |
+
+**One number cannot serve a 259px card and a 440px card.** It was simultaneously
+wasteful at the small end and soft at the large one, which is why the complaint
+and the page-weight problem have the same cause.
+
+### `sizes` is the half that is easy to forget
+
+A `srcset` of width descriptors does nothing without it: a browser picks a
+candidate BEFORE layout exists, and with no `sizes` it assumes the image fills
+the viewport — taking the *largest* file for a 259px card, the exact opposite of
+the fix. `Media` cannot know the answer either, because the same card is 259px
+on the index and 440px on a category page.
+
+So `ProductRail` owns it, since the rail is what sets the column count, and the
+strings are **measured at the seven sweep widths** rather than estimated:
+
+```
+          320    360    390    430    768    1024   1440
+5-col     61vw   62vw   62vw   63vw   24vw   18vw   259px
+3-col     61vw   62vw   62vw   63vw   35vw   30vw   440px
+```
+
+Rounded up throughout: understating the drawn width makes the browser pick too
+small and renders the card soft, which is the failure being fixed; overstating
+it costs only bytes.
+
+### A descriptor that lied, caught by reading the files rather than the HTML
+
+The first build emitted `… 1037px-file 1320w`. `getImage` correctly refuses to
+upscale — a 1320 request against a 1037px source returns 1037 — but
+**`attributes.width` reports the width that was REQUESTED, not the one
+produced**, and the dedup keyed on it.
+
+That is worse than shipping no srcset at all: a browser picking by descriptor
+takes the candidate believing it is 1320 wide and renders it *softer* than the
+880 it would otherwise have chosen. The emitted HTML looked perfect. Only
+`sips` on the emitted files showed 1037.
+
+Now clamped to `picture.src.width`, the source's real intrinsic width, and every
+descriptor was re-checked against its file: 260/440/520/880/1037, all honest.
+
+### And a measurement that lied, for a different reason
+
+The first "after" reading said the browser was picking the *smallest* candidate
+everywhere — ratio 0.50 at 2x. It was not. Under `Emulation.setDeviceMetrics`
+Chrome reports `naturalWidth` divided by the emulated density, so an 880px file
+at 2x reads as 440. **The property was wrong, not the code.** `currentSrc`
+mapped back through the srcset is unambiguous and is what the table below uses.
+
+Two false readings in one entry, in opposite directions — one made a broken
+build look correct, one made a correct build look broken. Both were caught by
+going to the artifact: the files on disk, and the URL the browser actually
+fetched.
+
+### After
+
+| context | card | needs | served | |
+| --- | --- | --- | --- | --- |
+| index @1x | 259px | 259 | **260w** | sharp |
+| index @2x | 259px | 518 | **520w** | sharp |
+| index @3x | 259px | 778 | **880w** | sharp |
+| phone 430 @3x | 269px | 808 | **880w** | sharp |
+| tablet 768 @2x | 185px | 371 | **440w** | sharp |
+| category @1x | 440px | 440 | **440w** | sharp |
+| category @2x | 440px | 880 | **880w** | sharp |
+| category @3x | 440px | 1320 | **1037w** | source-capped |
+
+**A 1x visitor to the products index downloads 59 KB of card images instead of
+563 KB — 89% less**, because thirteen 880px files were being sent for thirteen
+259px slots.
+
+### The one case still short, and it is not a code problem
+
+`category @3x` wants 1320px and the product photographs in this repo are
+**1037px wide**. `getImage` will not upscale, so 1037 is the ceiling —
+better than the 880 it had, still short. `CARD_WIDTHS` already lists 1320 and
+will start producing it the moment larger sources land; nothing needs to change
+here when they do.
+
+### Measurements
+
+| | before | after |
+| --- | --- | --- |
+| verify | 8 checks, 641 assertions | **8 checks, 641 assertions, 0 failures** |
+| candidates per card image | **1** | 5 (capped at the source width) |
+| index @1x card bytes | 562,978 B | **59,056 B** |
+| contexts served a file that is too small | 2 of 8 | **1 of 8**, source-capped |
+
+### Open questions
+
+Unchanged: 22–26, 28, 29, 31–34, 36, 37, 40, 41, 44, 48, 51–71. One added:
+
+72. **Only product card images have a srcset.** Category card images, the page
+    heroes and the home collage all still ship one fixed width — `toPicture` now
+    takes a `widths` argument and they simply do not pass one. The heroes are the
+    next most valuable: `WIDE_WIDTH` is 2400, sent whole to a 390px phone.

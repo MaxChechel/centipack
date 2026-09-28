@@ -8,16 +8,14 @@ import Media from '../components/blocks/Media.astro';
 import { getCategories, toPageImage } from '../lib/catalogue';
 import { SITE } from '../consts';
 import heroImage from '../assets/home/centipack-home-hero.avif';
-/* TEMPORARY, ON INSTRUCTION. The collage's own five shots are owed; until they
-   arrive it borrows the product catalogue's, which are the same objects on the
-   same ground. They are imported from `assets/products` rather than copied into
-   `assets/home`, so there is one file per product and swapping back is five
-   lines. */
-import volumeCooler from '../assets/products/eps-foam-coolers.avif';
-import volumeGelPack from '../assets/products/gel-packs.avif';
-import volumeMailer from '../assets/products/insulated-metallic-mailers.avif';
-import volumeVialKit from '../assets/products/vial-kits.avif';
-import volumeBox from '../assets/products/vial-presentation-boxes.avif';
+/* THE COLLAGE'S OWN FIVE SHOTS, supplied 2026-09-28. These replace the product
+   catalogue's, which stood in here from the first build — the note that used to
+   sit at this import said "swapping back is five lines", and it was. */
+import volumeGelPack from '../assets/home/cta-banner/home-cta-2.avif';
+import volumeJar from '../assets/home/cta-banner/home-cta-1.avif';
+import volumeCooler from '../assets/home/cta-banner/home-cta-4.avif';
+import volumeMailer from '../assets/home/cta-banner/home-cta-5.avif';
+import volumeBox from '../assets/home/cta-banner/home-cta-3.avif';
 import { Image } from 'astro:assets';
 
 /**
@@ -73,20 +71,48 @@ const heroPicture = await toPageImage({
  * measurements, and a measurement in a class name is a measurement nobody can
  * check against the source.
  */
-/* `ratio` IS THE DRAWN BOX, not the file's own proportion — and it exists
-   because the borrowed shots are all one portrait 1037 x 1284 while the design's
-   five boxes run from 288:540 to 618:593. Without it the tall crop at the top of
-   the collage grew down over "Thermal integrity." Each number below is the pixel
-   size of the shot this slot used to hold, which is the design's box; the
-   photograph is cropped INTO it rather than the composition bending around a
-   photograph. Measured on the built page, not guessed: the five files are
-   identical in size, so every slot needed this. */
+/* `ratio` IS THE DRAWN BOX, not the file's own proportion. It went in because
+   the borrowed shots were all one portrait 1037 x 1284 dropped into boxes drawn
+   between 288:540 and 618:593, and the tallest crop grew down over "Thermal
+   integrity."
+
+   IT STAYS, AND THE REAL SHOTS ARE WHY IT IS NOW ALMOST A NO-OP. Each supplied
+   file is exactly TWICE its slot's drawn box in height:
+
+     slot        drawn box   x2        file            actual
+     top centre  618 x 593   1236x1186 home-cta-2.avif 1236 x 1188
+     left        360 x 628    720x1256 home-cta-1.avif  904 x 1256
+     right       288 x 540    576x1080 home-cta-4.avif  720 x 1080
+     bottom rt   522 x 628   1044x1256 home-cta-5.avif 1044 x 1256
+     bottom lf   514 x 504   1028x1008 home-cta-3.avif 1028 x 1008
+
+   Three match the box outright; two are wider than it, so `ratio` crops them
+   horizontally into the composition rather than letting the composition bend
+   around a photograph. That is the same job it has always done — the difference
+   is that it is now trimming the sides of a correct shot rather than rescuing a
+   wrong one.
+
+   THE FILE NUMBERS ARE NOT THE SLOT ORDER, which is why the imports above are
+   deliberately out of sequence. The mapping was derived twice and both agree:
+   by matching each file's height to a box height at 2x, and by sorting files and
+   slots independently by aspect ratio. Verified afterwards by rendering the page
+   and looking at it.
+
+   `alt` came out of these rows. The list is `aria-hidden` and the template has
+   always passed `alt=""`, so the five sentences that used to sit here described
+   photographs to nobody and had already gone stale against the new files —
+   dead data that reads as authoritative. */
 const collage = [
-  { image: volumeCooler, alt: 'An EPS foam cooler inside its open corrugated outer, printed rush, perishable, insulated.', left: 39.79, top: -0.05, width: 22.99, ratio: '618 / 593', mobile: { left: 38, top: 1, width: 24 } },
-  { image: volumeGelPack, alt: 'Five gel packs in printed pillow pouches, stacked together.', left: -3.57, top: 24.6, width: 13.39, ratio: '360 / 628' },
-  { image: volumeMailer, alt: 'A sealed blue insulated mailer printed "Refrigerate upon opening".', left: 92.86, top: 22.68, width: 10.71, ratio: '288 / 540' },
-  { image: volumeVialKit, alt: 'A branded jar opened to show vials inside.', left: 69.07, top: 65.51, width: 19.42, ratio: '522 / 628', mobile: { left: 60, top: 76, width: 22 } },
-  { image: volumeBox, alt: 'A blue drawer box slid open to show two vials in a fitted insert.', left: 21.5, top: 73.73, width: 19.12, ratio: '514 / 504', mobile: { left: 14, top: 83, width: 21 } },
+  /* Flat gel pack, shot from above. */
+  { image: volumeGelPack, left: 39.79, top: -0.05, width: 22.99, ratio: '618 / 593', mobile: { left: 38, top: 1, width: 24 } },
+  /* Navy jar, lid off, vials inside. Bleeds into the left gutter. */
+  { image: volumeJar, left: -3.57, top: 24.6, width: 13.39, ratio: '360 / 628' },
+  /* EPS cooler in its corrugated outer. Bleeds into the right gutter. */
+  { image: volumeCooler, left: 92.86, top: 22.68, width: 10.71, ratio: '288 / 540' },
+  /* The large insulated mailer. */
+  { image: volumeMailer, left: 69.07, top: 65.51, width: 19.42, ratio: '522 / 628', mobile: { left: 60, top: 76, width: 22 } },
+  /* Drawer box slid open on two vials. */
+  { image: volumeBox, left: 21.5, top: 73.73, width: 19.12, ratio: '514 / 504', mobile: { left: 14, top: 83, width: 21 } },
 ];
 
 /**

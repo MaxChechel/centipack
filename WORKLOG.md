@@ -4702,3 +4702,85 @@ Unchanged: 22–26, 28, 29, 31–34, 36, 37, 40, 41, 44, 48, 51–64. One added:
     contract is with a third-party console, and the harness ends at the network
     boundary. A periodic live submission with the honeypot filled — expecting
     rejection — is the only thing that would prove it.
+
+---
+
+## 2026-09-28 — Entry 52. The collage's own five shots arrived
+
+Supplied in `src/assets/home/cta-banner/` as `home-cta-1` … `home-cta-5`, for
+the home page's closing CTA — section 5, the placed collage around "Thermal
+integrity. Validated performance. Manufacturing scale." There is no CtaBanner on
+Home; this band is its call to action.
+
+They replace the product catalogue's shots, which have stood in since the first
+build. The import site said *"swapping back is five lines"*, and it was five
+lines.
+
+### The file numbers are not the slot order
+
+The obvious reading — `home-cta-1` into the first slot, and so on — is wrong,
+and acting on it would have put a tall jar in a box drawn 618:593 and a flat
+top-down pouch in one drawn 288:540. The mapping was derived two independent
+ways, and they agree:
+
+**Every file's height is exactly twice its slot's drawn box.**
+
+| slot | drawn box | ×2 | file | actual |
+| --- | --- | --- | --- | --- |
+| top centre | 618 × 593 | 1236 × 1186 | `home-cta-2` | 1236 × 1188 |
+| left, bleeding | 360 × 628 | 720 × 1256 | `home-cta-1` | 904 × 1256 |
+| right, bleeding | 288 × 540 | 576 × 1080 | `home-cta-4` | 720 × 1080 |
+| bottom right | 522 × 628 | 1044 × 1256 | `home-cta-5` | 1044 × 1256 |
+| bottom left | 514 × 504 | 1028 × 1008 | `home-cta-3` | 1028 × 1008 |
+
+**And sorting files and slots independently by aspect ratio pairs them the same
+way.** Three match their box outright; two are wider, so `--at-ratio` crops them
+horizontally into the composition — the same job that property has always done,
+except it is now trimming the sides of a correct photograph rather than
+rescuing a wrong one.
+
+Subjects, in slot order: flat gel pack shot from above; navy jar with its lid
+off and vials inside; EPS cooler in its corrugated outer; the large insulated
+mailer; drawer box slid open on two vials.
+
+### Verified by looking at it
+
+Two derivations agreeing is an argument, not a result. The page was built,
+served and screenshotted at 1440 and 390, and read:
+
+- **1440** — gel pack top centre, jar bleeding off the left gutter, cooler off
+  the right, drawer box and mailer below. The heading and button sit clear of
+  all five, which is the thing `max-w-[38.75rem]` on the text column exists to
+  protect and the failure this arrangement would have shown first.
+- **390** — gel pack above the heading, drawer box and mailer below the button,
+  the two gutter shots dropped. Exactly what the mobile rule describes, with the
+  real files in place of the borrowed ones.
+
+### `alt` came out of the collage rows
+
+Five sentences describing photographs, and nothing has ever read them: the list
+is `aria-hidden="true"` and the template passes `alt=""` directly. They were
+also now stale — they described the borrowed product shots, not these. Dead data
+that reads as authoritative is worse than no data, and a future reader wiring
+`shot.alt` into the `<Image>` would have shipped five confident descriptions of
+the wrong pictures.
+
+The decision they encoded is unchanged and still stated at the list: these five
+are decoration around a heading that already says what they are, and five alt
+texts here would be five interruptions on the way to the button.
+
+### Measurements
+
+| | before | after |
+| --- | --- | --- |
+| verify | 8 checks, 613 assertions, 0 failures | **8 checks, 613 assertions, 0 failures** |
+| collage images | 5 borrowed from `assets/products` | **5 own, `assets/home/cta-banner`** |
+| references to borrowed shots on Home | 5 | **0** |
+| dead `alt` strings in the collage data | 5 | **0** |
+
+### Open questions
+
+Unchanged: 22–26, 28, 29, 31–34, 36, 37, 40, 41, 44, 48, 51–65.
+
+Open question 27 — the collage's mobile fallback — stays closed; the placed
+mobile arrangement it was closed with is what these render into.

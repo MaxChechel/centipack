@@ -5244,3 +5244,76 @@ Unchanged: 22–26, 28, 29, 31–34, 36, 37, 40, 41, 44, 48, 51–69. 62 closes.
 valid token now provably works end to end. Whether Formspark *rejects* one with
 a bad or absent token is still a dashboard fact this repo cannot see, and the
 only way to know is to force it.
+
+---
+
+## 2026-09-28 — Entry 58. A card shot that fails contrast, pushed knowingly
+
+Two images replaced in the tree: `category-cold-chain.avif` (4224 × 2376) and
+`range-custom-boxes.avif` (4320 × 2100).
+
+**The cold chain card's heading contrast fell from 3.17 to 1.62 against a 3.0
+requirement.** Measured the way entry 53 set out — darkest decile of rendered
+pixels behind each text box, against white:
+
+| card | heading | needs | |
+| --- | --- | --- | --- |
+| Pharmacy Formats | 3.17 | 3.0 | pass |
+| Custom Boxes | 3.25 | 3.0 | pass |
+| **Cold Chain & Shipping** | **1.62** | 3.0 | **fail** |
+
+`CategoryCard` sets `data-theme="dark"` whenever it has an image, so the heading
+is white 32px type sitting directly on the photograph, and there is no scrim —
+it came off in entry 40 "when the client's pre-darkened photographs landed".
+**This shot is not pre-darkened, so that assumption has broken.**
+
+This is open question 66 arriving: *"every future photograph swap on these cards
+is one shade away from failing, with no check to catch it."* It took one swap.
+
+### Pushed anyway, on instruction, and the record is the point
+
+Ruled: push as-is, the image to be re-exported darker. **The target is ≥3.0 on
+the heading; the two passing cards sit at 3.17 and 3.25**, so those are the
+reference for how dark "dark enough" is.
+
+Also ruled: do not wire the measurement into `verify` yet. Open question 66
+stays open, now with a demonstrated failure attached to it rather than a
+prediction.
+
+**`npm run verify` passes — 8 checks, 641 assertions, 0 failures — and that is
+the finding.** The contrast matrix reads token pairs out of the built CSS and
+has no view of what a photograph does behind a paragraph. A green gate here
+means the tokens are sound, not that the page is legible. Recorded so that the
+next person reading a green run does not conclude more from it than it says.
+
+### A near-miss in the measuring, worth more than the measurement
+
+The first three attempts measured **nothing** and reported it as a pass: an
+empty `{}` of geometry, and a contrast table with no rows and a cheerful
+"tightest margin +99.00". The cause was a leftover `astro preview` daemon from
+the reverted hero work still holding a port — Astro's preview refuses to start a
+second instance and logs `SKIP`, so every new port I asked for silently served
+nothing while `curl -sf -o /dev/null` still returned success.
+
+**That is the port-4321 incident (§9) in miniature, in a throwaway script.** It
+was caught only because the numbers were absurd and the next step was to assert
+that the server was serving THIS build — 6 `category-card` occurrences served
+against 6 in `dist` — before trusting a single pixel. `lib/preview.mjs` and
+`lib/served.mjs` exist because of exactly this, and a script written outside
+them does not inherit their protection.
+
+### Open questions
+
+Unchanged: 22–26, 28, 29, 31–34, 36, 37, 40, 41, 44, 48, 51–65, 67–70.
+
+66, now with evidence: **the category card headings have no contrast floor and
+nothing checks them.** One photograph swap took Cold Chain from 3.17 to 1.62.
+The fix is either the scrim restored as an insurance band or the pixel sampling
+wired into `verify`; both were offered and neither taken yet. A re-exported
+image closes this instance, not the class.
+
+71. **A verification script written outside `scripts/verify/lib` does not
+    inherit the harness's protections.** The ad-hoc measurement above connected
+    to a dead port and reported a pass over nothing. Anything that measures the
+    site should go through `preview.mjs` and `served.mjs`, or assert the same
+    things they do before it believes a number.

@@ -5317,3 +5317,50 @@ image closes this instance, not the class.
     to a dead port and reported a pass over nothing. Anything that measures the
     site should go through `preview.mjs` and `served.mjs`, or assert the same
     things they do before it believes a number.
+
+---
+
+## 2026-09-28 — Entry 59. The re-export, measured: 1.62 → 2.15, still short
+
+`category-cold-chain.avif` re-exported darker, and `range-cold-chain.avif`
+replaced alongside it (a page hero, no type over it, nothing to measure).
+
+| | heading contrast |
+| --- | --- |
+| before the first swap | 3.17 |
+| after the first swap (entry 58) | **1.62** |
+| after this re-export | **2.15** |
+| required | **3.0** |
+
+Moving in the right direction and not there. Pushed on the same standing
+instruction as entry 58.
+
+### The number that makes the next export one-shot
+
+Measuring "it failed again" is worth less than measuring what would pass, so:
+
+- the area behind the heading currently reads **RGB(183, 175, 173)**, relative
+  luminance **0.437**;
+- 3.0:1 against white needs luminance **≤ 0.300**, about **RGB(148,148,148)**;
+- 3.3:1 — a margin rather than a pass by rounding — needs **≤ 0.268**, about
+  **RGB(141,141,141)**.
+
+That is the top-left region only, where the white 32px heading lands. The rest
+of the photograph is unconstrained, and the body copy at the bottom has never
+been in question: it reads 16.93 against a 4.5 requirement, because the card's
+lower half is already dark.
+
+**The two passing cards sit at 3.17 and 3.25**, which is the practical
+definition of how dark this photography needs to be.
+
+### Standing note
+
+`npm run verify` passes — 8 checks, 641 assertions, 0 failures. As entry 58
+recorded, that is not evidence about this: the contrast matrix reads token pairs
+out of the built CSS and cannot see a photograph. Open question 66 remains the
+place where this is either fixed by a scrim or caught by a check; a third
+re-export closes this instance and not the class.
+
+### Open questions
+
+Unchanged: 22–26, 28, 29, 31–34, 36, 37, 40, 41, 44, 48, 51–65, 66, 67–71.

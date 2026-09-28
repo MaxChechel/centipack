@@ -23,11 +23,16 @@
  * secret-bearing half of the old design — a Turnstile secret and a Resend key in
  * the Pages Function's env — no longer exists.
  *
- * NO TURNSTILE. It was removed with the Pages Function that verified it: the
- * token was only ever checked server-side by `functions/api/contact.ts`, and
- * Formspark does not check it. A challenge nobody verifies is a step the visitor
- * pays for and no bot is stopped by. Spam is now Formspark's built-in filtering
- * plus the honeypot below, which Formspark DOES enforce.
+ * TURNSTILE, VERIFIED BY FORMSPARK. It was deleted in D7 and is back, and the
+ * difference is the only thing that matters about it: its token used to be
+ * checked by `functions/api/contact.ts`, so when that went, nothing verified it
+ * and the widget was pure theatre — a step the visitor pays for that stops no
+ * bot. Formspark now holds the secret key and checks the token server-side, so
+ * the challenge means something again.
+ *
+ * Three layers, and each one catches something the others do not: Formspark's
+ * own filtering, the honeypot below (a bot that fills every field), and
+ * Turnstile (a bot that fills only the visible ones).
  *
  * NO CTA BAND: this page is the call to action. Copy is verbatim from Figma
  * 788:9565; the five controls are exactly the ones the design draws, mapped onto
@@ -54,6 +59,28 @@ import { SITE } from '../consts';
  * Changing the destination is changing this line.
  */
 const FORM_ENDPOINT = 'https://submit-form.com/bqtIN0U6N';
+
+/**
+ * The Turnstile site key.
+ *
+ * PUBLIC, LIKE THE ENDPOINT. Cloudflare issues a site key and a secret key; this
+ * is the site key, which is rendered into the widget's markup on every page that
+ * carries a challenge and is meaningless without its secret half. The SECRET
+ * lives in the Formspark dashboard, never here — that is the whole of the split,
+ * and it is why this is a constant and not an env var. Nothing in this repo is
+ * or becomes a secret.
+ *
+ * TURNSTILE IS BACK, AND IT IS NOT THE ARRANGEMENT THAT WAS DELETED. It came off
+ * in AUDIT D7 because its token was only ever checked by the Pages Function that
+ * went with it — a challenge nobody verifies is a step the visitor pays for and
+ * no bot is stopped by. **Formspark verifies it**, so the token now means
+ * something, and D7 narrows accordingly.
+ *
+ * The widget injects its own `cf-turnstile-response` input INSIDE the form, so
+ * `new FormData(form)` picks it up with no wiring — which is why the div has to
+ * sit inside the <form> and not beside it.
+ */
+const TURNSTILE_SITE_KEY = '0x4AAAAAAFHCIE9r1TW2roAB';
 
 /**
  * The honeypot field's name.
@@ -181,6 +208,16 @@ const SHIPMENT_RANGES = [
             placeholder="e.g. GLP-1 injectables, nationwide next-day air, 3,000 packages/week"
           />
 
+          {/* INSIDE the form: the widget injects `cf-turnstile-response` as a real
+              input, so FormData picks it up with no wiring. Beside the form it
+              would render and send nothing.
+
+              `data-size="flexible"` so it takes the column's width rather than
+              its own fixed 300px, which is what the form's other controls do. */}
+          <div class="turnstile-fit">
+            <div class="cf-turnstile" data-sitekey={TURNSTILE_SITE_KEY} data-size="flexible"></div>
+          </div>
+
           <Button type="submit" variant="primary" icon="square" iconPosition="start" class="w-full">
             Send request
           </Button>
@@ -215,6 +252,15 @@ const SHIPMENT_RANGES = [
   import '../scripts/contact';
 </script>
 
-{/* The Turnstile script tag was here. It went with the Pages Function that
-    verified its token — nothing checks it now, so loading it would be a
-    third-party request on the launch page's critical path buying nothing. */}
+{/* Turnstile's loader, on this page and nowhere else.
+
+    `defer` RATHER THAN `async`, which is the same call the earlier version made
+    and for the same reason: `async` lets the widget race the form's own module,
+    and the reset-on-failure path in scripts/contact.ts needs `window.turnstile`
+    to exist by the time a submission can fail.
+
+    `is:inline` because Astro must not process or bundle a third-party URL — it
+    is a script tag, not a module this build owns. It is declared in the JS
+    census as an external dependency with a reason (scripts/verify/js-census.mjs)
+    and its origin is named in three CSP directives (public/_headers). */}
+<script is:inline defer src="https://challenges.cloudflare.com/turnstile/v0/api.js"></script>

@@ -228,10 +228,17 @@ redirecting, and renders the outcome on the page in words.
 
 **What was given up, stated plainly rather than minimised:**
 
-- **Turnstile.** Deleted, not disabled. Its token was only ever checked by the
+- ~~**Turnstile.** Deleted, not disabled. Its token was only ever checked by the
   function that is gone, and Formspark does not check it. A challenge nobody
-  verifies costs the visitor a step and stops no bot. Spam protection is now
-  Formspark's own filtering plus the honeypot.
+  verifies costs the visitor a step and stops no bot.~~
+  **RESTORED 2026-09-28, and the deviation narrows with it.** Formspark holds
+  the secret key and verifies the token server-side, so the challenge means
+  something again — which was the only reason it came off. §8 asked for
+  invisible Turnstile on the contact page and the site has it; what still
+  deviates is *who* verifies the token, not *whether* anyone does. Spam
+  protection is now three layers, each catching what the others do not:
+  Formspark's own filtering, the honeypot (a bot that fills every field) and
+  Turnstile (a bot that fills only the visible ones).
 - **The time floor** (`MIN_FILL_MS` / `MAX_FILL_MS`). Evaluated server-side by
   deleted code. `started_at` was removed rather than left in the markup: a hidden
   field no endpoint reads is data wearing the costume of a defence.

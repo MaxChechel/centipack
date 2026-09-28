@@ -34,8 +34,10 @@ const EXPECTED = [
       'ARCHITECTURE §8, as deviated in AUDIT D7 — ONE job now: intercept the submit and render the answer on the page. ' +
       'The form posts to Formspark, whose documented HTML setup is a native POST that NAVIGATES — success lands the visitor on submit-form.com and a failure lands them on an error page belonging to a company they have never heard of. Either way they have left CentiPack and have to interpret the outcome themselves. ' +
       'Fetching with `accept: application/json` makes Formspark answer JSON instead of redirecting, so both outcomes are rendered here, in words, in the live region that contracts.mjs asserts the existence of. That region is what keeps a failed enquiry from being a silent one, which is the whole of §8. ' +
-      'THE BUDGET CAME DOWN FROM 750 B, because three jobs became one: the disabled-until-configured gate, the started_at time floor and the Turnstile reset all belonged to the Cloudflare Pages Function this replaced, and were deleted with it rather than left as code that looks like a defence and is not. ' +
-      'Measured at 519 B gzipped against the 550 B budget, down from 620 B.',
+      'THE BUDGET CAME DOWN FROM 750 B when the disabled-until-configured gate and the started_at time floor went with the Pages Function that evaluated them, rather than being left as code that looks like a defence and is not. ' +
+      'THE TURNSTILE RESET CAME BACK when Turnstile did, and it is not optional: a token is single-use, so without it a second attempt posts a spent one and is refused again for a reason the visitor cannot see or fix. ' +
+      'THE BUDGET DID NOT MOVE FOR IT. The reset cost 16 B gzipped — 519 to 535 — which the 550 set at the Formspark move already covered. Raising a budget to fit a change nobody measured is how a budget stops being one. ' +
+      'Measured at 535 B gzipped against the 550 B budget.',
     maxGzip: 550,
   },
   {
@@ -75,6 +77,34 @@ const EXPECTED = [
     maxGzip: 900,
   },
 ];
+
+/**
+ * THIRD-PARTY SCRIPTS THE SITE DELIBERATELY LOADS.
+ *
+ * Separate from EXPECTED because the question is different. EXPECTED asks how
+ * many bytes a script we wrote costs; this asks whether a script we did NOT
+ * write should be on the page at all. A third-party tag is a dependency, a
+ * request on the critical path, and code that can change without this repo
+ * changing — so it gets a name and a reason, and an undeclared one still fails
+ * the run.
+ *
+ * NO BYTE BUDGET, because the number would be a lie: the payload is served by
+ * somebody else, is not in `dist`, and can be swapped for a larger one without
+ * anything here noticing. Naming a budget would assert a measurement this
+ * harness cannot take.
+ */
+const EXTERNAL = [
+  {
+    id: 'turnstile loader',
+    match: /^https:\/\/challenges\.cloudflare\.com\/turnstile\/v0\/api\.js/,
+    why:
+      'ARCHITECTURE §8 / AUDIT D7 — the bot challenge on the contact form, and the ONLY third-party script on this site. ' +
+      'It earns its place by being verified: Formspark holds the secret key and checks the token server-side, so a failed challenge stops a submission. ' +
+      'It was deleted once for exactly the opposite reason — when the Pages Function that verified the token went, nothing checked it, and an unverified challenge is a step the visitor pays for that stops no bot. ' +
+      'Contact page only; no other page loads it. Its origin is named in script-src, frame-src and connect-src (public/_headers), and the CSP check asserts that.',
+  },
+];
+
 
 /** Script types that are data, not code, and do not count against the budget. */
 const DATA_TYPES = ['application/ld+json'];
@@ -133,10 +163,23 @@ export function jsCensus() {
 
     if (s.kind === 'ref') {
       /* A <script src> pointing at a file already counted above is fine; one
-         pointing off-site is a dependency nobody declared. */
-      if (/^https?:/.test(s.where.split('→ ')[1] ?? '')) {
-        failures++;
-        notes.push(`UNDECLARED external script: ${s.where}`);
+         pointing off-site is a dependency nobody declared — UNLESS it is
+         declared in EXTERNAL below, with a reason. The assertion is unchanged:
+         an undeclared third-party script still fails. What is new is that there
+         is a way to declare one, which there had to be the moment the site
+         loaded its first. */
+      const url = s.where.split('→ ')[1] ?? '';
+      if (/^https?:/.test(url)) {
+        const declared = EXTERNAL.find((e) => e.match.test(url));
+        if (!declared) {
+          failures++;
+          notes.push(`UNDECLARED external script: ${s.where}`);
+          notes.push('    A third-party script is a dependency and a request on the critical path.');
+          notes.push('    Declare it in EXTERNAL with a reason, or delete it (§6).');
+        } else {
+          notes.push(`${declared.id} — ${s.where} (external)`);
+          notes.push(`    ${declared.why}`);
+        }
       }
       continue;
     }

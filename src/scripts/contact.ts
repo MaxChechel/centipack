@@ -16,12 +16,24 @@
  * asserts the existence of, and it is the whole reason a failed enquiry is not
  * a silent one.
  *
- * NO `started_at`, NO TURNSTILE RESET, NO ENABLE GATE — all three belonged to
- * the Cloudflare Pages Function this replaced (AUDIT D7). The time floor was
- * evaluated server-side by code that no longer exists; Formspark would have
- * filed it as an ordinary form field, so a hidden input named `started_at`
- * would have been data pretending to be a defence. The honeypot survives
- * because Formspark genuinely enforces it, under the name `_honeypot`.
+ * NO `started_at` AND NO ENABLE GATE — both belonged to the Cloudflare Pages
+ * Function this replaced (AUDIT D7). The time floor was evaluated server-side by
+ * code that no longer exists; Formspark would have filed it as an ordinary form
+ * field, so a hidden input named `started_at` would have been data pretending to
+ * be a defence. The honeypot survives because Formspark genuinely enforces it,
+ * under the custom name `company_contact`.
+ *
+ * THE TURNSTILE RESET IS BACK, because Turnstile is (AUDIT D7, narrowed). A
+ * token is SINGLE-USE: after a rejected submission the spent one is still sitting
+ * in the form, so a second attempt posts it, Formspark refuses it again, and the
+ * visitor is told their details could not be sent for a reason they have no way
+ * to see or fix. Resetting the widget issues a fresh token and makes "try again"
+ * mean what it says.
+ *
+ * Guarded rather than assumed: the loader is `defer`, a request to
+ * challenges.cloudflare.com can fail, and `window.turnstile` may simply not be
+ * there. Optional chaining means a missing widget costs the reset and nothing
+ * else — the error is already on screen by this point.
  *
  * The form is NOT disabled in markup and nothing here enables it. The endpoint
  * is public and static — there is no unconfigured state to protect against.
@@ -94,5 +106,7 @@ if (form) {
     }
 
     if (submit) submit.disabled = false;
+    /* A spent token cannot be sent twice. See the note at the top. */
+    (window as unknown as { turnstile?: { reset: () => void } }).turnstile?.reset();
   });
 }

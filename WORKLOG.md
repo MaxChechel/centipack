@@ -5061,3 +5061,113 @@ Unchanged: 22–26, 28, 29, 31–34, 36, 37, 40, 41, 44, 48, 51–67. One added:
     graph fails exactly as silently as a missing one. Google's Rich Results Test
     is the manual answer; a local check over the emitted blocks is the durable
     one.
+
+---
+
+## 2026-09-28 — Entry 56. Turnstile, and the widget that did not fit
+
+Site key supplied: `0x4AAAAAAFHCIE9r1TW2roAB`, with the secret half configured
+in Formspark. **AUDIT D7 narrows** — the deviation is now about *who* verifies
+the token, not *whether* anyone does.
+
+Turnstile came off in entry 48 for a specific reason: its token was only ever
+checked by the Pages Function that went with it, and an unverified challenge is
+a step the visitor pays for that stops no bot. Formspark checks it now, so the
+reason has expired and the widget is back. Three layers, each catching what the
+others do not: Formspark's filtering, the honeypot (a bot that fills every
+field), Turnstile (a bot that fills only the visible ones).
+
+The reset came back too, and it is not optional: **a token is single-use**, so
+without it a second attempt posts a spent one and is refused again for a reason
+the visitor cannot see or fix. 16 B gzipped, 519 → 535, **inside the 550 budget
+already set** — the budget did not move, because raising one to fit a change
+nobody measured is how a budget stops being one.
+
+### The sweep caught a horizontal scroll on the phone, immediately
+
+`data-size="flexible"` does not mean what it sounds like. **Turnstile's iframe
+has a hard 300px floor**, and flexible only governs the width above it. Measured
+on the built page rather than guessed:
+
+| viewport | space for the widget | widget needs | result |
+| --- | --- | --- | --- |
+| 320 | 240px | 300px | **document pushed to 340** |
+| 360 | 280px | 300px | spill |
+| 768 | 245px | 300px | spill — the `md` grid narrows the form column |
+| 1440 | 560px | 560px | fine |
+
+Three failures the moment Turnstile went in, on the one page that has to work.
+Worth noting **768 is not a narrow viewport** — the form sits in a 6-column grid
+there and gets 245px while the window is wide, which is why this was never a
+question about screen size.
+
+**`data-bleed` would have silenced it in one line and was not an option.** That
+hatch is for art direction that deliberately runs past its box — the collage,
+the product rail. A third-party iframe that does not fit is not art direction,
+and declaring it bleed is exactly the "weaken the check" §9 forbids.
+
+### `zoom`, not `transform: scale()`
+
+`scale` paints smaller and leaves the original box in the layout, so a 0.75
+scale would have left ~16px of dead space under the widget and broken the form's
+rhythm. **`zoom` scales the layout box with the pixels**, so the gap closes
+itself. Where `zoom` is unsupported the widget renders at 300px — the behaviour
+before this rule, not a worse one.
+
+**A container query, not a media query**, because the trigger is not viewport
+width — 768 proves that. The question is always "how much room does this widget
+have", and that is the question a container query asks.
+
+**0.75 rather than the 0.8 that exactly fits.** 300 × 0.8 is 240.0 against 240px
+available, and the sweep's own tolerance is half a pixel. A rule that passes by
+rounding is a rule that fails on the next browser.
+
+### Two checks had to be widened, and both kept their red path
+
+**The JS census hard-failed on any off-site script** — "UNDECLARED external
+script". The previous Turnstile code only ever passed it because the widget
+never rendered without an env key, so the rule had never met a real third-party
+tag. It now has an `EXTERNAL` list: declared with a reason, undeclared still
+fails. Fault-injected `https://cdn.example.com/tracker.js` → 1 failure, exit 1,
+reverted.
+
+**No byte budget on an external entry**, deliberately. The payload is served by
+somebody else, is not in `dist`, and can be swapped for a larger one without
+this repo changing. A number there would assert a measurement this harness
+cannot take.
+
+**The `cf-turnstile` dead-class allowance came back**, having been correctly
+removed in entry 50 when the class stopped reaching any page. The entry is right
+exactly while the class ships: an allowance for a class nothing emits describes a
+site that does not exist, and a missing one fails a build for no reason.
+
+**The CSP needed three directives, not one.** `script-src` for the loader,
+`frame-src` because Turnstile renders its challenge in an iframe, `connect-src`
+because the widget calls home for the token. Miss `frame-src` and the failure is
+the nastiest of the three: the script loads, the widget mounts, no challenge
+ever appears, and every submission is refused for a reason the page cannot
+explain. The CSP check went 4 assertions to 6 and holds all of it.
+
+### Measurements
+
+| | before | after |
+| --- | --- | --- |
+| verify | 8 checks, 636 assertions | **8 checks, 641 assertions, 0 failures** |
+| contact script | 519 B / 550 budget | **535 B / 550** |
+| third-party scripts | 0 | **1, declared** |
+| CSP origins | 1 | 2 |
+| sweep failures introduced, then fixed | **3** | 0 |
+
+### Open questions
+
+Unchanged: 22–26, 28, 29, 31–34, 36, 37, 40, 41, 44, 48, 51–68. Two added:
+
+69. **The widget renders in the browser's language, not the page's.** Turnstile
+    defaults to `data-language="auto"`, so an English form can show a Russian
+    challenge — seen while testing. Arguably right for the visitor and arguably
+    jarring on an English-only site. `data-language={SITE.locale}` pins it.
+70. **Nothing here proves a challenge is actually enforced.** The widget renders
+    and the token posts; whether Formspark rejects a submission with a bad or
+    absent token is a fact about a dashboard setting this repo cannot see —
+    the same shape as open questions 64 and 65. A submission with the challenge
+    deliberately failed is the only thing that would show it.

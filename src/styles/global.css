@@ -3122,3 +3122,50 @@
     );
   }
 }
+
+/* --- Turnstile, made to fit ----------------------------------------------
+   TURNSTILE'S WIDGET HAS A HARD 300px FLOOR, whatever `data-size` says. The
+   flexible size takes the width it is given down to 300 and then stops, and the
+   iframe inside keeps its own 300px. Measured on the built page rather than
+   guessed:
+
+     viewport   space for the widget   widget content
+     320                       240px            300px   → document pushed to 340
+     360                       280px            300px
+     768                       245px            300px   → the md grid narrows it
+     1440                      560px            560px   → fine
+
+   The sweep caught all three the moment Turnstile went in — a horizontal scroll
+   on a phone, on the one page that has to work.
+
+   NOT `data-bleed`. That hatch is for art direction that deliberately runs past
+   its box — the collage, the product rail — and this is a third-party iframe
+   that does not fit. Declaring it bleed would silence the assertion rather than
+   fix the page, which is the one thing §9 forbids.
+
+   `zoom` AND NOT `transform: scale()`, which is the interesting part. `scale`
+   paints smaller but leaves the original box in the layout, so a 0.75 scale
+   would leave ~16px of dead space under the widget and the form's rhythm would
+   break. `zoom` scales the LAYOUT BOX with the pixels, so the gap closes
+   itself. It is a standard property now, and where it is unsupported the widget
+   simply renders at 300px — the behaviour before this rule, not a worse one.
+
+   A CONTAINER QUERY, not a media query, because the trigger is not viewport
+   width: at 768 the form sits in a 6-column grid and gets 245px while the
+   viewport is wide. The question is always "how much room does this widget
+   have", and that is what a container query asks. */
+@layer components {
+  .turnstile-fit {
+    container-type: inline-size;
+  }
+
+  /* 0.75, not the 0.8 that would exactly fit the tightest case. 300 x 0.8 is
+     240.0 against 240px available, and the sweep's own tolerance is half a
+     pixel — a rule that passes by rounding is a rule that fails on the next
+     browser. 225px leaves real room. */
+  @container (width < 300px) {
+    .turnstile-fit .cf-turnstile {
+      zoom: 0.75;
+    }
+  }
+}

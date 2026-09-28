@@ -31,15 +31,26 @@
   #     silent swallow §8 exists to prevent, so the fallback is allowed to reach
   #     Formspark and land on its thank-you page rather than die quietly.
   #
-  # challenges.cloudflare.com is GONE from all three directives it appeared in
-  # (script-src, connect-src, frame-src). Turnstile was deleted with the Pages
-  # Function that verified it; a CSP allowance for a script the site no longer
-  # loads is permission granted to nothing, which is how an allowlist rots into
-  # a list of things somebody once used.
+  # challenges.cloudflare.com is Turnstile, on the contact page only, and it
+  # needs THREE directives because it does three things — miss any one and the
+  # widget fails differently:
   #
-  # frame-src is removed entirely rather than emptied: with no directive it falls
-  # back to default-src 'self', which is tighter than what was here.
-  Content-Security-Policy: default-src 'self'; script-src 'self' 'unsafe-inline'; style-src 'self' 'unsafe-inline'; img-src 'self' data:; font-src 'self'; media-src 'self' https:; connect-src 'self' https://submit-form.com; base-uri 'none'; form-action 'self' https://submit-form.com; frame-ancestors 'none'
+  #   script-src  — the loader, <script src=…/turnstile/v0/api.js>.
+  #   frame-src   — Turnstile renders its challenge in an IFRAME. Without this
+  #                 the script loads, the widget mounts, and the challenge never
+  #                 appears: no token, and every submission refused by Formspark
+  #                 for a reason the page cannot explain.
+  #   connect-src — the widget calls home to issue and refresh the token.
+  #
+  # It was removed in AUDIT D7 and is back because the token is verified again —
+  # Formspark holds the secret key now. The entry was correctly deleted when
+  # nothing checked the token; it is correctly here now that something does.
+  #
+  # frame-src is declared again for the same reason. It was dropped to inherit
+  # default-src 'self', which was tighter and right while nothing framed
+  # anything; naming Turnstile is narrower than leaving the directive off would
+  # now be.
+  Content-Security-Policy: default-src 'self'; script-src 'self' 'unsafe-inline' https://challenges.cloudflare.com; style-src 'self' 'unsafe-inline'; img-src 'self' data:; font-src 'self'; media-src 'self' https:; connect-src 'self' https://submit-form.com https://challenges.cloudflare.com; frame-src https://challenges.cloudflare.com; base-uri 'none'; form-action 'self' https://submit-form.com; frame-ancestors 'none'
 
 # Fingerprinted assets are immutable: the filename changes when the content does.
 /_astro/*

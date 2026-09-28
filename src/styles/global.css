@@ -2771,6 +2771,32 @@
     aspect-ratio: var(--at-ratio);
     object-fit: cover;
   }
+
+  /* A 20% BLACK WASH OVER EACH SHOT, on instruction.
+   *
+   * `::after` on the ITEM rather than a div in the markup: five overlay
+   * elements would be five things to keep in sync with five images, and the
+   * collage is already `aria-hidden` decoration — adding real nodes to it puts
+   * markup into the accessibility tree that exists only to be painted over.
+   *
+   * OUTSIDE THE MEDIA QUERIES, deliberately. The item is absolutely positioned
+   * at BOTH widths — the desktop placement and the phone one differ only in
+   * which custom properties feed `left/top/width` — so one rule covers both,
+   * and the two shots that `display: none` below `md` take their overlay with
+   * them because a pseudo-element of a hidden box is hidden too.
+   *
+   * The radius is repeated here because the radius lives on the IMG, as a
+   * `rounded-md` utility in the markup, and a pseudo-element does not inherit
+   * it. Without this the wash would square off the corners the photograph
+   * rounds. */
+  .volume-collage-item::after {
+    content: '';
+    position: absolute;
+    inset: 0;
+    border-radius: var(--radius-md);
+    background-color: rgb(0 0 0 / 0.2);
+    pointer-events: none;
+  }
 }
 
 /* --- The collage on a phone ----------------------------------------------

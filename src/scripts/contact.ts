@@ -38,6 +38,18 @@
  * The form is NOT disabled in markup and nothing here enables it. The endpoint
  * is public and static — there is no unconfigured state to protect against.
  */
+/**
+ * Turnstile's global, if it loaded.
+ *
+ * One accessor rather than the cast repeated at each call site: the loader is
+ * `defer`, the request can fail, and an ad blocker can remove it entirely, so
+ * every use has to tolerate its absence. Typed to the two methods this module
+ * calls and no more.
+ */
+const turnstile = () =>
+  (window as unknown as { turnstile?: { reset: (id?: string) => void; remove: (id?: string) => void } })
+    .turnstile;
+
 const form = document.querySelector<HTMLFormElement>('[data-contact-form]');
 
 if (form) {
@@ -82,6 +94,27 @@ if (form) {
       }
 
       if (response.ok && result.success !== false && result.ok !== false) {
+        /* TELL TURNSTILE TO LET GO BEFORE THE WIDGET IS REMOVED.
+           The loop below deletes the widget's element along with the rest of
+           the form, and Turnstile goes on tracking a node that is no longer in
+           the document — its own housekeeping then logs "Cannot find Widget
+           cf-chl-widget-…, consider using turnstile.remove()". Harmless, and a
+           warning in the console of a page that has just succeeded is still a
+           defect: it is the kind of noise that teaches people to ignore the
+           console.
+
+           Wrapped, because this is third-party code on the SUCCESS path. A
+           throw here would take out the thank-you message that is the entire
+           point of the branch — a console warning is a far better outcome than
+           a visitor who submitted successfully and was told nothing. */
+        try {
+          const host = form.querySelector<HTMLElement>('.cf-turnstile');
+          const widgetId = host?.id || host?.querySelector<HTMLElement>('[id^="cf-chl-widget-"]')?.id;
+          if (widgetId) turnstile()?.remove(widgetId);
+        } catch {
+          /* Turnstile absent, blocked, or its API changed. Nothing to clean up. */
+        }
+
         /* Replace rather than reset: a sent enquiry is not a form waiting to be
            filled in again, and leaving it fillable invites the double-send.
            Every direct child goes except the status line itself — which is why
@@ -107,6 +140,6 @@ if (form) {
 
     if (submit) submit.disabled = false;
     /* A spent token cannot be sent twice. See the note at the top. */
-    (window as unknown as { turnstile?: { reset: () => void } }).turnstile?.reset();
+    turnstile()?.reset();
   });
 }

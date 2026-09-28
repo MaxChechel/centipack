@@ -5171,3 +5171,76 @@ Unchanged: 22–26, 28, 29, 31–34, 36, 37, 40, 41, 44, 48, 51–68. Two added:
     absent token is a fact about a dashboard setting this repo cannot see —
     the same shape as open questions 64 and 65. A submission with the challenge
     deliberately failed is the only thing that would show it.
+
+---
+
+## 2026-09-28 — Entry 57. The widget Turnstile could not find
+
+**A submission went through and arrived in Formspark.** Open question 62 closes:
+the endpoint accepts, the challenge passes, the enquiry lands. Open question 70
+narrows to "a deliberately failed challenge has still not been tried".
+
+Three console messages came with it. **Two are not ours**, and saying which is
+half the work — both are sourced to `flexible?lang=auto:1`, which is Turnstile's
+own challenge document on `challenges.cloudflare.com`:
+
+- `OTS parsing error: Size of decompressed WOFF 2.0 is less than compressed
+  size` — a font inside Cloudflare's frame. Not this site's: ours is served
+  from our own origin, and `font-src 'self'` would not let their document fetch
+  it even if it wanted to.
+- `No available adapters.` — WebGPU probing inside the challenge.
+
+Neither is actionable from this repo, and chasing them would have been an hour
+spent on somebody else's iframe.
+
+### The third one was mine
+
+> `[Cloudflare Turnstile] Cannot find Widget cf-chl-widget-y9k9m, consider using
+> turnstile.remove() to clean up a widget.`
+
+The success path replaces the form with the thank-you line — *"a sent enquiry is
+not a form waiting to be filled in again"* — by removing every child except the
+status element. **The widget is one of those children**, and Turnstile goes on
+tracking a node that has left the document until its own housekeeping notices.
+
+Harmless in effect, and still a defect: **a warning in the console of a page that
+has just succeeded is how people learn to ignore the console.**
+
+Fixed by telling Turnstile to release the widget before the DOM goes. Wrapped in
+`try/catch` because it is third-party code **on the success path** — a throw
+there would take out the thank-you message, which is a far worse outcome than
+the warning it replaces.
+
+### The budget refused it, and that is the entry
+
+592 B against a 550 B budget. The census failed the build, correctly.
+
+A shorter version — read the id off the container and pass it straight to
+`remove()` — measures **560 B**, and was rejected. If Cloudflare puts the widget
+id on a child element rather than the container it passes `undefined`, cleans
+up nothing, and leaves exactly the warning it exists to remove. **32 B for a fix
+that works rather than one that might.**
+
+So the budget moved 550 → 620, deliberately and with the measurement written at
+the entry. That is what a budget is for: not to prevent growth, but to make
+growth a decision somebody made rather than one nobody noticed. The history is
+now legible in one place — 500 → 750 when the intercept arrived, 750 → 550 when
+the Pages Function's three jobs went, 550 → 620 for this.
+
+### Measurements
+
+| | before | after |
+| --- | --- | --- |
+| verify | 8 checks, 641 assertions | **8 checks, 641 assertions, 0 failures** |
+| contact script | 535 B / 550 | **592 B / 620** |
+| console warnings from this site on success | **1** | 0 |
+| console warnings from Cloudflare's iframe | 2 | 2, not ours |
+
+### Open questions
+
+Unchanged: 22–26, 28, 29, 31–34, 36, 37, 40, 41, 44, 48, 51–69. 62 closes.
+
+70, revised: **a failing challenge has not been tested.** A submission with a
+valid token now provably works end to end. Whether Formspark *rejects* one with
+a bad or absent token is still a dashboard fact this repo cannot see, and the
+only way to know is to force it.

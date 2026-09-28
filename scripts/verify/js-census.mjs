@@ -36,9 +36,10 @@ const EXPECTED = [
       'Fetching with `accept: application/json` makes Formspark answer JSON instead of redirecting, so both outcomes are rendered here, in words, in the live region that contracts.mjs asserts the existence of. That region is what keeps a failed enquiry from being a silent one, which is the whole of §8. ' +
       'THE BUDGET CAME DOWN FROM 750 B when the disabled-until-configured gate and the started_at time floor went with the Pages Function that evaluated them, rather than being left as code that looks like a defence and is not. ' +
       'THE TURNSTILE RESET CAME BACK when Turnstile did, and it is not optional: a token is single-use, so without it a second attempt posts a spent one and is refused again for a reason the visitor cannot see or fix. ' +
-      'THE BUDGET DID NOT MOVE FOR IT. The reset cost 16 B gzipped — 519 to 535 — which the 550 set at the Formspark move already covered. Raising a budget to fit a change nobody measured is how a budget stops being one. ' +
-      'Measured at 535 B gzipped against the 550 B budget.',
-    maxGzip: 550,
+      'It also tells Turnstile to release its widget before the success path removes the form, or Turnstile keeps tracking a node that has left the document and logs "Cannot find Widget" into the console of a page that has just succeeded. Seen in production, not predicted. ' +
+      'THE BUDGET MOVED 550 to 620, and this is the reasoning rather than a bump. The reset cost 16 B (519 to 535) and fitted. The widget cleanup did not: 592 B. A shorter version that reads the id off the container alone measures 560 B and was REJECTED — if Cloudflare puts the id on a child element instead it passes undefined, cleans nothing, and leaves the warning it exists to remove. 32 B for a fix that works rather than one that might. ' +
+      'Measured at 592 B gzipped against the 620 B budget.',
+    maxGzip: 620,
   },
   {
     id: 'select enter-to-open',

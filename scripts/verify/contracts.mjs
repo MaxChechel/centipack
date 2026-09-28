@@ -398,12 +398,214 @@ function slotIsReserved() {
   return { checks, failures, notes };
 }
 
+/**
+ * Absolute URLs that appear in built HTML and are NOT network requests.
+ *
+ * Every entry needs a reason. The rule this list serves is narrow: the CSP
+ * governs what the browser FETCHES, so a URL the browser never fetches must not
+ * be held against it.
+ */
+const NOT_A_FETCH = [
+  {
+    match: /^http:\/\/www\.w3\.org$/,
+    why: 'XML namespace on <svg> and <html>. An identifier, never dereferenced — no browser has ever requested it.',
+  },
+  {
+    match: /^https:\/\/schema\.org$/,
+    why: 'JSON-LD `@context`. Names a vocabulary; consumers ship it, they do not fetch it. Not a subresource.',
+  },
+];
+
+/**
+ * §8 — THE CSP PERMITS WHAT THE SITE ACTUALLY DOES, AND NOTHING ELSE.
+ *
+ * PAID FOR, AT THE WORST MOMENT: on a real person trying to send a real
+ * enquiry. The contact form moved to Formspark (AUDIT D7) and `public/_headers`
+ * was not followed through, so `connect-src` still named Turnstile's domain and
+ * not the endpoint the form now posts to. Every submission was refused by the
+ * browser before it left the page. The form reported "Could not reach the
+ * server" — correctly; it genuinely could not — and the cause was visible only
+ * in the console.
+ *
+ * NOTHING IN THE HARNESS COULD HAVE OBJECTED. The build was valid, the markup
+ * was right, `internalLinksResolve()` only inspects internal links, and a CSP is
+ * a response header that no page-rendered check reads. This is §9's "a rule that
+ * only convention enforces is a rule that will be broken", demonstrated.
+ *
+ * TWO DIRECTIONS, because the two failures are different and both are real:
+ *
+ *   1. AN ORIGIN THE SITE REACHES IS MISSING FROM THE CSP → the browser blocks
+ *      it. This is the failure above, and it is the expensive one: it breaks a
+ *      working feature in production only, because a CSP is not applied by
+ *      `astro dev` or `astro preview`. Nobody sees it until a deploy.
+ *
+ *   2. AN ORIGIN IN THE CSP APPEARS NOWHERE IN THE BUILD → permission granted to
+ *      nothing. Not exploitable on its own, and it is how an allowlist decays
+ *      into a list of things somebody once used: Turnstile sat in three
+ *      directives of this CSP after the code that used it was deleted. A stale
+ *      allowance is the next person's evidence that an origin is needed.
+ *
+ *   3. THE RIGHT ORIGIN IN THE WRONG DIRECTIVE. Directives 1 and 2 read the CSP
+ *      as a flat set of origins, which is enough to catch an origin that is
+ *      missing altogether — and NOT enough for the bug that prompted this check.
+ *      Discovered by fault injection: removing `submit-form.com` from
+ *      `connect-src` while leaving it in `form-action` reproduced the exact
+ *      production failure and the flat check passed it, because the origin was
+ *      still "somewhere in the CSP".
+ *
+ *      So the form's endpoint is checked PER DIRECTIVE, and against both of the
+ *      two that govern it:
+ *        - `connect-src`, because the submit is intercepted and sent by fetch;
+ *        - `form-action`, because the <form> carries a real action and a browser
+ *          that never ran the module will POST to it natively.
+ *      Either one missing breaks a real path, and the two paths fail
+ *      differently: without `connect-src` the fetch is refused and the page says
+ *      so; without `form-action` the native POST is blocked and nothing visible
+ *      happens at all.
+ */
+function cspMatchesTheSite() {
+  const notes = [];
+  const build = productionBuild();
+  if (!build.ok) return { checks: 1, failures: 1, notes: ['production build failed', build.log] };
+
+  const headersPath = join(build.out, '_headers');
+  if (!existsSync(headersPath)) {
+    return {
+      checks: 1,
+      failures: 1,
+      notes: ['no _headers in the production build — the CSP ships from there, so there is no policy at all'],
+    };
+  }
+
+  const csp = /Content-Security-Policy:([^\n]*)/.exec(readFileSync(headersPath, 'utf8'))?.[1] ?? '';
+  if (!csp.trim()) {
+    return { checks: 1, failures: 1, notes: ['_headers carries no Content-Security-Policy line'] };
+  }
+
+  /* Origins named in the policy, as opposed to keywords and schemes. */
+  const cspOrigins = new Set(
+    [...csp.matchAll(/https?:\/\/[a-zA-Z0-9.*-]+/g)].map((m) => m[0]),
+  );
+
+  const files = walkRelative(build.out).filter((f) => f.endsWith('.html'));
+
+  /* The site's own origin is `'self'`, and it is READ OUT OF THE BUILD rather
+     than imported from src/consts.ts — partly because this is a .mjs script and
+     that is a .ts module, and mostly because the canonical tag is the artifact's
+     own statement of where it lives. If those two ever disagree, the build is
+     what ships. */
+  const indexHtml = existsSync(join(build.out, 'index.html'))
+    ? readFileSync(join(build.out, 'index.html'), 'utf8')
+    : '';
+  const canonical = /<link[^>]+rel=["']canonical["'][^>]+href=["'](https?:\/\/[^/"']+)/.exec(indexHtml)?.[1];
+  if (!canonical) {
+    return {
+      checks: 1,
+      failures: 1,
+      notes: ['could not read the canonical origin from the built index.html — cannot tell self from third party'],
+    };
+  }
+  const siteOrigin = canonical;
+
+  /** Origins the built pages actually reference, excluding self and non-fetches. */
+  const used = new Map();
+  for (const file of files) {
+    const html = readFileSync(join(build.out, file), 'utf8');
+    for (const m of html.matchAll(/https?:\/\/[a-zA-Z0-9.-]+/g)) {
+      const origin = m[0];
+      if (origin === siteOrigin) continue;
+      if (NOT_A_FETCH.some((e) => e.match.test(origin))) continue;
+      if (!used.has(origin)) used.set(origin, new Set());
+      used.get(origin).add(file);
+    }
+  }
+
+  let checks = 0;
+  let failures = 0;
+
+  for (const [origin, onPages] of [...used].sort()) {
+    checks++;
+    if (cspOrigins.has(origin)) continue;
+    failures++;
+    const list = [...onPages].sort();
+    notes.push(
+      `NOT IN THE CSP: ${origin} — referenced by ${list.length} page(s): ${list.slice(0, 4).join(', ')}` +
+        `${list.length > 4 ? ', …' : ''}. The browser will refuse it in production.`,
+    );
+  }
+
+  for (const origin of [...cspOrigins].sort()) {
+    checks++;
+    /* A wildcard host cannot be matched against a literal, and is a deliberate
+       breadth decision rather than a specific permission. */
+    if (origin.includes('*')) continue;
+    if ([...used.keys()].some((u) => u === origin)) continue;
+    failures++;
+    notes.push(
+      `STALE CSP ALLOWANCE: ${origin} is permitted but appears on no page in this build — ` +
+        'permission granted to nothing. Remove it, or say here why it is needed.',
+    );
+  }
+
+  /* --- 3. The form endpoint, per directive. See the note above for why the two
+     checks above are not sufficient on their own. */
+  const sourceList = (name) => {
+    const m = new RegExp(`(?:^|;)\\s*${name}\\s+([^;]*)`).exec(csp);
+    return m ? m[1].trim().split(/\s+/) : null;
+  };
+
+  const formOrigins = new Set();
+  for (const file of files) {
+    const html = readFileSync(join(build.out, file), 'utf8');
+    for (const m of html.matchAll(/<form\b[^>]*\saction=["'](https?:\/\/[^/"']+)/g)) {
+      formOrigins.add(m[1]);
+    }
+  }
+
+  for (const origin of [...formOrigins].sort()) {
+    for (const name of ['connect-src', 'form-action']) {
+      checks++;
+      const list = sourceList(name);
+      if (list === null) {
+        failures++;
+        notes.push(
+          `${name} IS NOT DECLARED, so the form endpoint ${origin} falls back to default-src — ` +
+            `state it explicitly rather than inheriting it.`,
+        );
+        continue;
+      }
+      if (list.includes(origin)) continue;
+      failures++;
+      notes.push(
+        `${origin} IS THE FORM ENDPOINT BUT IS NOT IN ${name} (found: ${list.join(' ')}). ` +
+          (name === 'connect-src'
+            ? 'The intercepted submit is a fetch; the browser will refuse it and the enquiry never leaves the page.'
+            : 'A browser that did not run the module POSTs natively; that POST is blocked and NOTHING VISIBLE HAPPENS.'),
+      );
+    }
+  }
+
+  if (failures === 0) {
+    notes.push(
+      `${used.size} external origin(s) used, all permitted; ` +
+        `${[...cspOrigins].filter((o) => !o.includes('*')).length} origin(s) permitted, all used`,
+    );
+    for (const [origin] of [...used].sort()) notes.push(`    ${origin}`);
+    for (const origin of [...formOrigins].sort()) {
+      notes.push(`    ${origin} — form endpoint, present in connect-src and form-action`);
+    }
+  }
+
+  return { checks, failures, notes };
+}
+
 const CONTRACTS = [
   ['form reports failure (§8)', formReportsFailure],
   ['`as` reserved for Section (§4.2)', asPropReservedForSection],
   ['`slot` reserved by Astro', slotIsReserved],
   ['production omits styleguide (§2.4)', productionOmitsStyleguide],
   ['internal links resolve (§8/§9)', internalLinksResolve],
+  ['CSP matches the site (§8)', cspMatchesTheSite],
 ];
 
 export function contracts() {

@@ -16,8 +16,30 @@
   # nonce. The mitigation is the JS census (§6): every inline module in dist is
   # named and budgeted by `npm run verify`, so "inline script" is an enumerated
   # set rather than an open door.
-  # challenges.cloudflare.com is Turnstile, used by the contact form only.
-  Content-Security-Policy: default-src 'self'; script-src 'self' 'unsafe-inline' https://challenges.cloudflare.com; style-src 'self' 'unsafe-inline'; img-src 'self' data:; font-src 'self'; media-src 'self' https:; connect-src 'self' https://challenges.cloudflare.com; frame-src https://challenges.cloudflare.com; base-uri 'none'; form-action 'self'; frame-ancestors 'none'
+  # submit-form.com is Formspark, the contact form's endpoint (AUDIT D7). It is
+  # named in TWO directives and both are load-bearing:
+  #
+  #   connect-src — the form is submitted by fetch (src/scripts/contact.ts), and
+  #     without this the browser blocks the request outright. That is what
+  #     happened when the form moved to Formspark and this file was not followed
+  #     through: every submission failed with "Could not reach the server".
+  #
+  #   form-action — the NO-JAVASCRIPT path. The <form> carries a real action, so
+  #     if the module fails to load the browser does a native POST. Under
+  #     `form-action 'self'` that POST is blocked and NOTHING VISIBLE HAPPENS —
+  #     no navigation, no error on the page, the enquiry simply gone. That is the
+  #     silent swallow §8 exists to prevent, so the fallback is allowed to reach
+  #     Formspark and land on its thank-you page rather than die quietly.
+  #
+  # challenges.cloudflare.com is GONE from all three directives it appeared in
+  # (script-src, connect-src, frame-src). Turnstile was deleted with the Pages
+  # Function that verified it; a CSP allowance for a script the site no longer
+  # loads is permission granted to nothing, which is how an allowlist rots into
+  # a list of things somebody once used.
+  #
+  # frame-src is removed entirely rather than emptied: with no directive it falls
+  # back to default-src 'self', which is tighter than what was here.
+  Content-Security-Policy: default-src 'self'; script-src 'self' 'unsafe-inline'; style-src 'self' 'unsafe-inline'; img-src 'self' data:; font-src 'self'; media-src 'self' https:; connect-src 'self' https://submit-form.com; base-uri 'none'; form-action 'self' https://submit-form.com; frame-ancestors 'none'
 
 # Fingerprinted assets are immutable: the filename changes when the content does.
 /_astro/*

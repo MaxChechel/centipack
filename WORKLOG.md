@@ -4485,3 +4485,111 @@ Unchanged: 22, 23, 24, 25, 26, 28, 29, 31–34, 36, 37, 40, 41, 44, 48, 51, 52,
     `dist`. A check that diffs a dev-rendered page against its built counterpart
     would catch the whole class; it is not obviously worth the machinery for one
     flag, which is why this is a question rather than an entry.
+
+---
+
+## 2026-09-28 — Entry 50. The CSP still named Turnstile, and a person found it
+
+Reported from the browser console on a real submission attempt:
+
+> Connecting to 'https://submit-form.com/bqtIN0U6N' violates the following
+> Content Security Policy directive: "connect-src 'self'
+> https://challenges.cloudflare.com". The action has been blocked.
+
+Entry 48 moved the form to Formspark and deleted Turnstile. **It did not follow
+the change out to `public/_headers`,** so `connect-src` still permitted the
+domain of a service the site no longer uses and did not permit the endpoint the
+form now posts to. Every submission was refused by the browser before it left
+the page.
+
+### The form behaved correctly, which is the one good part
+
+The page said *"Could not reach the server. Please email info@centipack.com."*
+That is the catch branch in `src/scripts/contact.ts`, and it is exactly right —
+the request genuinely never reached anything, and the visitor was told so in
+words with a working alternative. **§8's guarantee held under a failure nobody
+had anticipated.** The enquiry was not swallowed; it was refused, visibly.
+
+### Why nothing in the harness objected
+
+A CSP is a RESPONSE HEADER. `astro dev` and `astro preview` do not apply
+`_headers`, so the policy is inert everywhere except a real deploy — and every
+rendered check in this harness runs against the preview server. The build was
+valid, the markup was right, and `internalLinksResolve()` inspects internal
+links only. **There was no artifact under test that carried the bug.**
+
+§9: "a rule that only convention enforces is a rule that will be broken."
+
+### `cspMatchesTheSite()`, and the fault injection that rewrote it
+
+The check asserts, against the production build, that the CSP and the site agree
+in both directions: every external origin the pages reference is permitted, and
+every origin permitted is referenced. Turnstile sitting in three directives
+after its code was deleted is the second failure, and is how an allowlist decays
+into a list of things somebody once used.
+
+**The first version passed its own fault injection, and that is the entry.**
+Removing `submit-form.com` from `connect-src` — the exact production bug —
+left it in `form-action`, and a check that reads the CSP as a flat set of
+origins saw the origin still present and reported green. It would have caught
+the original bug, because that origin was absent from the policy altogether; it
+would not have caught the bug it was written for if the shape had been slightly
+different. A check that passes the fault it exists to catch is an assertion
+about the harness.
+
+So the form endpoint is now checked PER DIRECTIVE, against both that govern it:
+
+| directive | why | failure if missing |
+| --- | --- | --- |
+| `connect-src` | the submit is intercepted and sent by fetch | request refused, page reports it |
+| `form-action` | the `<form>` has a real action; a browser that never ran the module POSTs natively | **POST blocked, nothing visible happens at all** |
+
+All three red paths demonstrated, each exit 1: origin missing from
+`connect-src`, origin missing from `form-action`, stale Turnstile allowance
+re-added.
+
+### A second bug, found by writing the check rather than by a visitor
+
+`form-action` was `'self'` — it had never included Formspark, and would not have
+until something forced the question. With JavaScript unavailable the form does a
+native POST to `submit-form.com`, and under `form-action 'self'` the browser
+blocks it: **no navigation, no error on the page, the enquiry simply gone.**
+That is the silent swallow §8 exists to prevent, and it was one script-load
+failure away from being live. Now permitted, so the no-JS path degrades to
+Formspark's own thank-you page.
+
+`frame-src` was removed rather than emptied — with no directive it falls back to
+`default-src 'self'`, which is tighter than the Turnstile allowance it replaced.
+
+### Three URLs in the built HTML are not fetches
+
+Enumerated in `NOT_A_FETCH` with reasons rather than silently skipped:
+`http://www.w3.org` (XML namespace on `<svg>`, never dereferenced),
+`https://schema.org` (JSON-LD `@context`, a vocabulary name), and the site's own
+origin — read out of the built `index.html`'s canonical tag rather than imported
+from `consts.ts`, because the artifact's own statement of where it lives is what
+ships.
+
+### Measurements
+
+| | before | after |
+| --- | --- | --- |
+| verify | 8 checks, 602 assertions | **8 checks, 606 assertions, 0 failures** |
+| origins permitted by the CSP | 1, used by nothing | **1, used** |
+| origins used but not permitted | **1** (`submit-form.com`) | 0 |
+| directives naming a dead service | **3** | 0 |
+| deliverable enquiries | **0** (blocked) | endpoint permitted; see OQ 62 |
+
+### Open questions
+
+Unchanged: 22, 23, 24, 25, 26, 28, 29, 31–34, 36, 37, 40, 41, 44, 48, 51–63.
+One added:
+
+64. **No check covers response headers as a deployed browser would see them.**
+    This check reads `_headers` as a file and reasons about it; it cannot tell
+    whether Cloudflare Pages actually serves what the file says, nor catch a
+    header set in a dashboard rather than in the repo. Open question 62's live
+    submission is currently the only thing that would.
+
+Open question 62 is now the urgent one: **the endpoint has still never accepted
+a submission.** It has been attempted once and refused by the CSP.

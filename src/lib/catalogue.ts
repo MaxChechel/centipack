@@ -79,7 +79,7 @@ export interface Picture {
    * descriptions of one subject is two things to keep in sync. Absent means the
    * desktop file serves both, which is the case for everything not yet reshot.
    */
-  mobile?: { src: string; width: number; height: number };
+  mobile?: { src: string; width: number; height: number; srcset?: string };
 }
 
 export interface ProductView {
@@ -205,6 +205,16 @@ type RawPicture = { src: ImageMetadata; alt: string; mobile?: ImageMetadata } | 
 /** One number per surface, so every caller asks for the same asset. */
 const MOBILE_WIDTH = 900;
 
+/**
+ * Candidate widths for the art-directed MOBILE file.
+ *
+ * A phone hero is full-bleed, so the ladder is the phone viewport times its
+ * density: 390 at 2x is 780, 390 at 3x is 1170, 430 at 3x is 1290. The single
+ * `MOBILE_WIDTH` of 900 was therefore already short of a 3x phone — which is
+ * most phones — on the one image that fills the screen.
+ */
+const MOBILE_WIDTHS = [440, 780, 900, 1290] as const;
+
 async function toPicture(
   picture: RawPicture,
   width: number,
@@ -247,6 +257,28 @@ async function toPicture(
   const mobile = picture.mobile
     ? await getImage({ src: picture.mobile, format: 'webp', width: MOBILE_WIDTH })
     : undefined;
+
+  /* The mobile file gets its own ladder, clamped to its own intrinsic width for
+     the same reason the desktop one is — see the note above `srcset`. */
+  let mobileSrcset: string | undefined;
+  if (picture.mobile) {
+    const intrinsic = picture.mobile.width;
+    /* Typed `number[]` explicitly: MOBILE_WIDTHS is `as const`, so `.filter`
+       returns an array of its literal union and refuses the intrinsic width
+       pushed below. The desktop path does not hit this because its `widths`
+       arrives as a `readonly number[]` parameter. */
+    const candidates: number[] = MOBILE_WIDTHS.filter((w) => w < intrinsic);
+    if (MOBILE_WIDTHS.some((w) => w >= intrinsic)) candidates.push(intrinsic);
+    if (candidates.length > 1) {
+      const variants = await Promise.all(
+        candidates.map(async (w) => {
+          const v = await getImage({ src: picture.mobile!, format: 'webp', width: w });
+          return `${v.src} ${w}w`;
+        }),
+      );
+      mobileSrcset = variants.join(', ');
+    }
+  }
   return {
     src: rendered.src,
     width: Number(rendered.attributes.width ?? width),
@@ -258,6 +290,7 @@ async function toPicture(
         src: mobile.src,
         width: Number(mobile.attributes.width ?? MOBILE_WIDTH),
         height: Number(mobile.attributes.height ?? MOBILE_WIDTH),
+        ...(mobileSrcset && { srcset: mobileSrcset }),
       },
     }),
   };

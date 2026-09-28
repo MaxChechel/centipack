@@ -122,9 +122,23 @@ const artDirected = Boolean(image?.mobile);
 {
   image && artDirected ? (
     <picture class="media-picture">
-      <source media="(min-width: 48rem)" srcset={image.src} width={image.width} height={image.height} />
+      {/* BOTH BRANCHES CARRY THEIR OWN srcset, which this used to drop.
+          The <source> took `image.src` — a single URL — so an art-directed
+          picture silently lost every responsive candidate the adapter had
+          generated for it, and the `<img>` fallback likewise. The two files are
+          different photographs at different sizes, so they need separate
+          ladders, not one shared between them. */}
+      <source
+        media="(min-width: 48rem)"
+        srcset={image.srcset ?? image.src}
+        sizes={image.srcset ? sizes : undefined}
+        width={image.width}
+        height={image.height}
+      />
       <img
         src={image.mobile!.src}
+        srcset={image.mobile!.srcset}
+        sizes={image.mobile!.srcset ? sizes : undefined}
         width={image.mobile!.width}
         height={image.mobile!.height}
         alt={image.alt}

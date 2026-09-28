@@ -27,6 +27,7 @@ rangeImage:
   src: ../../assets/categories/range-cold-chain.avif
   alt: >-
     A CentiPack gel pack standing beside a flat refrigerant pouch, next to an EPS foam cooler in its open corrugated outer.
+  mobile: ../../assets/categories/category-cold-chain-mobile.avif
 cardImage:
   src: ../../assets/categories/category-cold-chain.avif
   alt: >-

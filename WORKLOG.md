@@ -5632,3 +5632,80 @@ Unchanged: 22–26, 28, 29, 31–34, 36, 37, 40, 41, 44, 48, 51–71. One added:
     assertion was about links that existed, and none about a menu having any. A
     check that every disclosure panel offers at least one destination would have
     caught this the moment entry 47 shipped.
+
+---
+
+## 2026-09-29 — Entry 63. Art-directed category heroes, and the srcset the picture branch was dropping
+
+Three mobile photographs supplied for the category page hero — ~1175 × 1400, a
+ratio of 0.84, which is the 1:1.2 asked for. Wired as `rangeImage.mobile` in the
+three category files.
+
+**The mechanism already existed and had never been used.** `Media` has rendered
+`<picture>` since it was written — desktop behind a `min-width` query, the
+mobile file on the `<img>` — and the content schema has carried `mobile` on
+every image record. These are the first files to take it.
+
+`.page-hero-media` goes from `1 / 1.2 5` to **`1 / 1.2`**, and the number changed
+meaning: 1.25 was a judgement about how much of a landscape photograph to throw
+away, and 1.2 is the proportion of a real file. `object-fit: cover` now has
+almost nothing to trim.
+
+### The picture branch was silently dropping every responsive candidate
+
+Found while wiring it, not after: the `<source>` took `srcset={image.src}` — a
+single URL — and the `<img>` fallback had no `srcset` at all. So **turning on art
+direction would have thrown away the entire srcset added in entries 60 and 61**,
+and the regression would have been invisible: the markup is valid, the picture
+is right, and it only fails as a heavier or softer download.
+
+Both branches now carry their own ladder, because the two files are different
+photographs at different sizes and cannot share one.
+
+The mobile file also gained its own ladder. `MOBILE_WIDTH` was a single 900,
+and a full-bleed hero on a 390px phone at 3x needs 1170 — **the one image that
+fills a phone screen was already the one most under-served.**
+
+### Result
+
+| viewport | file | ratio | needs | served |
+| --- | --- | --- | --- | --- |
+| 390 @2x | mobile | 0.83 | 780 | **780w** |
+| 390 @3x | mobile | 0.83 | 1170 | **1175w** |
+| 430 @3x | mobile | 0.83 | 1290 | 1175w (source cap) |
+| 768 @2x | desktop | 2.06 | 1536 | **1920w** |
+| 1440 @2x | desktop | 2.06 | 2880 | **3840w** |
+
+The breakpoint swap is doing exactly what art direction is for: a portrait
+photograph on a phone and a landscape one above it, not one crop of one file.
+
+### `astro check` caught what my own tail hid
+
+The build passed and the page rendered, and `verify` failed on a type error:
+`MOBILE_WIDTHS` is `as const`, so `.filter()` returns an array of its literal
+union and refuses the intrinsic width pushed onto it. The desktop path does not
+hit it because its `widths` arrives as a `readonly number[]` parameter.
+
+**I had run `npx astro check | tail -3` and read "0 warnings, 0 hints" as
+clean** — the error line was the fourth from the end. The gate read the whole
+output and failed. A reminder that reading the tail of a report is not reading
+the report, and the reason `astro check` runs first in the harness.
+
+### Measurements
+
+| | before | after |
+| --- | --- | --- |
+| verify | 8 checks, 663 assertions | **8 checks, 664 assertions, 0 failures** |
+| category heroes using `<picture>` | 0 | **3** |
+| candidates on the desktop source | 1 (`image.src`) | **6** |
+| candidates on the mobile `<img>` | 0 | **4** |
+| mobile hero at 390 @3x | 900w | **1175w** |
+
+### Open questions
+
+Unchanged: 22–26, 28, 29, 31–34, 36, 37, 40, 41, 44, 48, 51–71, 73. One added:
+
+74. **The mobile hero sources are 1175px and a 430px phone at 3x wants 1290.**
+    Close, and capped. Also: the product page hero and the home hero still have
+    no art-directed mobile file — both crop a landscape photograph to 1:1.2 on a
+    phone, which is what these three just stopped doing.

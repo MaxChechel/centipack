@@ -2993,9 +2993,17 @@
      rule — only the desktop ratio differs, and that already arrives as the
      inline `--media-ratio` the caller passes, so this reads it back rather
      than restating 1344/541 and 1440/700 in CSS where nobody would check them
-     against the design. */
+     against the design.
+
+     1 / 1.2 ON A PHONE, down from 1 / 1.25, and it is now the ratio of a REAL
+     FILE rather than a crop. The category heroes have art-directed mobile
+     photographs (supplied 2026-09-29, ~1175 x 1400 = 0.84, which is 1:1.2), so
+     this box and the picture in it agree and `object-fit: cover` has almost
+     nothing left to trim. It was 1.25 while the wide desktop file was being
+     cropped to portrait and the number was a judgement about how much of a
+     landscape shot to throw away. */
   .page-hero-media {
-    aspect-ratio: 1 / 1.25;
+    aspect-ratio: 1 / 1.2;
   }
 
   @media (min-width: 48rem) {

@@ -21,6 +21,7 @@ rangeImage:
   src: ../../assets/categories/range-custom-boxes.avif
   alt: >-
     A blue mailer box holding two bottles, a blue drawer box of vials, and a white mailer packed with a branded box and a blue pouch.
+  mobile: ../../assets/categories/category-custom-boxes-mobile.avif
 cardImage:
   src: ../../assets/categories/category-custom-boxes.avif
   alt: >-

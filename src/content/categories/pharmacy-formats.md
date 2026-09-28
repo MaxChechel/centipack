@@ -21,6 +21,7 @@ rangeImage:
   src: ../../assets/categories/range-pharmacy-formats.avif
   alt: >-
     Navy CentiPack jars, a spray bottle and a pump dispenser grouped together, one jar open.
+  mobile: ../../assets/categories/category-pharmacy-mobile.avif
 cardImage:
   src: ../../assets/categories/category-pharmacy-formats.avif
   alt: >-

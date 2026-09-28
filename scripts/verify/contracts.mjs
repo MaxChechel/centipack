@@ -17,6 +17,24 @@ import { isMain } from './lib/main.mjs';
 
 const DIST = process.env.DIST ?? 'dist';
 
+/**
+ * The honeypot field's name, which is a VALUE SHARED WITH A SYSTEM THIS REPO
+ * CANNOT SEE.
+ *
+ * Formspark enforces a honeypot under `_honeypot` and `_gotcha` unconditionally,
+ * and under any custom name registered in its dashboard. CentiPack registers
+ * `company_contact` and uses that, because the published names are the ones a
+ * bot author can skip by name on every site that uses them — a trap named
+ * `_honeypot` announces itself. An innocuous field does not.
+ *
+ * Declared here rather than written into two regexes below so that the name has
+ * ONE place in this harness. It still has two places in the world: this repo and
+ * the Formspark dashboard. This check can prove the field ships, is enabled and
+ * is excluded from the live-control count. It cannot prove the endpoint enforces
+ * it — see WORKLOG open question 65, which is the whole of what is not covered.
+ */
+const HONEYPOT_FIELD = 'company_contact';
+
 const read = (file) => {
   const path = join(DIST, file);
   if (!existsSync(path)) throw new Error(`verify: ${path} is missing — run \`npm run build:styleguide\` first.`);
@@ -102,11 +120,8 @@ function formReportsFailure() {
       const submits = [...form.matchAll(/<(button|input)\b[^>]*type=["']submit["'][^>]*>/g)].map((m) => m[0]);
       const status = /<[a-z]+\b[^>]*data-contact-status[^>]*>/.exec(form)?.[0] ?? '';
       const live = /role=["']status["']/.test(status) || /aria-live=/.test(status);
-      /* `_honeypot`, renamed from `company_website` when the form moved to
-         Formspark (AUDIT D7): that is the name the endpoint actually enforces.
-         The assertion is unchanged — a honeypot exists and is not disabled —
-         and follows the field rather than relaxing. */
-      const honeypot = /<input\b[^>]*name=["']_honeypot["'][^>]*>/.exec(form)?.[0] ?? '';
+      const honeypot =
+        new RegExp(`<input\\b[^>]*name=["']${HONEYPOT_FIELD}["'][^>]*>`).exec(form)?.[0] ?? '';
 
       const problems = [];
       if (submits.length === 0) problems.push('no submit control — nothing can be sent');
@@ -130,7 +145,7 @@ function formReportsFailure() {
         for (const problem of problems) notes.push(`${file}: ${problem}`);
       } else {
         const controls = [...form.matchAll(/<(input|textarea|select|button)\b[^>]*>/g)]
-          .filter((m) => !/_honeypot/.test(m[0]))
+          .filter((m) => !new RegExp(HONEYPOT_FIELD).test(m[0]))
           .filter((m) => !/type=["']hidden["']/.test(m[0]));
         notes.push(
           `${file}: ${controls.length} live control(s), submit present, failures reported into a live region`,
@@ -599,6 +614,79 @@ function cspMatchesTheSite() {
   return { checks, failures, notes };
 }
 
+/**
+ * §2/§8 — NO HTML COMMENT REACHES A VISITOR.
+ *
+ * PAID FOR, AND THE BILL WAS THE HONEYPOT. `<!-- … -->` is content: Astro emits
+ * it verbatim, and only `{/* … *\/}` is stripped at build. A paragraph explaining
+ * how the contact form's honeypot works — naming the field, and saying in as many
+ * words that it is a trap — shipped in the HTML of the live contact page, where
+ * the one audience guaranteed to read the source is the audience it existed to
+ * fool. 2,682 B of comments on that page, and that one destroyed the mechanism
+ * it described.
+ *
+ * The rule is absolute rather than "no sensitive comments", because the author
+ * of a comment is the last person able to judge what is sensitive: the honeypot
+ * note was written to be helpful and had been reviewed. A flat rule needs no
+ * judgement and cannot be argued with at 5pm.
+ *
+ * WHAT IS NOT AFFECTED. Frontmatter and `{/* … *\/}` never reach the output, so
+ * this costs the codebase nothing — every comment in this repo is still there,
+ * in the source, where it is for. The conversion was 29 comments across 7 files.
+ *
+ * Conditional comments (`<!--[if IE]>`) are not exempted. Nothing in this system
+ * targets IE, and an exemption would be a door held open for the next thing that
+ * wants to ship a comment.
+ *
+ * ASTRO STRIPS SOME HTML COMMENTS AND NOT OTHERS, which is why this is a check
+ * against the BUILT OUTPUT and not a grep over `src`. Measured, because the
+ * first fault injection for this check PASSED and the reason was not obvious:
+ *
+ *   <BaseLayout>            a comment here — a direct child of a component's
+ *     <!-- x -->            slot — is STRIPPED and never reaches dist.
+ *
+ *   <div>                   a comment here — inside a plain HTML element —
+ *     <!-- x -->            SHIPS verbatim.
+ *
+ * The honeypot note was in the second position, inside a `<form>`, which is how
+ * it reached production. A source grep would report both and a reviewer would
+ * learn to ignore it; only dist knows which comments are real.
+ */
+function noCommentsInShippedHtml() {
+  const notes = [];
+  const build = productionBuild();
+  if (!build.ok) return { checks: 1, failures: 1, notes: ['production build failed', build.log] };
+
+  const files = walkRelative(build.out).filter((f) => f.endsWith('.html'));
+  let checks = 0;
+  let failures = 0;
+  let totalBytes = 0;
+
+  for (const file of files) {
+    checks++;
+    const html = readFileSync(join(build.out, file), 'utf8');
+    const comments = [...html.matchAll(/<!--([\s\S]*?)-->/g)];
+    if (comments.length === 0) continue;
+
+    failures++;
+    const bytes = comments.reduce((n, m) => n + m[0].length, 0);
+    totalBytes += bytes;
+    const first = comments[0][1].trim().replace(/\s+/g, ' ').slice(0, 90);
+    notes.push(
+      `${file}: ${comments.length} HTML comment(s), ${bytes} B shipped to every visitor. ` +
+        `First: "${first}…". Use {/* … *\/} — Astro strips it; <!-- --> is content.`,
+    );
+  }
+
+  if (failures === 0) {
+    notes.push(`${files.length} page(s), zero HTML comments — nothing internal is being published`);
+  } else {
+    notes.push(`${totalBytes} B of comments across ${failures} page(s)`);
+  }
+
+  return { checks, failures, notes };
+}
+
 const CONTRACTS = [
   ['form reports failure (§8)', formReportsFailure],
   ['`as` reserved for Section (§4.2)', asPropReservedForSection],
@@ -606,6 +694,7 @@ const CONTRACTS = [
   ['production omits styleguide (§2.4)', productionOmitsStyleguide],
   ['internal links resolve (§8/§9)', internalLinksResolve],
   ['CSP matches the site (§8)', cspMatchesTheSite],
+  ['no HTML comments shipped (§2/§8)', noCommentsInShippedHtml],
 ];
 
 export function contracts() {

@@ -4593,3 +4593,112 @@ One added:
 
 Open question 62 is now the urgent one: **the endpoint has still never accepted
 a submission.** It has been attempted once and refused by the CSP.
+
+---
+
+## 2026-09-28 — Entry 51. The honeypot explained itself to the bots
+
+Two changes asked for, and one of them uncovered a live defect that the other
+had just made worse.
+
+### The honeypot is `company_contact` now
+
+`company_contact` registered as a custom honeypot name in the Formspark
+dashboard, and the field renamed to match. **The name is the mechanism.**
+`_honeypot` and `_gotcha` are Formspark's always-on names and therefore published
+ones: a bot author who has read any form using them can skip them by name on
+every site that uses them, and the better the bot the more certainly it does. An
+innocuous-looking contact field has nothing to skip on sight.
+
+This is the third name for this field — `company_website` for the Pages
+Function, `_honeypot` for Formspark's default, `company_contact` now — and the
+last one is the first that is both enforced and not self-announcing.
+
+**The coupling is invisible from the repo.** This is a trap only while that
+dashboard setting exists. Delete the custom name in Formspark and the markup goes
+on looking exactly as correct as it does today while quietly filing spam as
+ordinary form data. Nothing here can see or assert it. Open question 65.
+
+### And then: the comment describing the trap was shipping in the page
+
+Writing that explanation next to the input, as `<!-- -->`, put it **in the HTML
+of the live contact page**. A paragraph naming the honeypot field and stating in
+as many words that it is a trap, served to every visitor — and the one audience
+certain to read page source is the audience the field exists to fool.
+
+Found by grepping `dist` for `_honeypot` after the rename, expecting zero hits
+and getting two. **Both were inside my own comment.** §2's thesis again: it was
+invisible in source, because in source it is a comment, and comments are the one
+thing a reader's eye is trained to treat as not-content.
+
+The pre-existing comment already said "Honeypot. Off-screen rather than
+display:none — some bots skip hidden fields". So this was live before this
+session; the rewrite made a small leak into a complete disclosure.
+
+The explanation now lives in the frontmatter, which is compiled away.
+
+### `<!-- -->` is content. 29 of them across the site
+
+| page | comments | bytes shipped |
+| --- | --- | --- |
+| contact | 7 | 2,682 |
+| products | 9 | 2,232 |
+| index | 7 | 1,361 |
+| three category pages | 7 each | 1,486 each |
+| about | 6 | 1,113 |
+
+All converted to `{/* … */}`, which Astro strips. **The source keeps every word**
+— this costs the codebase nothing and removes roughly 1–2.7 KB per page of
+internal design reasoning from what visitors receive.
+
+Converted by script rather than by hand, with entry 45's discipline: each
+comment matched end to end, the per-file count asserted after, and anything
+containing `*/` reported and left alone rather than guessed at. 29 converted, 0
+skipped, 0 aborted.
+
+### The check, and the fault injection that was wrong the first time
+
+`noCommentsInShippedHtml()` asserts the production build carries no HTML comment
+at all. Flat rule, deliberately: the honeypot note was written to be helpful and
+had been reviewed, so **the author of a comment is the last person able to judge
+whether it is safe to publish.** A rule with no judgement in it cannot be argued
+with.
+
+**The first fault injection passed, and the reason is worth keeping.** A comment
+was injected as a direct child of `<BaseLayout>` — and it never reached `dist`.
+Measured:
+
+```
+<BaseLayout>          direct child of a component slot  →  STRIPPED
+  <!-- x -->
+<div>                 inside a plain HTML element       →  SHIPS
+  <!-- x -->
+```
+
+Astro strips one and emits the other. The honeypot note was in the second
+position, inside a `<form>`, which is exactly how it reached production. Injected
+there instead: 1 failure, page named, bytes counted, exit 1.
+
+**A source grep could not have done this job.** It would flag both positions,
+half its hits would be false, and a reviewer would learn to ignore it. Only the
+built output knows which comments are real — which is the same sentence this
+repo has now paid for in CSS rules, in dead classes, in link targets, and here.
+
+### Measurements
+
+| | before | after |
+| --- | --- | --- |
+| verify | 8 checks, 606 assertions | **8 checks, 613 assertions, 0 failures** |
+| HTML comments in the production build | **29, ~11.8 KB** | **0** |
+| mentions of the honeypot in shipped HTML | **2** | **0** |
+| honeypot field name | `_honeypot` (published) | `company_contact` (custom) |
+
+### Open questions
+
+Unchanged: 22–26, 28, 29, 31–34, 36, 37, 40, 41, 44, 48, 51–64. One added:
+
+65. **The honeypot works only while a Formspark dashboard setting exists, and
+    nothing in this repo can see it.** Same shape as open question 64: the
+    contract is with a third-party console, and the harness ends at the network
+    boundary. A periodic live submission with the honeypot filled — expecting
+    rejection — is the only thing that would prove it.

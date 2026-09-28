@@ -73,8 +73,8 @@ const ogImageAbsolute = ogImage ? new URL(ogImage, Astro.site).href : undefined;
   <body>
     {!bare && <Nav />}
 
-    <!-- id="main" is the skip link's real target. A skip link that points at an
-         id no page has is the most common a11y bug there is. -->
+    {/* id="main" is the skip link's real target. A skip link that points at an
+         id no page has is the most common a11y bug there is. */}
     <main id="main">
       <slot />
     </main>

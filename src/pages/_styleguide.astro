@@ -228,9 +228,9 @@ const INDEX = [
 ---
 
 <BaseLayout title={`Styleguide · ${SITE.name}`} description="Every token and component in the system, annotated." noindex>
-  <!-- ===================================================================
+  {/* ===================================================================
        HEADER
-       =================================================================== -->
+       =================================================================== */}
   <Section as="header" spaceTop="nav" spaceBottom="lg">
     <div class="gap-2xl flex flex-col">
       <div class="gap-md flex flex-wrap items-end justify-between">
@@ -245,7 +245,7 @@ const INDEX = [
     </div>
   </Section>
 
-  <!-- ===================================================================
+  {/* ===================================================================
        INDEX — sticks under the nav once it reaches it.
 
        A full-bleed band rather than something inside the header Section: a
@@ -255,7 +255,7 @@ const INDEX = [
 
        `top-nav` is the nav's own height token, so the two bars meet exactly and
        keep meeting if the nav height ever changes.
-       =================================================================== -->
+       =================================================================== */}
   <div class="border-line bg-surface top-nav sticky z-30 border-b">
     <nav aria-label="Styleguide sections" class="container-main py-sm">
       <ul class="list-bare gap-x-md gap-y-2xs flex flex-wrap">
@@ -272,9 +272,9 @@ const INDEX = [
     </nav>
   </div>
 
-  <!-- ===================================================================
+  {/* ===================================================================
        01 COLOUR
-       =================================================================== -->
+       =================================================================== */}
   <Section id="color" space="md">
     <div class="gap-lg flex flex-col">
       <SectionHeader
@@ -316,7 +316,7 @@ const INDEX = [
         </ul>
       </div>
 
-      <!-- Side-by-side theme panels. IDENTICAL MARKUP; only [data-theme] differs. -->
+      {/* Side-by-side theme panels. IDENTICAL MARKUP; only [data-theme] differs. */}
       <div class="gap-md grid md:grid-cols-2">
         {
           themes.map((theme) => (
@@ -345,9 +345,9 @@ const INDEX = [
     </div>
   </Section>
 
-  <!-- ===================================================================
+  {/* ===================================================================
        02 CONTRAST MATRIX
-       =================================================================== -->
+       =================================================================== */}
   <Section id="contrast" space="md" class="bg-subtle">
     <div class="gap-lg flex flex-col">
       <SectionHeader
@@ -438,9 +438,9 @@ const INDEX = [
     </div>
   </Section>
 
-  <!-- ===================================================================
+  {/* ===================================================================
        03 TYPE
-       =================================================================== -->
+       =================================================================== */}
   <Section id="type" space="md">
     <div class="gap-lg flex flex-col">
       <SectionHeader
@@ -482,9 +482,9 @@ const INDEX = [
     </div>
   </Section>
 
-  <!-- ===================================================================
+  {/* ===================================================================
        04 SPACING
-       =================================================================== -->
+       =================================================================== */}
   <Section id="spacing" space="md" class="bg-subtle">
     <div class="gap-lg flex flex-col">
       <SectionHeader
@@ -526,9 +526,9 @@ const INDEX = [
     </div>
   </Section>
 
-  <!-- ===================================================================
+  {/* ===================================================================
        05 LAYOUT & GUTTERS  (full-bleed, so the rules line up with the real page)
-       =================================================================== -->
+       =================================================================== */}
   <Section id="layout" space="md" width="full">
     <div class="container-main">
       <SectionHeader
@@ -539,9 +539,9 @@ const INDEX = [
       />
     </div>
 
-    <!-- The demo is full-bleed on purpose: the dashed rules below sit at exactly
+    {/* The demo is full-bleed on purpose: the dashed rules below sit at exactly
          the same x as the container edge of every other section on this page.
-         Compare them against the heading above. -->
+         Compare them against the heading above. */}
     <div class="mt-lg border-line relative border-y">
       <div class="sg-gutter-overlay" aria-hidden="true">
         <div class="container-main h-full">
@@ -594,9 +594,9 @@ const INDEX = [
     </div>
   </Section>
 
-  <!-- ===================================================================
+  {/* ===================================================================
        06 SECTION
-       =================================================================== -->
+       =================================================================== */}
   <Section id="section" space="md" class="bg-subtle">
     <div class="gap-lg flex flex-col">
       <SectionHeader
@@ -656,7 +656,7 @@ const INDEX = [
     </div>
   </Section>
 
-  <!-- Live dark section. Identical component API, one attribute. -->
+  {/* Live dark section. Identical component API, one attribute. */}
   <Section theme="dark" space="md">
     <div class="gap-md flex flex-col">
       <SectionHeader eyebrow='theme="dark"' heading="One attribute; every consumer remaps" headingLevel="h3" size="h3" split>
@@ -681,9 +681,9 @@ const INDEX = [
     </div>
   </Section>
 
-  <!-- ===================================================================
+  {/* ===================================================================
        07 ATOMS
-       =================================================================== -->
+       =================================================================== */}
   <Section id="atoms" space="md">
     <div class="gap-lg flex flex-col">
       <SectionHeader
@@ -744,9 +744,9 @@ const INDEX = [
         </div>
       </div>
 
-      <!-- ============================================================
+      {/* ============================================================
            Form controls — every control, every state
-           ============================================================ -->
+           ============================================================ */}
       <div class="gap-md flex flex-col">
         <h3 class="text-h5 text-primary">Form controls</h3>
         <p class="text-sm text-secondary measure">
@@ -848,10 +848,10 @@ const INDEX = [
           }
         </div>
 
-        <!-- The tick and the dot are painted in --accent-contrast, which is white
+        {/* The tick and the dot are painted in --accent-contrast, which is white
              on light and near-black on dark. A control set that is only ever
              rendered on one ground is a control set whose inverse has never been
-             looked at — and this system has shipped exactly that bug before. -->
+             looked at — and this system has shipped exactly that bug before. */}
         <div data-theme="dark" class="bg-base border-line p-md gap-md flex flex-col rounded-md border">
           <p class="sg-meta">the same controls on theme="dark" — accent and accent-contrast both flip</p>
           <div class="gap-md grid md:grid-cols-2">
@@ -928,9 +928,9 @@ const INDEX = [
     </div>
   </Section>
 
-  <!-- ===================================================================
+  {/* ===================================================================
        08 BLOCKS & THE CARD PATTERN
-       =================================================================== -->
+       =================================================================== */}
   <Section id="blocks" space="md" class="bg-subtle">
     <div class="gap-lg flex flex-col">
       <SectionHeader
@@ -982,14 +982,14 @@ bg-surface + border-line + rounded-md + p-*  &#8592; the house default</code></p
         <Faq items={faqItems} headingLevel="h4" />
       </div>
 
-      <!-- SELF-SKIP (§4.2). Both of these are rendered. Neither appears on the
+      {/* SELF-SKIP (§4.2). Both of these are rendered. Neither appears on the
            page, because neither has anything to show: the SectionHeader has no
            heading, eyebrow or lede, and the LogoStrip has no marks. A CMS-shaped
            schema has optional fields, and an optional field left empty must not
            leave a bordered empty box or a heading with nothing under it. The
            guard lives in the block because the block is the only thing that knows
            what "empty" means for it — the alternative is every page guarding every
-           block at the call site, which is where it gets forgotten. -->
+           block at the call site, which is where it gets forgotten. */}
       <SectionHeader heading="" />
       <LogoStrip label="Trusted by" logos={[]} />
 
@@ -1027,9 +1027,9 @@ bg-surface + border-line + rounded-md + p-*  &#8592; the house default</code></p
     </div>
   </Section>
 
-  <!-- ===================================================================
+  {/* ===================================================================
        09 NAV DROPDOWN
-       =================================================================== -->
+       =================================================================== */}
   <Section id="nav" space="md">
     <div class="gap-lg flex flex-col">
       <SectionHeader
@@ -1059,9 +1059,9 @@ bg-surface + border-line + rounded-md + p-*  &#8592; the house default</code></p
     </div>
   </Section>
 
-  <!-- ===================================================================
+  {/* ===================================================================
        10 MOTION
-       =================================================================== -->
+       =================================================================== */}
   <Section id="motion" space="md" class="bg-subtle" reveal>
     <div class="gap-lg flex flex-col">
       <SectionHeader
@@ -1120,9 +1120,9 @@ bg-surface + border-line + rounded-md + p-*  &#8592; the house default</code></p
     </div>
   </Section>
 
-  <!-- ===================================================================
+  {/* ===================================================================
        11 PROSE
-       =================================================================== -->
+       =================================================================== */}
   <Section id="prose" space="md" width="narrow">
     <div class="gap-lg flex flex-col">
       <SectionHeader
@@ -1208,9 +1208,9 @@ bg-surface + border-line + rounded-md + p-*  &#8592; the house default</code></p
     </div>
   </Section>
 
-  <!-- ===================================================================
+  {/* ===================================================================
        12 DEMO COLLECTION
-       =================================================================== -->
+       =================================================================== */}
   <Section id="collection" space="md" spaceBottom="lg" class="bg-subtle">
     <div class="gap-lg flex flex-col">
       <SectionHeader

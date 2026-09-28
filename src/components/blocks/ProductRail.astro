@@ -51,11 +51,11 @@ const hasContent = products.length > 0;
 
 {hasContent && (
 <div class:list={['gap-md flex flex-col', className]}>
-  <!-- `data-bleed` declares to the sweep that this element deliberately extends
+  {/* `data-bleed` declares to the sweep that this element deliberately extends
        past its parent's box: the rail cancels the page gutter with a negative
        margin so the cards run to the screen edge and the next one peeks. Without
        it the spill assertion reports the rail's parent on four pages at every
-       mobile width. See scripts/verify/sweep.mjs. -->
+       mobile width. See scripts/verify/sweep.mjs. */}
   <ul
     class:list={['product-rail list-bare gap-sm grid', COLUMNS[columns]]}
     tabindex="0"

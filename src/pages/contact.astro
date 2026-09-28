@@ -55,6 +55,38 @@ import { SITE } from '../consts';
 const FORM_ENDPOINT = 'https://submit-form.com/bqtIN0U6N';
 
 /**
+ * The honeypot field's name.
+ *
+ * IN THE FRONTMATTER, AND THAT IS NOT TIDINESS. This explanation sat beside the
+ * input as an `<!-- -->` comment, and Astro emits those: **a paragraph naming
+ * the honeypot field and explaining how the trap works was shipping in the HTML
+ * of the live contact page**, readable by precisely the scrapers it exists to
+ * catch. Frontmatter is compiled away and cannot leak; `{/* … *\/}` in the
+ * template is stripped too. `<!-- … -->` is not.
+ *
+ * THE NAME IS THE MECHANISM. A honeypot works by looking like a field worth
+ * filling. `_honeypot` and `_gotcha` are Formspark's always-on names and
+ * therefore PUBLISHED ones — a bot author who has read any form using them can
+ * skip them by name everywhere, and the better the bot the more certainly it
+ * does. `company_contact` reads as an ordinary contact field, so there is
+ * nothing to skip on sight.
+ *
+ * Registered as a custom honeypot name in the Formspark dashboard, which is what
+ * makes it enforced rather than merely collected.
+ *
+ * THE COUPLING IS INVISIBLE FROM HERE: this is a trap only while that dashboard
+ * setting exists. Remove the custom name in Formspark and this markup goes on
+ * looking exactly as correct as it does now while quietly filing spam as
+ * ordinary form data. Nothing in this repo can see that setting or assert it —
+ * WORKLOG open question 65. Changing the name means changing it in both places,
+ * and in `HONEYPOT_FIELD` in scripts/verify/contracts.mjs.
+ *
+ * It was `_honeypot`, and before that `company_website`, for the Pages Function
+ * that no longer exists (AUDIT D7).
+ */
+const HONEYPOT = 'company_contact';
+
+/**
  * The select's ranges are NOT in the design — only the placeholder is drawn.
  * Open question 14. These are a stand-in shaped like the placeholder promises
  * ("up to 10,000+") and flagged rather than presented as final.
@@ -101,18 +133,11 @@ const SHIPMENT_RANGES = [
           data-contact-form
           class="gap-lg flex flex-col"
         >
-          <!-- Honeypot. Off-screen rather than display:none — some bots skip
-               hidden fields, and none of them are looking at the viewport.
-               aria-hidden + tabindex="-1" keep it away from real users entirely.
-
-               NAMED `_honeypot`, WHICH IS THE NAME THAT DOES SOMETHING. It was
-               `company_website`, checked by the Pages Function that no longer
-               exists; Formspark enforces this trap only under its own reserved
-               name and would have filed any other field as ordinary form data.
-               A honeypot nothing reads is a hidden input, not a trap. -->
+          {/* See HONEYPOT in the frontmatter. This comment form is stripped at
+              build; an HTML comment would not be. */}
           <div class="sr-only" aria-hidden="true">
-            <label for="_honeypot">Leave this field empty</label>
-            <input id="_honeypot" type="text" name="_honeypot" tabindex="-1" autocomplete="off" />
+            <label for={HONEYPOT}>Leave this field empty</label>
+            <input id={HONEYPOT} type="text" name={HONEYPOT} tabindex="-1" autocomplete="off" />
           </div>
 
           <FormField

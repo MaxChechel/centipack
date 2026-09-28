@@ -41,10 +41,10 @@ const { table, heading, headingLevel = 'h2', id } = Astro.props as Props;
     <p class="text-body text-secondary">{table.caption}</p>
   </div>
 
-  <!-- `data-bleed`: this deliberately runs past the right gutter so the next
+  {/* `data-bleed`: this deliberately runs past the right gutter so the next
        column is sliced by the screen edge — that IS the scroll affordance, and
        it is content outside its own box, which the sweep's spill assertion
-       would otherwise report. See scripts/verify/sweep.mjs. -->
+       would otherwise report. See scripts/verify/sweep.mjs. */}
   <div class="spec-table-scroll" tabindex="0" role="group" aria-label={heading} data-bleed>
     <table class="spec-table">
       <thead>

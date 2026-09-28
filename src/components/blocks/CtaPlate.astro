@@ -76,7 +76,16 @@ const hasContent = Boolean(heading) || Boolean(body) || Boolean(action);
     className,
   ]}
 >
-  <Media image={image} label={imageLabel} ratio="1344 / 600" class="absolute inset-0 -z-10 h-full" />
+  {/* `sizes` because this plate is drawn at the CONTAINER width, not the
+      viewport's. Without it the browser assumes 100vw and fetches a file sized
+      for a 1440px band to fill a 1344px one — sharp, and needlessly heavy. */}
+  <Media
+    image={image}
+    label={imageLabel}
+    ratio="1344 / 600"
+    sizes="(min-width: 90rem) 1344px, 100vw"
+    class="absolute inset-0 -z-10 h-full"
+  />
 
   <div class="px-lg py-4xl gap-xl relative z-10 flex flex-col items-center text-center">
     {

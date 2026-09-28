@@ -5563,3 +5563,72 @@ Unchanged: 22–26, 28, 29, 31–34, 36, 37, 40, 41, 44, 48, 51–71.
 72 closes: category cards, range shots and page heroes all carry a srcset now.
 The home collage still ships fixed widths, and is the one remaining case —
 small, decorative, five images, and deliberately left.
+
+---
+
+## 2026-09-28 — Entry 62. The mobile Products menu had no links at all
+
+Asked why the mobile dropdown hides the category links. Read out of `dist`, and
+the answer was worse than the question assumed:
+
+> **links in the mobile Products fold: 0**
+> 13 product names as `<span>`, 3 column titles as `<p>`, and nothing else.
+
+**The Products menu on a phone was entirely non-navigable.** Open it and there
+is no way out of it — not to a category page, not to anything.
+
+### Two causes, and the second is mine
+
+1. **The fold never had the category link.** The desktop panel has carried a
+   "Browse cold chain →" button per column since it was built; the mobile fold
+   rendered `column.title` as a plain `<p>` and listed the products beneath it.
+   So the category pages were reachable on a laptop and not on a phone, and had
+   been from the start.
+
+2. **Entry 47 turned that gap into a dead end.** Gating product detail pages made
+   every name in that list a `<span>` — correctly; they have no page. But those
+   spans were the only links the fold had. A change that was right on its own
+   terms removed the last exit from a menu that was already one link short, and
+   nothing caught it: the links that disappeared were *supposed* to disappear.
+
+### The title is the link, rather than a button under it
+
+Desktop keeps its shape — an eyebrow heading with a browse button at the foot of
+the column. The mobile fold takes the link on the title instead, because this
+fold is a stack of rows on a small screen and a non-link heading sitting above a
+button to the same place gives one destination two rows.
+
+Same `column.href` either way, so the two surfaces cannot drift.
+
+### 11px, which is not a tap target
+
+Measured after wiring it up: the links worked and were **11px tall**, because
+`text-eyebrow` is small caps. WCAG 2.5.8 asks 24. `py-xs -my-xs` takes the hit
+area to **27px** while cancelling itself in layout, so the visual spacing is
+exactly what it was.
+
+Worth saying plainly: the link being present and the link being usable are two
+different assertions, and only the first one was visible in the markup.
+
+### Measurements
+
+| | before | after |
+| --- | --- | --- |
+| verify | 8 checks, 641 assertions | **8 checks, 663 assertions, 0 failures** |
+| links in the mobile Products fold | **0** | **3** |
+| category pages reachable on a phone | **0 of 3** | **3 of 3** |
+| tap target height | 11px | **27px** |
+| internal link assertions | 141 | **162** |
+
+The link check gained 21 assertions on its own — three new hrefs across seven
+pages — so these are now covered by the same contract as everything else.
+
+### Open questions
+
+Unchanged: 22–26, 28, 29, 31–34, 36, 37, 40, 41, 44, 48, 51–71. One added:
+
+73. **Nothing asserts that a navigation surface contains a link.** The fold was
+    valid HTML, passed the sweep, passed axe, passed the link check — every
+    assertion was about links that existed, and none about a menu having any. A
+    check that every disclosure panel offers at least one destination would have
+    caught this the moment entry 47 shipped.

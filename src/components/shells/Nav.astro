@@ -240,8 +240,33 @@ const linkClass = 'link-underline text-body text-primary aria-[current=page]:tex
 
                       <div class="pt-lg gap-xl flex flex-col">
                         {item.columns.map((column) => (
-                          <div class="gap-md flex flex-col">
-                            <p class="text-eyebrow">{column.title}</p>
+                          <div class="gap-md flex flex-col items-start">
+                            {/* THE CATEGORY'S OWN LINK, which this fold never had.
+                                The desktop panel has carried a "Browse cold chain →"
+                                button per column since it was built; the mobile
+                                fold rendered the title as a plain <p> and listed
+                                the products under it, so the category pages were
+                                reachable on a laptop and not on a phone.
+
+                                That was a gap from the start and the launch gate
+                                turned it into a dead end: with product detail
+                                pages out of scope every name in this list became
+                                a <span>, and the Products menu on a phone went to
+                                ZERO links — thirteen product names, three
+                                headings, and no way out of the menu.
+
+                                The title is the link, rather than a separate
+                                button underneath it as on desktop: this fold is a
+                                stack of rows on a small screen, and a heading that
+                                is not a link sitting above a button that is
+                                gives the same destination two rows. */}
+                            <a
+                              href={column.href}
+                              class="text-eyebrow link-underline rounded-sm py-xs -my-xs aria-[current=page]:text-accent"
+                              aria-current={isCurrent(column.href) ? 'page' : undefined}
+                            >
+                              {column.title}
+                            </a>
                             {/* Same rule as the desktop panel above: a product
                                 name with no page renders as text. */}
                             <ul class="list-bare gap-md pl-xl flex flex-col">

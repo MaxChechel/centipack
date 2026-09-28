@@ -87,7 +87,11 @@ const hasContent = Boolean(heading) || Boolean(body) || Boolean(action);
     class="absolute inset-0 -z-10 h-full"
   />
 
-  <div class="px-lg py-4xl gap-xl relative z-10 flex flex-col items-center text-center">
+  {/* `gap-md` between the heading and the copy group, down from `gap-xl`, on
+      instruction. The inner group keeps `gap-lg` between its paragraph and the
+      button — that is the space before an action, which is a different
+      relationship from the one between a heading and the sentence under it. */}
+  <div class="px-lg py-4xl gap-md relative z-10 flex flex-col items-center text-center">
     {
       headingLevel === 'h3' ? (
         <h3 class="text-h2 text-primary max-w-[60rem]">{heading}</h3>

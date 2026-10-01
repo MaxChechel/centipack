@@ -18,6 +18,18 @@ that, not remembered.
 Nothing here edits the spec. ARCHITECTURE.md governs; this is the list of
 changes to propose to it and to the template's code.
 
+**Two phases are recorded here.** A1–A6, B1–B5, C1–C14 and D1–D7 came out of the
+build. A7–A8, B6–B11, C15–C22 and D8–D11 came out of taking the site to a soft
+launch — a phase the template has not been through before.
+
+That second phase found only **two** new template bugs and a great many holes in
+the harness, which is itself the finding: the launch defects were mostly things
+nothing was *checking*, not things the template got wrong. Several were visible
+only in the built output, and one only in a deployed response header. Four more
+were drafted as template bugs and withdrawn on checking — see the note at the end
+of section A, because getting that distinction wrong is how this file would start
+misleading people.
+
 ---
 
 ## A. Bugs in the template
@@ -113,6 +125,76 @@ generates. Caught here only by the dead-class check.
 `--blur-overlay`) or document in the reset that a blur needs a token first.
 
 ---
+
+### A7. The template generates no `srcset` anywhere — CONFIRMED
+
+Checked against the initial commit: `src/lib/media.ts`, `src/lib/items.ts` and
+`src/components/blocks/ItemCard.astro` contain **zero** references to `srcset`,
+`densities` or `widths`. Every image helper resolves one file at one width and
+the card emits a plain `<img src>`.
+
+One fixed width cannot serve a responsive layout. Measured here, the same card
+component on two pages:
+
+```
+index card    259px drawn      880px shipped   3.4x oversized
+category card 656px drawn      880px shipped   needs 1312 at 2x
+page hero     390px on a phone 2400px shipped  73 KB for a 10 KB job
+```
+
+Wasteful at the small end and soft at the large one, simultaneously, and it
+arrives as "the images look bad" with no obvious cause.
+
+**Fix:** a `widths` argument on the image helper, a `srcset` field on the
+normalised picture shape (still source-agnostic — a CMS builds the same string
+from its CDN), and a `sizes` prop that the LAYING-OUT component passes. `sizes`
+cannot live in the media component: the same card is 259px on one page and 656px
+on another, and only the parent knows which.
+
+Three gotchas are in C15, C16 and C18 — all three produced confident wrong
+readings while this was being built.
+
+### A8. Every page ships its internal design notes to visitors — CONFIRMED
+
+The template comments in `<!-- -->`. **Astro emits those**; only `{/* … */}` is
+stripped at build. Counted in the initial commit:
+
+```
+src/components/shells/BaseLayout.astro    1
+src/components/shells/Nav.astro           4
+src/pages/contact.astro                   2
+src/pages/_styleguide.astro              20
+                                   TOTAL 27
+```
+
+So every site built from this template publishes its own implementation notes.
+On this project that reached ~11.8 KB across seven pages, and included a
+paragraph beside the contact form naming the honeypot field and explaining that
+it was a trap — served to precisely the audience it existed to fool.
+
+**Fix:** convert every `<!-- -->` in a `.astro` template to `{/* … */}` and keep
+long-form reasoning in frontmatter, which is compiled away. Then B8 holds the
+line. Note C18 before writing the check — Astro's stripping is not uniform.
+
+---
+
+**Four entries were drafted here and withdrawn after checking them against the
+initial commit.** They are real defects on this project and NOT template bugs,
+and the difference matters to whoever reads this:
+
+- *The `<picture>` branch drops its `srcset`.* The template has no `<picture>`
+  support at all; CentiPack added it. Recorded as a caveat in D2 instead.
+- *The mobile nav fold has no link to its column's page.* The template's
+  `NavColumn` is `{ title, links }` with **no `href`** — its columns have no
+  landing page to link to. CentiPack added `href` and `browseLabel`, wired the
+  desktop panel and missed the mobile fold. Recorded as C22, because the shape
+  of that mistake is reusable.
+- *`legalLinks` ships two dead links.* The template has no `legalLinks`. Its
+  `footerLinks` are `/`, `/styleguide` and `/contact`, all of which exist.
+  CentiPack introduced `/terms` and `/privacy` against pages nobody wrote.
+- *Cards put white type on a photograph with nothing behind it.* **The template
+  ships `--scrim-strength` and uses it.** CentiPack removed it. That one is in
+  section E, under what the template got right.
 
 ## B. Holes in the harness
 
@@ -218,6 +300,76 @@ fade that drops text under AA fails the run), and the `:root` declaration row
 from B1.
 
 ---
+
+### B6. Nothing checks that an internal link resolves
+
+§9 demands "zero broken refs" for images and says nothing about `href`. A static
+build has no objection to an anchor pointing at a URL it never wrote.
+
+This project shipped `/terms` and `/privacy` in the footer of every page from
+the first build, and a later change would have left 39 dead links per page —
+thirteen names across three lists — all of which built clean, typed clean, swept
+clean and passed axe. **A 404 is not a rendering defect.**
+
+`internalLinksResolve()` in `scripts/verify/contracts.mjs`: every internal
+`href` in the PRODUCTION build must resolve to a page that build emits. It found
+14 real dead links on its first run.
+
+### B7. Nothing checks the CSP against what the site actually loads
+
+A CSP is a response header. `astro dev` and `astro preview` do not apply
+`_headers`, so **the policy is inert everywhere except a real deploy** and no
+rendered check can see it.
+
+Here, a form moved to a new endpoint and `_headers` was not followed through:
+`connect-src` named a service the site no longer used and not the one it now
+posted to. Every submission was refused by the browser. Nothing in the harness
+could object.
+
+`cspMatchesTheSite()` asserts both directions — every origin the build
+references is permitted, and every permitted origin is referenced, which is what
+catches an allowlist rotting into a list of things somebody once used.
+
+**Its first version passed its own fault injection** and had to be rewritten:
+reading the CSP as a flat set of origins, removing an origin from `connect-src`
+while it remained in `form-action` looked fine. The form endpoint is now checked
+PER DIRECTIVE.
+
+### B8. Nothing checks that comments stay out of the build
+
+See A8. `noCommentsInShippedHtml()` asserts the production build contains no
+`<!-- -->` at all. Flat rule on purpose — the author of a comment is the last
+person able to judge whether it is safe to publish.
+
+**Its first fault injection passed too**, for a reason worth knowing (C18).
+
+### B9. The JS census cannot declare an external script
+
+`js-census.mjs` hard-fails any `<script src="https://…">` as "UNDECLARED", with
+no way to declare one. The rule is right and the list it implies does not exist,
+so the first legitimate third-party tag forces someone to weaken the check.
+
+Fix: an `EXTERNAL` list beside `EXPECTED` — declared with a reason, undeclared
+still fails. **No byte budget on an external entry**: the payload is served by
+somebody else and can change without the repo changing, so a number there would
+assert a measurement the harness cannot take.
+
+### B10. Nothing checks contrast of text over a photograph
+
+The contrast matrix reads token pairs out of the built CSS. It cannot see a
+photograph, so a card whose heading sits on an image is unchecked — and a green
+matrix on such a page means the tokens are sound, not that the page is legible.
+
+Method that works, if someone wants to wire it up: render the page, take the
+bounding box of each text node over an image, sample the **darkest decile** of
+pixels behind it (so white glyphs do not flatter the reading), and compare to
+the text colour. That is how every number in section E's scrim note was taken.
+
+### B11. Nothing asserts a navigation surface contains a link
+
+C22's mobile menu was valid HTML, passed the sweep, passed axe and passed the
+link check — because every assertion was about links that exist, and none about
+a menu having any.
 
 ## C. Traps
 
@@ -385,6 +537,118 @@ on the launch punch list as a human look at every asset.
 
 ---
 
+### C15. `getImage().attributes.width` is the width you ASKED for
+
+Astro will not upscale: request 1320 from a 1037px source and you get 1037. But
+`attributes.width` reports **1320**.
+
+Build a `srcset` from it and you ship `… 1320w` pointing at a 1037px file. That
+is worse than no `srcset`: a browser picking by descriptor takes that candidate
+believing it is the largest and renders it SOFTER than the one it would
+otherwise have chosen.
+
+Clamp candidates to `picture.src.width`, the source's real intrinsic width. The
+emitted HTML looks perfect either way — this was caught by running `sips` on the
+emitted files.
+
+### C16. Chrome divides `naturalWidth` by the emulated device pixel ratio
+
+Under `Emulation.setDeviceMetricsOverride` with `deviceScaleFactor: 2`, an 880px
+image reports `naturalWidth` **440**. A srcset audit written on `naturalWidth`
+therefore reports that the browser is picking the smallest candidate everywhere,
+when it is picking correctly.
+
+Use `currentSrc`, mapped back through the element's own `srcset`. It names a
+file and cannot be rescaled.
+
+### C17. A leftover `astro preview` daemon makes every new port serve nothing
+
+`astro preview` daemonises, and a second instance does not fail — it logs
+`Preview server already running … SKIP_FORMAT` and exits. **Every subsequent
+port you ask for then serves nothing**, while `curl -sf -o /dev/null` still
+returns success, because an empty 200 is a success.
+
+Three measurement passes here reported a clean result over nothing — an empty
+`{}` of geometry and a contrast table with no rows reporting "tightest margin
++99.00". This is the port-4321 incident in miniature, in a throwaway script.
+
+`lib/preview.mjs` and `lib/served.mjs` exist for this. **A script written
+outside them does not inherit their protection**, so assert that the server is
+serving THIS build — count a known string in the response against the same count
+in `dist` — before trusting a single number.
+
+### C18. Astro strips some HTML comments and not others
+
+```astro
+<BaseLayout>        a comment here — a direct child of a component slot —
+  <!-- x -->        is STRIPPED and never reaches dist.
+
+<div>               a comment here — inside a plain HTML element —
+  <!-- x -->        SHIPS verbatim.
+</div>
+```
+
+This is why B8's first fault injection passed: the comment was injected in the
+first position. It is also why A8 must be checked against `dist` rather than
+grepped in source — a source grep flags both and half its hits are false.
+
+### C19. An `as const` array plus `.filter()` will not take a `number`
+
+```ts
+const WIDTHS = [440, 780, 900] as const;
+const candidates = WIDTHS.filter(w => w < max);   // (440 | 780 | 900)[]
+candidates.push(intrinsic);                       // ts(2345)
+```
+
+Annotate `const candidates: number[]`. A `readonly number[]` parameter does not
+hit this, which is why the same code works in one function and not the next.
+
+### C20. Turnstile's "flexible" widget has a hard 300px floor
+
+`data-size="flexible"` governs the width ABOVE 300px and the iframe inside keeps
+its own 300. A form column narrower than that — which includes a 320px phone AND
+a two-column desktop layout at 768 — gets a horizontal scrollbar on the page.
+
+`zoom`, not `transform: scale()`: `scale` paints smaller and leaves the original
+box in layout, so it opens a gap under the widget. And a CONTAINER query, not a
+media query — at 768 the viewport is wide and the column is 245px, so the
+trigger is available width, not screen width.
+
+### C21. Reading the tail of `astro check` hides errors
+
+`npx astro check | tail -3` prints `0 warnings`, `0 hints` and the `Result`
+line. **The error count and the errors themselves are above it.** A run with one
+error looks identical to a clean one.
+
+Grep the output for `error`, or read the `Result` block whole. This is why the
+harness runs `astro check` first and parses all three counts.
+
+### C22. Adding a landing page to a nav column wires two surfaces, and you will do one
+
+The template's `NavColumn` is `{ title, links }` — **no `href`**. Its columns are
+groupings, not pages, so nothing links a column heading anywhere.
+
+The moment a project gives its sections real landing pages it adds `href` to that
+interface, and there are **two** places that render a column: the desktop
+mega-panel and the mobile fold. They are structurally different on purpose (a
+disclosure vs a nested `<details>`), so the compiler cannot pair them.
+
+Here the desktop panel got a "Browse …" button and the mobile fold did not, which
+meant category pages were reachable on a laptop and not on a phone — and nobody
+noticed, because the fold still listed the children under each heading.
+
+It became total later: gating the child pages turned every child link into a
+`<span>`, and the mobile menu went to **zero links**. A menu with no way out of
+it. The gating was right; the fold had been one link short all along.
+
+**Two lessons.** Any field added to `NavColumn` has two render sites. And a tap
+target measured **11px** tall — `text-eyebrow` is small caps — needs
+`py-xs -my-xs` to reach WCAG 2.5.8's 24px without moving anything, because *the
+link existing* and *the link being usable* are different assertions and only the
+first is visible in the markup. See B11.
+
+---
+
 ## D. Worth promoting into the template
 
 ### D1. The catalogue adapter, and the proof that it works
@@ -470,6 +734,63 @@ properties; the shape and the colours are CSS. Ships with C8's
 
 ---
 
+### D8. A launch gate that the compiler enforces
+
+`LAUNCH.productPages` in `src/consts.ts` with one derived helper, for shipping a
+site before a whole route family is ready.
+
+The mechanism is not the boolean — it is that **the view model's `href` becomes
+optional**. A product with no page has no URL, and saying so in the type turns
+every consumer into a compile error until it handles the absence. Four consumers
+here, all found by `astro check`, none by grep. The alternative is a string
+pointing at a route the build does not emit, which is a 404 nothing catches.
+
+Each consumer renders a `<span>`, never an href-less `<a>` — that is still
+announced as a link and still takes a tab stop.
+
+Pair it with: `getStaticPaths` returning `[]` when the gate is shut, and NO dev
+override. An override was tried and removed — it made `npm run dev` serve 52
+links the build did not, so the preview disagreed with the artifact on exactly
+the question under review.
+
+### D9. Three checks, in priority order
+
+`internalLinksResolve`, `cspMatchesTheSite`, `noCommentsInShippedHtml` — see B6,
+B7, B8. All three found real defects on their first run. The first is the one to
+take if only one is taken.
+
+### D10. `build-icons.mjs`
+
+Generates `favicon.svg`, `favicon.ico`, `apple-touch-icon.png` and the share
+image from two brand sources. Run by hand, committing its output, following the
+`subset-fonts.py` precedent — these change when the brand changes, which is
+never, and a build step re-deriving identical bytes on every deploy earns
+nothing.
+
+Three things in it are not obvious:
+- **One SVG answers both themes.** A `media` attribute on `<link rel="icon">` is
+  not reliably honoured; the `prefers-color-scheme` rule goes INSIDE the SVG.
+- **The raster icons must be flattened.** iOS renders alpha as black, so a
+  knocked-out mark ships as a black shape on a dark square.
+- **`sizes="32x32"` on the `.ico` link is load-bearing** — without it a browser
+  may take the ICO as the better candidate and never look at the SVG.
+- `sharp` cannot write ICO. The container is a 6-byte header, a 16-byte entry
+  and a PNG verbatim; writing those 22 bytes beats a dependency.
+
+### D11. Structured data as one `@graph`
+
+`Organization` / `WebSite` / page-type nodes in `BaseLayout`, linked by `@id`,
+with `pageType` a closed union rather than a string — a typo in structured data
+fails silently because structured data has no runtime.
+
+`BreadcrumbList` stays emitted by `Breadcrumb` from the same array that draws the
+visible trail. That coupling is what makes it trustworthy and moving it into the
+graph would break it.
+
+The discipline worth copying: **every value is something the page already says.**
+No address, telephone or `sameAs` that does not appear in the markup, and no
+`SearchAction` on a site without search — it names an endpoint that 404s.
+
 ## E. What the template got right — leave it alone
 
 - **Semantic colours, type scale and layout tokens outside `@theme`.** Illegal
@@ -487,4 +808,30 @@ properties; the shape and the colours are CSS. Ships with C8's
   source and obvious in `dist/`.
 - **Fault-inject every new check.** A check whose red path has never run is an
   assertion about the harness, not about the code. Every check in section B has
-  its red path recorded above.
+  its red path recorded above. Two of them PASSED their first injection and had
+  to be rewritten (B7, B8) — which is the rule earning its place, not an argument
+  against it.
+- **`--scrim-strength`, and the band behind type on a photograph.** This project
+  removed it, on the reasoning that the client's photographs arrived
+  pre-darkened and the scrim was therefore redundant. **Do not repeat that.**
+
+  `CategoryCard` and `CtaPlate` set `data-theme="dark"` and lay white type
+  directly over an image, so with no scrim the contrast is whatever the
+  photograph happens to be in that corner. Measured across five rounds of
+  re-exported photography, heading contrast against a 3.0 requirement:
+
+  ```
+  round 1   3.17  3.25  3.17     all three pass
+  round 3   2.13  2.60  1.78     all three fail
+  round 5   2.97  3.64  2.80     one passes
+  ```
+
+  Photographs get chosen for how they look; the type needs a specific luminance
+  in a specific corner. Those goals fight, and the photograph wins, because it is
+  the thing anyone is actually looking at. The template's scrim is the insurance
+  that makes the two independent — a project with genuinely pre-darkened art can
+  turn it down, and a project without one is a single photo swap from a WCAG
+  failure that nothing in the harness can see (B10).
+
+  Five rounds of client re-exports, and still not resolved at the time of
+  writing. The scrim was one line.

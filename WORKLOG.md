@@ -6066,3 +6066,93 @@ canonical no longer matters. Three added:
     the built page this round.
 87. **"Jars" is capitalised mid-sentence** in the pharmacy formats card body,
     as drawn. Transcribed rather than corrected, per the rule this round.
+
+## 2026-10-16 — Entry 67. Full-bleed heroes, and three photographs that broke the scrim twice
+
+Two instructions and two image drops, in one pass.
+
+### Hero photographs go back to full-bleed
+
+On instruction. v1 draws the home and product heroes as plates inside the page
+gutter — 1344 × 560 and 1344 × 541 — and the ruling is that hero photography
+runs the full viewport width, as it did before v1 and as the category pages do
+in v1 regardless. The home hero had shipped as the drawn plate for exactly one
+round.
+
+Recorded as **AUDIT D8** rather than absorbed: it is a real difference from the
+source of truth this round is measured against, and the kind that reads as an
+oversight later. Costs nothing measurable — `sizes="100vw"` picks a wider
+candidate than `1344px` did, which is correct for a wider box, and there is no
+type on any of the three.
+
+The product page hero moved out of the contained Section into its own
+`width="full"` one, which is the structure the category pages already had.
+
+### The scrim failed twice, against two different photographs
+
+All three category card shots were replaced. Every one is a bright studio frame
+on a cream backdrop, and two have a white corrugated box low in the frame. The
+scrim that v1 draws — two bands at `rgb(0 0 0 / 0.5)` over 34.8% — does not
+carry white type on any of them.
+
+**First failure, cold chain.** Body text at **2.96** against a 4.5 requirement.
+Fixed by taking the top band to 0.65 and the bottom to 0.8.
+
+**Second failure, custom boxes**, which arrived after that fix was applied and
+measured: body at **3.88**, still short.
+
+| bottom band | cold chain | custom boxes | pharmacy |
+| --- | --- | --- | --- |
+| 0.5 over 34.8% *(as drawn)* | **2.96** | — | — |
+| 0.8 over 34.8% | 4.73 | **3.88** | 9.31 |
+| 0.9 over 34.8% | 5.58 | 4.53 | 10.32 |
+| **0.8 over 50%** | **6.65** | **5.65** | **11.63** |
+
+**Height, not more alpha.** Raising the bottom alpha alone reached 4.53 at 0.9 —
+a 0.7% margin over the requirement — and needed 0.95 before there was real
+headroom, at which point the foot of the photograph is nearly black and there is
+no point having a photograph. The same 0.8 spread over 50% of the card instead
+of 34.8% triples the margin and leaves the bottom edge uncrushed. The two bands
+are now asymmetric, which is also honest about what they carry: one short
+heading at the top, a paragraph and a link at the bottom.
+
+Recorded as **AUDIT D9**.
+
+### The method is the finding
+
+Neither failure is visible to `npm run verify`. The contrast matrix reads token
+pairs out of the built CSS and a photograph is not a token, so both of these
+shipped green through the gate and were caught by a separate measurement script
+run against the built page — screenshot with the glyphs hidden, sample the
+90th-percentile luminance under each text box.
+
+**Running that script is not optional when a photograph is swapped.** Four
+images landed today and two of them broke a contrast requirement; neither was
+obvious by eye. The sweep that found the fix overrides the alpha in the page
+rather than rebuilding, so testing four values costs seconds rather than four
+builds — `scrim-sweep.mjs`, in the session scratchpad.
+
+### Measurements
+
+| | before | after |
+| --- | --- | --- |
+| verify | 8 checks, 1082 assertions | **8 checks, 1082 assertions, 0 failures** |
+| card contrast, worst body | **2.96 (fail)** | **5.65** |
+| card contrast, worst heading | 3.08 | **3.69** |
+| category card sources | 2200 × 2660 | 1760 × 2128 and 1320 × 1596 |
+
+The new sources are smaller than the ones they replace. That is fine and worth
+stating: the largest a category card is drawn is 440px on the home page, so 3x
+wants 1320 and every new file meets it exactly. The 656px two-up case that
+drove the old ladder is gone — cross-links are 128px thumbs now (entry 66).
+
+### Open questions
+
+Unchanged: 22–26, 28, 29, 31, 33, 34, 36, 37, 40, 41, 44, 48, 51–71, 73, 74,
+76–87. One added:
+
+88. **All four new photographs are bright studio frames on cream**, and two of
+    them needed a scrim well past what the design draws to carry white type.
+    If more card or plate photography arrives in this style, expect the same —
+    and the answer may be a darker shot rather than a darker scrim. See AUDIT D9
+    for what that would take.

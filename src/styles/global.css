@@ -2328,6 +2328,33 @@
      The v1 design draws two (Figma 1005:13692 and 1295:23619): a band at the
      top and a band at the bottom, each 185px on a 532px card — 34.8% — and each
      a `linear-gradient` from transparent to `rgb(0 0 0 / 0.5)`, blurred 2px.
+
+     THEY SHIP DEEPER AND THE BOTTOM BAND SHIPS TALLER, AND THE PHOTOGRAPHS ARE
+     WHY. All three card shots were replaced on 2026-10-16 with bright studio
+     frames — cream backdrops, a white corrugated box low in two of them — and
+     white type stopped carrying on the design's values:
+
+       at 0.5 / 0.5, 34.8%      cold chain body 2.96, custom boxes body 3.88
+       at 0.65 / 0.8, 34.8%     cold chain 4.73, custom boxes 3.88 — still short
+       at 0.65 / 0.8, bottom 50%  cold chain 6.65, custom boxes 5.65, pharmacy 11.63
+
+     HEIGHT, NOT MORE ALPHA, is what fixed the second one, and the difference
+     matters. Pushing the bottom alpha on its own reached 4.53 at 0.9 — a 0.7%
+     margin over the requirement — and 0.95 before there was any real margin, by
+     which point the foot of the photograph is nearly black and there is no
+     point having a photograph. Taking the band from 34.8% to 50% at the SAME
+     0.8 spreads the same darkness over more of the card, so the gradient under
+     the text is gentler and the bottom edge is not crushed.
+
+     Measured by sweeping the value in the page and sampling the
+     90th-percentile luminance under each text box with the glyphs hidden, so
+     the number is about the ground and not about the text on it.
+
+     A scrim is not a decoration whose value is a style choice; it is the thing
+     that makes the type legible, and what it has to be depends on the picture
+     under it. This is the third time that has been relearned on this component
+     (WORKLOG 40, 41, and the v1 restoration). Recorded as AUDIT D9 because it
+     departs from numbers the design states.
      Same construction as the closing plate's, and for the same reason: the top
      band is under the title, the bottom band is under the paragraph and the
      link, and the middle of the picture is left alone.
@@ -2353,12 +2380,15 @@
      into it. */
   .category-card-scrim-top {
     top: -0.375rem;
-    background-image: linear-gradient(to top, rgb(0 0 0 / 0), rgb(0 0 0 / 0.5));
+    background-image: linear-gradient(to top, rgb(0 0 0 / 0), rgb(0 0 0 / 0.65));
   }
 
+  /* Half the card, against the top band's 34.8%. Asymmetric on purpose: the
+     bottom carries a paragraph AND a link, the top carries one short heading. */
   .category-card-scrim-bottom {
     bottom: 0;
-    background-image: linear-gradient(to bottom, rgb(0 0 0 / 0), rgb(0 0 0 / 0.5));
+    height: 50%;
+    background-image: linear-gradient(to bottom, rgb(0 0 0 / 0), rgb(0 0 0 / 0.8));
   }
 
   /* THE WHOLE CARD IS THE TARGET, and it is still ONE target with ONE

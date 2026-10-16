@@ -117,48 +117,51 @@ assertEverySectionIsHandled(product.sections);
   description={product.lede ?? `${product.title} — ${product.summary}. ${category.summary}`}
 >
   <Section spaceTop="nav" spaceBottom="lg">
-    <div class="gap-2xl flex flex-col">
-      <div class="gap-xl md:gap-lg md:grid md:grid-cols-12 md:items-end flex flex-col">
-        <div class="gap-lg md:col-span-7 flex flex-col">
-          {/* Home is the first crumb on every trail on this site. The v1
-              product pages start theirs at "Products", and the category pages
-              one level up start theirs at "Home" — two trails to the same
-              branch disagreeing. Kept at Home, so the BreadcrumbList in the
-              structured-data graph has one root. */}
-          <Breadcrumb
-            trail={[
-              { label: 'Home', href: '/' },
-              { label: 'Products', href: '/products' },
-              { label: category.title, href: category.href },
-              { label: product.title },
-            ]}
-          />
-          <h1 class="text-h1 text-primary">{product.pageTitle}</h1>
-          {product.descriptor && <p class="text-eyebrow">{product.descriptor}</p>}
-        </div>
-
-        <div class="gap-xl md:col-span-4 md:col-start-9 flex flex-col items-start">
-          {product.lede && <p class="text-body text-secondary">{product.lede}</p>}
-          {
-            product.contactLinkLabel && (
-              <Button href={SITE.contactHref} variant="ghost" size="link" icon="arrow">
-                {product.contactLinkLabel}
-              </Button>
-            )
-          }
-        </div>
+    <div class="gap-xl md:gap-lg md:grid md:grid-cols-12 md:items-end flex flex-col">
+      <div class="gap-lg md:col-span-7 flex flex-col">
+        {/* Home is the first crumb on every trail on this site. The v1
+            product pages start theirs at "Products", and the category pages
+            one level up start theirs at "Home" — two trails to the same
+            branch disagreeing. Kept at Home, so the BreadcrumbList in the
+            structured-data graph has one root. */}
+        <Breadcrumb
+          trail={[
+            { label: 'Home', href: '/' },
+            { label: 'Products', href: '/products' },
+            { label: category.title, href: category.href },
+            { label: product.title },
+          ]}
+        />
+        <h1 class="text-h1 text-primary">{product.pageTitle}</h1>
+        {product.descriptor && <p class="text-eyebrow">{product.descriptor}</p>}
       </div>
 
-      <Media
-        image={product.heroImage}
-        label={`${product.title} — hero`}
-        ratio="1344 / 541"
-        sizes="(min-width: 90rem) 1344px, 100vw"
-        loading="eager"
-        fetchpriority="high"
-        class="page-hero-media rounded-md"
-      />
+      <div class="gap-xl md:col-span-4 md:col-start-9 flex flex-col items-start">
+        {product.lede && <p class="text-body text-secondary">{product.lede}</p>}
+        {
+          product.contactLinkLabel && (
+            <Button href={SITE.contactHref} variant="ghost" size="link" icon="arrow">
+              {product.contactLinkLabel}
+            </Button>
+          )
+        }
+      </div>
     </div>
+  </Section>
+
+  {/* The hero picture, full-bleed — the same treatment the category pages give
+      their range shot, and the same deviation from the drawn 1344px plate. See
+      the note on the home page's hero. */}
+  <Section width="full" space="none">
+    <Media
+      image={product.heroImage}
+      label={`${product.title} — hero`}
+      ratio="1344 / 541"
+      sizes="100vw"
+      loading="eager"
+      fetchpriority="high"
+      class="page-hero-media"
+    />
   </Section>
 
   {

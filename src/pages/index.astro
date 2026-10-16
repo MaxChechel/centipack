@@ -132,31 +132,31 @@ const heroPicture = await toPageImage({
   </Section>
 
   {/*
-    2 — The hero picture.
+    2 — The hero picture, full-bleed.
 
-    CONTAINED, NOT FULL-BLEED, and with nothing on top of it. v1 draws a
-    1344 x 560 plate inside the page's own gutter with the card radius — the
-    same object as every other photographic plate on the site — where this used
-    to run edge to edge under a band of four statistics.
+    EDGE TO EDGE, ON INSTRUCTION. v1 draws this as a 1344 x 560 plate inside the
+    page's gutter and it shipped that way for one round; the ruling is that the
+    site's hero photographs run the full viewport width, as they did before and
+    as the category pages still do. Recorded as a deviation from the design
+    rather than absorbed, because it is one.
 
-    No `media-scrim` either: a scrim exists to make type legible over a
-    photograph, and there is no longer any type over this one.
+    `width="full"` keeps the Section wrapper — theme and vertical rhythm behave
+    identically — and drops only the max-width and the gutter, which is what
+    full-bleed means here. No radius, for the same reason: there is no card edge
+    to round when the picture meets the screen.
+
+    NO `media-scrim`. A scrim exists to make type legible over a photograph, and
+    the four statistics that used to sit on this one are gone.
   */}
-  {/* `spaceBottom="md"` — the design leaves 80px of page ground between the
-      picture and the cream band below it, and without it the cream starts on
-      the image's own bottom edge. 96px at 1440 is the nearest step on the
-      section scale; a token for the 16px difference would be scale inflation
-      (§4.5). No top padding: the picture sits directly under the hero, as
-      drawn. */}
-  <Section width="main" space="none" spaceBottom="md">
+  <Section width="full" space="none">
     <Media
       image={heroPicture}
       label="Home hero — the CentiPack range in one line-up"
-      ratio="1344 / 560"
+      ratio="5 / 3"
       loading="eager"
       fetchpriority="high"
-      sizes="(min-width: 90rem) 1344px, 100vw"
-      class="hero-media rounded-md"
+      sizes="100vw"
+      class="hero-media"
     />
   </Section>
 

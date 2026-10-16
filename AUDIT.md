@@ -290,3 +290,91 @@ a 1px `--line-strong` border on the button (cheapest, keeps the swatch), or
 darkening the tan to roughly L*62 — about #a98d6b — which reaches 3:1 against
 the ground while staying recognisably the same colour. Both change what the
 design draws, so neither is this file's call.
+
+## D8 — Hero photographs run full-bleed, where v1 draws them as contained plates
+
+**Deviation, on instruction, 2026-10-16.**
+
+The v1 design draws every page's hero photograph as a plate inside the page
+gutter with the card radius:
+
+| page | drawn | |
+| --- | --- | --- |
+| Home | 1344 × 560 at x=48 | Figma 1005:13611 |
+| Product pages | 1344 × 541 at x=48 | Figma 1179:3206 and siblings |
+| Category pages | 1440 × 700, x=0 | Figma 1005:14041 — already full-bleed |
+
+**They ship full-bleed.** The home hero was built to the drawn plate for one
+round and the ruling came back the other way: the site's hero photographs run
+the full viewport width, as they did before v1 and as the category pages do in
+v1 regardless.
+
+**Why it is recorded rather than absorbed.** It is a real difference from the
+source of truth this round is being measured against, and it is the kind that
+reads as an oversight later — someone opens Figma, sees a 48px gutter on the
+home hero, and files it as a bug. It is not: it is a decision, and this is where
+decisions that contradict the design live.
+
+**What it costs.** Nothing measurable. The pictures are 4096px wide sources and
+`sizes="100vw"` picks a wider candidate than `1344px` did, which is correct for
+the wider box rather than wasteful. Contrast is unaffected — there is no type on
+any of these three, which is also why the home hero's scrim came off with its
+stat band.
+
+**What would reverse it**: `width="main"` on the three Sections, the drawn ratio
+on each Media, and `rounded-md` back on the image. Two lines per page, and the
+design is already written down above.
+
+## D9 — The category card's scrims are deeper and taller than the design draws them
+
+**Deviation, forced by photography, 2026-10-16.**
+
+v1 draws two gradient bands on a category card, each 185px on a 532px card —
+34.8% — and each from transparent to `rgb(0 0 0 / 0.5)` (Figma 1005:13692 and
+1295:23619). **They ship at 0.65 over 34.8% (top) and 0.8 over 50% (bottom).**
+
+All three card photographs were replaced on 2026-10-16 with bright studio
+frames: cream backdrops, and a white corrugated box low in the frame on two of
+them. White type stopped carrying. Measured on the built home page at 1440,
+sampling the 90th-percentile luminance under each text box with the glyphs
+hidden, so the number describes the ground rather than the text on it:
+
+| bottom band | cold chain body | custom boxes body | pharmacy body |
+| --- | --- | --- | --- |
+| 0.5 over 34.8% *(as drawn)* | **2.96** | — | — |
+| 0.8 over 34.8% | 4.73 | **3.88** | 9.31 |
+| 0.9 over 34.8% | 5.58 | 4.53 | 10.32 |
+| **0.8 over 50%** | **6.65** | **5.65** | **11.63** |
+
+The requirement is 4.5. Headings, which the top band governs, run 4.14 / 3.69 /
+3.77 against a requirement of 3.0.
+
+**HEIGHT, NOT MORE ALPHA, is the part worth recording.** Raising the bottom
+alpha alone reached 4.53 at 0.9 — a 0.7% margin — and needed 0.95 before there
+was any real headroom, by which point the foot of the photograph is nearly black
+and there is no point having a photograph. Taking the band from 34.8% to 50% at
+the same 0.8 spreads the same darkness over more of the card: the gradient under
+the text is gentler, the bottom edge is not crushed, and the margin triples.
+
+The two bands are therefore asymmetric — 34.8% top, 50% bottom. That is also
+honest about what they carry: the top band covers one short heading, the bottom
+covers a paragraph and a link.
+
+**Why this is not a style choice.** A scrim is the thing that makes the type
+legible; what it has to be is a property of the picture under it, not a number
+that can be copied between photographs. The design's values were correct for
+the shots they were drawn against. This is the third time it has been relearned
+on this component — WORKLOG 40 took the scrim off when pre-darkened shots
+arrived, 41 recorded the contrast that left, and the v1 round put two back.
+
+**The alternative, if the darker plates are not wanted**: card photographs that
+are darker where the type sits — the lower half, and the top-left where the
+heading goes. At the design's 0.5 / 0.5 those shots would need to be roughly a
+stop down from these. That is a shoot decision, not a CSS one, which is why the
+fix went where it could be made.
+
+**Not a weakened check.** Nothing in the harness was relaxed to reach this. The
+contrast matrix cannot see photographs at all — which is why these numbers come
+from a separate measurement script rather than from `npm run verify`, and why
+running that script is not optional when a photograph is swapped. Both failures
+above were found that way, after the images landed and before they shipped.

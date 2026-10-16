@@ -25,7 +25,7 @@ rangeImage:
 cardImage:
   src: ../../assets/categories/category-cold-chain.avif
   alt: >-
-    A CentiPack gel pack and a flat refrigerant pouch beside an open EPS foam cooler in its corrugated outer.
+    Three CentiPack stand-up pouches in silver, white and navy, a navy gel pack marked "Puncture here" lying in front of them, and a branded corrugated box holding an EPS foam cooler with its lid off.
 guideLinkLabel: >-
   Browse cold chain
 ---

@@ -30,7 +30,7 @@ rangeImage:
 cardImage:
   src: ../../assets/categories/category-custom-boxes.avif
   alt: >-
-    An open blue mailer box of bottles and a blue drawer box of vials, beside a white mailer holding a branded box.
+    An open blue mailer box holding two navy containers, a blue drawer box slid open on two glass vials, and a white mailer box packed with a branded blue box and blue tissue.
 guideLinkLabel: >-
   Browse custom boxes
 ---

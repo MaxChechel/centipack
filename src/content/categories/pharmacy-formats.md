@@ -25,7 +25,7 @@ rangeImage:
 cardImage:
   src: ../../assets/categories/category-pharmacy-formats.avif
   alt: >-
-    Navy CentiPack jars, a spray bottle and a pump dispenser, one jar open to its threaded neck.
+    Navy CentiPack jars, a tall dispenser and a pump bottle grouped together, with one jar open to show its threaded neck and the inserts inside it.
 guideLinkLabel: >-
   Browse pharmacy formats
 ---

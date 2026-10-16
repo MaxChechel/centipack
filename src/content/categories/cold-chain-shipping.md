@@ -8,7 +8,7 @@ summary: >-
 lede: >-
   The insulation format and the refrigerant are chosen separately — hold time is the result of both. Configurations are validated under summer ambient conditions.
 cardBody: >-
-  Gel packs, insulated metallic mailers, EPS coolers, Puncture Pack, and eco liners — validated for 24, 48, and 72-hour 2–8°C transit.
+  Gel packs, insulated metallic mailers, EPS coolers, Puncture Packs, and eco liners — designed to maintain 2–8°C. Configurations validated for 24, 48, and 72-hour transit profiles
 cardLinkLabel: >-
   Browse formats
 selectionHeading: >-
@@ -26,7 +26,7 @@ navLinkLabel: >-
 rangeImage:
   src: ../../assets/categories/range-cold-chain.avif
   alt: >-
-    A CentiPack gel pack standing beside a flat refrigerant pouch, next to an EPS foam cooler in its open corrugated outer.
+    The CentiPack cold chain range laid out on a cream ground — an open white mailer box, a navy drawer box, three stand-up pouches in navy, white and silver, a navy gel pack marked "Puncture here", a spray bottle and a jar, and an EPS foam cooler in its open corrugated outer.
   mobile: ../../assets/categories/category-cold-chain-mobile.avif
 cardImage:
   src: ../../assets/categories/category-cold-chain.avif

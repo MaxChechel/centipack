@@ -2,7 +2,7 @@
 title: "Insulated metallic mailers"
 slug: insulated-metallic-mailers
 category: cold-chain-shipping
-order: 2
+order: 3
 summary: "6 sizes · 1 in and 1.5 in wall · 24 and 48-hour 2–8°C"
 lede: >-
   Foam-lined metallic mailers for 2–8°C injectables — the GLP-1 workhorse. Six sizes, two wall thicknesses, validated for 24 and 48-hour summer transit.
@@ -51,5 +51,5 @@ images:
   main:
     src: ../../assets/products/insulated-metallic-mailers.avif
     alt: >-
-      A sealed blue insulated mailer printed "Refrigerate upon opening".
+      Three sealed CentiPack insulated mailers standing in a row — navy with a white arrow mark, white with a navy one, and plain silver foil.
 ---

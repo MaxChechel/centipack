@@ -2,7 +2,7 @@
 title: "EPS foam coolers"
 slug: eps-foam-coolers
 category: cold-chain-shipping
-order: 3
+order: 4
 summary: "Rigid systems, corrugated outer included · 48–72 hour hold"
 images:
   main:

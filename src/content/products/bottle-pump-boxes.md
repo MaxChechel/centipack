@@ -1,9 +1,9 @@
 ---
-title: "Bottle & pump boxes"
+title: "Complete protocol kits"
 slug: bottle-pump-boxes
 category: custom-boxes
 order: 2
-summary: "Matched to bottle and pump dimensions · custom print"
+summary: "Everything together. Clearly organized"
 images:
   main:
     src: ../../assets/products/bottle-pump-boxes.avif

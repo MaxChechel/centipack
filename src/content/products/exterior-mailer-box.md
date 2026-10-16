@@ -1,5 +1,5 @@
 ---
-title: "Exterior mailer box"
+title: "Exterior shipping boxes"
 slug: exterior-mailer-box
 category: custom-boxes
 order: 3
@@ -7,7 +7,7 @@ order: 3
 # — a copy-paste in the design, applied on instruction and flagged twice (open
 # questions 30 and 49). The client supplied this one with the thirteen short
 # card lines; both questions close with it.
-summary: "Branded outer mailer · sized to the full packout"
+summary: "The finishing touch for your shipment"
 images:
   main:
     src: ../../assets/products/exterior-mailer-box.avif

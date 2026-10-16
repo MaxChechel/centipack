@@ -63,6 +63,6 @@ export async function closingBand() {
        there is nothing left for it to skip. */
     action: { label: 'Get a quote', href: '/contact' },
     image: rendered,
-    imageLabel: 'Closing band — mailers, a corrugated outer and an EPS cooler',
+    imageLabel: 'Closing band — a gel pack, stand-up mailers and an EPS cooler in its outer',
   };
 }

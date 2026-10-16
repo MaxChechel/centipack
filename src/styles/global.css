@@ -2331,11 +2331,50 @@
    pointing anywhere at it lifts the picture 1%. `scale` and nothing else: the
    card's box must not move, and `overflow: hidden` crops the extra percent. */
 @layer components {
-  /* `.category-card` used to set `--scrim-strength: 1` — the design's own
-     full-strength ramp, since this is the card that has to carry a paragraph
-     and a link over a photograph. The scrim itself came off when the client's
-     pre-darkened photographs landed (WORKLOG 40), and the strength went with
-     it rather than sitting here unused. */
+  /* THE SCRIM IS BACK, AND IT IS TWO BANDS RATHER THAN ONE RAMP.
+     This card used to set `--scrim-strength: 1` against `.media-scrim`'s single
+     bottom-up ramp. That came off when the client's pre-darkened photographs
+     landed (WORKLOG 40), on the reasoning that the picture carried its own
+     gradient. It did not carry enough of one: the three category cards have
+     been failing their heading contrast ever since — 2.97, 3.64 and 2.80
+     against a 3.0 requirement — because the HEADING sits at the top of the card
+     and the one ramp that existed only ever covered the bottom.
+
+     The v1 design draws two (Figma 1005:13692 and 1295:23619): a band at the
+     top and a band at the bottom, each 185px on a 532px card — 34.8% — and each
+     a `linear-gradient` from transparent to `rgb(0 0 0 / 0.5)`, blurred 2px.
+     Same construction as the closing plate's, and for the same reason: the top
+     band is under the title, the bottom band is under the paragraph and the
+     link, and the middle of the picture is left alone.
+
+     INSET -8px HORIZONTALLY, which the design does not draw. A 2px blur on a
+     box the exact width of the card pulls transparency in from beyond its left
+     and right edges, which shows as a faint light seam down both sides of the
+     band. Eight pixels of bleed gives the blur somewhere to fall off. Identical
+     treatment to `.cta-plate-scrim`, written out here rather than shared with
+     it because the geometry is genuinely different — that one is full-height
+     and asymmetric, this one is two equal bands. */
+  .category-card-scrim {
+    position: absolute;
+    right: -0.5rem;
+    left: -0.5rem;
+    height: 34.8%;
+    pointer-events: none;
+    filter: blur(2px);
+  }
+
+  /* -6px, as drawn: the darkest end of the top band sits just above the card so
+     the very first row of pixels is already at full strength rather than ramping
+     into it. */
+  .category-card-scrim-top {
+    top: -0.375rem;
+    background-image: linear-gradient(to top, rgb(0 0 0 / 0), rgb(0 0 0 / 0.5));
+  }
+
+  .category-card-scrim-bottom {
+    bottom: 0;
+    background-image: linear-gradient(to bottom, rgb(0 0 0 / 0), rgb(0 0 0 / 0.5));
+  }
 
   /* THE WHOLE CARD IS THE TARGET, and it is still ONE target with ONE
      accessible name: the link that was already the card's only route to the

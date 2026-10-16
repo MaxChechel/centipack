@@ -20,10 +20,22 @@ import { SITE } from '../../consts';
  */
 const year = new Date().getFullYear();
 const columns = await getFooterColumns();
-/* Redline v7 §9: the phone number comes off site-wide. Removed rather than
-   hidden — a `tel:` link nobody should call is still a link a crawler indexes
-   and a screen reader announces. */
-const contact = [{ href: `mailto:${SITE.email}`, label: SITE.email }];
+/* THE PHONE NUMBER IS BACK, AND THIS REVERSES REDLINE v7 §9.
+   That redline took it off site-wide, and the reasoning stands on its own
+   terms: a `tel:` link nobody should call is still a link a crawler indexes and
+   a screen reader announces. The v1 footer (Figma FOOTER v2, I1179:3353;381:1536)
+   draws it under the address, and Figma is the source of truth for this round —
+   so the number returns as a decision rather than as a regression. If it should
+   not be called, it should not be drawn; that is the client's call to make
+   against their own design.
+
+   It lives in `src/consts.ts` beside the address for the same reason the
+   address does: it was typed into a footer once already and a second copy is
+   how two published phone numbers disagree. */
+const contact = [
+  { href: `mailto:${SITE.email}`, label: SITE.email },
+  { href: `tel:${SITE.phone.replace(/[^+\d]/g, '')}`, label: SITE.phone },
+];
 
 /* Same rule as the nav: the underline is the hover, not a colour. See
    `.link-underline` in global.css. */
@@ -98,8 +110,11 @@ const linkClass = 'link-underline text-body text-primary';
       80px there; 64 is the step below on the scale and the complaint was too
       much, not too little. */}
   <div class="border-line mt-3xl md:mt-5xl pt-md gap-md flex flex-col border-t sm:flex-row sm:items-center sm:justify-between">
-    <p class="text-caption text-tertiary">&copy; {year} {SITE.name}. Cold chain packaging built for compounding pharmacy. All rights
-      reserved.</p>
+    {/* v1 drops the middle sentence: the design's line is the copyright and
+        nothing else. "Cold chain packaging built for compounding pharmacy."
+        was doing a strapline's job in a legal row, and the logo above it now
+        carries the strapline of its own. */}
+    <p class="text-caption text-tertiary">&copy; {year} {SITE.name}. All rights reserved.</p>
     {/* The social marks were here and are gone at the client's request. The
         wrapper that held them beside the legal row went with them — a flex row
         around a single child is a div doing nothing. `socialLinks` and

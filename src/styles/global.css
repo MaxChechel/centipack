@@ -3222,6 +3222,42 @@
   }
 }
 
+/* --- The closing plate's scrim -------------------------------------------
+   TWO GRADIENTS, TOP AND BOTTOM, which is what the v1 design draws and not a
+   decoration: this plate is white type on a photograph, and the photograph is a
+   pale beige.
+
+   Measured on the band before they existed: heading 2.72 : 1 against a 3.0
+   requirement, body 3.45 against 4.5. Both failing, on four pages. The scrim
+   came off this component in an earlier round on the reasoning that the
+   photography was pre-darkened; it was not, and the design has now put it back.
+
+   TOP IS WEAKER THAN BOTTOM (0.35 against 0.5) because the heading sits above
+   the centre line and the body and button below it — the half carrying the most
+   type gets the most cover. Both are inset -8px horizontally so the 2px blur
+   has somewhere to fall off without showing a seam at the plate's edge.
+
+   `blur(2px)` on the gradient itself, from the design. It softens the banding a
+   long vertical ramp shows on a wide plate, which is the one artefact a flat
+   gradient reliably produces. */
+@layer components {
+  .cta-plate-scrim {
+    position: absolute;
+    inset: 0 -0.5rem;
+    z-index: -1;
+    pointer-events: none;
+    filter: blur(2px);
+  }
+
+  .cta-plate-scrim-top {
+    background-image: linear-gradient(to top, rgb(0 0 0 / 0), rgb(0 0 0 / 0.35));
+  }
+
+  .cta-plate-scrim-bottom {
+    background-image: linear-gradient(to bottom, rgb(0 0 0 / 0), rgb(0 0 0 / 0.5));
+  }
+}
+
 /* --- Turnstile, made to fit ----------------------------------------------
    TURNSTILE'S WIDGET HAS A HARD 300px FLOOR, whatever `data-size` says. The
    flexible size takes the width it is given down to 300 and then stops, and the

@@ -28,7 +28,10 @@ export async function closingBand() {
   });
 
   return {
-    heading: 'Produced at scale.',
+    /* v1 (Figma uMHWj1JRHoqmY9uOQNfyL6, `cta desktop`). Replaces "Produced at
+       scale." — and note it ends WITHOUT a full stop, which the design draws
+       and which the three-sentence rhythm reads better without. */
+    heading: 'Thermal integrity. Validated performance. Manufacturing scale',
     /* THE BODY IS BACK, and the history is the point rather than an
        embarrassment: it shipped with a paragraph, was removed in review
        ("we don't have subtext for all instances"), and the reference screens
@@ -45,16 +48,20 @@ export async function closingBand() {
        the v8 copy deck then wrote the sentence out under the index's own
        "Produced at scale." A deck that states the copy outranks a screenshot it
        has to be inferred from, and one string serves all five page types again. */
+    /* v1, replacing the client's directly-supplied line from WORKLOG 45. That
+       line outranked the deck when it was written; this file is newer than both
+       and is the source of truth for this round. The old string is recorded in
+       entry 45 if it is ever wanted back. */
     body:
-      'Our own manufacturing partners, no distributor markup — the best price you will find ' +
-      'for the spec. Tell us what you ship and we come back with a build and a number.',
+      'Mass volume through our manufacturing partners — Quoted to your quantity and ' +
+      'specifications. Low pricing guaranteed',
     /* PREVIOUSLY: This shipped with a paragraph on the category and
        product pages and without one on the products index, on the reading that a
        page arrived at from a narrower context wants the extra sentence. Ruled
        the other way in review: the band is a heading and a button everywhere it
        appears. The `body` prop went with it — CtaPlate self-skips on content, so
        there is nothing left for it to skip. */
-    action: { label: 'Contact us', href: '/contact' },
+    action: { label: 'Get a quote', href: '/contact' },
     image: rendered,
     imageLabel: 'Closing band — mailers, a corrugated outer and an EPS cooler',
   };

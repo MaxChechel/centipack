@@ -22,7 +22,7 @@ import VisuallyHidden from './VisuallyHidden.astro';
  * contrast matrix, because a label that goes illegible on hover fails for
  * exactly as long as anyone is looking at it.
  */
-export type ButtonVariant = 'primary' | 'secondary' | 'ghost';
+export type ButtonVariant = 'primary' | 'secondary' | 'ghost' | 'action';
 export type ButtonSize = 'sm' | 'md' | 'link';
 /** Typed per §4.1; extend the union per project rather than passing markup. */
 export type ButtonIcon = 'arrow' | 'play' | 'close' | 'square';
@@ -80,7 +80,42 @@ const VARIANT = {
     'bg-transparent text-primary border-line-strong',
     'hover:bg-inverse hover:text-on-inverse hover:border-inverse',
   ],
-  ghost: ['bg-transparent text-secondary border-transparent', 'hover:text-accent'],
+  /**
+   * The v1 design's headline fill: the tan `action/secondary/default`, used for
+   * "Get a quote" in the nav and as the page-level call to action on a LIGHT
+   * ground.
+   *
+   * A VARIANT RATHER THAN A CHANGE TO `primary`, and the reason is in the
+   * design rather than in caution. The closing CTA's button is WHITE with black
+   * ink, sitting on a dark photograph — which is exactly what `primary` already
+   * resolves to inside a `theme="dark"` section, because --bg-inverse flips
+   * with the ground. So the design has two fills doing two jobs: one that
+   * follows the ground (primary, unchanged) and one that does not (this).
+   * Folding them together would have broken whichever one was not chosen.
+   *
+   * The hover darkens the tan rather than reversing it: this fill is already
+   * light, so the `secondary` variant's invert would send it to ink and read as
+   * a different button rather than the same one under a pointer.
+   */
+  action: [
+    'bg-action text-on-action border-action',
+    'hover:bg-action-hover hover:border-action-hover',
+  ],
+  /**
+   * `ghost` IS THE ARROW LINK, and its rest colour is now the ink.
+   *
+   * It was `text-secondary` — grey at rest, and `.btn-link`'s hover took it to
+   * grey as well, so the tertiary action was grey throughout. The v1 design
+   * draws these in `text/primary`, and that is what was asked for: black.
+   *
+   * The hover is unchanged and still lightens to --text-secondary (global.css,
+   * `.btn-link`), which now reads as a real response because the rest state is
+   * no longer the same colour. NOT `hover:text-accent` any more either — the
+   * accent is bronze as of the v1 palette, and an arrow link that went bronze
+   * on hover would be the one place on the page spending a colour nothing else
+   * near it uses.
+   */
+  ghost: ['bg-transparent text-primary border-transparent', ''],
 } as const;
 
 /**

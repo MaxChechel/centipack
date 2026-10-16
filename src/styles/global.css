@@ -162,6 +162,7 @@
   /* The tan fill, a primitive because one swatch does two jobs: the secondary
      action fill on both themes, and the accent's dark step. */
   --tan-300: #c5b197;    /* Figma action/secondary/default */
+  --tan-400: #b39c7e;    /* DERIVED — one step down, the hover */
 
   --accent-700: #8a6424;  /* Figma text/accent              — the light accent */
   --accent-300: var(--tan-300);  /* the same swatch, as the dark-theme accent */
@@ -624,6 +625,11 @@
      failure AUDIT F1 already records for this project's control borders. */
   --bg-action: var(--tan-300);
   --text-on-action: var(--gray-950);
+  /* The hover DARKENS rather than inverting. `secondary`'s invert sends an
+     outline to ink, which is right for an empty box and wrong here: this fill
+     is already light, and flipping it to ink would read as a different button
+     rather than the same one under a pointer. One step down the same hue. */
+  --bg-action-hover: var(--tan-400);
 
   /* --- The inverse fill --------------------------------------------------
      The ink-coloured primary action: ground and ink swapped. CentiPack's
@@ -746,6 +752,15 @@
 @utility border-inverse-hover { border-color: var(--bg-inverse-hover); }
 @utility border-inverse { border-color: var(--bg-inverse); }
 @utility text-on-inverse { color: var(--text-on-inverse); }
+
+/* The secondary action fill, same shape as the inverse pair above and for the
+   same reason: `text-action` is deliberately absent, because the pair is a fill
+   and its label rather than a colour anything may paint text with. */
+@utility bg-action { background-color: var(--bg-action); }
+@utility bg-action-hover { background-color: var(--bg-action-hover); }
+@utility border-action { border-color: var(--bg-action); }
+@utility border-action-hover { border-color: var(--bg-action-hover); }
+@utility text-on-action { color: var(--text-on-action); }
 
 @utility bg-overlay { background-color: var(--bg-overlay); }
 @utility border-overlay { border-color: var(--line-overlay); }

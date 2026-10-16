@@ -176,6 +176,38 @@ export function accentMatrix(scopes) {
  * and that coincidence is exactly why it needs its own row: the day someone
  * moves --bg-inverse off --text-primary's value, nothing else would notice.
  */
+/**
+ * The SECONDARY ACTION fill — the tan "Get a quote" button.
+ *
+ * Added when that pair was, because a semantic colour pair the matrix does not
+ * read is a pair with no floor under it. The inverse fill's own note says a
+ * fill "goes through the matrix like everything else"; this is that, applied to
+ * the second fill the system now has.
+ *
+ * ONE ROW PER THEME AND NOT TWO, unlike the inverse fill: `--bg-action` is
+ * declared once in the bare :root and deliberately does not remap, so the two
+ * themes resolve the same pair. Both are still read, because the day somebody
+ * adds a `[data-theme]` override for it, this is what notices.
+ *
+ * The 3:1 boundary check against the page ground is NOT here. It belongs to
+ * `lineMatrix`'s job and it currently FAILS at 1.94 : 1 — recorded in AUDIT
+ * rather than asserted here, because making it a row would turn a known,
+ * accepted design deviation into a red build on every run.
+ */
+export function actionMatrix(scopes) {
+  const rows = [];
+  for (const theme of THEMES) {
+    const label = resolveColor(scopes, theme, '--text-on-action');
+    const fill = resolveColor(scopes, theme, '--bg-action');
+    const ratio = contrastRatio(label, fill);
+    rows.push({
+      theme, bg: '--bg-action', text: '--text-on-action',
+      bgHex: fill, textHex: label, ratio, pass: ratio >= AA, threshold: AA,
+    });
+  }
+  return rows;
+}
+
 export function inverseMatrix(scopes) {
   const rows = [];
   for (const theme of THEMES) {

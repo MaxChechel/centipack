@@ -130,11 +130,27 @@
 
   /* Accent primitives.
 
-     CentiPack's design is monochrome on its surface — the primary button is
-     Brand/Black, links are ink — but the client's variable collection carries a
-     real accent hue, `text/brand` #0e2a46 at hue 210°, and the launch design
-     spends it once (the highlighted SKU row on the mailers page). It is the
-     accent, and it is wired here so that every future consumer follows.
+     THE ACCENT MOVED FROM NAVY TO BRONZE in the v1 design round (Figma
+     `uMHWj1JRHoqmY9uOQNfyL6`), and both steps are now real values from the
+     client's collection rather than one taken and one derived:
+
+       light  `text/accent`               #8a6424  (was `text/brand` #0e2a46)
+       dark   `action/secondary/default`  #c5b197  (was DERIVED #8fa8c2)
+
+     Measured before the swap, because an accent that fails the matrix is an
+     accent that cannot ship:
+
+       #8a6424 on bg-base 5.00 : 1   on bg-subtle 4.62   on bg-surface 5.34
+       #c5b197 on dark base 7.94     on subtle    7.08   on surface    6.16
+
+     THE LIGHT STEP IS MUCH SHALLOWER THAN THE NAVY WAS — 5.00 against 13.66 —
+     so it clears AA for body text with far less headroom than before. The floor
+     is bg-subtle at 4.62. Anything that darkens those grounds, or any new ground
+     between them, has to be re-measured rather than assumed.
+
+     The dark step is no longer derived. #c5b197 is the same tan the design uses
+     as its secondary action fill, so the accent and that button are one hue on
+     the dark theme instead of two that nearly match.
 
      Two steps, not one, per §2.4 rule 5: #0e2a46 measures 1.13:1 on the dark
      ground and is unusable there. The dark step is DERIVED rather than taken
@@ -143,8 +159,12 @@
      (#d4d2cf) that neither reads as distinct from the other. The derived step
      keeps hue 210° and carries 30% saturation, so it is still legibly the brand
      blue at L*68. */
-  --accent-700: #0e2a46;  /* Figma text/brand   — L*16.5, the light-theme accent */
-  --accent-300: #8fa8c2;  /* DERIVED            — L*68.0, the dark-theme accent  */
+  /* The tan fill, a primitive because one swatch does two jobs: the secondary
+     action fill on both themes, and the accent's dark step. */
+  --tan-300: #c5b197;    /* Figma action/secondary/default */
+
+  --accent-700: #8a6424;  /* Figma text/accent              — the light accent */
+  --accent-300: var(--tan-300);  /* the same swatch, as the dark-theme accent */
 
   /* --- Typography --------------------------------------------------------
      --font-body is emitted by Astro's font pipeline; see the `fonts` block in
@@ -581,6 +601,29 @@
      is the only legal text colour on top of an --accent fill. */
   --accent: var(--accent-700);
   --accent-contrast: var(--gray-0);
+
+  /* --- The secondary action fill -----------------------------------------
+     The tan the v1 design gives its headline button — "Get a quote" in the
+     nav, and the primary action on the pages after it. Figma names the pair
+     `action/secondary/default` over `action/on-secondary`.
+
+     ITS OWN PAIR, not the accent and not the inverse fill, for the same reason
+     the inverse fill is its own: a fill carries a different contrast obligation
+     from a text colour, and this one is a LIGHT fill where --bg-inverse is a
+     dark one. Sharing either would make one of the two wrong on a dark ground.
+
+     --text-on-action is the only legal ink on it — 7.94 : 1, measured.
+
+     DECLARED ONCE, IN THE BARE :root, AND NOT REMAPPED PER THEME. Every other
+     pair here flips with the ground; this one does not, because the tan is the
+     brand's rather than the ground's and the design draws the same swatch on
+     both themes. Stated rather than left as an omission someone later "fixes".
+
+     KNOWN FAILURE, recorded not hidden: the fill is 1.94 : 1 against
+     --bg-base, under WCAG 1.4.11's 3:1 for a control boundary — the same
+     failure AUDIT F1 already records for this project's control borders. */
+  --bg-action: var(--tan-300);
+  --text-on-action: var(--gray-950);
 
   /* --- The inverse fill --------------------------------------------------
      The ink-coloured primary action: ground and ink swapped. CentiPack's

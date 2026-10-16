@@ -256,3 +256,37 @@ otherwise unchanged.
 **When to reopen.** If Turnstile-grade bot filtering becomes necessary, or lead
 data must not leave infrastructure the client controls, the function comes back
 out of git history and §8 applies again unmodified.
+
+---
+
+## F8 — The v1 secondary action fill has no visible boundary
+
+**The v1 design (Figma `uMHWj1JRHoqmY9uOQNfyL6`) gives its headline button a tan
+fill**, `action/secondary/default` #c5b197, on the page ground #f9f7f5. Measured:
+
+| | ratio | requirement | |
+| --- | --- | --- | --- |
+| label #1f1f1f on the fill | **7.94** | 4.5 (AA text) | passes |
+| the fill against `--bg-base` | **1.94** | 3.0 (WCAG 1.4.11) | **fails** |
+
+The label is legible. **The button's edge is not** — a tan at L*74 on a ground at
+L*97 is a shape a sighted user infers from the label rather than sees. This is
+the "Get a quote" button in the nav of every page, and the primary action on the
+pages below it.
+
+**The same failure as F1, one layer up.** F1 records that the design's control
+BORDERS fail 1.4.11; this is the design's control FILL failing it, and the
+mechanism is identical — a brand swatch chosen for how it looks on the ground
+rather than for how far it is from it.
+
+**Not asserted in the harness, deliberately.** `actionMatrix` checks the label on
+the fill and stops there. Adding the 3:1 boundary row would turn an accepted
+design decision into a red build on every run, which is how a check gets
+weakened later to make it pass. It is recorded here instead, which is what
+AUDIT is for.
+
+**What would fix it**, if the client wants it fixed rather than accepted:
+a 1px `--line-strong` border on the button (cheapest, keeps the swatch), or
+darkening the tan to roughly L*62 — about #a98d6b — which reaches 3:1 against
+the ground while staying recognisably the same colour. Both change what the
+design draws, so neither is this file's call.

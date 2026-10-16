@@ -157,13 +157,12 @@ sections:
         body: >-
           Tailored shipping solutions for testing kits, medical samples, and specimens.
 
-  # SIX OF THESE SEVEN QUESTIONS HAVE NO ANSWER, and that is how the design
-  # ships: Figma 1215:4075 expands the first item and writes its copy, and
-  # leaves every other row collapsed with no answer text in the file at all.
-  # The questions are the client's and are recorded here so nothing has to be
-  # re-read out of Figma; the adapter drops any item with an empty `answer`, so
-  # only the answered one reaches the page. Writing the rest would mean
-  # inventing claims about thermal performance and materials.
+  # ALL SEVEN ANSWERED. The first pass through Figma found six of these rows
+  # collapsed with no answer text in the file; the client has since written
+  # them, and they are transcribed here verbatim. The adapter still drops an
+  # item with an empty `answer`, which is the right behaviour to keep: it is
+  # what makes a half-written FAQ render as the part that is written rather
+  # than as a disclosure that opens onto nothing.
   - type: faq
     heading: Frequently asked questions
     items:
@@ -172,9 +171,27 @@ sections:
           - >-
             PuncturePack™ arrives vacuum-compressed for compact storage. Puncturing the designated outer film releases the vacuum, allowing the PU foam insulation to expand around your shipment.
       - question: Where do I puncture the mailer?
+        answer:
+          - >-
+            Puncture only at the designated “Puncture Here” marks. Follow the packing instructions and avoid piercing the inner liner or contents.
       - question: What sizes and insulation thicknesses are available?
+        answer:
+          - >-
+            Popular envelope sizes include 9″ × 11″, 12″ × 14″, and 14″ × 18″, with custom sizes also available. Expanded PU foam insulation options range from ½″ to 1.5″ per side.
       - question: How do I choose the right size for my product and gel packs?
+        answer:
+          - >-
+            Allow room for your product, any inner packaging, and the required gel packs while leaving enough space to close the mailer securely. Share your payload dimensions and refrigerant requirements, and we can help recommend a size.
       - question: Can you help develop a packout for my temperature and transit requirements?
+        answer:
+          - >-
+            Yes. We work with you to select the mailer size, insulation thickness, foam density and refrigerant configuration for your target temperature range and shipping duration. Thermal performance depends on the complete packout and shipping conditions.
       - question: Are custom sizes and printed mailers available?
+        answer:
+          - >-
+            Yes. Custom dimensions and printing are available. Share your product requirements, artwork, and estimated order volume to discuss our custom program.
       - question: How can I request samples, and what are the ordering minimums?
+        answer:
+          - >-
+            Use the “Request a Custom Quote” button to discuss.
 ---

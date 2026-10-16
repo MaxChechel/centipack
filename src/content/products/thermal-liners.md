@@ -129,7 +129,12 @@ sections:
         body: >-
           Tailored shipping solutions for testing kits, medical samples, and specimens.
 
-  # Eight of these nine are unanswered in Figma; see puncture-pack.md for the rule.
+  # All nine answered; see the note in puncture-pack.md.
+  #
+  # THE LAST ANSWER DESCRIBES A CHOOSER THAT DOES NOT EXIST. It tells the
+  # reader to "choose Paper, PET, Foam, or Help Me Choose" after clicking
+  # through, and the contact form has no such field. Transcribed as written;
+  # either the form grows the option or the sentence loses it.
   - type: faq
     heading: Frequently asked questions
     items:
@@ -138,11 +143,35 @@ sections:
           - >-
             A thermal liner fits inside a corrugated shipping carton to slow heat transfer. Paired with refrigerants, it creates an insulated pack-out for temperature-sensitive products.
       - question: What's the difference between paper, PET, and foam liners?
+        answer:
+          - >-
+            Each material has its own strengths. Paper liners offer a familiar, paper-based format. PET liners resist moisture, so they keep performing when gel packs create condensation. Foam liners provide the most cushioning, and their metallic exterior helps reflect heat.
       - question: Which liner should I choose?
+        answer:
+          - >-
+            It depends on your product, target temperature, transit time, and packing process. Share your requirements and we'll help you compare options.
       - question: Can I use a liner with my existing shipping box?
+        answer:
+          - >-
+            In many cases, yes. The liner needs to fit your carton and leave room for the complete pack-out. Share your box's interior dimensions and payload, and we'll confirm the fit.
       - question: Do I need gel packs?
+        answer:
+          - >-
+            For cold shipments, yes. Refrigerants are typically part of the pack-out. The type, quantity, placement, and conditioning depend on your product and shipping requirements.
       - question: How long will a thermal liner keep my shipment cold?
+        answer:
+          - >-
+            With the right pack-out, our liners are designed to keep shipments cold for 24–48 hours. Actual performance depends on the liner, refrigerants, payload, and conditions in transit. Contact us to discuss your temperature range and transit time.
       - question: Are the liners recyclable?
+        answer:
+          - >-
+            Ask us for disposal guidance and about the recyclability of our liner options.
       - question: Can you help develop a custom pack-out?
+        answer:
+          - >-
+            Yes. We'll work with you to select the liner material, carton size, insulation configuration, and refrigerants that fit your product and shipping needs.
       - question: How can I request samples and pricing?
+        answer:
+          - >-
+            Click Request Samples & Pricing and choose Paper, PET, Foam, or Help Me Choose. Include your shipping requirements and estimated volume so we can recommend the right options.
 ---

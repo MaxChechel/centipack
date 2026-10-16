@@ -245,19 +245,20 @@ const section = (image: () => z.ZodType<ImageMetadata>) =>
       .strict(),
 
     /*
-     * FAQ — and `answer` DEFAULTS TO EMPTY, which is the whole point.
+     * FAQ — and `answer` DEFAULTS TO EMPTY, which is not a formality.
      *
-     * The design draws seven to ten questions per page and writes the answer to
-     * exactly ONE of them: the first item is expanded with its copy, and every
-     * other row is collapsed with no answer text anywhere in the file. Measured
-     * on all four FAQ instances; it is the pattern, not an oversight in one.
+     * The design first arrived with seven to ten questions per page and the
+     * answer to exactly one of them: the first item expanded with its copy,
+     * every other row collapsed with no answer text anywhere in the file. That
+     * was true of all four FAQ instances, so the schema was built to carry a
+     * question whose answer was still owed, and the adapter drops any item that
+     * has one. The answers have since been written — all 34 of them — so
+     * nothing is currently filtered.
      *
-     * The questions are real and the client wrote them, so they are recorded
-     * here rather than dropped — losing them would mean re-reading Figma to
-     * find out what was owed. The template renders only the items that HAVE an
-     * answer, so an unanswered question is visible in the repo, visible in
-     * review, and absent from the built page. Inventing answers was the other
-     * option and it is not an option: these are claims about thermal
+     * THE DEFAULT STAYS ANYWAY. It cost nothing, it is what let the pages ship
+     * honestly while the copy was outstanding, and the next product's FAQ will
+     * arrive the same way. The alternative — requiring an answer — would have
+     * meant either holding the pages back or inventing claims about thermal
      * performance and disposal.
      */
     z

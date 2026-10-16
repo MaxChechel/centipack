@@ -167,8 +167,13 @@ sections:
         body: >-
           Tailored shipping solutions for testing kits, medical samples, and specimens.
 
-  # Seven of these eight questions are unanswered in Figma; see the note in
-  # puncture-pack.md for the rule and the reason.
+  # All eight answered; see the note in puncture-pack.md.
+  #
+  # THE LAST ANSWER NAMES A BUTTON THIS PAGE DOES NOT HAVE. It says "Click Get
+  # Samples & Pricing"; the hero's link is labelled "Request samples & pricing"
+  # (Figma's own `contactLinkLabel` for this page). Transcribed as written
+  # rather than quietly reworded — one of the two is wrong and it is the
+  # client's call which.
   - type: faq
     heading: Frequently asked questions
     items:
@@ -177,10 +182,31 @@ sections:
           - >-
             Mailers arrive flat and vacuum-sealed, so they take up minimal space. You can keep more inventory near your packing stations and activate each mailer only when you're ready to pack.
       - question: How does the pull tab work?
+        answer:
+          - >-
+            Pull the tab to release the vacuum, and the foam begins expanding right away. Place your product and gel packs inside while it expands, so the foam fills in around the contents. Then seal the mailer.
       - question: How do I choose the right mailer size?
+        answer:
+          - >-
+            Allow room for your product, inner packaging, and gel packs, plus enough space to close the mailer securely. Share your complete pack-out dimensions and we'll recommend a size.
       - question: Do I need gel packs?
+        answer:
+          - >-
+            For cold shipments, yes. Refrigerants are typically part of the pack-out. The type, quantity, and conditioning depend on your product, target temperature, and shipping conditions.
       - question: How long will the mailer keep my shipment cold?
+        answer:
+          - >-
+            It depends on your complete pack-out and the conditions in transit. Our mailers are designed to maintain 2–8°C for 24–48 hours with the right configuration. Contact us to discuss your temperature range and transit time.
       - question: Can you help develop a custom pack-out?
+        answer:
+          - >-
+            Yes. We'll work with you to select the mailer size, insulation configuration, and refrigerants that fit your product and shipping requirements.
       - question: What customization options are available?
+        answer:
+          - >-
+            Custom dimensions, insulation thicknesses, foam densities, and full-color printing. Share your requirements and estimated volume, and we'll discuss configurations and order minimums.
       - question: How can I request samples and pricing?
+        answer:
+          - >-
+            Click Get Samples & Pricing and tell us what you're shipping, your target temperature range, and your estimated volume.
 ---

@@ -114,7 +114,7 @@ sections:
         body: >-
           Tailored shipping solutions for testing kits, medical samples, and specimens.
 
-  # Nine of these ten are unanswered in Figma; see puncture-pack.md for the rule.
+  # All ten answered; see the note in puncture-pack.md.
   - type: faq
     heading: Frequently asked questions
     items:
@@ -123,12 +123,39 @@ sections:
           - >-
             EPS stands for expanded polystyrene. It is a lightweight, rigid foam that provides thermal insulation and protective support in shipping containers.
       - question: How do I choose the right cooler size?
+        answer:
+          - >-
+            Allow space for your product, inner packaging, and required refrigerants. Share your complete packout dimensions, and we can help recommend a cooler size and wall thickness.
       - question: What sizes and wall thicknesses are available?
+        answer:
+          - >-
+            Standard interior sizes are 8″ × 6″ × 4″, 8″ × 6″ × 7″, and 12″ × 10″ × 7″. Standard wall thickness options are 1″ and 1.5″. Contact us for available size and thickness combinations or to discuss a custom mold.
       - question: How does wall thickness affect the cooler?
+        answer:
+          - >-
+            Wall thickness influences thermal insulation and the overall dimensions of the shipper. The right choice depends on your payload, refrigerants, target temperature, and transit time.
       - question: Do I need gel packs?
+        answer:
+          - >-
+            For shipments that need to remain cold, refrigerants are typically part of the packout. The type, quantity, placement, and conditioning depend on your product and shipping requirements.
       - question: How long will the cooler keep my shipment cold?
+        answer:
+          - >-
+            Shipping duration depends on the complete packout and ambient conditions. The target range for EPS coolers is 48–72 hours. Contact us to discuss a configuration for your target temperature range and transit time.
       - question: Is the corrugated outer carton included?
+        answer:
+          - >-
+            Matched outer cartons are available kitted or can be supplied separately.
       - question: Can you help develop a custom packout?
+        answer:
+          - >-
+            Yes. We work with you to select the cooler size, wall thickness, and refrigerants for your product and shipping requirements.
       - question: Can you provide custom coolers and branded cartons?
+        answer:
+          - >-
+            Yes. Custom cooler molds and printed outer cartons are available. Share your dimensions, artwork, and estimated volume to discuss options and ordering minimums.
       - question: How can I request samples and pricing?
+        answer:
+          - >-
+            Use the Request a Custom Quote button and tell us what you’re shipping, your target temperature range, and estimated volume. We’ll help you explore suitable options.
 ---

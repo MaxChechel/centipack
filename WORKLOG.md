@@ -5890,3 +5890,63 @@ added:
 82. **The phone number is back**, reversing redline v7 §9 on the authority of
     the v1 footer. If it should not be called it should not be drawn — the
     client's call against their own design.
+
+## 2026-10-16 — Entry 65. The FAQ answers arrived; open question 75 closes
+
+Supersedes entry 64's open question 75. Re-read the four FAQ instances on
+instruction and the copy is there — every row now carries a `content` child
+where last time only the first did. The accordions grew with it:
+
+| page | questions | accordion, before | after |
+| --- | --- | --- | --- |
+| PuncturePack | 7 | 734px | **1223px** |
+| insulated metallic mailers | 8 | 795px | **1446px** |
+| EPS foam coolers | 10 | 896px | — |
+| thermal liners | 9 | 835px | — |
+
+**34 answers, transcribed verbatim.** Built HTML confirms 7 / 8 / 10 / 9 items
+across the four pages, and 0 on gel packs, whose design has no FAQ at all.
+
+### The filter stays, and the reason changed
+
+`toSection()` drops any FAQ item with an empty `answer`, and the schema defaults
+`answer` to `[]`. Nothing is filtered now. Both are kept, and the note in each
+file is rewritten to say why: the default is what let these pages ship honestly
+while the copy was outstanding, it cost nothing, and the next product's FAQ will
+arrive the same way — questions first, answers after. Requiring an answer would
+have meant holding five finished pages back or inventing claims about thermal
+performance and disposal.
+
+This is worth stating because it looks like dead defence now and is not. The
+mechanism was exercised for exactly as long as it was needed.
+
+### Two answers describe a page that does not exist
+
+Transcribed as written rather than quietly reworded, because one of each pair is
+wrong and which one is the client's call:
+
+- **Insulated metallic mailers** closes with *"Click Get Samples & Pricing"*.
+  The hero's link on that page is labelled **"Request samples & pricing"** —
+  Figma's own string for the same page.
+- **Thermal liners** closes with *"Click Request Samples & Pricing and choose
+  Paper, PET, Foam, or Help Me Choose."* The contact form has no such field.
+
+Both are recorded as comments beside the copy they describe.
+
+### Measurements
+
+| | before | after |
+| --- | --- | --- |
+| verify | 8 checks, 1085 assertions | **8 checks, 1085 assertions, 0 failures** |
+| FAQ items in built HTML | 4 | **34** |
+
+### Open questions
+
+75 **closes**. Two added, both narrow:
+
+83. **"Get Samples & Pricing" vs "Request samples & pricing"** on the mailers
+    page — the FAQ names a button the page does not have.
+84. **The liners FAQ promises a material chooser on the contact form.** Either
+    the form grows the field or the sentence loses it.
+
+Unchanged: 22–26, 28, 29, 31–34, 36, 37, 40, 41, 44, 48, 51–71, 73, 74, 76–82.

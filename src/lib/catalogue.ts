@@ -481,12 +481,13 @@ async function toSlot(slot: { label: string; picture?: RawPicture }): Promise<Sl
  * that silently renders nothing.
  *
  * THE FAQ FILTERS ITSELF HERE, and that is the one place a section's content
- * changes on the way through. The design writes seven to ten questions per page
- * and the answer to exactly one of them; the rest are recorded in the content
- * file so nothing is lost, and dropped here so the page never renders a
- * disclosure that opens onto nothing. See the schema's note for why the
- * alternative — writing the missing answers — is not available: they are claims
- * about thermal performance, materials and disposal.
+ * changes on the way through. An item with no answer is dropped, so the page
+ * never renders a disclosure that opens onto nothing.
+ *
+ * Nothing is filtered today — the client has written all 34 answers across the
+ * four FAQ instances. The filter is kept because it is what let these pages
+ * ship while the copy was still outstanding, and because the next one will
+ * arrive the same way: questions first, answers after. See the schema's note.
  */
 async function toSection(section: ProductSectionInput): Promise<ProductSection> {
   switch (section.type) {

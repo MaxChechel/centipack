@@ -207,10 +207,11 @@ assertEverySectionIsHandled(product.sections);
           <FormatCards heading={section.heading} cards={section.cards} />
         )}
 
-        {/* SELF-SKIP, AND IT IS LOAD-BEARING HERE (§4.2). The adapter drops
-            every question the design left unanswered, so this list can arrive
-            empty — and `Faq` would still render its top rule and nothing else.
-            A heading over one hairline is worse than no section. */}
+        {/* SELF-SKIP (§4.2). The adapter drops any question whose answer is
+            still owed, so this list can arrive empty — and `Faq` would render
+            its top rule and nothing else. A heading over one hairline is worse
+            than no section. Every answer exists today; this is the guard for
+            the next FAQ that arrives as questions first. */}
         {section.type === 'faq' && section.items.length > 0 && (
           <div class="gap-xl md:gap-lg md:grid md:grid-cols-12 md:items-start flex flex-col">
             <h2 class="text-h2 text-primary md:col-span-4">{section.heading}</h2>

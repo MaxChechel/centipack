@@ -6,15 +6,15 @@ order: 3
 summary: >-
   The format the medication ships in — produced to pharmaceutical standards.
 lede: >-
-  The primary format the medication is dispensed and shipped in — produced to pharmaceutical standards. Vial kits lead the range, with formats covering GLP-1, peptide, oral, nasal, and topical compounded medications.
+  Produced to pharmaceutical standards. Available individually or as part of a complete solution.
 cardBody: >-
-  Vial kits, pill bottles, spray bottles, pump dispensers, and jars — produced to pharmaceutical presentation standards.
+  Vial kits, pill bottles, spray bottles, pump dispensers and Jars — produced to pharmaceutical standards.
 cardLinkLabel: >-
   Browse formats
 selectionHeading: >-
-  A selection of our pharmacy formats
+  Our pharmacy format range
 crossBody: >-
-  Vial kits, bottles, dispensers, and jars — the primary format the medication is dispensed in, produced to pharmaceutical standards.
+  Made-to-order vial kits, bottles, dispensers and jars
 navLinkLabel: >-
   Browse pharmacy formats
 rangeImage:

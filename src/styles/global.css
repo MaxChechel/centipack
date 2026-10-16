@@ -324,21 +324,6 @@
      alone cannot say that. Remapped per theme like any other token. */
   --shadow-popover: 0 1rem 2.5rem -0.75rem rgb(0 0 0 / 0.18), 0 0.25rem 0.75rem -0.25rem rgb(0 0 0 / 0.1);
 
-  /* ONE blur step, re-exposed deliberately after the --blur-* reset in §2.2.
-     The design frosts the plates that sit on photographs — the hero's stat
-     cards — and a backdrop filter is the only way to do that without a second
-     image. It is a token rather than an arbitrary value because it appears in
-     more than one place, and because `backdrop-blur-sm` resolving to nothing is
-     exactly the silent failure the reset exists to surface.
-
-     16px, DOWN FROM 50. Set on instruction. The two consumers are both the home
-     hero's stats — the full-bleed plate below `md` and the three cards above it
-     — so this token and "the hero stats' blur" are currently the same thing,
-     and changing it here changes nothing else on the site. If a second surface
-     ever frosts at a different strength, that is the moment this stops being one
-     number and the hero takes its own. */
-  --blur-overlay: 16px;
-
   --border-width: 1px;
   --focus-width: 0.125rem;
   --focus-offset: 0.1875rem;
@@ -2824,116 +2809,6 @@
   }
 }
 
-/* --- The home page's closing collage -------------------------------------
-   Five product shots placed around the closing block at the design's own
-   offsets, carried in as custom properties per item because they are
-   MEASUREMENTS — percentages of the 1344 × 967 box the design draws them in —
-   and a measurement baked into a class name is one nobody can check against the
-   source.
-
-   Absolute only from `md`. Below that there is no room to scatter anything and
-   the list is a plain strip, which is why the positioning lives behind a query
-   rather than in the markup. The container holds the design's aspect ratio so
-   the percentages mean the same thing at every width. */
-@layer components {
-  @media (min-width: 48rem) {
-    .volume {
-      aspect-ratio: 1344 / 967;
-      justify-content: center;
-    }
-
-    .volume-collage {
-      position: absolute;
-      inset: 0;
-      z-index: 0;
-    }
-
-    .volume-collage-item {
-      position: absolute;
-      left: var(--at-left);
-      top: var(--at-top);
-      width: var(--at-width);
-    }
-  }
-
-  /* THE SLOT KEEPS ITS DRAWN SHAPE WHATEVER IS PUT IN IT. The five shots are
-     borrowed from the product catalogue until the collage's own arrive, and
-     those are one portrait size for all thirteen products — dropped into boxes
-     drawn between 288:540 and 618:593, the tallest slot grew down over the
-     heading. `--at-ratio` carries the design's box and the photograph is
-     cropped into it, so a replacement file of any proportion lands in the same
-     composition. Both widths, because the mobile placement has the same
-     problem. */
-  .volume-collage-item img {
-    aspect-ratio: var(--at-ratio);
-    object-fit: cover;
-  }
-
-  /* A 20% BLACK WASH OVER EACH SHOT, on instruction.
-   *
-   * `::after` on the ITEM rather than a div in the markup: five overlay
-   * elements would be five things to keep in sync with five images, and the
-   * collage is already `aria-hidden` decoration — adding real nodes to it puts
-   * markup into the accessibility tree that exists only to be painted over.
-   *
-   * OUTSIDE THE MEDIA QUERIES, deliberately. The item is absolutely positioned
-   * at BOTH widths — the desktop placement and the phone one differ only in
-   * which custom properties feed `left/top/width` — so one rule covers both,
-   * and the two shots that `display: none` below `md` take their overlay with
-   * them because a pseudo-element of a hidden box is hidden too.
-   *
-   * The radius is repeated here because the radius lives on the IMG, as a
-   * `rounded-md` utility in the markup, and a pseudo-element does not inherit
-   * it. Without this the wash would square off the corners the photograph
-   * rounds. */
-  .volume-collage-item::after {
-    content: '';
-    position: absolute;
-    inset: 0;
-    border-radius: var(--radius-md);
-    background-color: rgb(0 0 0 / 0.2);
-    pointer-events: none;
-  }
-}
-
-/* --- The collage on a phone ----------------------------------------------
-   PLACED, NOT STACKED. This used to fall back to a two-up grid below md — five
-   items in two columns, so the fifth sat alone, which was recorded as open
-   question 27. The design places them on mobile too, just differently: one shot
-   centred above the heading and two below the button, with the two side shots
-   dropped entirely because there is no gutter to hang them in.
-
-   The container reserves the room with percentage padding — percentages resolve
-   against the container's WIDTH, so the space above and below scales with the
-   screen instead of being a magic pixel height that is wrong at the next size. */
-@layer components {
-  @media (max-width: 47.99rem) {
-    .volume {
-      padding-block: 30% 34%;
-    }
-
-    .volume-collage {
-      position: absolute;
-      inset: 0;
-      z-index: 0;
-      margin: 0;
-    }
-
-    .volume-collage-item {
-      position: absolute;
-      left: var(--at-left-m);
-      top: var(--at-top-m);
-      width: var(--at-width-m);
-    }
-
-    /* Two of the five have no mobile position, and that is the design's call:
-       they hang in the desktop gutters, and a phone has none. */
-    .volume-collage-item:not([data-on-mobile]) {
-      display: none;
-    }
-  }
-}
-
 /* --- Media slots ---------------------------------------------------------
    The shape a picture holds before it loads, and the one thing about it that is
    art-directed. `--media-ratio` is set inline per slot by Media; a class may
@@ -2950,102 +2825,6 @@
      silently change the box model of every slot that gained one. */
   .media-picture {
     display: contents;
-  }
-
-  /* --- The hero's three claims ------------------------------------------
-     TWO OBJECTS, ONE MARKUP. Below md the three claims share ONE glass plate
-     split by hairlines; from md they separate into the three cards the desktop
-     design draws. Both live here rather than in utilities on the markup for the
-     reason that keeps coming up in this file: a utility cannot be UNSET at a
-     breakpoint, and utilities outrank `@layer components`, so card classes in
-     the markup would have made the mobile plate unexpressible.
-
-     The dividers are a ::before rather than `border-inline-start`, because the
-     design insets them: the hairline stops short of the plate's own padding top
-     and bottom instead of running edge to edge. A border cannot be inset; an
-     absolutely positioned pseudo-element is the only way to say it.
-
-     `--bg-overlay` and `--line-overlay` are the named translucent tokens (§2.3)
-     and are re-declared per theme — they have to be, because they are mixed from
-     `--text-primary`, and a single :root declaration would paint the light
-     theme's black into every dark region. That is WORKLOG Entry 11. */
-  /* MOBILE IS A FULL-BLEED BAND, not a plate. No border and no radius: it runs
-     to both screen edges and sits flush on the bottom of the picture, so there
-     is no edge for a border to describe. The page's gutter comes back as the
-     columns' own padding, which is what keeps the first number on the same line
-     as every heading on the page. */
-  .hero-stats {
-    background-color: var(--bg-overlay);
-    backdrop-filter: blur(var(--blur-overlay));
-    /* The plate is one box: the columns butt together and the hairline is what
-       separates them, so there is no gap to close. */
-    gap: 0;
-    /* Keeps the hairlines and the columns inside the corner radius. */
-    overflow: hidden;
-  }
-
-  .hero-stat {
-    position: relative;
-    padding: var(--spacing-md);
-    gap: var(--spacing-2xs);
-  }
-
-  /* 32px and 12px, as tokens rather than literals: --text-h2's clamp floor IS
-     2rem and --text-caption IS 0.75rem, so these are the design's numbers
-     said in the system's words. The h1/h5 classes in the markup still supply
-     the weight, leading and tracking; only the size changes here, and only
-     below md, where the band is one object rather than three cards.
-     Descendant selectors (0,1,1) outrank the .text-h1 / .text-h5 classes
-     (0,1,0) they override — no !important, no utility fight. */
-  @media (max-width: 47.99rem) {
-    .hero-stat dt {
-      font-size: var(--text-h2);
-    }
-
-    .hero-stat dd {
-      font-size: var(--text-caption);
-    }
-  }
-
-  /* THE DIVIDER GOES ON THE ITEM THAT HAS A NEIGHBOUR TO ITS LEFT, which below
-     md is every EVEN item — the band is two columns there, so item 3 opens a new
-     row and a left-hand hairline on it would sit against the plate's own edge.
-     `+` is right for a single row and wrong for a grid that wraps. */
-  .hero-stat:nth-child(2n)::before {
-    content: '';
-    position: absolute;
-    inset-block: var(--spacing-md);
-    inset-inline-start: 0;
-    inline-size: var(--border-width);
-    background-color: var(--line-overlay);
-  }
-
-
-
-  @media (min-width: 48rem) {
-    /* Three cards. The plate's own treatment comes off and moves onto each
-       column, which is the desktop design. */
-    .hero-stats {
-      background-color: transparent;
-      backdrop-filter: none;
-      overflow: visible;
-      gap: var(--spacing-lg);
-    }
-
-    .hero-stat {
-      background-color: var(--bg-overlay);
-      border: var(--border-width) solid var(--line-overlay);
-      border-radius: var(--radius-md);
-      backdrop-filter: blur(var(--blur-overlay));
-      padding: var(--spacing-md) var(--spacing-lg) var(--spacing-lg);
-      gap: var(--spacing-sm);
-    }
-
-
-    /* Separate cards from md, so nothing needs a hairline between them. */
-    .hero-stat:nth-child(2n)::before {
-      content: none;
-    }
   }
 
   /* The home headline's own measure. 1000px is MEASURED, not chosen: it is the
@@ -3408,6 +3187,35 @@
   @container (width < 300px) {
     .turnstile-fit .cf-turnstile {
       zoom: 0.75;
+    }
+  }
+}
+
+/* --- The category pages' cross-links -------------------------------------
+   The whole row is one target, and it is still ONE target with ONE accessible
+   name: the arrow that was already the row's only anchor grows a stretched
+   ::after rather than a second link being wrapped around everything. Same
+   ruling as `.category-card-link`, and the same reason — a wrapping <a> would
+   put the heading, the paragraph and the arrow's own label into one announced
+   name.
+
+   The thumbnail is not a target: without this the picture swallows the press,
+   and dragging it starts the browser's native image drag instead of following
+   the link. */
+@layer components {
+  .cross-link-target::after {
+    content: '';
+    position: absolute;
+    inset: 0;
+  }
+
+  .cross-link .media-slot {
+    pointer-events: none;
+  }
+
+  @media (hover: hover) {
+    .cross-link:hover .cross-link-target {
+      background-color: var(--bg-subtle);
     }
   }
 }

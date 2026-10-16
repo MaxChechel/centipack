@@ -4,19 +4,12 @@ import Section from '../components/Section.astro';
 import Button from '../components/atoms/Button.astro';
 import SectionHeader from '../components/blocks/SectionHeader.astro';
 import CategoryCard from '../components/blocks/CategoryCard.astro';
+import CtaPlate from '../components/blocks/CtaPlate.astro';
 import Media from '../components/blocks/Media.astro';
 import { getCategories, toPageImage } from '../lib/catalogue';
+import { closingBand } from '../lib/closing-band';
 import { SITE } from '../consts';
 import heroImage from '../assets/home/centipack-home-hero.avif';
-/* THE COLLAGE'S OWN FIVE SHOTS, supplied 2026-09-28. These replace the product
-   catalogue's, which stood in here from the first build — the note that used to
-   sit at this import said "swapping back is five lines", and it was. */
-import volumeGelPack from '../assets/home/cta-banner/home-cta-2.avif';
-import volumeJar from '../assets/home/cta-banner/home-cta-1.avif';
-import volumeCooler from '../assets/home/cta-banner/home-cta-4.avif';
-import volumeMailer from '../assets/home/cta-banner/home-cta-5.avif';
-import volumeBox from '../assets/home/cta-banner/home-cta-3.avif';
-import { Image } from 'astro:assets';
 
 /**
  * Home (§4.4).
@@ -30,13 +23,31 @@ import { Image } from 'astro:assets';
  * adapter, from the first commit — not a hardcoded trio that would have to be
  * migrated later (§5).
  *
- * Copy is verbatim from Figma 788:8519. One deliberate departure, recorded as
- * open question 16: the design drops the hero lede at 1440 and keeps it at 402.
- * It ships at both widths here, because hiding content at one breakpoint is a
- * content-loss pattern rather than a layout, and because that sentence is also
- * the site's meta description.
+ * Copy and structure are v1 (Figma uMHWj1JRHoqmY9uOQNfyL6, `Home v1.03`,
+ * 1005:13599). Three things changed in that round and all three are
+ * subtractions, which is worth saying because the page got better by losing
+ * them:
+ *
+ *   - THE STAT BAND IS GONE. Four claims sat on a glass plate over the hero
+ *     photograph. The design does not draw them — the frames that carried them
+ *     were already `hidden` in the file, which open question 32 flagged at the
+ *     time — and they are now gone from the page as well. `.hero-stats`,
+ *     `.hero-stat` and the `--blur-overlay` token went with them rather than
+ *     being left as CSS for markup nobody renders.
+ *   - THE COLLAGE IS GONE. This page ended on its own closing block: five
+ *     product shots scattered at Figma offsets around a heading, with its own
+ *     copy and its own button. v1 ends it on the SAME `cta desktop` every other
+ *     page ends on, so the band is now one component and one string
+ *     (`src/lib/closing-band.ts`) across six page types instead of five plus a
+ *     bespoke sixth.
+ *   - THE HERO HAS ONE BUTTON. It had two; the design draws one secondary.
+ *
+ * The hero picture is also no longer full-bleed: v1 draws it CONTAINED at
+ * 1344 x 560 with the page's own radius, which is what every other photographic
+ * plate on the site does.
  */
 const categories = await getCategories();
+const cta = await closingBand();
 
 /**
  * How wide a category card is DRAWN here, as `sizes`.
@@ -63,99 +74,10 @@ const heroPicture = await toPageImage({
   src: heroImage,
   // mobile: heroImageMobile,
   /* RE-READ AGAINST THE PICTURE after the shot was swapped, which is the rule
-     entry 46 set and the only way this string stays true. The previous version
-     said "two insulated mailers": there is ONE mailer — the navy pouch printed
-     "Refrigerate upon opening" — and the second blue pouch is a GEL PACK, a
-     different product in the catalogue. It also said "jars" for a single open
-     jar and did not name the gel pack at all. */
+     entry 46 set and the only way this string stays true. */
   alt:
     'The CentiPack range in one line-up: an insulated mailer printed "Refrigerate upon opening", a gel pack, blue drawer and hinged boxes holding vials, a pump bottle, an open jar, an EPS foam cooler in its corrugated outer, and an open white mailer box.',
 });
-
-/**
- * The closing collage. Five product shots placed AT THE FIGMA OFFSETS rather
- * than in a grid: the arrangement is the point — two of them bleed past the
- * container into the gutters — and it is what the motion pass will animate.
- *
- * The numbers are percentages of the 1344 × 967 container the design draws them
- * in, which is why they are data here rather than utility classes: they are
- * measurements, and a measurement in a class name is a measurement nobody can
- * check against the source.
- */
-/* `ratio` IS THE DRAWN BOX, not the file's own proportion. It went in because
-   the borrowed shots were all one portrait 1037 x 1284 dropped into boxes drawn
-   between 288:540 and 618:593, and the tallest crop grew down over "Thermal
-   integrity."
-
-   IT STAYS, AND THE REAL SHOTS ARE WHY IT IS NOW ALMOST A NO-OP. Each supplied
-   file is exactly TWICE its slot's drawn box in height:
-
-     slot        drawn box   x2        file            actual
-     top centre  618 x 593   1236x1186 home-cta-2.avif 1236 x 1188
-     left        360 x 628    720x1256 home-cta-1.avif  904 x 1256
-     right       288 x 540    576x1080 home-cta-4.avif  720 x 1080
-     bottom rt   522 x 628   1044x1256 home-cta-5.avif 1044 x 1256
-     bottom lf   514 x 504   1028x1008 home-cta-3.avif 1028 x 1008
-
-   Three match the box outright; two are wider than it, so `ratio` crops them
-   horizontally into the composition rather than letting the composition bend
-   around a photograph. That is the same job it has always done — the difference
-   is that it is now trimming the sides of a correct shot rather than rescuing a
-   wrong one.
-
-   THE FILE NUMBERS ARE NOT THE SLOT ORDER, which is why the imports above are
-   deliberately out of sequence. The mapping was derived twice and both agree:
-   by matching each file's height to a box height at 2x, and by sorting files and
-   slots independently by aspect ratio. Verified afterwards by rendering the page
-   and looking at it.
-
-   `alt` came out of these rows. The list is `aria-hidden` and the template has
-   always passed `alt=""`, so the five sentences that used to sit here described
-   photographs to nobody and had already gone stale against the new files —
-   dead data that reads as authoritative. */
-const collage = [
-  /* Flat gel pack, shot from above. */
-  { image: volumeGelPack, left: 39.79, top: -0.05, width: 22.99, ratio: '618 / 593', mobile: { left: 38, top: 1, width: 24 } },
-  /* Navy jar, lid off, vials inside. Bleeds into the left gutter. */
-  { image: volumeJar, left: -3.57, top: 24.6, width: 13.39, ratio: '360 / 628' },
-  /* EPS cooler in its corrugated outer. Bleeds into the right gutter. */
-  { image: volumeCooler, left: 92.86, top: 22.68, width: 10.71, ratio: '288 / 540' },
-  /* The large insulated mailer. */
-  { image: volumeMailer, left: 69.07, top: 65.51, width: 19.42, ratio: '522 / 628', mobile: { left: 60, top: 76, width: 22 } },
-  /* Drawer box slid open on two vials. */
-  { image: volumeBox, left: 21.5, top: 73.73, width: 19.12, ratio: '514 / 504', mobile: { left: 14, top: 83, width: 21 } },
-];
-
-/**
- * The hero's three claims. Page-local because they are three sentences about
- * this page, not a repeating content type — a collection for three numbers that
- * appear once is the abstraction §4.5 says to wait for.
- */
-/**
- * THE LABELS ARE FIGMA'S AGAIN. Two of the three were not: "point of contact"
- * and "years in cold chain industry" appear NOWHERE in the design file —
- * searched, zero nodes — and the brief says copy is lifted verbatim. The
- * design's own strings are below, and they are also what the client's reference
- * image shows.
- *
- * Worth knowing before trusting this: both Figma frames carrying these labels
- * (788:8317 and 788:8559) are marked `hidden="true"`, i.e. the band is switched
- * off in the design file. The band exists on this page because it was asked for
- * in review, not because the design draws it — so "which of these is canonical"
- * is a question for the human, recorded as open question 32.
- */
-/**
- * NO PAYOFF LINES. The v7 redline gave each number a label AND a payoff
- * sentence; the reference screens show the label alone, which is also what the
- * band can carry — the payoffs ran to ninety characters and took the band from
- * 120px to 327px on a phone (open question 39, now moot).
- */
-const stats = [
-  { value: '1', label: 'dedicated contact' },
-  { value: '0', label: 'distributors in between' },
-  { value: '20+', label: 'years of combined cold-chain expertise' },
-  { value: '3', label: 'integrated layers' },
-];
 ---
 
 <BaseLayout
@@ -186,136 +108,81 @@ const stats = [
       <h1 class="hero-headline text-h1 text-primary">
         Cold chain packaging for high-volume compounding pharmacies
       </h1>
-      {/* v8 DRAWS A HERO BODY, reversing the "hero: no subtext" call from the
-          2026-09-12 review. The design's own mobile frame carries this line, so
-          the later instruction wins — flagged in the WORKLOG rather than
-          silently overriding an earlier one.
 
-          THE LINE ITSELF IS NO LONGER THE DECK'S. v8 reads "Insulated shippers,
-          refrigerants, custom boxes, and pharmacy formats — one supplier, built
-          for pharmacies producing at scale."; this is the client's replacement,
-          supplied directly (WORKLOG 44). It leads with manufacturing rather
-          than with the list, which nothing else on the page says. */}
-      <p class="text-body text-secondary measure">
-        We manufacture complete packaging for temperature-sensitive medications — shippers,
-        refrigerants, custom boxes and pharmacy formats — backed by 20+ years of combined cold chain
-        expertise.
+      {/* `text-large`, not `text-body`: the design sets this one paragraph at
+          18px where the rest of the site's body copy is 16. It is the opening
+          sentence of the site and `--text-large` is exactly the step that
+          exists for it (see the token's note in global.css).
+
+          680px is the column the design draws it in, and no token lands there —
+          `measure` is 66ch of the current size, which at 18px overshoots by
+          about 60px. An arbitrary value with its reason stated (§4.2). */}
+      <p class="text-large text-secondary max-w-[42.5rem]">
+        We manufacture complete packaging solutions for temperature-sensitive medications — from
+        insulated shippers and refrigerants to custom boxes and pharmacy formats — backed by 20+
+        years of combined cold-chain expertise and built for pharmacies that produce at scale.
       </p>
-      {/* No lede here. The design does not draw one at either width; the
-          sentence lives on as the page's meta description, which is where it
-          was doing its real work. Closes open question 16. */}
-      <div class="gap-sm flex flex-wrap justify-center">
-        <Button href={SITE.contactHref} variant="primary" icon="square" iconPosition="start">
-          Contact us
-        </Button>
-        <Button href="/products" variant="secondary">Explore products</Button>
-      </div>
+
+      {/* ONE BUTTON, and it is the secondary. The page had a primary "Contact
+          us" beside this; v1 draws a single 152px secondary. The hero's job
+          here is to open the catalogue, and the closing band at the foot of the
+          page is where the quote request lives. */}
+      <Button href="/products" variant="secondary">Explore products</Button>
     </div>
   </Section>
 
   {/*
-    2 — The hero picture, and the three claims that sit on it.
+    2 — The hero picture.
 
-    `width="full"` keeps the Section wrapper — theme and rhythm behave identically
-    — and drops only the max-width and the gutter, which is what full-bleed means
-    here. The stat cards are REAL CARDS over the photograph: `bg-overlay` and
-    `border-overlay` are named translucent tokens (§2.3), not ad-hoc alpha, and
-    `data-theme="dark"` is what makes them resolve white over the scrim.
+    CONTAINED, NOT FULL-BLEED, and with nothing on top of it. v1 draws a
+    1344 x 560 plate inside the page's own gutter with the card radius — the
+    same object as every other photographic plate on the site — where this used
+    to run edge to edge under a band of four statistics.
 
-    A <dl> rather than three divs: each card is a term and its value, and that is
-    what a description list is for.
+    No `media-scrim` either: a scrim exists to make type legible over a
+    photograph, and there is no longer any type over this one.
   */}
-  <Section width="full" space="none">
-    <div
-      data-theme={heroPicture ? 'dark' : undefined}
-      class:list={['relative isolate', heroPicture && 'media-scrim']}
-    >
-      <Media
-        image={heroPicture}
-        label="Home hero — the CentiPack range in one line-up"
-        ratio="5 / 3"
-        loading="eager"
-        fetchpriority="high"
-        sizes="100vw"
-        class="hero-media"
-      />
-
-      {/*
-        Three across at EVERY width, which is what the design draws and what the
-        band has room for — stacking them overflowed the 4:5 crop and landed on
-        the hero above it.
-
-        ONE TYPE STEP AT BOTH WIDTHS, and that is the system refusing something
-        rather than a compromise: `md:text-h5` is not a utility, because the type
-        scale is not in @theme (§2.1) and the named styles are the only way to
-        apply type. Type never jumps at a breakpoint here. The tokens are already
-        fluid — the value is 36px at 402 and 64px at 1440, which is exactly what
-        the design draws — so the only thing the breakpoint changes is padding.
-      */}
-      {/* FULL BLEED BELOW md, contained above it. No gutter and no bottom
-          padding on mobile — the band runs edge to edge and sits flush on the
-          bottom of the picture; the page's gutter comes back as the columns'
-          own padding. From md the three cards want the container again. */}
-      <div class="md:container-main md:pb-2xl absolute inset-x-0 bottom-0 z-10">
-        {/*
-          ONE PLATE ON MOBILE, THREE CARDS FROM md. Below the breakpoint the
-          three claims share a single glass panel divided by hairlines; from md
-          they separate into the three cards the desktop design draws. That is
-          two different objects, not one object with a gap that changes, so the
-          whole treatment lives in `.hero-stats` / `.hero-stat` rather than in
-          utilities here — a utility cannot be removed at a breakpoint, and
-          utilities outrank the component layer, so leaving the card classes in
-          the markup would have made the mobile plate impossible to express.
-        */}
-        <dl class="hero-stats grid grid-cols-2 md:grid-cols-4">
-          {
-            stats.map((stat) => (
-              <div class="hero-stat flex flex-col">
-                <dt class="text-h1 text-primary">{stat.value}</dt>
-                {/* HYPHENATED, because three cards across 320px leaves 67px of
-                    text and "distributors" is 97px of it. Measured: the label
-                    spilled 30px past its own card and over the one beside it at
-                    320, 16px at 360, 6px at 390 — invisible to the page-level
-                    overflow sweep, because the document never scrolled.
-                    The alternatives were worse. Stacking overflowed the 4:5 crop
-                    (recorded above); a smaller type step at a breakpoint is the
-                    one thing this type scale refuses (§2.1). Hyphenation is what
-                    the browser has for exactly this, it needs the <html lang>
-                    that is already there, and it does nothing at all at any width
-                    where the word fits. */}
-                <dd class="text-h5 text-primary hyphens-auto">{stat.label}</dd>
-              </div>
-            ))
-          }
-        </dl>
-      </div>
-    </div>
+  {/* `spaceBottom="md"` — the design leaves 80px of page ground between the
+      picture and the cream band below it, and without it the cream starts on
+      the image's own bottom edge. 96px at 1440 is the nearest step on the
+      section scale; a token for the 16px difference would be scale inflation
+      (§4.5). No top padding: the picture sits directly under the hero, as
+      drawn. */}
+  <Section width="main" space="none" spaceBottom="md">
+    <Media
+      image={heroPicture}
+      label="Home hero — the CentiPack range in one line-up"
+      ratio="1344 / 560"
+      loading="eager"
+      fetchpriority="high"
+      sizes="(min-width: 90rem) 1344px, 100vw"
+      class="hero-media rounded-md"
+    />
   </Section>
 
   {/* 3 — Three layers. The band the design sets on the cream ground. */}
   <Section space="lg" class="bg-subtle">
     <div class="gap-2xl flex flex-col">
-      <SectionHeader heading="Three integrated layers. Available individually or as a complete solution. Built to perform." headingLevel="h2" size="h2" split>
+      <SectionHeader heading="Three integrated layers available individually or as a complete solution. Built to perform." headingLevel="h2" size="h2" split>
         <Fragment slot="lede">
-          A cold-chain system, not just packaging: shippers and refrigerants validated for 2–8°C
-          from 24 to 72 hours, with formats and custom boxes built to the same standard. Behind it,
-          20+ years of combined cold-chain expertise and supply built for the largest compounding
-          programs.
+          Your products deserve more than packaging — they require a cold-chain system built to
+          maintain thermal integrity from packout through delivery. We manufacture the complete
+          solution: insulated shippers validated for 2–8°C performance, refrigerants, custom
+          secondary packaging, and pharmacy formats
         </Fragment>
-        <Button href="/products" variant="ghost" size="link" icon="arrow">Browse all formats</Button>
+        <Button href="/products" variant="ghost" size="link" icon="arrow">Browse all products</Button>
       </SectionHeader>
 
       {/*
-        NESTED ORDER, NOT CATALOGUE ORDER. The lede above names them inward-out —
-        "the format it is dispensed in, the custom box, and the shipper" — and
-        the heading calls them three layers, so the cards read in that same
-        order. The nav and the footer keep the catalogue's own order, which is
-        the order someone browsing a menu expects. Same three records, ordered
-        for the sentence they sit under.
+        CATALOGUE ORDER, left to right: cold chain, custom boxes, pharmacy
+        formats. These were REVERSED here — nested order, inward-out, to match a
+        lede that named them that way — and v1 draws them in the catalogue's own
+        order under a lede that no longer names them at all. Same three records,
+        one less thing to keep in sync.
       */}
       <ul class="list-bare gap-sm grid md:grid-cols-3">
         {
-          [...categories].reverse().map((category) => (
+          categories.map((category) => (
             <li class="flex">
               <CategoryCard category={category} headingLevel={3} sizes={CARD_SIZES_3UP} class="w-full" />
             </li>
@@ -332,13 +199,9 @@ const stats = [
     across the full width; the card inside it carries left and right borders,
     inset by one step from the page edge. That pair is what makes the quote read
     as a plate set into the page rather than as another band — it is drawn that
-    way in Figma (788:8623) and it is the one place on this page where `--line`
-    does structural work.
+    way in Figma and it is the one place on this page where `--line` does
+    structural work.
   */}
-  {/* `bg-base`, not `bg-surface`: neither this band nor the one after it
-      declares a fill in Figma, so both inherit the page ground. The rules are
-      what separate this section, not a change of ground — which is the whole
-      reason it is drawn with borders. */}
   <Section space="none" class="border-line border-b">
     {/* 64px of air on mobile rather than 192. `py-5xl` is the desktop
         measure and on a phone it pushed the quote most of a screen away from
@@ -359,67 +222,22 @@ const stats = [
           some of the best we’ve seen.
         </p>
       </blockquote>
-      <figcaption class="text-body text-secondary">Director of Operations, high-volume compounding pharmacy</figcaption>
+      {/* v1's attribution, replacing "Director of Operations, high-volume
+          compounding pharmacy". Shorter and less specific — which is the
+          client's call about their own reference. */}
+      <figcaption class="text-body text-secondary">Compounding pharmacy client</figcaption>
     </figure>
   </Section>
 
-  {/* 5 — Volume. This page's closing CTA; there is no CtaBanner on Home. */}
-  <Section space="lg" width="main">
-    <div class="volume relative isolate flex flex-col items-center text-center">
-      {/* 620px is the column the design centres this block in, and the collage
-          is placed around it — so the width is load-bearing rather than
-          cosmetic: at the container's full 1344 the heading runs under the two
-          side shots. An arbitrary value with its reason stated (§4.2); this is
-          the second editorial width on the page, and a third makes it a token. */}
-      <div class="gap-lg relative z-10 flex max-w-[38.75rem] flex-col items-center">
-        <h2 class="text-h2 text-primary">Thermal integrity. Validated performance. Manufacturing scale.</h2>
-        <p class="text-body text-secondary measure">
-          Mass volume through our own manufacturing partners — no distributors, no markup in
-          between. Quoted to your volumes and lanes.
-        </p>
-        <Button href={SITE.contactHref} variant="primary" icon="square" iconPosition="start">
-          Contact us
-        </Button>
-      </div>
+  {/*
+    5 — The closing band, and it is the SAME ONE every other page ends on.
 
-      {/*
-        The collage, placed. Absolute from `md` up at the design's own offsets —
-        two of them deliberately bleed past the container into the gutters, which
-        is the whole character of the arrangement and the reason a grid could not
-        stand in for it. Below `md` there is no room to scatter anything, so they
-        fall back to a two-up flow that reads as a strip.
-
-        `aria-hidden`: these five are decoration around a heading that already
-        says what they are. Five alt texts describing product photographs here
-        would be five interruptions on the way to the button.
-      */}
-      {/* `data-bleed`: two of the five hang into the gutter on purpose (see
-           above), which is content outside its own box — declared here so the
-           sweep's spill assertion reads it as art direction rather than a
-           defect. */}
-      <ul
-        class="volume-collage list-bare"
-        aria-hidden="true"
-        data-bleed
-      >
-        {
-          collage.map((shot) => (
-            <li
-              class="volume-collage-item"
-              data-on-mobile={shot.mobile ? '' : undefined}
-              style={[
-                `--at-left:${shot.left}%;--at-top:${shot.top}%;--at-width:${shot.width}%;--at-ratio:${shot.ratio}`,
-                shot.mobile &&
-                  `--at-left-m:${shot.mobile.left}%;--at-top-m:${shot.mobile.top}%;--at-width-m:${shot.mobile.width}%`,
-              ]
-                .filter(Boolean)
-                .join(';')}
-            >
-              <Image src={shot.image} alt="" widths={[240, 480, 720]} class="rounded-md w-full" />
-            </li>
-          ))
-        }
-      </ul>
-    </div>
+    This page used to end on a bespoke block: five product photographs scattered
+    at the design's own offsets around a heading, with its own copy and its own
+    button. v1 replaces it with the shared `cta desktop`, so the closing band is
+    now one component reading one string across every page type that has one.
+  */}
+  <Section space="md" spaceTop="lg">
+    <CtaPlate {...cta} />
   </Section>
 </BaseLayout>

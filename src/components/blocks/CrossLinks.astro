@@ -1,0 +1,117 @@
+---
+import Media from './Media.astro';
+import type { CategoryView } from '../../lib/catalogue';
+
+/**
+ * "The rest of the build" (§4.2) — the compact pair of cross-links at the foot
+ * of every category page.
+ *
+ * A THIRD CARD, AND NOT A VARIANT OF THE OTHER TWO. This replaces a pair of
+ * full CategoryCards drawn 1:1 at 656px each, which is what the previous design
+ * put here; v1 draws something structurally different — a 128px square thumb, a
+ * 208px text column, and a round arrow button pinned to the bottom right, all
+ * 154px tall. White type over a photograph has become black type BESIDE one.
+ *
+ * Trying to reach that from CategoryCard would have meant a prop that moved the
+ * text out of the picture, dropped the scrims, dropped the dark theme and
+ * changed the aspect ratio — which is not a variant, it is a different
+ * component wearing the same name (§4.2). CategoryCard keeps the home page's
+ * three-up tiles and loses the props that only this use needed.
+ *
+ * ONE TARGET, ONE ACCESSIBLE NAME, same mechanism CategoryCard uses: the arrow
+ * is the only anchor and `.cross-link-target` stretches its ::after over the
+ * whole row. The card is NOT wrapped in an <a>, which would fold the heading,
+ * the paragraph and the arrow into a single announced name.
+ */
+interface Props {
+  /** The eyebrow over the section's standfirst. */
+  eyebrow: string;
+  /** The standfirst. Drawn at h4 in a 432px column, not as a heading. */
+  body: string;
+  /** The other categories — two of them, on every page that renders this. */
+  categories: readonly CategoryView[];
+  id?: string;
+}
+
+const { eyebrow, body, categories, id } = Astro.props as Props;
+
+/* SELF-SKIP (§4.2): nothing to cross-link to, nothing to render. */
+const hasContent = categories.length > 0;
+---
+
+{hasContent && (
+<div id={id} class="gap-xl md:gap-lg md:grid md:grid-cols-12 md:items-start flex flex-col">
+  <div class="gap-sm md:col-span-4 flex flex-col">
+    <p class="text-eyebrow">{eyebrow}</p>
+    {/* `text-h4` and a <p>, not a heading: the design sets this at 24px but it
+        is a sentence about the two cards beside it, not a title over them. The
+        cards carry the headings. */}
+    <p class="text-h4 text-primary">{body}</p>
+  </div>
+
+  {/* `md:col-span-8 md:col-start-5` is the design's own split: the heading
+      column is 432px and the pair beside it is 888, which at a 1344 container
+      with a 24px gutter is exactly four columns and eight. Each card then comes
+      out at (888 - 24) / 2 = 432px, as drawn.
+
+      TWO-UP ONLY FROM xl, AND THE ARITHMETIC IS WHY. A card spends 212px on
+      furniture before any text — a 128px thumb, a 36px arrow and two 24px gaps
+      — so a pair of them needs 424px of chrome plus two readable columns. At
+      1024 that leaves 96px per paragraph; at 1280 it leaves 180. Below xl the
+      pair stacks and each card gets the full width, which is the same content
+      at a width it can be read at. */}
+  <ul class="list-bare gap-lg md:col-span-8 md:col-start-5 grid xl:grid-cols-2">
+    {
+      categories.map((category) => (
+        /* `min-w-[0px]` on the row and on the text column, because a flex item
+           and a grid item both default to `min-width: auto` — they refuse to
+           shrink below their content, and the row ran up to 183px past its own
+           box at every width the sweep tests. Not `min-w-0`: this repo resets
+           Tailwind's numeric spacing scale, so that class generates no rule.
+
+           STACKED BELOW sm. At 320 the container is ~272 and the furniture
+           alone is 212, which leaves 60px for a paragraph. The thumb goes above
+           the text instead and the text gets the full width. */
+        <li class="cross-link gap-lg relative flex min-w-[0px] flex-col sm:flex-row">
+          {/* 128px square, fixed: the thumb is a constant in the design and the
+              text column is what absorbs a longer line.
+
+              THE WIDTH IS ON A WRAPPER, NOT ON `Media`. Media puts `w-full` on
+              its own <img> and the `class` prop lands beside it, so a `w-[8rem]`
+              passed through is two width utilities in one layer and `w-full`
+              wins on source order — measured: the thumb came out 432px, the
+              text column 0, and the arrow 48px outside the card. A caller
+              cannot size this element from outside; it can only size the box
+              around it. */}
+          <div class="w-[8rem] flex-none self-start">
+            <Media
+              image={category.cardImage}
+              label={`${category.pageTitle} — thumbnail`}
+              ratio="1 / 1"
+              sizes="128px"
+              class="rounded-md"
+            />
+          </div>
+
+          <div class="gap-xs flex min-w-[0px] flex-1 flex-col">
+            <h3 class="text-h5 text-primary">{category.pageTitle}</h3>
+            <p class="text-body text-secondary">{category.crossBody}</p>
+          </div>
+
+          {/* Bottom-aligned, as drawn. `self-end` rather than a margin, so the
+              row's own height decides where the bottom is. */}
+          <a
+            href={category.href}
+            class="cross-link-target border-line h-control-sm w-control-sm flex flex-none items-center justify-center self-end rounded-full border"
+            aria-label={`Browse ${category.pageTitle}`}
+          >
+            <svg class="size-icon-inline" viewBox="0 0 16 16" fill="none" aria-hidden="true">
+              <path d="M2 8h12M9.5 3.5 14 8l-4.5 4.5" stroke="currentColor" stroke-width="1.25" />
+            </svg>
+          </a>
+        </li>
+      ))
+    }
+  </ul>
+</div>
+)}

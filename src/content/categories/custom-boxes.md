@@ -1,20 +1,25 @@
 ---
 title: "Custom Boxes"
 pageTitle: "Custom boxes"
+# The PAGE's own H1, which is a third name again: the nav says "Custom Boxes",
+# a cross-link card says "Custom boxes", and the page is headed "Custom interior
+# and exterior boxes" (Figma 1005:14936). Only this category needs it; the other
+# two head their page with `pageTitle`, which is what this falls back to.
+pageHeading: "Custom interior and exterior boxes"
 slug: custom-boxes
 order: 2
 summary: >-
   The box the patient opens — your size, closure, finish, and print. Produced to pharmaceutical presentation standards.
 lede: >-
-  The box the patient opens — made to your spec on size, closure, finish, and print. Produced to pharmaceutical presentation standards for compounding pharmacy and direct-to-patient programs.
+  From individual vial holders to complete protocol kits and exterior shipping boxes, CentiPack helps you create packaging around your products, your brand, and the way you fulfill orders.
 cardBody: >-
-  Magnetic-closure boxes, rigid boxes, trays, inserts, and seals — made to your spec. The first thing your patient sees.
+  Magnetic-closure boxes, rigid presentation boxes, trays, inserts, and seals — made to your specifications
 cardLinkLabel: >-
   Browse formats
 selectionHeading: >-
-  A selection of our custom boxes
+  Thoughtfully packaged. Ready to deliver.
 crossBody: >-
-  Custom secondary packaging — made to your spec, and the first thing your patient sees.
+  Secondary packaging made to your specifications
 navLinkLabel: >-
   Browse custom boxes
 rangeImage:

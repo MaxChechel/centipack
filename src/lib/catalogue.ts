@@ -240,6 +240,8 @@ export interface CategoryView {
   slug: CategorySlug;
   title: string;
   pageTitle: string;
+  /** The page's own H1, falling back to `pageTitle`. See the schema. */
+  pageHeading: string;
   order: number;
   summary: string;
   lede: string;
@@ -249,8 +251,6 @@ export interface CategoryView {
   navLinkLabel: string;
   selectionHeading: string;
   crossBody: string;
-  /** Per-host cross-card copy: `{ [slug of the card]: what it says here }`. */
-  crossBodyOverrides?: Partial<Record<CategorySlug, string>>;
   href: string;
   rangeImage?: Picture;
   cardImage?: Picture;
@@ -580,6 +580,7 @@ async function toCategory(entry: CollectionEntry<'categories'>): Promise<Categor
     slug: entry.data.slug,
     title: entry.data.title,
     pageTitle: entry.data.pageTitle,
+    pageHeading: entry.data.pageHeading ?? entry.data.pageTitle,
     order: entry.data.order,
     summary: entry.data.summary,
     lede: entry.data.lede,
@@ -589,7 +590,6 @@ async function toCategory(entry: CollectionEntry<'categories'>): Promise<Categor
     navLinkLabel: entry.data.navLinkLabel,
     selectionHeading: entry.data.selectionHeading,
     crossBody: entry.data.crossBody,
-    crossBodyOverrides: entry.data.crossBodyOverrides,
     href: categoryHref(entry.data.slug),
     rangeImage: await toPicture(entry.data.rangeImage, WIDE_WIDTH, WIDE_WIDTHS),
     cardImage: await toPicture(entry.data.cardImage, CARD_WIDTH, CATEGORY_CARD_WIDTHS),

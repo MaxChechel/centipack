@@ -5950,3 +5950,119 @@ Both are recorded as comments beside the copy they describe.
     the form grows the field or the sentence loses it.
 
 Unchanged: 22–26, 28, 29, 31–34, 36, 37, 40, 41, 44, 48, 51–71, 73, 74, 76–82.
+
+## 2026-10-16 — Entry 66. Home to v1, and the cross-link pair that was a different object
+
+Three instructions: put the shared CTA banner on the home page, remove the hero
+stats, and re-check every page against Figma. The first two are done and the
+third is partly done — what is left is listed at the end rather than implied.
+
+### The home page got better by losing things
+
+All three of this round's home changes are subtractions.
+
+**The stat band is gone.** Four claims sat on a glass plate over the hero
+photograph. The design does not draw them, and never did: open question 32
+recorded that both Figma frames carrying those labels were `hidden` in the file
+and that the band existed because review asked for it. v1 settles it. The band,
+`.hero-stats`, `.hero-stat` and the `--blur-overlay` token are all gone — the
+token had exactly two consumers and both were the band.
+
+**The collage is gone.** This page ended on a bespoke block: five product shots
+scattered at Figma offsets around their own heading, copy and button, plus about
+100 lines of positioning CSS. v1 ends it on the same `cta desktop` every other
+page ends on. The closing band is now one component reading one string across
+six page types instead of five plus a bespoke sixth.
+
+**The hero has one button**, a secondary, where it had two.
+
+The hero picture is also no longer full-bleed: v1 draws it contained at
+1344 × 560 with the card radius, and with no type on it there is no scrim.
+
+Copy, all from Figma 1005:13599: the hero paragraph (now at `--text-large`, 18px,
+which is what the design sets and what that step exists for), the section
+heading, its standfirst, "Browse all products" for "Browse all formats", and the
+testimonial's attribution — "Compounding pharmacy client", down from "Director
+of Operations, high-volume compounding pharmacy".
+
+The three cards also stop being reversed. They were in nested order, inward-out,
+to match a lede that named them that way; that lede is gone and v1 draws them in
+catalogue order.
+
+### CategoryCard was carrying a second component
+
+`title` read `cross ? pageTitle : title`, which put "Cold Chain & Shipping" — a
+menu label — on the home page's cards while the cross-link beside it said "Cold
+chain packaging". v1 draws `pageTitle` in both places. One category, one display
+name.
+
+Then the cross-link pair stopped being a CategoryCard at all. v1 draws something
+structurally different at the foot of a category page: a 128px square thumb, a
+text column beside it in BLACK, and a round arrow button pinned bottom-right,
+all 154px tall — where that was two 656px tiles with white type over a
+photograph. Reaching one from the other would have meant a prop that moved the
+text out of the picture, dropped both scrims, dropped the dark theme and changed
+the aspect ratio, which is not a variant (§4.2). `CrossLinks.astro` is the new
+block; CategoryCard lost `cross`, `ratio` and `body`, which only that use needed.
+
+`crossBodyOverrides` went with it. It existed because the v8 deck wrote the
+pharmacy card shorter on the cold chain page than on the custom boxes page; v1
+writes one line per category and uses it on both pages that link to it, verified
+across all six cards. One string, no host-keyed map.
+
+Categories also gained `pageHeading`, a THIRD name, because one of them needs
+it: the nav says "Custom Boxes", a card says "Custom boxes", and the page is
+headed "Custom interior and exterior boxes". The other two fall back to
+`pageTitle`.
+
+### Two measurement bugs, both found by the sweep
+
+**`w-full` beats a `class` prop.** `CrossLinks` passed `w-[8rem]` to `Media` for
+its 128px thumb. Media puts `w-full` on its own `<img>` and the prop lands
+beside it — two width utilities in one layer, decided by source order, and
+`w-full` won. Measured on the built page rather than inferred: the thumb came
+out **432px**, the text column **0px**, and the arrow 48px outside the card.
+A caller cannot size that element from outside; it can only size the box around
+it, so the width moved to a wrapper.
+
+**`min-width: auto` again**, the same trap entry 64 hit in NumberedList. Flex
+and grid items both refuse to shrink below their content, and the row ran up to
+183px past its box at all seven widths. `min-w-[0px]` on the row and the text
+column — not `min-w-0`, which generates no rule in this repo.
+
+The pair is also two-up only from `xl`, and that is arithmetic rather than
+taste: a card spends 212px on furniture before any text, so two of them need
+424px of chrome plus two readable columns. At 1024 that leaves 96px per
+paragraph.
+
+### Measurements
+
+| | before | after |
+| --- | --- | --- |
+| verify | 8 checks, 1085 assertions | **8 checks, 1082 assertions, 0 failures** |
+| home page height at 1440 | 5,600px (with collage) | **4,604px** |
+| CSS removed | — | ~160 lines (stats, collage, blur token) |
+
+### Open questions
+
+76 **narrows**: Figma 1005:14205 "Product family (CMS)" is the OLD product page
+template and it DOES draw the six-cell fact grid. The five v1 product pages
+(1179, 1204–1207) do not. Taking the newer batch as canonical is what dropped
+the facts; recorded here because the client's own link list includes both.
+
+Unchanged: 22–26, 28, 29, 31, 33, 34, 36, 37, 40, 41, 44, 48, 51–71, 73, 74,
+77–84. Open question 32 **closes** — the stat band is gone, so which labels were
+canonical no longer matters. Three added:
+
+85. **The custom boxes category page is structurally different in v1** and is
+    NOT yet built. It replaces the five-up product grid with three full-width
+    rows — individual product boxes, complete protocol kits, exterior shipping
+    boxes, each a heading, standfirst, paragraph and picture — and adds an
+    eight-slide "Everything you can customize" carousel with prev/next and an
+    "01 / 08" counter. The rows are the `split` section type that already
+    exists; the carousel is new JavaScript and needs a census entry and a
+    budget.
+86. **The products index (Figma 1007:12982) has not been re-checked** against
+    the built page this round.
+87. **"Jars" is capitalised mid-sentence** in the pharmacy formats card body,
+    as drawn. Transcribed rather than corrected, per the rule this round.

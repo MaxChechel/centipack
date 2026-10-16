@@ -33,29 +33,13 @@ interface Props {
   category: CategoryView;
   headingLevel?: 2 | 3;
   /**
-   * The CROSS-LINK reading: the short body and the sentence-case title another
-   * category or product page uses when it points here.
-   *
-   * A prop rather than a second component, because it is the same card with a
-   * different field selected. The design writes both because a card in a
-   * three-up hero has room a card in a two-up footer does not — that is a
-   * content decision, and the collection carries both strings.
+   * ONE READING, NOT TWO. This carried `cross`, `ratio` and `body` — a second
+   * mode for the pair of cross-links at the foot of a category page, drawn 1:1
+   * with the short copy and sometimes a per-host override. v1 draws that pair
+   * as a different object entirely: a 128px thumb with black type beside it and
+   * a round arrow button, which is `CrossLinks.astro`. The three props went
+   * with the use that needed them.
    */
-  cross?: boolean;
-  /**
-   * Square rather than the 5:6 portrait the home page uses. The cross-link pair
-   * at the foot of a category page is drawn 1:1 in the design — two wide cards
-   * side by side read as a pair, where two tall ones read as a column that lost
-   * its third.
-   */
-  ratio?: '5 / 6' | '1 / 1';
-  /**
-   * Replaces the body this card would otherwise select. One page uses it: the
-   * cold chain page's pharmacy card, which the copy deck writes shorter than
-   * the same card on the custom boxes page. The host passes the string; the
-   * card does not know why.
-   */
-  body?: string;
   /**
    * How wide this card is DRAWN, forwarded to `Media` as `sizes`.
    *
@@ -68,18 +52,15 @@ interface Props {
   class?: string;
 }
 
-const {
-  category,
-  headingLevel = 3,
-  cross = false,
-  ratio = '5 / 6',
-  body: bodyOverride,
-  sizes,
-  class: className,
-} = Astro.props as Props;
+const { category, headingLevel = 3, sizes, class: className } = Astro.props as Props;
 
-const title = cross ? category.pageTitle : category.title;
-const body = bodyOverride ?? (cross ? category.crossBody : category.cardBody);
+/* `pageTitle`, NOT `title`. This read `cross ? pageTitle : title` and put
+   "Cold Chain & Shipping" on the home page's cards — a menu label on a card
+   with a paragraph under it, while the cross-link beside it said "Cold chain
+   packaging". The v1 design draws `pageTitle` in both places (Figma 1005:13694
+   and 1275:3369); one category, one display name. */
+const title = category.pageTitle;
+const body = category.cardBody;
 
 /**
  * THE DARK TREATMENT IS A CONSEQUENCE OF THE PHOTOGRAPH, so it is conditional on
@@ -100,7 +81,7 @@ const hasImage = Boolean(category.cardImage);
     className,
   ]}
 >
-  <Media image={category.cardImage} label={`${category.title} — card`} ratio={ratio} sizes={sizes} />
+  <Media image={category.cardImage} label={`${category.title} — card`} ratio="5 / 6" sizes={sizes} />
 
   {/* TWO SCRIMS, TOP AND BOTTOM, and only where there is a photograph to cover.
       The v1 design draws both; see `.category-card-scrim` in global.css for the

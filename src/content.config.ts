@@ -415,6 +415,20 @@ const categories = defineCollection({
          * item or a menu item that reads like a sentence.
          */
         pageTitle: z.string(),
+        /**
+         * The category PAGE's own H1, where it differs from `pageTitle`.
+         *
+         * A THIRD NAME, and only one category needs it: the nav says "Custom
+         * Boxes", a cross-link card says "Custom boxes", and v1 heads the page
+         * "Custom interior and exterior boxes" (Figma 1005:14936). The other
+         * two categories head their page with `pageTitle`, which is what this
+         * falls back to in the adapter.
+         *
+         * Three fields for three jobs is the honest shape when the design draws
+         * three strings; collapsing them would mean a menu item that reads like
+         * a sentence or a page heading that reads like a menu item.
+         */
+        pageHeading: z.string().optional(),
         slug: CATEGORY,
         order: z.number().int().nonnegative(),
 
@@ -439,29 +453,6 @@ const categories = defineCollection({
          * three-up hero has room a card in a two-up footer does not.
          */
         crossBody: z.string(),
-        /**
-         * WHAT ANOTHER CATEGORY'S CROSS-CARD SAYS **ON THIS PAGE**, keyed by
-         * that category's slug. Absent means it says its own `crossBody`, which
-         * is what all but one of the six cards do.
-         *
-         * A per-host override rather than a second field on the target, because
-         * the v8 copy deck writes the difference that way: the cold chain page's
-         * pharmacy card reads "Vial kits, bottles, dispensers and jars — what
-         * the medication is dispensed in", and the custom boxes page's reads the
-         * longer line. One record cannot hold both, and the deck is explicit
-         * enough that guessing which page is stale is no longer the job
-         * (WORKLOG 31, 33, 35).
-         *
-         * Keyed by the CATEGORY enum, so a slug that does not exist fails the
-         * build with the bad key named rather than silently rendering the
-         * default — the failure mode was run before this shipped (§9).
-         *
-         * `partialRecord`, not `record`: zod 4's `z.record(enum, …)` is
-         * EXHAUSTIVE — it demanded all three slugs on a map that exists to name
-         * one. Measured, not assumed; the build said
-         * "crossBodyOverrides.custom-boxes: Required".
-         */
-        crossBodyOverrides: z.partialRecord(CATEGORY, z.string()).optional(),
 
         /** The wide "range header" shot: the whole category in one picture. */
         rangeImage: picture(image).optional(),

@@ -1,6 +1,12 @@
 import { getCollection, type CollectionEntry } from 'astro:content';
 import { getImage } from 'astro:assets';
 import { productPagesShip } from '../consts';
+import type { IconName } from '../components/atoms/icons';
+/* The schema's own section type, inferred by zod rather than restated here —
+   see the note beside the export in content.config.ts for why it is not read
+   off `CollectionEntry`. A type-only import, so nothing is pulled in at run
+   time and the adapter still knows nothing about where the data came from. */
+import type { ProductSectionInput } from '../content.config';
 
 /**
  * The catalogue view-model adapter (§5).
@@ -82,12 +88,119 @@ export interface Picture {
   mobile?: { src: string; width: number; height: number; srcset?: string };
 }
 
+/** One cell of a `specs` section's two-column sheet. */
+export interface ProductSpecRow {
+  label: string;
+  value: string;
+}
+
+/** One step of a `steps` section. Order is the content; see StepList.astro. */
+export interface ProductStep {
+  title: string;
+  body: string;
+}
+
+/** One cell of a `features` section. `icon` is a name in Icon.astro's map. */
+export interface ProductFeature {
+  icon: IconName;
+  title: string;
+  body: string;
+}
+
+/** One row of a `numbered` section. `body` is absent on the title-only lists. */
+export interface ProductNumberedItem {
+  title: string;
+  body?: string;
+}
+
+/** One row of a `cards` section — the thermal liners chooser. */
+export interface ProductMediaCard {
+  title: string;
+  body: string;
+  image: SlotImage;
+}
+
+/** One card of a `formats` section — a format name over its sizes. */
+export interface ProductFormatCard {
+  title: string;
+  sizes: readonly string[];
+}
+
+/** One answered question. Unanswered ones never reach here; see below. */
+export interface ProductFaqItem {
+  question: string;
+  answer: readonly string[];
+}
+
+/**
+ * AN IMAGE SLOT: the brief, and the photograph if it has been taken.
+ *
+ * `label` is required and `picture` is not, which is the inverse of how an
+ * image field usually reads and the honest shape for this round — the v1
+ * product pages are drawn with nineteen photographic slots and none of the
+ * photographs exists. `Media` prints `label` inside the pending box, so what a
+ * reviewer sees in an empty slot is the brief for the shot that is owed.
+ */
+export interface SlotImage {
+  label: string;
+  picture?: Picture;
+}
+
+/**
+ * A SECTION OF A PRODUCT PAGE, resolved.
+ *
+ * The same discriminated union the content schema declares, with every
+ * `ImageMetadata` already turned into a `Picture` — so the page template does
+ * no image work and a component never sees a `CollectionEntry`. Exhaustive by
+ * construction: the template switches on `type` and TypeScript fails the build
+ * if a member is added here and not handled there, which is the whole reason
+ * this is a union rather than an object with eight optional keys.
+ */
+export type ProductSection =
+  | { type: 'steps'; heading: string; steps: readonly ProductStep[]; image: SlotImage }
+  | { type: 'features'; heading: string; features: readonly ProductFeature[] }
+  | {
+      type: 'specs';
+      heading: string;
+      intro?: string;
+      note?: string;
+      columns: readonly [string, string];
+      rows: readonly ProductSpecRow[];
+      image: SlotImage;
+    }
+  | {
+      type: 'split';
+      heading: string;
+      subheading?: string;
+      body: string;
+      note?: string;
+      action?: { label: string; href: string };
+      image: SlotImage;
+      imageSide: 'start' | 'end';
+    }
+  | {
+      type: 'numbered';
+      heading: string;
+      body?: string;
+      items: readonly ProductNumberedItem[];
+    }
+  | { type: 'cards'; heading: string; cards: readonly ProductMediaCard[] }
+  | { type: 'formats'; heading: string; cards: readonly ProductFormatCard[] }
+  | { type: 'faq'; heading: string; items: readonly ProductFaqItem[] };
+
 export interface ProductView {
   slug: string;
   title: string;
+  /**
+   * The page's own H1. Falls back to `title`, so a product that needs only one
+   * name carries only one.
+   */
+  pageTitle: string;
   category: CategorySlug;
   order: number;
   summary: string;
+  /** The eyebrow line under the page's H1. See the schema for what it is. */
+  descriptor?: string;
   lede?: string;
   contactLinkLabel?: string;
   /**
@@ -106,6 +219,14 @@ export interface ProductView {
    */
   href?: string;
   image?: Picture;
+  /**
+   * The wide shot at the top of the product page — a different photograph from
+   * the card's, falling back to it while no wide one exists. See `images.hero`
+   * in content.config.ts.
+   */
+  heroImage?: Picture;
+  /** The page, as an ordered list of typed sections. Empty means no page. */
+  sections: readonly ProductSection[];
   facts: readonly { label: string; value: string }[];
   specTable?: {
     caption: string;
@@ -199,6 +320,22 @@ const CATEGORY_CARD_WIDTHS = [360, 440, 660, 880, 1320, 1970] as const;
  * for a phone and not quite enough for a retina desktop at the same time.
  */
 const WIDE_WIDTHS = [640, 960, 1280, 1920, 2560, 3840] as const;
+
+/**
+ * The widths a PRODUCT PAGE SECTION's picture is rendered at.
+ *
+ * These slots are drawn at 660px (the two-up rows) and 546px (the spec sheet's
+ * drawing) in a 1344px container, and they go full-bleed below `md`. So the
+ * ladder is those two widths at 1x, 2x and 3x, capped where a source runs out:
+ *
+ *   440   the slot at a 430px phone, 1x
+ *   660   drawn width, 1x
+ *   900   a 430px phone at 2x
+ *  1320   drawn width at 2x
+ *  1980   drawn width at 3x
+ */
+const SECTION_WIDTHS = [440, 660, 900, 1320, 1980] as const;
+const SECTION_WIDTH = 1320;
 
 type RawPicture = { src: ImageMetadata; alt: string; mobile?: ImageMetadata } | undefined;
 
@@ -319,21 +456,119 @@ export async function toPageImage(
   return result!;
 }
 
+/**
+ * An image slot, resolved: the brief always, the photograph when it exists.
+ *
+ * `toPicture` already returns `undefined` for an absent picture, so there is no
+ * branch here — the absence travels through as the absence, and `Media` is the
+ * one place that decides what an absence looks like.
+ */
+async function toSlot(slot: { label: string; picture?: RawPicture }): Promise<SlotImage> {
+  return {
+    label: slot.label,
+    picture: await toPicture(slot.picture, SECTION_WIDTH, SECTION_WIDTHS),
+  };
+}
+
+/**
+ * One section, resolved.
+ *
+ * `entry.data.sections` is typed by zod from the schema, and the shapes line up
+ * member for member with `ProductSection` — so this function's whole job is to
+ * turn the image fields into `Picture`s and hand the rest through. It is
+ * written as an exhaustive switch rather than a spread so that ADDING a section
+ * type to the schema and forgetting it here is a compile error, not a section
+ * that silently renders nothing.
+ *
+ * THE FAQ FILTERS ITSELF HERE, and that is the one place a section's content
+ * changes on the way through. The design writes seven to ten questions per page
+ * and the answer to exactly one of them; the rest are recorded in the content
+ * file so nothing is lost, and dropped here so the page never renders a
+ * disclosure that opens onto nothing. See the schema's note for why the
+ * alternative — writing the missing answers — is not available: they are claims
+ * about thermal performance, materials and disposal.
+ */
+async function toSection(section: ProductSectionInput): Promise<ProductSection> {
+  switch (section.type) {
+    case 'steps':
+      return { type: 'steps', heading: section.heading, steps: section.steps, image: await toSlot(section.image) };
+    case 'features':
+      return { type: 'features', heading: section.heading, features: section.features };
+    case 'specs':
+      return {
+        type: 'specs',
+        heading: section.heading,
+        intro: section.intro,
+        note: section.note,
+        columns: section.columns,
+        rows: section.rows,
+        image: await toSlot(section.image),
+      };
+    case 'split':
+      return {
+        type: 'split',
+        heading: section.heading,
+        subheading: section.subheading,
+        body: section.body,
+        note: section.note,
+        action: section.action,
+        image: await toSlot(section.image),
+        imageSide: section.imageSide,
+      };
+    case 'numbered':
+      return { type: 'numbered', heading: section.heading, body: section.body, items: section.items };
+    case 'cards':
+      return {
+        type: 'cards',
+        heading: section.heading,
+        cards: await Promise.all(
+          section.cards.map(async (card) => ({
+            title: card.title,
+            body: card.body,
+            image: await toSlot(card.image),
+          })),
+        ),
+      };
+    case 'formats':
+      return { type: 'formats', heading: section.heading, cards: section.cards };
+    case 'faq':
+      return {
+        type: 'faq',
+        heading: section.heading,
+        items: section.items.filter((item) => item.answer.length > 0),
+      };
+  }
+}
+
 async function toProduct(entry: CollectionEntry<'products'>): Promise<ProductView> {
   return {
     slug: entry.data.slug,
     title: entry.data.title,
+    pageTitle: entry.data.pageTitle ?? entry.data.title,
     category: entry.data.category,
     order: entry.data.order,
     summary: entry.data.summary,
+    descriptor: entry.data.descriptor,
     lede: entry.data.lede,
     contactLinkLabel: entry.data.contactLinkLabel,
     /* THE ONE PLACE THE LAUNCH GATE REACHES THE VIEW MODEL. Every product link
        on the site is derived from this field, so gating it here gates all of
        them at once — and cannot leave one list pointing at pages the build does
        not emit while another has been updated. See src/consts.ts. */
-    href: productPagesShip() ? productHref(entry.data.category, entry.data.slug) : undefined,
+    href: productPagesShip(entry.data.sections.length)
+      ? productHref(entry.data.category, entry.data.slug)
+      : undefined,
     image: await toPicture(entry.data.images.main, CARD_WIDTH, CARD_WIDTHS),
+    /* FALLS BACK TO THE CARD SHOT while no wide one exists. A letterboxed crop
+       of a real photograph beats a pending box at the top of a page that has
+       just promised a product; the day a wide shot lands, `images.hero` picks
+       it up and nothing else moves. */
+    heroImage: await toPicture(
+      entry.data.images.hero ?? entry.data.images.main,
+      WIDE_WIDTH,
+      WIDE_WIDTHS,
+    ),
+    sections: await Promise.all(entry.data.sections.map(toSection)),
     facts: entry.data.facts,
     specTable: entry.data.specTable,
   };

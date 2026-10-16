@@ -3,49 +3,66 @@ import BaseLayout from '../../../components/shells/BaseLayout.astro';
 import Section from '../../../components/Section.astro';
 import Button from '../../../components/atoms/Button.astro';
 import Breadcrumb from '../../../components/blocks/Breadcrumb.astro';
-import SpecTable from '../../../components/blocks/SpecTable.astro';
 import CtaPlate from '../../../components/blocks/CtaPlate.astro';
 import Media from '../../../components/blocks/Media.astro';
-import { getCatalogue, type CategoryView, type ProductView } from '../../../lib/catalogue';
+import Faq from '../../../components/blocks/Faq.astro';
+import FeatureGrid from '../../../components/blocks/FeatureGrid.astro';
+import FormatCards from '../../../components/blocks/FormatCards.astro';
+import MediaCards from '../../../components/blocks/MediaCards.astro';
+import NumberedList from '../../../components/blocks/NumberedList.astro';
+import SpecSheet from '../../../components/blocks/SpecSheet.astro';
+import SplitFeature from '../../../components/blocks/SplitFeature.astro';
+import StepList from '../../../components/blocks/StepList.astro';
+import {
+  getCatalogue,
+  type CategoryView,
+  type ProductSection,
+  type ProductView,
+} from '../../../lib/catalogue';
 import { closingBand } from '../../../lib/closing-band';
-import { SITE, productPagesShip } from '../../../consts';
+import { SITE } from '../../../consts';
 
 /**
- * Product family — one template, twelve pages (§4.4, §5).
+ * Product family — one template, and as many pages as there are products with
+ * content (§4.4, §5).
  *
- * GATED OUT OF THE LAUNCH. `LAUNCH.productPages` is false (src/consts.ts), so
- * `getStaticPaths` returns an empty list and no HTML is emitted for any of these
- * routes — the same ruling the styleguide gets in astro.config.mjs, and for the
- * same reason: `noindex` is a request, not existing is a fact.
+ * THE PAGE IS ITS SECTIONS, AND THE SECTIONS ARE DATA. The five v1 products
+ * share a vocabulary and not a skeleton: PuncturePack runs hero → how it works
+ * → why choose → sizes → pack-outs → branding → applications → FAQ; gel packs
+ * runs hero → network → construction → formats → custom options and ends
+ * without an FAQ at all; thermal liners opens with a chooser nothing else has.
+ * Eight section types, five different orders, so the order lives in the content
+ * and this template is a switch over it. See the `section` union in
+ * content.config.ts for the argument in full.
  *
- * IN DEV TOO, deliberately. See the note in src/consts.ts: these pages were
- * briefly dev-only-visible, which made `npm run dev` disagree with the built
- * site about whether product cards were clickable. To review this template, set
- * `LAUNCH.productPages` to `true`.
+ * WHICH PRODUCTS GET A PAGE IS THE SAME QUESTION. `getStaticPaths` emits a path
+ * for a product that has sections and nothing for one that does not, which is
+ * why `href` is optional on `ProductView` and why filtering on it here is the
+ * same gate the nav, the footer and the cards read. Eight of the thirteen
+ * products have no v1 design; they render as names, not links, and this route
+ * emits no HTML for them. See `productPagesShip` in src/consts.ts.
  *
- * This template is untouched otherwise, and deliberately so: launching these
- * pages is flipping one boolean, not restoring deleted code.
+ * WHAT THIS TEMPLATE NO LONGER RENDERS: the six-cell `facts` list and the wide
+ * `specTable`. Neither is drawn on any v1 product page — the two-column spec
+ * sheet replaces the table, and the facts have no equivalent. Both are still in
+ * the schema and still in the one content file that fills them, because that
+ * copy came from the client's own redline and deleting it to tidy a template is
+ * not this change's business. Flagged for review rather than quietly dropped.
  *
- * EVERY OPTIONAL FIELD IS GENUINELY OPTIONAL HERE, and that is not a hedge: the
- * design writes one product in full (insulated metallic mailers) and the other
- * eleven are owed. So the lede, the fact list, the contact link and the size
- * table each self-skip, and a product with none of them renders a trail, a
- * heading, a picture slot and the closing band — thin, honest, and obviously
- * incomplete rather than padded with invented copy.
- *
- * Copy is verbatim from Figma 788:9125.
+ * Copy is verbatim from Figma uMHWj1JRHoqmY9uOQNfyL6, nodes 1179:3192,
+ * 1204:3919, 1205:3879, 1206:3839 and 1207:3793.
  */
 export async function getStaticPaths() {
-  /* No paths, no pages. Returning an empty list is what makes the route emit
-     nothing; the template below is never instantiated. */
-  if (!productPagesShip()) return [];
-
   const catalogue = await getCatalogue();
   return catalogue.flatMap(({ category, products }) =>
-    products.map((product) => ({
-      params: { category: category.slug, product: product.slug },
-      props: { product, category },
-    })),
+    products
+      /* `href` IS the gate — see the note above. A product without sections has
+         no href, so it gets no path, so the build emits no HTML for it. */
+      .filter((product) => Boolean(product.href))
+      .map((product) => ({
+        params: { category: category.slug, product: product.slug },
+        props: { product, category },
+      })),
   );
 }
 
@@ -57,37 +74,70 @@ interface Props {
 const { product, category } = Astro.props;
 const cta = await closingBand();
 
-/* The six cells are drawn in two rows of three. A <dl> because each one is a
-   term and its value — page markup rather than a block, because this is the one
-   template that renders it (§4.2's counting rule). */
-const facts = product.facts;
+/**
+ * EXHAUSTIVENESS, ENFORCED AT COMPILE TIME.
+ *
+ * The template below renders each section with a `===` test, which TypeScript
+ * narrows but does not COUNT: adding a ninth member to `ProductSection` and
+ * forgetting it here would type-check cleanly and render a silent gap in the
+ * page. This loop is what makes that a build error instead — the `never`
+ * assignment in the default branch stops compiling the moment a member exists
+ * that the cases above do not name.
+ *
+ * It asserts that every type is ACKNOWLEDGED, not that every type is drawn;
+ * those are different claims and this is the one a type system can make. Its
+ * failure mode was run before it shipped (§9): a `{ type: 'gallery' }` member
+ * added to the union fails `astro check` with "Type 'Gallery' is not assignable
+ * to type 'never'" and names the file and line.
+ */
+const assertEverySectionIsHandled = (sections: readonly ProductSection[]): void => {
+  for (const section of sections) {
+    switch (section.type) {
+      case 'steps':
+      case 'features':
+      case 'specs':
+      case 'split':
+      case 'numbered':
+      case 'cards':
+      case 'formats':
+      case 'faq':
+        break;
+      default: {
+        const unhandled: never = section;
+        throw new Error(`Unhandled product section: ${JSON.stringify(unhandled)}`);
+      }
+    }
+  }
+};
+assertEverySectionIsHandled(product.sections);
 ---
 
 <BaseLayout
-  title={`${product.title} — ${category.title} | ${SITE.name}`}
+  title={`${product.pageTitle} — ${category.title} | ${SITE.name}`}
   description={product.lede ?? `${product.title} — ${product.summary}. ${category.summary}`}
 >
-  <Section spaceTop="nav" spaceBottom="lg" class="bg-subtle">
+  <Section spaceTop="nav" spaceBottom="lg">
     <div class="gap-2xl flex flex-col">
-      <div class="gap-xl md:gap-lg md:grid md:grid-cols-12 md:items-start flex flex-col">
+      <div class="gap-xl md:gap-lg md:grid md:grid-cols-12 md:items-end flex flex-col">
         <div class="gap-lg md:col-span-7 flex flex-col">
+          {/* Home is the first crumb on every trail on this site. The v1
+              product pages start theirs at "Products", and the category pages
+              one level up start theirs at "Home" — two trails to the same
+              branch disagreeing. Kept at Home, so the BreadcrumbList in the
+              structured-data graph has one root. */}
           <Breadcrumb
             trail={[
-              /* Home is the first crumb on EVERY trail. It was missing only
-                 here, which made the product page's BreadcrumbList start one
-                 level below the site root while the two pages above it started
-                 at it — a visible inconsistency in the trail and an inconsistent
-                 structured-data graph for the same branch of the site. */
               { label: 'Home', href: '/' },
               { label: 'Products', href: '/products' },
               { label: category.title, href: category.href },
               { label: product.title },
             ]}
           />
-          <h1 class="text-h1 text-primary">{product.title}</h1>
+          <h1 class="text-h1 text-primary">{product.pageTitle}</h1>
+          {product.descriptor && <p class="text-eyebrow">{product.descriptor}</p>}
         </div>
 
-        <div class="gap-md md:col-span-4 md:col-start-9 flex flex-col items-start">
+        <div class="gap-xl md:col-span-4 md:col-start-9 flex flex-col items-start">
           {product.lede && <p class="text-body text-secondary">{product.lede}</p>}
           {
             product.contactLinkLabel && (
@@ -100,56 +150,78 @@ const facts = product.facts;
       </div>
 
       <Media
-        image={product.image}
-        label={`${product.title} — main`}
+        image={product.heroImage}
+        label={`${product.title} — hero`}
         ratio="1344 / 541"
+        sizes="(min-width: 90rem) 1344px, 100vw"
         loading="eager"
         fetchpriority="high"
         class="page-hero-media rounded-md"
       />
-
-      {/* SELF-SKIP: eleven of the twelve products have no facts yet.
-
-          SPACING, TIGHTENED AND EVENED OUT. The row gap was 48px and the
-          label-to-value gap 24, which left every value stranded clear of its
-          own label and crowded against the next rule. The design reads rule,
-          label, value as one group with the air AFTER it: 24 between rows, 12
-          inside one, 24 below the value.
-
-          The comment sits here and not beside the <dl> because a `&&` branch
-          takes a single root element and a comment beside it is a second — the
-          same Astro rule that bit the Breadcrumb ternary in entry 14. */}
-      {
-        facts.length > 0 && (
-          <dl class="gap-x-lg grid sm:grid-cols-2 lg:grid-cols-3">
-            {facts.map((fact) => (
-              <div class="border-line pt-lg pb-lg gap-sm flex flex-col border-t">
-                <dt class="text-body text-secondary">{fact.label}</dt>
-                <dd class="text-h4 text-primary">{fact.value}</dd>
-              </div>
-            ))}
-          </dl>
-        )
-      }
     </div>
   </Section>
 
-  {/* SELF-SKIP: the sizes are not standardised yet, so most products have no
-      table and this whole band disappears rather than leaving a heading with
-      nothing under it (§4.2). */}
   {
-    product.specTable && (
+    product.sections.map((section) => (
       <Section space="lg">
-        <SpecTable table={product.specTable} heading="Sizes and specifications" />
+        {section.type === 'steps' && (
+          <StepList heading={section.heading} steps={section.steps} image={section.image} />
+        )}
+
+        {section.type === 'features' && (
+          <FeatureGrid heading={section.heading} features={section.features} />
+        )}
+
+        {section.type === 'specs' && (
+          <SpecSheet
+            heading={section.heading}
+            intro={section.intro}
+            note={section.note}
+            columns={section.columns}
+            rows={section.rows}
+            image={section.image}
+          />
+        )}
+
+        {section.type === 'split' && (
+          <SplitFeature
+            heading={section.heading}
+            subheading={section.subheading}
+            body={section.body}
+            note={section.note}
+            action={section.action}
+            image={section.image}
+            imageSide={section.imageSide}
+          />
+        )}
+
+        {section.type === 'numbered' && (
+          <NumberedList heading={section.heading} body={section.body} items={section.items} />
+        )}
+
+        {section.type === 'cards' && (
+          <MediaCards heading={section.heading} cards={section.cards} />
+        )}
+
+        {section.type === 'formats' && (
+          <FormatCards heading={section.heading} cards={section.cards} />
+        )}
+
+        {/* SELF-SKIP, AND IT IS LOAD-BEARING HERE (§4.2). The adapter drops
+            every question the design left unanswered, so this list can arrive
+            empty — and `Faq` would still render its top rule and nothing else.
+            A heading over one hairline is worse than no section. */}
+        {section.type === 'faq' && section.items.length > 0 && (
+          <div class="gap-xl md:gap-lg md:grid md:grid-cols-12 md:items-start flex flex-col">
+            <h2 class="text-h2 text-primary md:col-span-4">{section.heading}</h2>
+            <Faq items={section.items} class="md:col-span-7 md:col-start-6" />
+          </div>
+        )}
       </Section>
-    )
+    ))
   }
 
   <Section space="md" spaceTop="lg">
     <CtaPlate {...cta} />
   </Section>
 </BaseLayout>
-
-<script>
-  import '../../../scripts/rail';
-</script>

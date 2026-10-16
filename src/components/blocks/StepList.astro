@@ -1,0 +1,64 @@
+---
+import Media from './Media.astro';
+import type { ProductStep, SlotImage } from '../../lib/catalogue';
+
+/**
+ * "How it works" (§4.2) — a short ordered procedure beside a demonstration.
+ *
+ * AN <ol> WITH NO VISIBLE NUMERALS, and both halves of that are deliberate.
+ * The design draws "Pull / Pack / Seal" as three divided rows with no numbers
+ * on them, so nothing here renders a numeral; but the order is the content —
+ * sealing before packing is wrong — so the element is an ordered list and a
+ * screen reader announces "3 items, item 1". `list-bare` drops the markers
+ * without dropping that.
+ *
+ * THE 12-COLUMN GRID IS THE DESIGN'S OWN. At the 1344px container with a 24px
+ * gutter, one column is 90px, so a 5-column block is 546px and a 6-column
+ * block starting at column 7 begins at 684px and runs 660px wide — which is
+ * exactly what Figma draws for every one of these two-up rows. The grid is not
+ * an approximation of the design; it is the design's measurements factored.
+ */
+interface Props {
+  heading: string;
+  steps: readonly ProductStep[];
+  image: SlotImage;
+  headingLevel?: 'h2' | 'h3';
+  id?: string;
+}
+
+const { heading, steps, image, headingLevel = 'h2', id } = Astro.props as Props;
+const hasContent = steps.length > 0;
+---
+
+{hasContent && (
+<div id={id} class="gap-xl md:gap-lg md:grid md:grid-cols-12 md:items-center flex flex-col">
+  <div class="gap-xl md:col-span-5 flex flex-col">
+    {
+      headingLevel === 'h3' ? (
+        <h3 class="text-h2 text-primary">{heading}</h3>
+      ) : (
+        <h2 class="text-h2 text-primary">{heading}</h2>
+      )
+    }
+
+    <ol class="list-bare flex flex-col">
+      {
+        steps.map((step) => (
+          <li class="border-line py-lg gap-xs flex flex-col border-t">
+            <p class="text-h5 text-primary">{step.title}</p>
+            <p class="text-body text-secondary">{step.body}</p>
+          </li>
+        ))
+      }
+    </ol>
+  </div>
+
+  <Media
+    image={image.picture}
+    label={image.label}
+    ratio="660 / 560"
+    sizes="(min-width: 90rem) 660px, (min-width: 48rem) 50vw, 100vw"
+    class="rounded-md md:col-span-6 md:col-start-7"
+  />
+</div>
+)}

@@ -687,6 +687,94 @@ function noCommentsInShippedHtml() {
   return { checks, failures, notes };
 }
 
+/**
+ * THE ICON MAP AND THE SCHEMA'S ICON ENUM NAME THE SAME FIFTEEN MARKS.
+ *
+ * `src/components/atoms/icons.ts` holds the drawings; `src/content.config.ts`
+ * holds the `z.enum` a product's `features` validate against. They are two
+ * lists of the same names in two files, which is the shape §5 spends its whole
+ * section warning about — and here it is unavoidable, because one is runtime
+ * data and the other is a build-time validator, and neither can be derived from
+ * the other without importing a component into a content config.
+ *
+ * SO THE DRIFT IS CHECKED INSTEAD. The two ways it goes wrong are not
+ * symmetrical, which is why this asserts both directions:
+ *
+ *   in the enum, not in the map   a product passes validation and renders an
+ *                                 EMPTY 48px circle. Silent. No error anywhere.
+ *   in the map, not in the enum   dead path data, and an icon a content author
+ *                                 can see in the repo and cannot use.
+ *
+ * The first is the dangerous one and it is invisible in every other check: the
+ * page builds, the markup is valid, axe is happy, and a feature cell has a hole
+ * where its mark should be.
+ *
+ * The union type `IconName` is NOT checked here, deliberately. `ICONS` is typed
+ * `Record<IconName, readonly Shape[]>`, so the compiler already refuses a map
+ * that does not match the union exactly — `astro check` is the assertion for
+ * that edge, and repeating it here would be a check about TypeScript rather
+ * than about this repo.
+ *
+ * Reads SOURCE rather than dist, which is the exception in this file and is
+ * right: neither list reaches the built output as a list. What ships is the one
+ * icon each feature happens to use, so dist cannot show a name that is missing
+ * from one side.
+ */
+function iconNamesMatchSchema() {
+  const notes = [];
+  let checks = 0;
+  let failures = 0;
+
+  const iconsSource = readFileSync('src/components/atoms/icons.ts', 'utf8');
+  const schemaSource = readFileSync('src/content.config.ts', 'utf8');
+
+  /** The keys of the ICONS map — top-level entries of the object literal. */
+  const mapBlock = iconsSource.slice(
+    iconsSource.indexOf('export const ICONS'),
+    iconsSource.indexOf('\n};', iconsSource.indexOf('export const ICONS')),
+  );
+  const inMap = new Set([...mapBlock.matchAll(/^ {2}'?([a-z][a-z-]*)'?:/gm)].map((m) => m[1]));
+
+  /** The members of the schema's `z.enum([...])`. */
+  const enumStart = schemaSource.indexOf('const ICON = z.enum([');
+  const enumBlock = schemaSource.slice(enumStart, schemaSource.indexOf(']);', enumStart));
+  const inEnum = new Set([...enumBlock.matchAll(/'([a-z][a-z-]*)'/g)].map((m) => m[1]));
+
+  /* A check that found nothing on either side is a check that cannot fail —
+     a parse that silently returns an empty set would report a confident pass
+     over two lists it never read. §9's counting rule, applied to the input. */
+  if (inMap.size === 0 || inEnum.size === 0) {
+    checks += 1;
+    failures += 1;
+    notes.push(
+      `ICON LISTS NOT FOUND — parsed ${inMap.size} name(s) from icons.ts and ` +
+        `${inEnum.size} from content.config.ts. One of the two files has been ` +
+        'restructured and this check is no longer reading it. Fix the check, not the count.',
+    );
+    return { checks, failures, notes };
+  }
+
+  for (const name of [...new Set([...inMap, ...inEnum])].sort()) {
+    checks += 1;
+    if (!inMap.has(name)) {
+      failures += 1;
+      notes.push(
+        `ICON "${name}" is in the schema's enum but NOT in the ICONS map ` +
+          '(src/components/atoms/icons.ts). A product using it validates and renders an empty badge.',
+      );
+    } else if (!inEnum.has(name)) {
+      failures += 1;
+      notes.push(
+        `ICON "${name}" is in the ICONS map but NOT in the schema's enum ` +
+          '(src/content.config.ts). No product can reference it; the path data is dead.',
+      );
+    }
+  }
+
+  if (failures === 0) notes.push(`${inMap.size} icon(s), named identically in both files`);
+  return { checks, failures, notes };
+}
+
 const CONTRACTS = [
   ['form reports failure (§8)', formReportsFailure],
   ['`as` reserved for Section (§4.2)', asPropReservedForSection],
@@ -695,6 +783,7 @@ const CONTRACTS = [
   ['internal links resolve (§8/§9)', internalLinksResolve],
   ['CSP matches the site (§8)', cspMatchesTheSite],
   ['no HTML comments shipped (§2/§8)', noCommentsInShippedHtml],
+  ['icon map matches schema enum (§4.1/§5)', iconNamesMatchSchema],
 ];
 
 export function contracts() {

@@ -101,9 +101,11 @@ export const isNoindexed = (path: string): boolean =>
 /**
  * LAUNCH SCOPE — what this build is allowed to ship.
  *
- * The soft launch is Home, the products index, the three category pages, About
- * and Contact. The twelve product detail pages are written, designed and built,
- * and they are not part of it.
+ * The soft launch was Home, the products index, the three category pages, About
+ * and Contact, with every product detail page gated out. v1 opens five of them
+ * — the five the client designed — and leaves the other eight closed. WHICH
+ * five is decided by the content, not by a list here; see `productPagesShip`
+ * below for why that is the only rule that can be correct.
  *
  * A GATE, NOT A `noindex`, and not a hand-edited list of links. The same ruling
  * the styleguide route gets in astro.config.mjs, for the same reason: a page
@@ -142,15 +144,36 @@ export const isNoindexed = (path: string): boolean =>
  * site. Flipping it is also exactly how they launch.
  */
 export const LAUNCH = {
-  /** Product detail pages — `/products/:category/:product`. */
-  productPages: false,
+  /** The master switch for product detail pages — `/products/:category/:product`. */
+  productPages: true,
 } as const;
 
 /**
- * Are product detail pages part of this site?
+ * Does THIS product have a page?
  *
- * A function rather than a bare constant so every consumer asks the same
- * question in the same words, and so the answer has one place to change if it
- * ever needs a condition again.
+ * IT IS NO LONGER ONE ANSWER FOR ALL THIRTEEN, and the v1 round is what forced
+ * that. Five products were designed as pages — gel packs, Puncture Pack,
+ * insulated metallic mailers, EPS foam coolers and thermal liners — and the
+ * other eight were not. An all-or-nothing boolean had two settings and both
+ * were wrong: `false` buries five finished pages, `true` ships eight built from
+ * a template with nothing in it.
+ *
+ * SO THE CONTENT DECIDES. A product with sections has a page; a product without
+ * them does not. That is not a convention someone has to remember — it is the
+ * only sentence that can be true, because a page IS its sections, and a product
+ * with none of them has no page to link to in the first place.
+ *
+ * The machinery around it is unchanged and still does the work: a product that
+ * fails this gets no `href` from the adapter, `ProductView.href` is optional,
+ * and every consumer — the card, the nav panel, the mobile fold, the footer —
+ * is a compile error until it handles the absence. Eight products across three
+ * lists is 24 names that render as text rather than 24 links to pages the build
+ * does not emit.
+ *
+ * `LAUNCH.productPages` survives as the master switch above it, for turning the
+ * whole family off in one line without emptying thirteen content files.
+ *
+ * @param sectionCount how many sections this product's content declares
  */
-export const productPagesShip = (): boolean => LAUNCH.productPages;
+export const productPagesShip = (sectionCount: number): boolean =>
+  LAUNCH.productPages && sectionCount > 0;

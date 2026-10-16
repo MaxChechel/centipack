@@ -1,0 +1,74 @@
+---
+import Icon from '../atoms/Icon.astro';
+import type { ProductFeature } from '../../lib/catalogue';
+
+/**
+ * The icon grid the v1 product pages head "Why choose …" and "Construction"
+ * (§4.2).
+ *
+ * FLEX-WRAP, NOT A COLUMN COUNT, and that is the whole design decision here.
+ * The design draws this three ways — four across (EPS, liners), three across
+ * (gel packs), and four-then-three (PuncturePack, metallic mailers, seven
+ * features) — and in the mixed case the SECOND ROW'S CARDS ARE WIDER: 432px
+ * against the first row's 318.
+ *
+ * A `grid-cols-4` cannot do that; it would leave three 318px cards and a hole.
+ * Storing the rows in content could, and would make a layout fact into data
+ * (§4.4). A wrapping flex row with `flex-1` on each item does it from the
+ * content alone, and the numbers come out exactly as drawn — measured against
+ * the 1344px container:
+ *
+ *   4 items   (1344 - 3 x 24) / 4 = 318px   matches Figma 1291:3370
+ *   3 items   (1344 - 2 x 24) / 3 = 432px   matches Figma 1291:3462
+ *
+ * `basis-[17rem]` is what picks the break: 272px basis means five cards
+ * (5 x 272 + 4 x 24 = 1456) do not fit 1344 and four (1160) do. It is the one
+ * number in this file and it is the one the design's own column width implies.
+ */
+interface Props {
+  heading: string;
+  features: readonly ProductFeature[];
+  headingLevel?: 'h2' | 'h3';
+  id?: string;
+}
+
+const { heading, features, headingLevel = 'h2', id } = Astro.props as Props;
+
+/* SELF-SKIP (§4.2): a heading with no features under it is a heading over
+   nothing, so the whole block renders nothing instead. */
+const hasContent = features.length > 0;
+---
+
+{hasContent && (
+<div id={id} class="gap-2xl flex flex-col">
+  {
+    headingLevel === 'h3' ? (
+      <h3 class="text-h2 text-primary">{heading}</h3>
+    ) : (
+      <h2 class="text-h2 text-primary">{heading}</h2>
+    )
+  }
+
+  {/* A LIST, because it is one: a set of sibling claims with no order between
+      them. `list-bare` removes the markers and keeps the semantics. */}
+  <ul class="list-bare gap-lg gap-y-2xl flex flex-wrap">
+    {
+      features.map((feature) => (
+        <li class="gap-lg flex flex-1 basis-[17rem] flex-col items-center text-center">
+          {/* The badge: a 48px circle on the page ground with a hairline, which
+              is `--bg-page` and `--border/subtle` in the design — `bg-base` and
+              `border-line` here, so it inverts with the theme like everything
+              else. 22px glyph, as drawn; the 24-unit viewBox is untouched. */}
+          <span class="border-line bg-base h-control-md w-control-md flex flex-none items-center justify-center rounded-full border">
+            <Icon name={feature.icon} class="size-[1.375rem]" />
+          </span>
+          <span class="gap-xs flex flex-col">
+            <span class="text-h5 text-primary">{feature.title}</span>
+            <span class="text-body text-secondary max-w-[20rem]">{feature.body}</span>
+          </span>
+        </li>
+      ))
+    }
+  </ul>
+</div>
+)}

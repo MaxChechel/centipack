@@ -1,0 +1,96 @@
+---
+import Media from './Media.astro';
+import Button from '../atoms/Button.astro';
+import type { SlotImage } from '../../lib/catalogue';
+
+/**
+ * Copy one side, picture the other (§4.2) — "Tailored pack-outs" and "Brand
+ * your box", which the v1 product pages alternate down the page.
+ *
+ * ONE COMPONENT WITH A SIDE PROP, not two components and not two pages'
+ * markup. The two instances differ in exactly one thing — which side the
+ * photograph is on — and everything else about them, the heading, the
+ * standfirst, the paragraph, the qualifying note and the button, is identical
+ * in structure. That is a prop, not a fork.
+ *
+ * `imageSide` IS A LAYOUT DECISION THIS BLOCK OWNS (§4.4) rather than one the
+ * page makes, because it is intrinsic to the alternation: the second of these
+ * on a page mirrors the first. The page says which, the block does it.
+ *
+ * ORDER IN THE SOURCE IS READING ORDER. The text comes first in the markup
+ * whichever side it is drawn on, and `md:order-*` moves the picture — so a
+ * screen reader and a narrow viewport both get heading-then-copy-then-picture,
+ * and only the wide layout mirrors.
+ */
+interface Props {
+  heading: string;
+  /** The line under the heading — a standfirst, not a second heading. */
+  subheading?: string;
+  body: string;
+  /** The qualifying sentence under the copy: smaller, quieter, and not a claim. */
+  note?: string;
+  action?: { label: string; href: string };
+  image: SlotImage;
+  imageSide?: 'start' | 'end';
+  headingLevel?: 'h2' | 'h3';
+  id?: string;
+}
+
+const {
+  heading,
+  subheading,
+  body,
+  note,
+  action,
+  image,
+  imageSide = 'end',
+  headingLevel = 'h2',
+  id,
+} = Astro.props as Props;
+---
+
+<div id={id} class="gap-xl md:gap-lg md:grid md:grid-cols-12 md:items-center flex flex-col">
+  <div
+    class:list={[
+      'gap-xl flex flex-col items-start md:col-span-5',
+      imageSide === 'start' ? 'md:order-2 md:col-start-8' : 'md:order-1',
+    ]}
+  >
+    <div class="gap-lg flex flex-col">
+      {
+        headingLevel === 'h3' ? (
+          <h3 class="text-h2 text-primary">{heading}</h3>
+        ) : (
+          <h2 class="text-h2 text-primary">{heading}</h2>
+        )
+      }
+      <div class="gap-sm flex flex-col">
+        {subheading && <p class="text-h4 text-primary">{subheading}</p>}
+        <p class="text-body text-secondary">{body}</p>
+      </div>
+    </div>
+
+    {/* The note is `--text-caption` and `--text-tertiary` because it is a
+        qualification, not a claim — "actual thermal performance depends on the
+        complete pack-out". Giving it body weight would make it read as another
+        selling sentence, which is the opposite of its job. */}
+    {note && <p class="text-caption text-tertiary">{note}</p>}
+
+    {action && (
+      <Button href={action.href} variant="primary">
+        {action.label}
+      </Button>
+    )}
+  </div>
+
+  <Media
+    image={image.picture}
+    label={image.label}
+    ratio="660 / 480"
+    sizes="(min-width: 90rem) 660px, (min-width: 48rem) 50vw, 100vw"
+    class:list={[
+      'rounded-md md:col-span-6',
+      imageSide === 'start' ? 'md:order-1 md:col-start-1' : 'md:order-2 md:col-start-7',
+    ]}
+  />
+</div>

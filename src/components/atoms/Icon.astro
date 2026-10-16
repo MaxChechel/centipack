@@ -1,0 +1,57 @@
+---
+import { ICONS, type IconName } from './icons';
+
+/**
+ * The v1 product pages' icon set (§4.1).
+ *
+ * The marks themselves are in `./icons.ts`; see that file for why they are not
+ * in this frontmatter, which is a bug story rather than a preference.
+ *
+ * `currentColor` and no `fill`: every mark is a stroke drawing, so it takes the
+ * colour of whatever it sits in and recolours with the theme like the rest of
+ * the system. The 24-unit viewBox is lucide's and is NOT rescaled — the size
+ * comes from the class on the <svg>, which is how a 22px glyph lands in a 48px
+ * badge without touching the geometry.
+ *
+ * `aria-hidden` always. Every one of these sits directly above its own label;
+ * an accessible name here would announce the picture and then the words.
+ */
+interface Props {
+  name: IconName;
+  class?: string;
+}
+
+const { name, class: className } = Astro.props as Props;
+const shapes = ICONS[name];
+---
+
+<svg
+  viewBox="0 0 24 24"
+  fill="none"
+  stroke="currentColor"
+  stroke-width="2"
+  stroke-linecap="round"
+  stroke-linejoin="round"
+  aria-hidden="true"
+  class:list={[className]}
+>
+  {
+    shapes.map((shape) =>
+      'd' in shape ? (
+        <path d={shape.d} />
+      ) : 'circle' in shape ? (
+        <circle cx={shape.circle[0]} cy={shape.circle[1]} r={shape.circle[2]} />
+      ) : 'rect' in shape ? (
+        <rect
+          x={shape.rect[0]}
+          y={shape.rect[1]}
+          width={shape.rect[2]}
+          height={shape.rect[3]}
+          rx={shape.rect[4]}
+        />
+      ) : (
+        <polyline points={shape.points} />
+      ),
+    )
+  }
+</svg>

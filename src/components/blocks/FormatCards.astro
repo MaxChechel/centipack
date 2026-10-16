@@ -1,0 +1,56 @@
+---
+import type { ProductFormatCard } from '../../lib/catalogue';
+
+/**
+ * "Available formats & sizes" (§4.2) — the gel packs page's two cards, each a
+ * format name over the sizes it comes in.
+ *
+ * THE SIZES ARE A LIST, NOT A SENTENCE. "6 oz, 8 oz, 12 oz, 16 oz, 24 oz,
+ * 32 oz, 48 oz" set as prose would be read as prose; these are seven discrete
+ * options and the design draws them as seven chips, so the markup is a <ul>
+ * and each chip is an <li>. Nothing here is interactive — a chip that looks
+ * like a button and does nothing is worse than a chip that looks like a label.
+ *
+ * The card wears the house recipe (`bg-subtle`, `--radius-md`, interior
+ * padding, no border), which is the same one the nav's help card and the
+ * contact page's panels use.
+ */
+interface Props {
+  heading: string;
+  cards: readonly ProductFormatCard[];
+  headingLevel?: 'h2' | 'h3';
+  id?: string;
+}
+
+const { heading, cards, headingLevel = 'h2', id } = Astro.props as Props;
+const hasContent = cards.length > 0;
+---
+
+{hasContent && (
+<div id={id} class="gap-2xl flex flex-col">
+  {
+    headingLevel === 'h3' ? (
+      <h3 class="text-h2 text-primary">{heading}</h3>
+    ) : (
+      <h2 class="text-h2 text-primary">{heading}</h2>
+    )
+  }
+
+  <ul class="list-bare gap-lg grid md:grid-cols-2">
+    {
+      cards.map((card) => (
+        <li class="bg-subtle rounded-md p-lg md:p-2xl gap-lg flex flex-col">
+          <p class="text-h4 text-primary">{card.title}</p>
+          <ul class="list-bare border-line gap-sm pt-lg flex flex-wrap border-t">
+            {card.sizes.map((size) => (
+              <li class="border-line rounded-sm px-md py-xs text-body text-primary border">
+                {size}
+              </li>
+            ))}
+          </ul>
+        </li>
+      ))
+    }
+  </ul>
+</div>
+)}

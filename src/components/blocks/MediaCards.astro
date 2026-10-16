@@ -1,0 +1,65 @@
+---
+import Media from './Media.astro';
+import type { ProductMediaCard } from '../../lib/catalogue';
+
+/**
+ * Full-width picture-and-pitch rows (§4.2) — the thermal liners page's "Which
+ * liner is right for you?".
+ *
+ * NOT CategoryCard AND NOT ProductCard, and the reason is the same one that
+ * made those two siblings rather than subclasses: this is a 1344 x 440 row with
+ * the picture on one side and two lines of type on the other, where those are
+ * portrait tiles with the type over the photograph. No shared structure, no
+ * common parent worth writing.
+ *
+ * ONE INSTANCE TODAY, which is usually the argument for putting it in the page
+ * instead (§4.2's counting rule). It is a component anyway because it is a
+ * SECTION TYPE in the content schema — the page renders whatever sections the
+ * content lists, and a type that only exists as markup inside one branch of
+ * that switch is a type the next product cannot use without a copy-paste.
+ */
+interface Props {
+  heading: string;
+  cards: readonly ProductMediaCard[];
+  headingLevel?: 'h2' | 'h3';
+  id?: string;
+}
+
+const { heading, cards, headingLevel = 'h2', id } = Astro.props as Props;
+const hasContent = cards.length > 0;
+---
+
+{hasContent && (
+<div id={id} class="gap-2xl flex flex-col">
+  {
+    headingLevel === 'h3' ? (
+      <h3 class="text-h2 text-primary">{heading}</h3>
+    ) : (
+      <h2 class="text-h2 text-primary">{heading}</h2>
+    )
+  }
+
+  <ul class="list-bare gap-lg flex flex-col">
+    {
+      cards.map((card) => (
+        <li class="bg-subtle rounded-md md:gap-lg md:grid md:grid-cols-12 md:items-center overflow-hidden">
+          {/* The picture runs to the card's own edge on its side — no padding
+              under it — which is why the radius is on the <li> and the overflow
+              is hidden there rather than on the image. */}
+          <Media
+            image={card.image.picture}
+            label={card.image.label}
+            ratio="660 / 440"
+            sizes="(min-width: 90rem) 660px, (min-width: 48rem) 50vw, 100vw"
+            class="md:col-span-6"
+          />
+          <div class="p-lg md:p-2xl gap-sm md:col-span-5 md:col-start-8 flex flex-col">
+            <p class="text-h3 text-primary">{card.title}</p>
+            <p class="text-large text-secondary">{card.body}</p>
+          </div>
+        </li>
+      ))
+    }
+  </ul>
+</div>
+)}

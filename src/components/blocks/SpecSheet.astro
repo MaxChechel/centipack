@@ -1,0 +1,104 @@
+---
+import Media from './Media.astro';
+import type { ProductSpecRow, SlotImage } from '../../lib/catalogue';
+
+/**
+ * "Sizes and specifications" (§4.2) — the v1 two-column specification sheet,
+ * beside the dimension drawing.
+ *
+ * A SIBLING OF SpecTable, NOT A REPLACEMENT FOR IT, the same way CtaPlate is a
+ * sibling of CtaBanner. That one is eight columns of measurements that do not
+ * fit a phone, so it owns a focusable scroll container and a caption; this is
+ * two columns — the thing and its options — that fit 320px with room, and a
+ * scroll affordance on it would be a control with nothing to scroll. Different
+ * structure, different interaction, different accessibility problem. Bolting a
+ * `layout` prop onto SpecTable would have produced one component whose every
+ * branch forked on it, which is two components wearing one name.
+ *
+ * SpecTable IS CURRENTLY UNREFERENCED, and that is stated here rather than
+ * left to be discovered. The only `specTable` in the repo held placeholder
+ * values the v1 design supersedes with real ones, so the data went and the
+ * component has nothing to render. It is kept rather than deleted because the
+ * eight products with no v1 page may yet want a wide size table, and because
+ * deleting a component is a reviewable decision rather than a side effect of
+ * transcribing a design. Open question at the gate: keep it or cut it.
+ *
+ * STILL A REAL <table>. Each row is a specification and the options available
+ * for it, and the association between the two is the content — a definition
+ * list was the other candidate and loses the column headers, which the design
+ * draws and which say what the second column IS. `scope="row"` on the
+ * specification name makes every value in the row be about it.
+ *
+ * The image is a drawing rather than a photograph ("dimension drawing: envelope
+ * measurement convention + usable payload space"), and it does not exist yet —
+ * `Media` prints the brief in the pending box, which is the design's own
+ * convention for a slot that is owed.
+ */
+interface Props {
+  heading: string;
+  /** The paragraph beside the heading. */
+  intro?: string;
+  /** The qualifying sentence under the table. */
+  note?: string;
+  columns: readonly [string, string];
+  rows: readonly ProductSpecRow[];
+  image: SlotImage;
+  headingLevel?: 'h2' | 'h3';
+  id?: string;
+}
+
+const { heading, intro, note, columns, rows, image, headingLevel = 'h2', id } =
+  Astro.props as Props;
+
+const hasContent = rows.length > 0;
+---
+
+{hasContent && (
+<div id={id} class="gap-2xl flex flex-col">
+  <div class="gap-md md:gap-lg md:grid md:grid-cols-12 md:items-start flex flex-col">
+    <div class="md:col-span-7">
+      {
+        headingLevel === 'h3' ? (
+          <h3 class="text-h2 text-primary">{heading}</h3>
+        ) : (
+          <h2 class="text-h2 text-primary">{heading}</h2>
+        )
+      }
+    </div>
+    {intro && <p class="text-body text-secondary md:col-span-5 md:col-start-8">{intro}</p>}
+  </div>
+
+  <div class="gap-xl md:gap-lg md:grid md:grid-cols-12 md:items-start flex flex-col">
+    <Media
+      image={image.picture}
+      label={image.label}
+      ratio="546 / 577"
+      sizes="(min-width: 90rem) 546px, (min-width: 48rem) 45vw, 100vw"
+      class="rounded-md md:col-span-5"
+    />
+
+    <div class="gap-md md:col-span-6 md:col-start-7 flex flex-col">
+      <table class="spec-sheet">
+        <thead>
+          <tr>
+            <th scope="col" class="text-eyebrow">{columns[0]}</th>
+            <th scope="col" class="text-eyebrow">{columns[1]}</th>
+          </tr>
+        </thead>
+        <tbody>
+          {
+            rows.map((row) => (
+              <tr>
+                <th scope="row" class="text-body text-primary">{row.label}</th>
+                <td class="text-body text-secondary">{row.value}</td>
+              </tr>
+            ))
+          }
+        </tbody>
+      </table>
+
+      {note && <p class="text-caption text-tertiary">{note}</p>}
+    </div>
+  </div>
+</div>
+)}

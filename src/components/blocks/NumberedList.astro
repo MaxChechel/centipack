@@ -1,0 +1,103 @@
+---
+import type { ProductNumberedItem } from '../../lib/catalogue';
+
+/**
+ * A numbered list beside its heading (§4.2) — the v1 pages' "Applications",
+ * "Nationwide cold storage & delivery network" and "Custom & private-label
+ * options".
+ *
+ * THE NUMERALS ARE CONTENT HERE, unlike StepList's. The design prints 01, 02,
+ * 03 in the eyebrow style down the left of each row, so they are drawn — and
+ * they come from a CSS counter rather than from the data, because a list whose
+ * numbers are typed into the content is a list that renumbers wrong the moment
+ * an item is inserted. `aria-hidden` on them: the <ol> already announces the
+ * position, and a screen reader that reads "zero one, one, Pharmacy
+ * fulfillment" is counting twice.
+ *
+ * TWO SHAPES, ONE COMPONENT, decided by the content rather than by a prop:
+ * "Applications" gives every item a title AND a paragraph, while the two gel
+ * packs instances give titles alone and let them run the full width. The
+ * branch is `items.some(item => item.body)` — if nothing has a body there is no
+ * third column to leave empty.
+ */
+interface Props {
+  heading: string;
+  /** The paragraph under the heading, in the left column. Optional. */
+  body?: string;
+  items: readonly ProductNumberedItem[];
+  headingLevel?: 'h2' | 'h3';
+  id?: string;
+}
+
+const { heading, body, items, headingLevel = 'h2', id } = Astro.props as Props;
+
+const hasContent = items.length > 0;
+/* Whether ANY item has a paragraph — see the note above. One item without one
+   in a list where others have it simply leaves its own third column empty,
+   which is correct; the branch is about the list as a whole. */
+const hasBodies = items.some((item) => Boolean(item.body));
+---
+
+{hasContent && (
+<div id={id} class="gap-xl md:gap-lg md:grid md:grid-cols-12 md:items-start flex flex-col">
+  <div class="gap-lg md:col-span-4 flex flex-col">
+    {
+      headingLevel === 'h3' ? (
+        <h3 class="text-h2 text-primary">{heading}</h3>
+      ) : (
+        <h2 class="text-h2 text-primary">{heading}</h2>
+      )
+    }
+    {body && <p class="text-body text-secondary">{body}</p>}
+  </div>
+
+  <ol class="numbered-list list-bare md:col-span-7 md:col-start-6 flex flex-col">
+    {
+      items.map((item) => (
+        <li
+          class:list={[
+            'border-line py-lg gap-xs sm:gap-xl flex flex-col border-t sm:flex-row sm:items-start',
+          ]}
+        >
+          {/* `sm:w-[2.5rem]`, not `sm:w-10`. This repo resets Tailwind's numeric
+              spacing scale (`--spacing-*: initial` in global.css), so `w-10`
+              generates no rule at all — it reached the built HTML styling
+              nothing and the dead-class check caught it. The design draws this
+              column at 40px. */}
+          <span class="text-eyebrow numbered-list-marker flex-none sm:w-[2.5rem]" aria-hidden="true" />
+          {/* THE TWO COLUMNS SHRINK TOGETHER; NEITHER IS FIXED.
+              They were `w-[18.75rem] flex-none` and `flex-1`, which is what the
+              design measures — 300px of title against 370px of body — and it
+              overflowed the viewport by 96px at 768. A fixed 300 plus 40 of
+              marker plus two 32px gaps leaves 616px for a paragraph that wants
+              370 in a container that is only 720 wide.
+
+              `basis` with `flex-1` on both gives the drawn 300:370 split at the
+              full 1344 container and lets the pair shrink in proportion below
+              it, so the row is right at every width rather than at one.
+
+              `min-w-[0px]` on both because a flex item's min-width is `auto`,
+              which means it refuses to shrink below its content — the actual
+              mechanism behind the 96px. Written as an arbitrary value, not
+              `min-w-0`: this repo resets Tailwind's numeric spacing scale, and
+              a utility that generates no rule is the bug the dead-class check
+              exists to catch. */}
+          <p
+            class:list={[
+              'text-h4 text-primary min-w-[0px]',
+              hasBodies ? 'sm:basis-[18.75rem] sm:flex-1' : 'flex-1',
+            ]}
+          >
+            {item.title}
+          </p>
+          {hasBodies && item.body && (
+            <p class="text-body text-secondary min-w-[0px] flex-1 sm:basis-[23.125rem]">
+              {item.body}
+            </p>
+          )}
+        </li>
+      ))
+    }
+  </ol>
+</div>
+)}

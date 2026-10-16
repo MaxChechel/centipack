@@ -5709,3 +5709,184 @@ Unchanged: 22–26, 28, 29, 31–34, 36, 37, 40, 41, 44, 48, 51–71, 73. One ad
     Close, and capped. Also: the product page hero and the home hero still have
     no art-directed mobile file — both crop a landscape photograph to 1:1.2 on a
     phone, which is what these three just stopped doing.
+
+## 2026-10-16 — Entry 64. Five product pages, and the page list that had to grow with them
+
+The v1 round so far — palette (`deabf2d`), nav and button (`331291b`), logo
+(`69df77c`), closing plate (`999c664`), photography, category-card scrims and
+footer links (`2e4dfe2`) — is recorded in those commit messages. This entry is
+the product pages, which are the first thing this round that is structural
+rather than a substitution.
+
+### The page is its sections, and the sections are data
+
+Five products were designed as pages and they do not share a skeleton:
+
+| | PuncturePack | mailers | EPS | liners | gel packs |
+| --- | --- | --- | --- | --- | --- |
+| how it works | ● | ● | | ● | |
+| which liner | | | | ● | |
+| why choose / construction | ● | ● | ● | ● | ● |
+| sizes and specifications | ● | ● | ● | | |
+| tailored pack-outs | ● | ● | ● | ● | |
+| brand your box | ● | ● | ● | ● | |
+| applications | ● | ● | ● | ● | |
+| network / custom options | | | | | ●● |
+| formats and sizes | | | | | ● |
+| FAQ | ● | ● | ● | ● | |
+
+Eight section types, five orders, two of them used once each. A template with
+eight optional fields and a fixed sequence gets four of these right and then
+needs a `sectionOrder` array for the fifth — at which point the order is data
+anyway, expressed twice. So `sections` is an ordered discriminated union in the
+content schema and the template is a switch over it.
+
+**That union is also the launch gate.** `LAUNCH.productPages` was one boolean
+over thirteen products and both its settings were now wrong: `false` buries five
+finished pages, `true` ships eight built from a template with nothing in them.
+`productPagesShip(sectionCount)` replaces it — a product with sections has a
+page, one without them does not. That is not a convention anyone has to
+remember; it is the only sentence that can be true, because a page IS its
+sections. The machinery underneath is unchanged and still does the work: no
+`href` from the adapter, `href` optional on `ProductView`, and every consumer a
+compile error until it handles the absence.
+
+### The check that caught what `astro check` cannot
+
+The fifteen lucide marks are two lists in two files: path data in
+`src/components/atoms/icons.ts`, and a `z.enum` in `content.config.ts` that a
+product's `features` validate against. Neither can be derived from the other
+without importing a component into a content config.
+
+The two drift modes are not symmetrical:
+
+- **in the enum, not in the map** — the product validates, the page builds, axe
+  is happy, and the feature cell renders an **empty 48px circle**. Silent.
+- in the map, not in the enum — dead path data nobody can reference.
+
+`iconNamesMatchSchema()` asserts both directions, 15 assertions. Its red path
+was run three ways before it counted (§9):
+
+| injection | result |
+| --- | --- |
+| `truck` removed from the map, left in the enum | FAIL, names the icon and the consequence, exit 1 |
+| `thermometer-snowflake` removed from the enum | FAIL, names the icon, exit 1 |
+| `ICONS` renamed so the parse finds nothing | FAIL, "ICON LISTS NOT FOUND — parsed 0 … Fix the check, not the count", exit 1 |
+
+**The first injection passes `astro check` with 0 errors.** The union and the
+map still agree with each other; it is only the enum that disagrees, and nothing
+in the type system spans that gap. That is the whole case for the check.
+
+### Two bugs, both invisible in source
+
+**`export` in Astro frontmatter is hoisted.** `export const ICON_NAMES =
+Object.keys(ICONS)` written *below* `const ICONS = {...}` evaluated *first*, and
+the build died with "ICONS is not defined" while `astro check` reported zero
+errors — the error is an ordering fact about the emitted module, not a type.
+Frontmatter is not a module scope. The data moved to `icons.ts`, which is where
+it wanted to be anyway: the contract above imports it without loading a
+component.
+
+**`sm:w-10` styles nothing.** This repo resets Tailwind's numeric spacing scale
+(`--spacing-*: initial`), so a `w-10` on the numbered list's marker column
+reached five built pages with no rule behind it. Caught by the dead-class check,
+which is the generalisation of the `duration-base` bug and has now paid for
+itself twice. Replaced with `sm:w-[2.5rem]`; arbitrary values always generate.
+
+### The page list had to grow, and it immediately found something
+
+`PAGES` in `scripts/verify/lib/cdp.mjs` carried a note saying the two product
+pages came off the list because no build emitted them, and that **"both paths go
+back on this list"** when the gate opened. The gate is open, so three went back:
+PuncturePack, gel packs and thermal liners — the smallest set that instantiates
+all eight section types, since `formats` exists only on gel packs and `cards`
+only on liners. Gel packs is also the only page drawn without a descriptor and
+with its contact link hidden, so it is the only place those two self-skips are
+exercised.
+
+The sweep went 6 pages → 9 and **failed immediately**, twice:
+
+```
+/products/cold-chain-shipping/puncture-pack @768px — overflows (837 > 768)
+  li.border-line … +96px "Pharmacy fulfillmentInsulated ma"
+```
+
+The numbered list's title column was `w-[18.75rem] flex-none`, which is what the
+design measures — 300px against 370px of body. At 768 the container is 720: 40
+of marker plus two 32px gaps plus a fixed 300 leaves 616 for a paragraph that
+wants 370. A flex item's `min-width` is `auto`, so neither column would shrink.
+Both are now `basis` + `flex-1` + `min-w-[0px]`, which gives the drawn 300:370
+split at 1344 and shrinks in proportion below it — right at every width rather
+than at one.
+
+**Three new pages, two real failures.** That is the argument for the page list
+following what the build emits, stated in measurements rather than in principle.
+
+### Copy that is not there
+
+Two gaps, neither invented around:
+
+**The FAQ answers.** Figma draws seven to ten questions per page and writes the
+answer to exactly **one** — the first item is expanded with its copy and every
+other row is collapsed with no answer text in the file at all. Measured on all
+four FAQ instances; it is the pattern, not an oversight in one. The questions
+are the client's, so they are recorded in the content files with an empty
+`answer`, and the adapter drops any item that has one. Each page currently shows
+a single FAQ item. Writing the rest would mean inventing claims about thermal
+performance, materials and disposal.
+
+**The photography.** Nineteen image slots across the five pages, none shot.
+`Media` renders its pending box, which is the design's own convention — but the
+label Figma puts in each slot is the brief for the photographer ("confirm
+sequence against the actual product before filming"), and `Media` prints that
+label on the live page. Those stay as YAML comments beside the slot; the label
+is a plain description of the missing picture.
+
+### Measurements
+
+| | before | after |
+| --- | --- | --- |
+| verify | 8 checks, 676 assertions | **8 checks, 1085 assertions, 0 failures** |
+| pages built | 7 | **12** |
+| pages swept (× 7 widths) | 6 | **9** |
+| axe page/width runs | 12 | **18** |
+| internal links asserted | 162 | **479** |
+| build contracts | 227 | **580** |
+| product pages with a route | 0 | **5 of 13** |
+| PuncturePack page height at 1440 | — | 7314px (Figma draws 7100) |
+
+New: `icons.ts`, `Icon.astro`, `FeatureGrid`, `StepList`, `SplitFeature`,
+`NumberedList`, `MediaCards`, `FormatCards`, `SpecSheet`. No dependency added —
+the fifteen lucide paths are copied in under ISC rather than installing 1,600
+files for fifteen strings (§6).
+
+### Open questions
+
+Unchanged: 22–26, 28, 29, 31–34, 36, 37, 40, 41, 44, 48, 51–71, 73, 74. Eight
+added:
+
+75. **Six to nine FAQ answers per page are unwritten**, as above. The questions
+    are in the content files; the pages show one item each.
+76. **`facts` and `specTable` are no longer rendered.** Neither is drawn on any
+    v1 product page. `facts` is kept on the mailers because three of its cells
+    (testing standard, production, disposal) say things the v1 copy says
+    nowhere. `SpecTable.astro` is now referenced by nothing. Keep or cut.
+77. **The design draws the product H1 at two sizes** — 64px on PuncturePack,
+    48px on the other four. Shipped at `--text-h1` for all five, matching the
+    category pages. Deliberate subordination, or drift between batches?
+78. **No wide hero photograph exists for any product.** The hero falls back to
+    the portrait card shot letterboxed to 1344 × 541. `images.hero` is in the
+    schema and picks one up the moment it lands.
+79. **Breadcrumb roots disagree in the design**: product trails start at
+    "Products", category trails at "Home". Shipped starting at Home, so one
+    branch has one root in the structured-data graph.
+80. **Three custom-boxes slugs still name the old products**
+    (`vial-presentation-boxes` for "Individual product boxes", and so on). No
+    page ships behind them so no URL is wrong yet; renaming churns four asset
+    filenames and should happen when those pages are designed.
+81. **FOOTER v2 draws Terms of Service, Privacy & cookies and three social
+    marks.** None of the pages exist and none of the accounts are known. Adding
+    the links would fail `internalLinksResolve()`, correctly. Owed.
+82. **The phone number is back**, reversing redline v7 §9 on the authority of
+    the v1 footer. If it should not be called it should not be drawn — the
+    client's call against their own design.

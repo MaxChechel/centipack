@@ -111,6 +111,35 @@ export const PAGES = [
   '/products',
   /* One of the three category pages — same template, same props shape. */
   '/products/cold-chain-shipping',
+  /*
+   * THREE OF THE FIVE PRODUCT PAGES, CHOSEN TO COVER ALL EIGHT SECTION TYPES.
+   *
+   * These went back on the list the moment the gate opened, which is what the
+   * note below said would happen. One product page is not enough and five is
+   * more than the coverage argument needs: the template is shared and the only
+   * thing that varies is WHICH sections a product declares, so the list has to
+   * instantiate every member of the union at least once.
+   *
+   *   puncture-pack   steps, features, specs, split x2, numbered, faq
+   *   gel-packs       numbered x2, features, formats
+   *   thermal-liners  cards, steps, features, split x2, numbered, faq
+   *
+   * Between them: all eight. `formats` exists only on gel packs and `cards`
+   * only on thermal liners, so dropping either would leave a section type that
+   * nothing sweeps and nothing runs axe against.
+   *
+   * GEL PACKS ALSO COVERS THE HERO'S OTHER STATE. It is the one page drawn
+   * without a descriptor and with its contact link hidden, so it is the only
+   * page where those two self-skips are exercised at all.
+   *
+   * eps-foam-coolers and insulated-metallic-mailers are deliberately absent:
+   * every section type they declare is already instantiated above, and a fourth
+   * and fifth instance of the same union members would cost seven widths each
+   * to assert something already asserted.
+   */
+  '/products/cold-chain-shipping/puncture-pack',
+  '/products/cold-chain-shipping/gel-packs',
+  '/products/cold-chain-shipping/thermal-liners',
   '/about',
   '/contact',
   '/styleguide',
@@ -118,6 +147,13 @@ export const PAGES = [
 
 /*
  * THE TWO PRODUCT PAGES CAME OFF THIS LIST, AND WHY IS THE POINT.
+ *
+ * SUPERSEDED, AND KEPT BECAUSE THE REASONING IS STILL THE RULE. The gate is now
+ * open for the five products that have v1 content, so three of them are on the
+ * list above and the paragraph below describes a state this repo has left. What
+ * it says about WHY a page leaves the list — the list follows what the build
+ * emits, never what we wish it emitted — is exactly as binding as it was.
+ * The eight products with no v1 content are the case it now describes.
  *
  * `/products/cold-chain-shipping/insulated-metallic-mailers` and
  * `/products/cold-chain-shipping/gel-packs` were swept here as the two ends of

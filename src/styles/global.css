@@ -3261,6 +3261,74 @@
   }
 }
 
+/* --- The v1 product pages ------------------------------------------------
+   Two rules, both for blocks that exist only on a product page.
+
+   `.spec-sheet` is the TWO-COLUMN specification table — a sibling of
+   `.spec-table`, not a variant of it. That one is eight columns of
+   measurements that do not fit a phone, so it owns a bleeding, focusable
+   scroll container; this is a specification and its options, which fits 320px
+   with room, and a scroll affordance on it would be a control with nothing to
+   scroll. The 40% first column is the design's 260-of-660 split.
+
+   `.numbered-list` draws the 01 / 02 / 03 down the left of "Applications" and
+   the two gel-packs lists. FROM A COUNTER, NOT FROM THE CONTENT: a list whose
+   numbers are typed into the data renumbers wrong the first time an item is
+   inserted in the middle, and nobody notices because the numbers still look
+   like numbers. `decimal-leading-zero` is what makes it 01 rather than 1,
+   which is what the design draws. The marker is `aria-hidden` in the markup —
+   the <ol> already announces position, and reading both says it twice. */
+@layer components {
+  .spec-sheet {
+    inline-size: 100%;
+    border-collapse: collapse;
+  }
+
+  .spec-sheet th,
+  .spec-sheet td {
+    padding-block: var(--spacing-lg);
+    padding-inline-end: var(--spacing-xl);
+    text-align: start;
+    vertical-align: top;
+  }
+
+  .spec-sheet th:last-child,
+  .spec-sheet td:last-child {
+    padding-inline-end: 0;
+  }
+
+  .spec-sheet thead th {
+    padding-block-start: 0;
+    padding-block-end: var(--spacing-sm);
+    font-weight: var(--font-weight-medium);
+  }
+
+  /* The specification name is the row's subject, so it is a <th scope="row">
+     — and it takes the body weight rather than a bold one, because the design
+     distinguishes the two columns by COLOUR (primary against secondary) and a
+     second signal would be louder than the sheet it sits in. */
+  .spec-sheet tbody th {
+    inline-size: 40%;
+    font-weight: inherit;
+  }
+
+  .spec-sheet tbody tr {
+    border-block-start: var(--border-width) solid var(--line);
+  }
+
+  .numbered-list {
+    counter-reset: numbered-list;
+  }
+
+  .numbered-list > li {
+    counter-increment: numbered-list;
+  }
+
+  .numbered-list-marker::before {
+    content: counter(numbered-list, decimal-leading-zero);
+  }
+}
+
 /* --- The closing plate's scrim -------------------------------------------
    TWO GRADIENTS, TOP AND BOTTOM, which is what the v1 design draws and not a
    decoration: this plate is white type on a photograph, and the photograph is a

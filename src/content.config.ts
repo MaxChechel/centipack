@@ -59,7 +59,7 @@ const CATEGORY = z.enum(['cold-chain-shipping', 'custom-boxes', 'pharmacy-format
  * box when one is absent — see src/components/blocks/Media.astro, which also
  * records how that box gets removed.
  */
-const picture = (image: () => z.ZodType) =>
+const picture = (image: () => z.ZodType<ImageMetadata>) =>
   z.object({
     src: image(),
     alt: z.string(),
@@ -73,12 +73,229 @@ const picture = (image: () => z.ZodType) =>
     mobile: image().optional(),
   });
 
+/**
+ * THE ICONS THE v1 PRODUCT PAGES DRAW, as a closed set.
+ *
+ * Every one is a lucide mark, named here exactly as the design names its layer
+ * (`lucide/package` → `package`). An enum rather than a free string because an
+ * icon name that does not exist renders NOTHING — a silent hole in a feature
+ * grid — and a typo should fail the build with the bad name printed instead.
+ * The paths themselves live in `src/components/atoms/Icon.astro`; this list and
+ * that map are asserted to agree by the build contracts.
+ */
+const ICON = z.enum([
+  'box',
+  'droplets',
+  'expand',
+  'feather',
+  'layers',
+  'leaf',
+  'lock-keyhole',
+  'package',
+  'repeat',
+  'shield',
+  'sparkles',
+  'target',
+  'thermometer-snowflake',
+  'truck',
+  'zap',
+]);
+
+/**
+ * AN IMAGE SLOT ON A PRODUCT PAGE, which is a picture AND the brief for it.
+ *
+ * The v1 product pages are drawn with nineteen photographic slots between them
+ * and not one of the photographs exists — the design fills each one with the
+ * instruction for the shot ("IMAGE: short demonstration video, pull tab clearly
+ * visible, transition from compressed to expanded"). That instruction is
+ * CONTENT, not a comment: it is what `Media` prints inside the pending box, so
+ * the client reviewing the page reads the brief for the picture that is
+ * missing rather than looking at an unlabelled grey rectangle.
+ *
+ * `label` is therefore required and `picture` is optional, which is the exact
+ * inverse of how an image field is usually shaped — and it is the honest shape
+ * here, because today every one of these slots is a brief and none is a photo.
+ */
+const slot = (image: () => z.ZodType<ImageMetadata>) =>
+  z
+    .object({
+      label: z.string(),
+      picture: picture(image).optional(),
+    })
+    .strict();
+
+/**
+ * A PRODUCT PAGE IS AN ORDERED LIST OF TYPED SECTIONS (§5).
+ *
+ * The five v1 product pages share a vocabulary but not a skeleton: PuncturePack
+ * runs hero → how it works → why choose → sizes → packouts → branding →
+ * applications → FAQ; gel packs runs hero → network → construction → formats →
+ * custom options and has no FAQ at all; thermal liners opens with a liner
+ * chooser nothing else has. Eight section types, five different orders.
+ *
+ * SO THE ORDER IS DATA, NOT TEMPLATE. The alternative is a template carrying
+ * eight optional fields and a hardcoded sequence, which gets the first four
+ * pages right and then has to grow a `sectionOrder` array for the fifth — at
+ * which point the order is data anyway, expressed twice. One list of
+ * discriminated-union members says what is on the page and in what order, and
+ * the template is a `switch`.
+ *
+ * `discriminatedUnion` rather than a loose object: zod reports
+ * "invalid_union_discriminator" with the list of valid types when `type` is
+ * wrong, and type-checks only the branch that matches when it is right, so a
+ * `features` section with a `steps` key is an error rather than silent extra
+ * data. Every branch is `.strict()` for the same reason the collections are.
+ */
+const section = (image: () => z.ZodType<ImageMetadata>) =>
+  z.discriminatedUnion('type', [
+    /* "How it works" — a heading and numbered steps on the left, a picture on
+       the right. The steps are a real ordered sequence, so the template renders
+       an <ol>; the design's numerals come from CSS counters, not from content. */
+    z
+      .object({
+        type: z.literal('steps'),
+        heading: z.string(),
+        steps: z.array(z.object({ title: z.string(), body: z.string() }).strict()).min(1),
+        image: slot(image),
+      })
+      .strict(),
+
+    /* "Why choose …" / "Construction" — an icon grid. The design draws four
+       across and then three or four across; the template lets the grid wrap
+       rather than storing a row structure, because a row is a layout fact and
+       this is content (§4.4). */
+    z
+      .object({
+        type: z.literal('features'),
+        heading: z.string(),
+        features: z
+          .array(z.object({ icon: ICON, title: z.string(), body: z.string() }).strict())
+          .min(1),
+      })
+      .strict(),
+
+    /* "Sizes and specifications" — a two-column specification sheet beside a
+       dimension drawing, with an intro above and a qualifying note below.
+       `columns` is a tuple because the sheet is exactly two columns wide: the
+       thing and its options. A sheet with three would be a different block. */
+    z
+      .object({
+        type: z.literal('specs'),
+        heading: z.string(),
+        intro: z.string().optional(),
+        note: z.string().optional(),
+        columns: z.tuple([z.string(), z.string()]),
+        rows: z.array(z.object({ label: z.string(), value: z.string() }).strict()).min(1),
+        image: slot(image),
+      })
+      .strict(),
+
+    /* "Tailored pack-outs" / "Brand your box" — copy one side, picture the
+       other. `imageSide` because the design alternates them down the page, and
+       which side a picture sits on is the one layout decision this section
+       genuinely owns. */
+    z
+      .object({
+        type: z.literal('split'),
+        heading: z.string(),
+        subheading: z.string().optional(),
+        body: z.string(),
+        note: z.string().optional(),
+        action: z.object({ label: z.string(), href: z.string() }).strict().optional(),
+        image: slot(image),
+        imageSide: z.enum(['start', 'end']).default('end'),
+      })
+      .strict(),
+
+    /* "Applications" / "Nationwide cold storage" / "Custom & private-label" —
+       a heading and an optional paragraph on the left, a numbered list on the
+       right. `body` on an item is optional because two of the three instances
+       are titles alone. */
+    z
+      .object({
+        type: z.literal('numbered'),
+        heading: z.string(),
+        body: z.string().optional(),
+        items: z.array(z.object({ title: z.string(), body: z.string().optional() }).strict()).min(1),
+      })
+      .strict(),
+
+    /* "Which liner is right for you?" — full-width rows, each a picture and a
+       short pitch. Thermal liners only, today. */
+    z
+      .object({
+        type: z.literal('cards'),
+        heading: z.string(),
+        cards: z
+          .array(z.object({ title: z.string(), body: z.string(), image: slot(image) }).strict())
+          .min(1),
+      })
+      .strict(),
+
+    /* "Available formats & sizes" — a card per format, each listing its sizes
+       as chips. Gel packs only, today. */
+    z
+      .object({
+        type: z.literal('formats'),
+        heading: z.string(),
+        cards: z
+          .array(z.object({ title: z.string(), sizes: z.array(z.string()).min(1) }).strict())
+          .min(1),
+      })
+      .strict(),
+
+    /*
+     * FAQ — and `answer` DEFAULTS TO EMPTY, which is the whole point.
+     *
+     * The design draws seven to ten questions per page and writes the answer to
+     * exactly ONE of them: the first item is expanded with its copy, and every
+     * other row is collapsed with no answer text anywhere in the file. Measured
+     * on all four FAQ instances; it is the pattern, not an oversight in one.
+     *
+     * The questions are real and the client wrote them, so they are recorded
+     * here rather than dropped — losing them would mean re-reading Figma to
+     * find out what was owed. The template renders only the items that HAVE an
+     * answer, so an unanswered question is visible in the repo, visible in
+     * review, and absent from the built page. Inventing answers was the other
+     * option and it is not an option: these are claims about thermal
+     * performance and disposal.
+     */
+    z
+      .object({
+        type: z.literal('faq'),
+        heading: z.string(),
+        items: z
+          .array(
+            z
+              .object({ question: z.string(), answer: z.array(z.string()).default([]) })
+              .strict(),
+          )
+          .min(1),
+      })
+      .strict(),
+  ]);
+
 const products = defineCollection({
   loader: glob({ pattern: '**/*.md', base: './src/content/products' }),
   schema: ({ image }) =>
     z
       .object({
         title: z.string(),
+        /**
+         * The product page's own H1, where it differs from the list name.
+         *
+         * A SECOND TITLE, exactly as `categories` carries one, and the v1
+         * design is what forces it: the footer and the nav say "Thermal
+         * liners", "EPS foam coolers" and "Puncture Pack", while the pages they
+         * point at are headed "Thermal box liners", "EPS foam coolers with
+         * matched corrugated outers" and "PuncturePack™". One field carrying
+         * both would mean a menu item that reads like a sentence or a page
+         * heading that reads like a menu item.
+         *
+         * Optional, falling back to `title` in the adapter — most products do
+         * not need a second name and should not be made to repeat the first.
+         */
+        pageTitle: z.string().optional(),
         /**
          * Explicit, not derived from the filename. Sanity will carry a slug
          * field, and the adapter should be the only thing that knows the
@@ -91,6 +308,17 @@ const products = defineCollection({
 
         /** The card's one-line sublabel: "3–32 oz · 4 variants". */
         summary: z.string(),
+
+        /**
+         * The line UNDER the product page's H1, set in the eyebrow style.
+         *
+         * Not the summary and not the lede: it is the product in five words
+         * and a claim, dot-separated and upper-cased by the stylesheet —
+         * "Self-expanding insulated poly mailer · Compact storage · Expanded
+         * protection". Optional because the gel packs page is drawn without
+         * one.
+         */
+        descriptor: z.string().optional(),
         /**
          * The product page's opening paragraph.
          *
@@ -113,6 +341,19 @@ const products = defineCollection({
         images: z
           .object({
             main: picture(image).optional(),
+            /**
+             * THE WIDE SHOT AT THE TOP OF THE PRODUCT PAGE, which is a
+             * different photograph from the card's.
+             *
+             * `main` is drawn 5:6 portrait for a card; the page hero is a
+             * 1344 x 541 letterbox. Cropping the portrait to it shows a band
+             * across the middle of the product, which is why this is a second
+             * slot rather than the same file at another ratio. The adapter
+             * falls back to `main` while no wide shot exists — a cropped real
+             * photograph beats a pending box, and the moment a wide one lands
+             * nothing but this line changes.
+             */
+            hero: picture(image).optional(),
             sizeRange: picture(image).optional(),
             branded: picture(image).optional(),
           })
@@ -138,6 +379,21 @@ const products = defineCollection({
             rows: z.array(z.array(z.string())).min(1),
           })
           .optional(),
+
+        /**
+         * The product page itself, as an ordered list of typed sections.
+         *
+         * AND IT IS ALSO THE LAUNCH GATE. A product with sections has a page;
+         * a product without them does not, and `src/lib/catalogue.ts` gives it
+         * no `href` — which makes its name render as text in the nav, the
+         * mobile fold, the footer and on its card, with no arrow promising a
+         * destination. See `productPagesShip` in src/consts.ts for why that
+         * replaced a single boolean over all thirteen.
+         *
+         * Defaults to empty, so the eight products the v1 round did not design
+         * are correct rather than broken.
+         */
+        sections: z.array(section(image)).default([]),
       })
       .strict(),
 });
@@ -215,3 +471,19 @@ const categories = defineCollection({
 });
 
 export const collections = { products, categories };
+
+/**
+ * The section union as ZOD infers it, exported for the adapter.
+ *
+ * NOT `CollectionEntry<'products'>['data']['sections'][number]`, which is what
+ * this was and which resolved to `any`: Astro's generated entry types flatten a
+ * schema this deep, so the adapter's switch narrowed nothing and `astro check`
+ * reported three "implicitly has an 'any' type" errors rather than one useful
+ * one. Inferring straight from the schema object keeps the discriminated union
+ * intact, which is the whole reason it is a discriminated union.
+ *
+ * `ReturnType<typeof section>` because `section` is a factory over Astro's
+ * `image()` helper; the argument does not affect the shape, only the type of
+ * the `src` inside a picture, which the adapter hands straight to `getImage`.
+ */
+export type ProductSectionInput = z.infer<ReturnType<typeof section>>;

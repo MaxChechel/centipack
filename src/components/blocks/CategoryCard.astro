@@ -18,6 +18,11 @@ import type { CategoryView } from '../../lib/catalogue';
  * paragraph and the Button all recolour themselves with no literal anywhere in
  * this file. The same card on a light ground would need no edit.
  *
+ * ONLY THE TITLE SHOWS AT REST. The paragraph and the link are collapsed and
+ * open on hover — or on focus, which is what makes the link reachable by
+ * keyboard. The card is bottom-anchored so the reveal grows upward into the
+ * photograph instead of pushing itself off the bottom edge.
+ *
  * THE IMAGE IS IN FLOW AND THE CONTENT OVERLAYS IT, rather than the other way
  * round. That is what lets the card's height come from the picture's own aspect
  * ratio — 5:6, which is the 440 × 532 the design draws — instead of from a
@@ -83,19 +88,18 @@ const hasImage = Boolean(category.cardImage);
 >
   <Media image={category.cardImage} label={`${category.title} — card`} ratio="5 / 6" sizes={sizes} />
 
-  {/* TWO SCRIMS, TOP AND BOTTOM, and only where there is a photograph to cover.
-      The v1 design draws both; see `.category-card-scrim` in global.css for the
-      measurements and for why the single ramp this card used to carry was never
-      enough — the heading sits at the TOP, and the ramp only covered the
-      bottom. */}
-  {hasImage && (
-    <>
-      <div class="category-card-scrim category-card-scrim-top" aria-hidden="true" />
-      <div class="category-card-scrim category-card-scrim-bottom" aria-hidden="true" />
-    </>
-  )}
+  {/* ONE SCRIM NOW, AT THE BOTTOM. The top band went with the heading: all of
+      this card's type sits at the foot of it, and a band covering an empty
+      corner is a band darkening a photograph for nothing. See
+      `.category-card-scrim` in global.css for the measurements that put it
+      there and for the two it replaced. */}
+  {hasImage && <div class="category-card-scrim category-card-scrim-bottom" aria-hidden="true" />}
 
-  <div class="p-lg gap-lg absolute inset-0 z-10 flex flex-col justify-between">
+  {/* BOTTOM-ANCHORED, so the reveal grows UPWARD. The paragraph and the link
+      sit after the heading in the source — which is reading order — and the
+      column is justified to the end, so opening them pushes the heading up
+      rather than pushing them off the card. */}
+  <div class="p-lg absolute inset-0 z-10 flex flex-col justify-end">
     {
       /* One step up from h4 at the client's request. The LEVEL is still the
          prop's — this is the visual size only, which is the whole reason the
@@ -107,19 +111,27 @@ const hasImage = Boolean(category.cardImage);
       )
     }
 
-    <div class="gap-md flex flex-col items-start">
-      <p class="text-body text-primary">{body}</p>
-      {/* `category-card-link` stretches this link over the whole card — see
-          global.css. Still one target and one accessible name. */}
-      <Button
-        href={category.href}
-        variant="ghost"
-        size="link"
-        icon="arrow"
-        class="category-card-link"
-      >
-        {category.cardLinkLabel}
-      </Button>
+    {/* The reveal. Collapsed to nothing at rest and opened on hover or focus —
+        see `.category-card-reveal` in global.css for how, and for why it is a
+        grid row rather than a height. */}
+    <div class="category-card-reveal">
+      <div class="category-card-reveal-clip">
+        <div class="gap-md pt-md flex flex-col items-start">
+          <p class="text-body text-primary">{body}</p>
+          {/* `category-card-link` stretches this link over the whole card — see
+              global.css. Still one target and one accessible name, and it is
+              what `:focus-within` keys off: tabbing to it opens the card. */}
+          <Button
+            href={category.href}
+            variant="ghost"
+            size="link"
+            icon="arrow"
+            class="category-card-link"
+          >
+            {category.cardLinkLabel}
+          </Button>
+        </div>
+      </div>
     </div>
   </div>
 </article>

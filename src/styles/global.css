@@ -2417,13 +2417,15 @@
     filter: blur(2px);
   }
 
-  /* -6px, as drawn: the darkest end of the top band sits just above the card so
-     the very first row of pixels is already at full strength rather than ramping
-     into it. */
-  .category-card-scrim-top {
-    top: -0.375rem;
-    background-image: linear-gradient(to top, rgb(0 0 0 / 0), rgb(0 0 0 / 0.65));
-  }
+  /* THE TOP BAND IS GONE, and so is the heading it existed for. This card now
+     shows only its title at rest, at the FOOT of the card, with the paragraph
+     and the link revealed below it on hover — so every piece of type on it sits
+     inside the bottom band and a second band at the top was darkening a corner
+     with nothing in it. One band, doing the whole job.
+
+     Its 50% height was already carrying a paragraph and a link; it now also
+     carries the heading that moved down into it. Re-measured after the move —
+     see WORKLOG — rather than assumed to still hold. */
 
   /* Half the card, against the top band's 34.8%. Asymmetric on purpose: the
      bottom carries a paragraph AND a link, the top carries one short heading. */
@@ -3173,6 +3175,63 @@
 
   .spec-sheet tbody tr {
     border-block-start: var(--border-width) solid var(--line);
+  }
+
+  /* --- The category card's hover reveal ---------------------------------
+     Only the title shows at rest; the paragraph and the link open under it.
+
+     `grid-template-rows: 0fr → 1fr` RATHER THAN A HEIGHT, because the content
+     has no height anyone can write down — it is two lines of copy on one card
+     and three on another, and it reflows at every width. `max-height` is the
+     usual workaround and it is a guess: too small clips the copy, too large
+     makes the transition start late and finish early, and both are wrong at
+     some viewport. A grid row animates to the content's own size.
+
+     The child needs `overflow: hidden` for that to work: a `0fr` row does not
+     clip on its own, it just stops reserving space.
+
+     OPACITY IS A SECOND, SLOWER STEP on the content inside, so the copy fades
+     in rather than being scraped up by the closing edge.
+
+     `:focus-within` AS WELL AS `:hover`, and it is not decoration: the link is
+     inside the collapsed region, so without this a keyboard user tabs to a
+     control they cannot see. It is also why the clip wrapper carries the
+     overflow and not the padded inner box — the focus ring needs somewhere to
+     sit once the row is open.
+
+     NO HOVER, NO HIDING. On a touch device there is no pointer to reveal with,
+     so the whole thing is shown at rest. Written as `@media (hover: hover)`
+     around the collapsed state rather than around the open one, so the
+     fallback is the content being VISIBLE rather than unreachable. */
+  .category-card-reveal {
+    display: grid;
+    grid-template-rows: 1fr;
+  }
+
+  .category-card-reveal-clip {
+    overflow: hidden;
+  }
+
+  @media (hover: hover) {
+    .category-card-reveal {
+      grid-template-rows: 0fr;
+      transition: grid-template-rows var(--transition-duration-spring-soft) var(--ease-spring-soft);
+    }
+
+    .category-card-reveal-clip {
+      opacity: 0;
+      transition: opacity var(--transition-duration-spring-soft) var(--ease-spring-soft);
+    }
+
+    .category-card:hover .category-card-reveal,
+    .category-card:focus-within .category-card-reveal {
+      grid-template-rows: 1fr;
+    }
+
+    .category-card:hover .category-card-reveal-clip,
+    .category-card:focus-within .category-card-reveal-clip {
+      opacity: 1;
+    }
   }
 
   .numbered-list {

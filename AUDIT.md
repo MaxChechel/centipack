@@ -357,9 +357,26 @@ drawn plate, or stay full-bleed. They are the only pages on the site where the
 hero now behaves differently from the design, and nothing has been said about
 them since the home page changed.
 
-## D9 — The category card's scrims are deeper and taller than the design draws them
+## D9 — The category card's scrim is deeper and taller than the design draws it
 
-**Deviation, forced by photography, 2026-10-16.**
+**Deviation, forced by photography, 2026-10-16. Narrowed to one band 2026-10-17.**
+
+**THE TOP BAND IS GONE.** The card was restructured on 2026-10-17: it shows only
+its title at rest, at the FOOT of the card, and reveals the paragraph and link
+below it on hover. Every piece of type on it now sits inside the bottom band, so
+a second band at the top was darkening a corner with nothing in it. What follows
+describes the bottom band, which is unchanged and still carries the deviation.
+
+Re-measured after the move, in **both** states, because the type changed
+position and a number taken before it would be about the old layout:
+
+| | heading (needs 3.0) | body (needs 4.5) |
+| --- | --- | --- |
+| at rest, title only | 8.16 – 9.62 | *collapsed* |
+| hover, fully open | 4.73 – 8.84 | 5.65 – 11.63 |
+
+---
+
 
 v1 draws two gradient bands on a category card, each 185px on a 532px card —
 34.8% — and each from transparent to `rgb(0 0 0 / 0.5)` (Figma 1005:13692 and

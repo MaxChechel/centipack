@@ -6410,3 +6410,67 @@ buttons. The dead-class count rose 316 → 323 on the build, which is those
 hover variants proving they generate rather than being assumed to.
 
 verify: 8 checks, 1103 assertions, 0 failures.
+
+## 2026-10-17 — Entry 72. The category card shows its title and nothing else
+
+On instruction, with the design attached: the home cards show only their title
+at rest and reveal the paragraph and the link on hover.
+
+**The title moved to the foot of the card** and the column is bottom-anchored,
+so the reveal grows UPWARD into the photograph. The paragraph and link still
+follow the heading in the source — that is reading order — and justifying the
+column to the end means opening them pushes the heading up rather than pushing
+them off the bottom edge.
+
+### `0fr → 1fr`, not a max-height
+
+The revealed block has no height anyone can write down: two lines of copy on one
+card and three on another, reflowing at every width. `max-height` is the usual
+workaround and it is a guess — too small clips the copy, too large makes the
+transition start late and finish early, and both are wrong at some viewport.
+A grid row animates to the content's own size and is correct at all of them.
+The child carries `overflow: hidden`, because a `0fr` row stops reserving space
+without clipping on its own.
+
+Opacity fades the content in as a second step, so the copy is not scraped up by
+the closing edge.
+
+### Two things that would have been bugs
+
+**`:focus-within`, not just `:hover`.** The link lives inside the collapsed
+region. Without it, a keyboard user tabs to a control they cannot see — the card
+would have passed the keyboard check (the link is reachable and has a ring) while
+being unusable, which is exactly the kind of pass that means nothing.
+
+**No hover, no hiding.** The collapsed state is written inside
+`@media (hover: hover)`, so a touch device — which has no pointer to reveal with
+— gets the content visible at rest. Putting the media query around the OPEN
+state instead would have hidden the copy on every phone with no way to get it
+back.
+
+### The scrim lost its top band
+
+Every piece of type on this card now sits at the bottom, so the top band was
+darkening a corner with nothing in it. One band does the whole job. Re-measured
+in both states rather than assumed to still hold, since the heading physically
+moved into the other band:
+
+| | heading (needs 3.0) | body (needs 4.5) |
+| --- | --- | --- |
+| rest, title only | **8.16 – 9.62** | *collapsed* |
+| hover, fully open | **4.73 – 8.84** | **5.65 – 11.63** |
+
+The measurement script had to be taught to force the reveal open first: sampling
+the card as drawn measures a zero-height box and returns 1.16 for every card,
+which is a number about nothing. The state that has to pass is the one the
+reader sees.
+
+AUDIT D9 narrowed to the single band.
+
+### Measurements
+
+| | before | after |
+| --- | --- | --- |
+| verify | 8 checks, 1103 assertions | **8 checks, 1105 assertions, 0 failures** |
+| scrim bands per card | 2 | **1** |
+| worst heading contrast | 3.69 | **4.73** |

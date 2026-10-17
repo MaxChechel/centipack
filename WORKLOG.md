@@ -6280,3 +6280,96 @@ Unchanged, plus:
     instruction that put them there has not been withdrawn, and nothing has
     been said about them since the design changed — so they are now the only
     pages whose hero disagrees with Figma.
+
+## 2026-10-17 — Entry 70. One button set, three grounds
+
+The v1 button set, drawn on the three grounds the site actually has (Figma
+1327:24580 on `#f9f7f5`, 1327:24510 on `#f2eee8`, 1327:24598 on `#1f1f1f`):
+
+| | primary | secondary | arrow link |
+| --- | --- | --- | --- |
+| on `#f9f7f5` | tan `#c5b197`, ink label | `#7a5f43` border + label | `#7a5f43` |
+| on `#f2eee8` | tan `#c5b197`, ink label | `#7a5f43` border + label | `#7a5f43` |
+| on `#1f1f1f` | **white**, ink label | **white** border + label | **white** |
+
+**Three scenarios, two tokens.** The two light rows are identical, so what the
+design is actually describing is a pair that flips with the ground — which is
+what every other colour here does. `--bg-action` now remaps per theme, and a new
+`--outline-action` carries the bronze.
+
+**The old note predicted this and said so**: `--bg-action` was declared once in
+the bare `:root` with "Stated rather than left as an omission someone later
+fixes", and `actionMatrix` carried "the day somebody adds a `[data-theme]`
+override for it, this is what notices". The override arrived. Both notes are
+rewritten rather than deleted, because being wrong in a recorded way is the
+point of recording it.
+
+### `action` is gone, and `primary` took its place
+
+The `action` variant existed because `primary` was the ink fill and the nav
+needed the tan beside it. v1 makes the tan the primary on light and white on
+dark — which is exactly what `primary` already resolved to on dark — so they
+became two names for one button and one of them went. The ink fill survives as
+`--bg-inverse`; nothing asks for it today.
+
+### Two reversals, both recorded rather than absorbed
+
+**Arrow links are bronze again.** They were grey, then black on the explicit
+instruction *"for button with arrow type text use our black(text color)"*, and
+the v1 set draws them `#7a5f43`. Later instruction wins; the earlier one was not
+wrong when it was given.
+
+**The square mark is a hover state.** It was drawn at rest on four call sites.
+It now belongs to the component — a mark four pages remember to ask for is a
+mark the fifth forgets — and appears on hover for every filled and outlined
+button.
+
+Positioning it was the only real design problem here, and both obvious options
+cost something visible at rest, which is the state all three scenarios draw:
+
+| | cost |
+| --- | --- |
+| in flow, revealed on hover | the label sits ~10px right of centre on every button, always |
+| in flow, grown on hover | the button changes width under the pointer and shoves its neighbour |
+| **absolute, in the left padding** | **nothing — label fixed, box fixed** |
+
+The visible square is about 5px inside a 14px box, so at `left: 0.3125rem` it
+clears the label by roughly 9px. Opacity only (§12.3).
+
+**Secondary reverses into the primary**, on instruction: border, fill and label
+all move to `--bg-action` / `--text-on-action`, so the outlined button completes
+into the filled one. Same gesture it always had, now pointing at the tan rather
+than the ink.
+
+### The new check, and its red path
+
+`outlineActionMatrix` asserts the bronze against all three grounds in both
+themes — 12 pairs, floor **5.13 : 1**. It checks at AA rather than at 1.4.11's
+3.0 even though the token is a border as well as a label: the stricter of the
+two obligations decides, and the boundary comes along free.
+
+Red path run before it counted (§9): lightening `--bronze-700` to `#b08a5e`
+fails 3 of 12 pairs with a floor of 2.74 and exits 1. Reverted.
+
+Verified at the pixel as well as in the matrix — rest, primary hover and
+secondary hover captured from the built page with the pointer actually moved
+onto each button, not by reading the CSS back.
+
+### Measurements
+
+| | before | after |
+| --- | --- | --- |
+| verify | 8 checks, 1083 assertions | **8 checks, 1096 assertions, 0 failures** |
+| contrast pairs | 71 | **85** |
+| button variants | 4 | **3** |
+
+### Open questions
+
+Unchanged, plus:
+
+91. **F8 now covers every filled button on the site**, not one nav button. The
+    tan measures 1.80–2.08 against the three grounds where WCAG 1.4.11 asks 3.0,
+    so no primary or hovered secondary has a perceivable edge. Accepting it once
+    for the nav and accepting it everywhere are different decisions; the second
+    has now been made by following the design. A 1px `--line-strong` border, or
+    darkening the tan to about `#a98d6b`, fixes it.

@@ -259,7 +259,27 @@ out of git history and §8 applies again unmodified.
 
 ---
 
-## F8 — The v1 secondary action fill has no visible boundary
+## F8 — The v1 action fill has no visible boundary — now on every primary button
+
+**Scope widened 2026-10-17.** This recorded one instance: the nav's "Get a
+quote". The v1 button set makes the tan the fill of the `primary` variant on
+every light ground, so it is now the fill of **every filled button on the
+site** — and the measurement below holds on all three grounds, not just one:
+
+| fill against | ratio | needs |
+| --- | --- | --- |
+| `--bg-base` #f9f7f5 | 1.94 | 3.0 |
+| `--bg-subtle` #f2eee8 | **1.80** | 3.0 |
+| `--bg-surface` #ffffff | 2.08 | 3.0 |
+
+The label still passes comfortably — 7.94 : 1 — so what is unreadable is the
+button's EDGE, not its text, everywhere it appears. Accepting it for one nav
+button and accepting it for every call to action on the site are different
+decisions, and this is the second one being made. The fix is unchanged and is
+below.
+
+---
+
 
 **The v1 design (Figma `uMHWj1JRHoqmY9uOQNfyL6`) gives its headline button a tan
 fill**, `action/secondary/default` #c5b197, on the page ground #f9f7f5. Measured:
@@ -412,6 +432,9 @@ defect instead of containing it.
 The ink fill passes, it is the site's primary action, and an ink primary beside
 an outlined secondary is the pairing this hero carried before v1.
 
-**If the nav's tan is wanted here anyway**, it is one word — `variant="action"`
-in `src/pages/index.astro` — and F8 then describes two instances rather than
-one.
+**SUPERSEDED 2026-10-17.** The v1 button set makes the tan the `primary` fill on
+every light ground, so the hero's button is tan after all — not by reversing the
+reasoning above, but because the question stopped being local: `primary` and the
+nav's old `action` variant are now one thing, and F8 covers all of them rather
+than counting instances. What remains true is the measurement; see F8 for the
+numbers on all three grounds.

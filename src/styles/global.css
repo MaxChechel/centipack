@@ -164,6 +164,15 @@
   --tan-300: #c5b197;    /* Figma action/secondary/default */
   --tan-400: #b39c7e;    /* DERIVED — one step down, the hover */
 
+  /* The bronze the v1 button set gives its OUTLINED and its TEXT action. Not
+     the accent (#8a6424) and not the tan: a third brown, darker and less
+     yellow than either, and the design uses it for the secondary button's
+     border and label and for every arrow link on a light ground.
+     Measured against all three light grounds: 5.54 on --bg-base, 5.13 on
+     --bg-subtle, 5.92 on --bg-surface. Text and boundary both clear. */
+  --bronze-700: #7a5f43;  /* Figma, the v1 button set */
+  --bronze-800: #5f4a34;  /* DERIVED — one step down, the hover */
+
   --accent-700: #8a6424;  /* Figma text/accent              — the light accent */
   --accent-300: var(--tan-300);  /* the same swatch, as the dark-theme accent */
 
@@ -600,14 +609,16 @@
 
      --text-on-action is the only legal ink on it — 7.94 : 1, measured.
 
-     DECLARED ONCE, IN THE BARE :root, AND NOT REMAPPED PER THEME. Every other
-     pair here flips with the ground; this one does not, because the tan is the
-     brand's rather than the ground's and the design draws the same swatch on
-     both themes. Stated rather than left as an omission someone later "fixes".
+     IT IS REMAPPED PER THEME NOW, AND IT WAS NOT. This pair was declared once
+     in the bare :root on the reading that the tan is the brand's rather than
+     the ground's. The v1 button set settles it the other way: the design draws
+     three grounds and the fill is the TAN on both light ones and WHITE on the
+     dark one (Figma 1327:24580, 1327:24510, 1327:24598). That is a token that
+     flips with the ground, which is what every other pair here does.
 
      KNOWN FAILURE, recorded not hidden: the fill is 1.94 : 1 against
-     --bg-base, under WCAG 1.4.11's 3:1 for a control boundary — the same
-     failure AUDIT F1 already records for this project's control borders. */
+     --bg-base, 1.80 against --bg-subtle and 2.08 against --bg-surface, all
+     under WCAG 1.4.11's 3:1 for a control boundary. AUDIT F8. */
   --bg-action: var(--tan-300);
   --text-on-action: var(--gray-950);
   /* The hover DARKENS rather than inverting. `secondary`'s invert sends an
@@ -615,6 +626,16 @@
      is already light, and flipping it to ink would read as a different button
      rather than the same one under a pointer. One step down the same hue. */
   --bg-action-hover: var(--tan-400);
+
+  /* --- The outlined and text action --------------------------------------
+     The bronze the v1 set gives the SECONDARY button's border and label and
+     every arrow link. Its own pair rather than the accent's, because the
+     accent is a text colour spent on `aria-current` and this carries a control
+     boundary as well as a label — a different obligation, and it clears both
+     (5.13 : 1 at worst on a light ground, against 4.5 for text and 3.0 for the
+     boundary). White on dark, where the design draws it white. */
+  --outline-action: var(--bronze-700);
+  --outline-action-hover: var(--bronze-800);
 
   /* --- The inverse fill --------------------------------------------------
      The ink-coloured primary action: ground and ink swapped. CentiPack's
@@ -746,6 +767,10 @@
 @utility border-action { border-color: var(--bg-action); }
 @utility border-action-hover { border-color: var(--bg-action-hover); }
 @utility text-on-action { color: var(--text-on-action); }
+@utility text-outline-action { color: var(--outline-action); }
+@utility text-outline-action-hover { color: var(--outline-action-hover); }
+@utility border-outline-action { border-color: var(--outline-action); }
+@utility border-outline-action-hover { border-color: var(--outline-action-hover); }
 
 @utility bg-overlay { background-color: var(--bg-overlay); }
 @utility border-overlay { border-color: var(--line-overlay); }
@@ -830,6 +855,12 @@
   --bg-inverse-hover: var(--gray-800);
   --text-on-inverse: var(--gray-0);
 
+  --bg-action: var(--tan-300);
+  --bg-action-hover: var(--tan-400);
+  --text-on-action: var(--gray-950);
+  --outline-action: var(--bronze-700);
+  --outline-action-hover: var(--bronze-800);
+
   /* Re-declared, not inherited — see the note in §2. */
   --bg-overlay: color-mix(in oklab, var(--gray-950) 10%, transparent);
   --line-overlay: color-mix(in oklab, var(--gray-950) 15%, transparent);
@@ -895,6 +926,17 @@
   /* The inverse fill inverts with the theme, which is the whole point of the
      name: the dark CTA band and the footer draw a white button with dark text,
      exactly as the light pages draw a black button with white text. */
+  /* THE ACTION FILL FLIPS TO WHITE, which is what the design's dark scenario
+     draws (Figma 1327:24598) and, not coincidentally, exactly what the inverse
+     fill already resolves to here. They agree on this ground and part on the
+     light one, which is why they stay two tokens. */
+  --bg-action: var(--gray-0);
+  --bg-action-hover: var(--gray-300);
+  --text-on-action: var(--gray-950);
+  /* The outlined and text action go white too — border, label and arrow. */
+  --outline-action: var(--gray-0);
+  --outline-action-hover: var(--gray-300);
+
   --bg-inverse: var(--gray-0);
   /* One step DOWN from white, which is the same gesture inverted: the fill
      moves toward the ground rather than away from it. */
@@ -2442,8 +2484,13 @@
   }
 
   @media (hover: hover) {
+    /* DARKENS ONE STEP, it used to lighten to --text-secondary. The arrow link
+       is bronze now rather than ink, and lightening a bronze toward a warm grey
+       is a hue change rather than a step — it reads as the link losing its
+       colour. One step down the same hue, which is the gesture `primary` and
+       `secondary` both use. */
     .btn-link:hover {
-      color: var(--text-secondary);
+      color: var(--outline-action-hover);
     }
 
     .btn-link:hover svg {
@@ -3250,5 +3297,43 @@
     .cross-link:hover .cross-link-target {
       background-color: var(--bg-subtle);
     }
+  }
+}
+
+/* --- The button's square mark --------------------------------------------
+   A hover state, not a rest state: every filled and outlined button grows a
+   small square before its label when the pointer crosses it, and shows nothing
+   at rest — which is what all three of the v1 button scenarios draw.
+
+   IN THE LEFT PADDING, NOT IN FLOW. Holding its width in the flex row would
+   push the label about 10px right of centre at rest, on every button on the
+   site; growing the button on hover would shove whatever sits beside it. An
+   absolutely positioned mark costs nothing in either direction — the label
+   never moves and the box never resizes.
+
+   OPACITY ONLY (§12.3). It is the one property here the compositor can animate
+   without touching layout, and the mark has nowhere to travel from.
+
+   `:focus-visible` as well as `:hover`, because a keyboard user reaching this
+   button should see the same state a pointer user does. */
+@layer components {
+  .btn-mark {
+    position: absolute;
+    left: 0.3125rem;
+    display: flex;
+    align-items: center;
+    opacity: 0;
+    pointer-events: none;
+    transition: opacity var(--transition-duration-spring-soft) var(--ease-spring-soft);
+  }
+
+  @media (hover: hover) {
+    .btn-has-mark:hover .btn-mark {
+      opacity: 1;
+    }
+  }
+
+  .btn-has-mark:focus-visible .btn-mark {
+    opacity: 1;
   }
 }

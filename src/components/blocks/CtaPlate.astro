@@ -112,7 +112,7 @@ const hasContent = Boolean(heading) || Boolean(body) || Boolean(action);
     <div class="gap-lg flex flex-col items-center">
       {body && <p class="text-body text-primary max-w-[27rem]">{body}</p>}
       {action && (
-        <Button href={action.href} variant="primary" icon="square" iconPosition="start">
+        <Button href={action.href} variant="primary">
           {action.label}
         </Button>
       )}

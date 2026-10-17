@@ -22,7 +22,7 @@ import VisuallyHidden from './VisuallyHidden.astro';
  * contrast matrix, because a label that goes illegible on hover fails for
  * exactly as long as anyone is looking at it.
  */
-export type ButtonVariant = 'primary' | 'secondary' | 'ghost' | 'action';
+export type ButtonVariant = 'primary' | 'secondary' | 'ghost';
 export type ButtonSize = 'sm' | 'md' | 'link';
 /** Typed per §4.1; extend the union per project rather than passing markup. */
 export type ButtonIcon = 'arrow' | 'play' | 'close' | 'square';
@@ -57,6 +57,32 @@ const {
 const Tag = href ? 'a' : 'button';
 
 /**
+ * THE SQUARE MARK IS A HOVER STATE, and it is no longer passed in.
+ *
+ * It used to be `icon="square"` on four call sites, drawn at rest. The ruling
+ * is that it belongs to the hover of every filled and outlined button, so the
+ * component decides rather than each caller — a mark that four pages remember
+ * to ask for is a mark the fifth page forgets.
+ *
+ * ABSOLUTELY POSITIONED, AND THAT IS THE WHOLE DESIGN PROBLEM SOLVED.
+ * The alternatives both cost something visible at rest, which is the state all
+ * three of the design's scenarios actually draw:
+ *
+ *   in flow, revealed on hover   the mark holds its width at rest, so the label
+ *                                sits ~10px right of centre on every button
+ *   in flow, grown on hover      the button changes width under the pointer and
+ *                                shoves whatever is beside it
+ *
+ * Sitting it in the left padding costs nothing at rest — the label stays
+ * exactly where the design puts it — and the button never changes size. The
+ * visible square is about 5px inside a 14px box, so at `left: 0.3125rem` it
+ * clears the label by roughly 9px.
+ *
+ * `size="link"` has no box to put it in, so it keeps its arrow and nothing else.
+ */
+const hasMark = (variant === 'primary' || variant === 'secondary') && size !== 'link';
+
+/**
  * Complete class strings. Never `` `bg-${variant}` `` — the scanner reads source
  * as text and would generate none of these.
  *
@@ -65,57 +91,66 @@ const Tag = href ? 'a' : 'button';
  * divider-weight border here would be a real failure, not a style choice.
  */
 const VARIANT = {
+  /**
+   * THE TAN FILL, AND IT USED TO BE THE INK ONE.
+   *
+   * The v1 button set draws the primary action on three grounds and the fill is
+   * the tan `action/secondary/default` on both light ones and WHITE on the dark
+   * one (Figma 1327:24580, 1327:24510, 1327:24598). `--bg-action` is themed to
+   * do exactly that, so one variant covers all three and `primary` no longer
+   * needs a sibling.
+   *
+   * `action` IS GONE. It existed because `primary` was the ink fill and the nav
+   * needed the tan beside it; now they are the same button and keeping both
+   * would be two names for one thing. The nav takes `primary` like everything
+   * else.
+   *
+   * The ink fill is not lost — `--bg-inverse` still exists and still flips with
+   * the ground. Nothing on the site asks for it today.
+   */
   primary: [
-    'bg-inverse text-on-inverse border-inverse',
-    'hover:bg-inverse-hover hover:border-inverse-hover',
-  ],
-  /**
-   * `secondary` REVERSES on hover — an outline box fills with the ink and the
-   * label goes to the ground colour, and the whole thing inverts again on a dark
-   * theme because both halves are tokens. It is the same gesture as `primary`'s
-   * fill-lift read the other way round: the outline was the empty version of
-   * the filled button, so pointing at it completes it.
-   */
-  secondary: [
-    'bg-transparent text-primary border-line-strong',
-    'hover:bg-inverse hover:text-on-inverse hover:border-inverse',
-  ],
-  /**
-   * The v1 design's headline fill: the tan `action/secondary/default`, used for
-   * "Get a quote" in the nav and as the page-level call to action on a LIGHT
-   * ground.
-   *
-   * A VARIANT RATHER THAN A CHANGE TO `primary`, and the reason is in the
-   * design rather than in caution. The closing CTA's button is WHITE with black
-   * ink, sitting on a dark photograph — which is exactly what `primary` already
-   * resolves to inside a `theme="dark"` section, because --bg-inverse flips
-   * with the ground. So the design has two fills doing two jobs: one that
-   * follows the ground (primary, unchanged) and one that does not (this).
-   * Folding them together would have broken whichever one was not chosen.
-   *
-   * The hover darkens the tan rather than reversing it: this fill is already
-   * light, so the `secondary` variant's invert would send it to ink and read as
-   * a different button rather than the same one under a pointer.
-   */
-  action: [
     'bg-action text-on-action border-action',
     'hover:bg-action-hover hover:border-action-hover',
   ],
   /**
-   * `ghost` IS THE ARROW LINK, and its rest colour is now the ink.
+   * BRONZE OUTLINE, BRONZE LABEL — and it no longer reverses on hover.
    *
-   * It was `text-secondary` — grey at rest, and `.btn-link`'s hover took it to
-   * grey as well, so the tertiary action was grey throughout. The v1 design
-   * draws these in `text/primary`, and that is what was asked for: black.
+   * It was a neutral outline (`border-line-strong`) with an ink label that
+   * filled with the ink on hover. The v1 set draws it in `#7a5f43` on both
+   * light grounds and in white on the dark one, which `--outline-action` is
+   * themed to do.
    *
-   * The hover is unchanged and still lightens to --text-secondary (global.css,
-   * `.btn-link`), which now reads as a real response because the rest state is
-   * no longer the same colour. NOT `hover:text-accent` any more either — the
-   * accent is bronze as of the v1 palette, and an arrow link that went bronze
-   * on hover would be the one place on the page spending a colour nothing else
-   * near it uses.
+   * THE HOVER FILLS IT WITH THE PRIMARY'S OWN FILL — border, background and
+   * label all move at once: `--bg-action` behind, `--bg-action` on the border,
+   * `--text-on-action` on the label. So the outlined button COMPLETES into the
+   * filled one under the pointer, which is the same gesture it always had,
+   * now pointing at the tan instead of the ink.
+   *
+   * At rest both halves clear their requirements on every light ground:
+   * 5.13 : 1 at worst for the label against 4.5, and the same number against
+   * 1.4.11's 3.0 for the border, which is the only thing saying "this is a
+   * control". On hover it becomes the primary, which the action matrix
+   * already covers at 7.94.
    */
-  ghost: ['bg-transparent text-primary border-transparent', ''],
+  secondary: [
+    'bg-transparent text-outline-action border-outline-action',
+    'hover:bg-action hover:text-on-action hover:border-action',
+  ],
+  /**
+   * `ghost` IS THE ARROW LINK, and it is bronze again.
+   *
+   * THIS REVERSES AN EXPLICIT INSTRUCTION, so the history is here rather than
+   * in a commit nobody reads. It was `text-secondary`, then black on the
+   * instruction "for button with arrow type text use our black(text color)".
+   * The v1 button set draws every arrow link in `#7a5f43` on a light ground and
+   * white on a dark one — the same `--outline-action` the outlined button uses
+   * — and that set is what has now been asked for. Later instruction wins; the
+   * earlier one was not wrong when it was given.
+   *
+   * The hover darkens one step through `.btn-link`, which used to lighten to
+   * --text-secondary and would now be a hue change rather than a step.
+   */
+  ghost: ['bg-transparent text-outline-action border-transparent', ''],
 } as const;
 
 /**
@@ -212,7 +247,8 @@ const ICON_FILLED: Partial<Record<ButtonIcon, boolean>> = { square: true };
        and the wrapped arrow will centre against the block. It is a real
        trade-off and not a defect in either position — which is why both are
        written down. */
-    'inline-flex items-center justify-center rounded-sm border',
+    'relative inline-flex items-center justify-center rounded-sm border',
+    hasMark && 'btn-has-mark',
     size !== 'link' && 'whitespace-nowrap',
     // Springs are the default character of the system (§12), including here.
     'transition-colors duration-spring-soft ease-spring-soft',
@@ -227,6 +263,15 @@ const ICON_FILLED: Partial<Record<ButtonIcon, boolean>> = { square: true };
   ]}
   {...rest}
 >
+  {
+    hasMark && (
+      <span class="btn-mark" aria-hidden="true">
+        <svg class="size-icon-inline" viewBox="0 0 16 16" fill="none">
+          <path d={ICON_PATHS.square} fill="currentColor" />
+        </svg>
+      </span>
+    )
+  }
   {
     icon && iconPosition === 'start' && (
       <svg class="size-icon-inline" viewBox="0 0 16 16" fill="none" aria-hidden="true">

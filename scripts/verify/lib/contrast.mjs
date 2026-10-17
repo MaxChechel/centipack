@@ -184,13 +184,18 @@ export function accentMatrix(scopes) {
  * fill "goes through the matrix like everything else"; this is that, applied to
  * the second fill the system now has.
  *
- * ONE ROW PER THEME AND NOT TWO, unlike the inverse fill: `--bg-action` is
- * declared once in the bare :root and deliberately does not remap, so the two
- * themes resolve the same pair. Both are still read, because the day somebody
- * adds a `[data-theme]` override for it, this is what notices.
+ * IT REMAPS PER THEME NOW, so this reads both themes and gets two different
+ * answers: the tan on light, white on dark. The note that used to sit here said
+ * the token was declared once and deliberately did not remap, and predicted
+ * that "the day somebody adds a `[data-theme]` override for it, this is what
+ * notices". The v1 button set added one; this is the note being kept.
+ *
+ * THE HOVER STATE IS A ROW TOO, as it is for the inverse fill: a label that
+ * goes illegible when the pointer crosses it fails for exactly as long as
+ * anyone is looking at it.
  *
  * The 3:1 boundary check against the page ground is NOT here. It belongs to
- * `lineMatrix`'s job and it currently FAILS at 1.94 : 1 — recorded in AUDIT
+ * `lineMatrix`'s job and it currently FAILS at 1.80–2.08 — recorded in AUDIT F8
  * rather than asserted here, because making it a row would turn a known,
  * accepted design deviation into a red build on every run.
  */
@@ -198,12 +203,45 @@ export function actionMatrix(scopes) {
   const rows = [];
   for (const theme of THEMES) {
     const label = resolveColor(scopes, theme, '--text-on-action');
-    const fill = resolveColor(scopes, theme, '--bg-action');
-    const ratio = contrastRatio(label, fill);
-    rows.push({
-      theme, bg: '--bg-action', text: '--text-on-action',
-      bgHex: fill, textHex: label, ratio, pass: ratio >= AA, threshold: AA,
-    });
+    for (const fillToken of ['--bg-action', '--bg-action-hover']) {
+      const fill = resolveColor(scopes, theme, fillToken);
+      const ratio = contrastRatio(label, fill);
+      rows.push({
+        theme, bg: fillToken, text: '--text-on-action',
+        bgHex: fill, textHex: label, ratio, pass: ratio >= AA, threshold: AA,
+      });
+    }
+  }
+  return rows;
+}
+
+/**
+ * THE OUTLINED AND TEXT ACTION, against every ground it can land on.
+ *
+ * `--outline-action` does two jobs at once and they carry different thresholds:
+ * it is the secondary button's LABEL, which owes 4.5, and that button's BORDER,
+ * which is the only thing saying "this is a control" and owes WCAG 1.4.11's
+ * 3.0. It is also every arrow link's colour. The stricter of the two decides,
+ * so every row is checked at AA and the boundary comes along for free.
+ *
+ * Unlike the action FILL, this one has no accepted exemption — the bronze was
+ * picked to clear both, and if a future palette change drops it under 4.5 on
+ * any of the three grounds this is what fails.
+ */
+export function outlineActionMatrix(scopes) {
+  const rows = [];
+  for (const theme of THEMES) {
+    for (const bg of BACKGROUNDS) {
+      const bgHex = resolveColor(scopes, theme, bg);
+      for (const token of ['--outline-action', '--outline-action-hover']) {
+        const hex = resolveColor(scopes, theme, token);
+        const ratio = contrastRatio(hex, bgHex);
+        rows.push({
+          theme, bg, text: token, bgHex, textHex: hex, ratio,
+          pass: ratio >= AA, threshold: AA,
+        });
+      }
+    }
   }
   return rows;
 }

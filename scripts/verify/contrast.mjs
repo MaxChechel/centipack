@@ -21,6 +21,7 @@ import {
   accentMatrix,
   inverseMatrix,
   actionMatrix,
+  outlineActionMatrix,
   lineMatrix,
   rootDeclaration,
   fadeMatrix,
@@ -54,7 +55,8 @@ export function contrast() {
     { label: 'text × background', rows: textMatrix(scopes) },
     { label: 'accent', rows: accentMatrix(scopes) },
     { label: 'inverse fill', rows: inverseMatrix(scopes) },
-    { label: 'secondary action fill', rows: actionMatrix(scopes) },
+    { label: 'action fill', rows: actionMatrix(scopes) },
+    { label: 'outlined and text action', rows: outlineActionMatrix(scopes) },
     { label: 'inactive fade, composited', rows: fadeMatrix(scopes) },
     { label: 'line', rows: lineMatrix(scopes) },
   ];

@@ -204,15 +204,14 @@ const linkClass = 'link-underline text-body text-primary aria-[current=page]:tex
       </ul>
 
       <div class="gap-sm flex items-center">
-        {/* `action`, not `primary`: the v1 design fills this one with the tan
-            `action/secondary/default` on the light nav ground, while the
-            closing CTA's button stays `primary` because it sits on a dark
-            photograph and wants the inverse fill. Two fills, two grounds — see
-            the variant's note in Button.astro.
+        {/* `primary` now carries the tan on a light ground and white on a dark
+            one, so the `action` variant this used to take is gone — they had
+            become two names for one button. See the variant's note in
+            Button.astro.
 
             NO `icon="square"` here: the nav button is label-only in the design.
             The square mark belongs to the closing CTA's button, which keeps it. */}
-        <Button href={SITE.contactHref} variant="action">
+        <Button href={SITE.contactHref} variant="primary">
           Get a quote
         </Button>
 

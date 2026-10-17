@@ -76,7 +76,7 @@ const heroPicture = await toPageImage({
   /* RE-READ AGAINST THE PICTURE after the shot was swapped, which is the rule
      entry 46 set and the only way this string stays true. */
   alt:
-    'The CentiPack range in one line-up: an insulated mailer printed "Refrigerate upon opening", a gel pack, blue drawer and hinged boxes holding vials, a pump bottle, an open jar, an EPS foam cooler in its corrugated outer, and an open white mailer box.',
+    'The CentiPack range laid out together: two open white corrugated shippers, one holding a kraft inner box and the other an EPS foam cooler; three stand-up pouches in silver, white and navy; a navy mailer box and a navy drawer box open on vials; a spray bottle and a jar; and two navy gel packs marked "Puncture here".',
 });
 ---
 
@@ -103,7 +103,7 @@ const heroPicture = await toPageImage({
     which is what `.measure` already does for body copy, one step up. The flex
     column centres it, so nothing here needs `mx-auto` (§3.1).
   */}
-  <Section width="main" spaceTop="nav" spaceBottom="lg" class="text-center">
+  <Section width="main" spaceTop="nav" spaceBottom="lg" class="bg-subtle text-center">
     <div class="gap-xl flex flex-col items-center">
       <h1 class="hero-headline text-h1 text-primary">
         Cold chain packaging for high-volume compounding pharmacies
@@ -150,31 +150,31 @@ const heroPicture = await toPageImage({
   </Section>
 
   {/*
-    2 — The hero picture, full-bleed.
+    2 — The hero picture, contained.
 
-    EDGE TO EDGE, ON INSTRUCTION. v1 draws this as a 1344 x 560 plate inside the
-    page's gutter and it shipped that way for one round; the ruling is that the
-    site's hero photographs run the full viewport width, as they did before and
-    as the category pages still do. Recorded as a deviation from the design
-    rather than absorbed, because it is one.
+    BACK INSIDE THE CONTAINER, FOLLOWING THE DESIGN. This went full-bleed on
+    instruction and the design has since moved the other way: v1.03 draws a
+    1344 x 640 plate inside the page gutter with the card radius (Figma
+    1327:24508 in a 1440 x 640 band). The picture itself is 756px tall and hangs
+    116px above the band, which is a crop — `object-cover` at 1344/640 does the
+    same thing.
 
-    `width="full"` keeps the Section wrapper — theme and vertical rhythm behave
-    identically — and drops only the max-width and the gutter, which is what
-    full-bleed means here. No radius, for the same reason: there is no card edge
-    to round when the picture meets the screen.
+    `.hero-media` carries the ratio rather than the `ratio` prop, because Media
+    writes that prop as an INLINE custom property and an art-directing class has
+    to set `aspect-ratio` itself to beat it. See the note on `.hero-media`.
 
     NO `media-scrim`. A scrim exists to make type legible over a photograph, and
     the four statistics that used to sit on this one are gone.
   */}
-  <Section width="full" space="none">
+  <Section width="main" space="none" class="bg-subtle">
     <Media
       image={heroPicture}
       label="Home hero — the CentiPack range in one line-up"
-      ratio="5 / 3"
+      ratio="1344 / 640"
       loading="eager"
       fetchpriority="high"
-      sizes="100vw"
-      class="hero-media"
+      sizes="(min-width: 90rem) 1344px, 100vw"
+      class="hero-media rounded-md"
     />
   </Section>
 
@@ -255,7 +255,12 @@ const heroPicture = await toPageImage({
     button. v1 replaces it with the shared `cta desktop`, so the closing band is
     now one component reading one string across every page type that has one.
   */}
-  <Section space="md" spaceTop="lg">
+  {/* `bg-subtle` HERE AND NOT ON THE CATEGORY PAGES, which is what the design
+      draws rather than an oversight: this page's closing band follows the
+      testimonial's lighter `#f9f7f5`, so it steps back down to the page ground;
+      a category page's follows the cross-links, which are already on it, so it
+      steps up. Sampled off both frames with Figma's canvas excluded. */}
+  <Section space="md" spaceTop="lg" class="bg-subtle">
     <CtaPlate {...cta} />
   </Section>
 </BaseLayout>

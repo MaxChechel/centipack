@@ -291,23 +291,30 @@ darkening the tan to roughly L*62 — about #a98d6b — which reaches 3:1 agains
 the ground while staying recognisably the same colour. Both change what the
 design draws, so neither is this file's call.
 
-## D8 — Hero photographs run full-bleed, where v1 draws them as contained plates
+## D8 — Product page heroes run full-bleed, where v1 draws them as contained plates
 
-**Deviation, on instruction, 2026-10-16.**
+**Deviation, on instruction, 2026-10-16. Narrowed 2026-10-17.**
+
+**The home hero is no longer part of this.** It went full-bleed with the others,
+and the design then moved the other way — v1.03 draws a 1344 × 640 plate inside
+the page gutter (Figma 1327:24508) — so it is back inside the container and
+matches the design. What is left below applies to the five product pages only.
+The category pages were never part of it: v1 draws their range shot at 1440
+full-bleed and always did.
 
 The v1 design draws every page's hero photograph as a plate inside the page
 gutter with the card radius:
 
-| page | drawn | |
+| page | drawn | ships |
 | --- | --- | --- |
-| Home | 1344 × 560 at x=48 | Figma 1005:13611 |
-| Product pages | 1344 × 541 at x=48 | Figma 1179:3206 and siblings |
-| Category pages | 1440 × 700, x=0 | Figma 1005:14041 — already full-bleed |
+| Home | 1344 × 640 at x=48 *(Figma 1327:24508)* | **contained — matches** |
+| Product pages | 1344 × 541 at x=48 *(Figma 1179:3206 and siblings)* | **full-bleed — deviates** |
+| Category pages | 1440 × 700 at x=0 *(Figma 1005:14041)* | full-bleed — matches |
 
-**They ship full-bleed.** The home hero was built to the drawn plate for one
-round and the ruling came back the other way: the site's hero photographs run
-the full viewport width, as they did before v1 and as the category pages do in
-v1 regardless.
+**The product heroes ship full-bleed**, on the instruction that the site's hero
+photographs run the full viewport width. That instruction has not been
+withdrawn; the home page simply stopped being an example of it when the design
+changed.
 
 **Why it is recorded rather than absorbed.** It is a real difference from the
 source of truth this round is being measured against, and it is the kind that
@@ -321,9 +328,14 @@ the wider box rather than wasteful. Contrast is unaffected — there is no type 
 any of these three, which is also why the home hero's scrim came off with its
 stat band.
 
-**What would reverse it**: `width="main"` on the three Sections, the drawn ratio
-on each Media, and `rounded-md` back on the image. Two lines per page, and the
-design is already written down above.
+**What would reverse it**: `width="main"` on the product template's picture
+Section, `ratio="1344 / 541"` already being passed, and `rounded-md` back on the
+image — two lines, exactly as the home page has just been put back.
+
+**Open**: whether the product pages should follow the home page back to the
+drawn plate, or stay full-bleed. They are the only pages on the site where the
+hero now behaves differently from the design, and nothing has been said about
+them since the home page changed.
 
 ## D9 — The category card's scrims are deeper and taller than the design draws them
 

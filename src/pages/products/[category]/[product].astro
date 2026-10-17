@@ -110,13 +110,41 @@ const assertEverySectionIsHandled = (sections: readonly ProductSection[]): void 
   }
 };
 assertEverySectionIsHandled(product.sections);
+
+/**
+ * WHICH GROUND A SECTION SITS ON, and it ALTERNATES.
+ *
+ * The v1 product pages band themselves: the hero is `#f2eee8`, then every
+ * content section after it flips between white and `#f2eee8` down the page,
+ * and the FAQ and closing band settle onto `#f9f7f5`. Sampled off two pages
+ * with different section mixes to establish that it is alternation rather than
+ * a colour per section type — the same `split` block is white on one row and
+ * `#f2eee8` two rows later:
+ *
+ *   mailers (1204:3919)   hero f2eee8 · steps #fff · features f2eee8 ·
+ *                         specs #fff · split f2eee8 · split #fff ·
+ *                         numbered f2eee8 · faq f9f7f5 · cta f9f7f5
+ *   gel packs (1207:3793) hero f2eee8 · numbered #fff · features f2eee8 ·
+ *                         formats #fff · numbered f2eee8 · cta f9f7f5
+ *
+ * So it is the INDEX that decides, not the type — which is why this is a
+ * function of the position rather than a field on the section. A ground stored
+ * in the content would have to be re-typed every time a section is inserted,
+ * and would be wrong the moment someone forgot.
+ *
+ * The FAQ is the one exception, and it is the design's: it leaves the
+ * alternation and lands on the same `#f9f7f5` as the closing band under it, so
+ * the page ends on one ground rather than on a stripe.
+ */
+const sectionGround = (section: ProductSection, index: number): string =>
+  section.type === 'faq' ? 'bg-base' : index % 2 === 0 ? 'bg-surface' : 'bg-subtle';
 ---
 
 <BaseLayout
   title={`${product.pageTitle} — ${category.title} | ${SITE.name}`}
   description={product.lede ?? `${product.title} — ${product.summary}. ${category.summary}`}
 >
-  <Section spaceTop="nav" spaceBottom="lg">
+  <Section spaceTop="nav" spaceBottom="lg" class="bg-subtle">
     <div class="gap-xl md:gap-lg md:grid md:grid-cols-12 md:items-end flex flex-col">
       <div class="gap-lg md:col-span-7 flex flex-col">
         {/* Home is the first crumb on every trail on this site. The v1
@@ -152,7 +180,7 @@ assertEverySectionIsHandled(product.sections);
   {/* The hero picture, full-bleed — the same treatment the category pages give
       their range shot, and the same deviation from the drawn 1344px plate. See
       the note on the home page's hero. */}
-  <Section width="full" space="none">
+  <Section width="full" space="none" class="bg-subtle">
     <Media
       image={product.heroImage}
       label={`${product.title} — hero`}
@@ -165,8 +193,8 @@ assertEverySectionIsHandled(product.sections);
   </Section>
 
   {
-    product.sections.map((section) => (
-      <Section space="lg">
+    product.sections.map((section, index) => (
+      <Section space="lg" class={sectionGround(section, index)}>
         {section.type === 'steps' && (
           <StepList heading={section.heading} steps={section.steps} image={section.image} />
         )}
@@ -225,7 +253,7 @@ assertEverySectionIsHandled(product.sections);
     ))
   }
 
-  <Section space="md" spaceTop="lg">
+  <Section space="md" spaceTop="lg" class="bg-base">
     <CtaPlate {...cta} />
   </Section>
 </BaseLayout>

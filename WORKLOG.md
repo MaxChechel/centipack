@@ -6190,3 +6190,93 @@ Unchanged, plus one added:
 89. **Three "Get a quote" buttons on one page.** Deliberate after this entry,
     but not obviously right. The hero's could be "Talk to a specialist" or the
     nav's could stand alone.
+
+## 2026-10-17 — Entry 69. Section grounds, and the canvas that nearly faked them
+
+The design moved: the home hero is a contained plate again, and the pages band
+themselves in three grounds rather than two. Both read off Figma, both now
+shipping.
+
+### The measurement nearly went wrong, and the trap is worth recording
+
+Sampling the home frame's left gutter gave `#f2eee8` for every section — a
+warm cream nothing in the file uses as a token. It looked like a page-wide
+ground change.
+
+**It was Figma's canvas showing through.** `get_screenshot` defaults to
+`contentsOnly: false`, which composites overlapping canvas content so the render
+"matches what the user sees"; the backdrop behind these frames happens to be the
+same `#f2eee8`, so unfilled sections read as filled and a filled one read as
+unfilled. The giveaway was a contradiction: the testimonial section's own design
+context says `bg-[#f9f7f5]`, and the page render claimed `#f2eee8` in the same
+place. Rendering that section ALONE settled it, and re-rendering the page with
+`contentsOnly: true` produced a different and coherent answer.
+
+A render that agrees with itself is not the same as a render that is right. Both
+numbers were real; one was about the wrong surface.
+
+### Three grounds, and the product pages alternate between them
+
+All three map to tokens that already existed — `#f2eee8` is `--bg-subtle`,
+`#ffffff` is `--bg-surface`, `#f9f7f5` is `--bg-base`:
+
+| page | bands, top to bottom |
+| --- | --- |
+| Home | subtle everywhere, except the testimonial on base |
+| Products index | subtle, then base — unchanged, already correct |
+| Category | subtle, base, subtle, base — unchanged, already correct |
+| **Product** | **subtle, then white / subtle alternating, then base for FAQ and CTA** |
+
+**The product pages alternate by POSITION, not by section type**, which is the
+part that had to be established rather than assumed. Two pages with different
+section mixes were sampled, and the same `split` block comes out white on one
+row and `#f2eee8` two rows later:
+
+```
+mailers    hero f2eee8 · steps #fff · features f2eee8 · specs #fff ·
+           split f2eee8 · split #fff · numbered f2eee8 · faq f9f7f5 · cta f9f7f5
+gel packs  hero f2eee8 · numbered #fff · features f2eee8 · formats #fff ·
+           numbered f2eee8 · cta f9f7f5
+```
+
+So it is a function of the index, not a field on the section — a ground stored
+in the content would need re-typing every time a section was inserted, and would
+be wrong the first time someone forgot. The FAQ is the one exception and it is
+the design's: it leaves the alternation and lands on the closing band's ground,
+so the page ends on one colour rather than on a stripe.
+
+Verified by diffing the band sequence of the built page against the Figma
+render, rather than by reading the code back:
+
+```
+FIGMA  subtle | white | subtle | white | subtle | white | subtle | base | ink
+BUILT  subtle | white | subtle | white | subtle | white | subtle | base | ink
+```
+
+### The nav moved with them
+
+`bg-base` → `bg-subtle`. The design puts the navbar on the same ground as the
+band under it, and that band is `#f2eee8` on every page type in the file. A
+sticky bar has to be opaque — a transparent one puts body copy behind the logo
+when a white section scrolls under it — so it picks one ground, and the right
+one is the ground the page starts on. About and Contact got `bg-subtle` on their
+first section to match; neither is in the v1 Figma set, so that is consistency
+rather than transcription.
+
+### Measurements
+
+| | before | after |
+| --- | --- | --- |
+| verify | 8 checks, 1083 assertions | **8 checks, 1083 assertions, 0 failures** |
+| grounds in use | 2 | **3** |
+| home hero | full-bleed, 5:3 | **contained, 1344 × 640** |
+
+### Open questions
+
+Unchanged, plus:
+
+90. **The product page heroes are still full-bleed** while the home hero has
+    gone back to the drawn plate. AUDIT D8 is narrowed to them alone. The
+    instruction that put them there has not been withdrawn, and nothing has
+    been said about them since the design changed — so they are now the only
+    pages whose hero disagrees with Figma.

@@ -39,7 +39,7 @@ const hasContent = cards.length > 0;
   <ul class="list-bare gap-lg grid md:grid-cols-2">
     {
       cards.map((card) => (
-        <li class="bg-subtle rounded-md p-lg md:p-2xl gap-lg flex flex-col">
+        <li class="bg-subtle rounded-card p-lg md:p-2xl gap-lg flex flex-col">
           <p class="text-h4 text-primary">{card.title}</p>
           <ul class="list-bare border-line gap-sm pt-lg flex flex-wrap border-t">
             {card.sizes.map((size) => (

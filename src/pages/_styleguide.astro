@@ -293,7 +293,7 @@ const INDEX = [
           ramps.map((r) => (
             <div class="gap-2xs flex flex-col">
               <p class="sg-meta">{r.label}</p>
-              <ul class="border-line list-bare flex overflow-hidden rounded-md border">
+              <ul class="border-line list-bare flex overflow-hidden rounded-card border">
                 {r.steps.map((swatch) => (
                   <li class="sg-swatch min-w-0 flex-1" style={`background:${swatch.value}`}>
                     <span class="sg-swatch-label" style={`color:${swatch.label}`}>{swatch.step}</span>
@@ -320,7 +320,7 @@ const INDEX = [
       <div class="gap-md grid md:grid-cols-2">
         {
           themes.map((theme) => (
-            <div data-theme={theme} class="bg-base border-line p-md gap-sm flex flex-col rounded-md border">
+            <div data-theme={theme} class="bg-base border-line p-md gap-sm flex flex-col rounded-card border">
               <p class="sg-meta">
                 {theme === 'light' ? '[data-theme] absent → light' : '[data-theme="dark"] → designed, not inverted'}
               </p>
@@ -360,7 +360,7 @@ const INDEX = [
       <div class="gap-md grid lg:grid-cols-2">
         {
           themes.map((theme) => (
-            <div data-theme={theme} class="bg-base border-line p-md gap-sm flex flex-col rounded-md border">
+            <div data-theme={theme} class="bg-base border-line p-md gap-sm flex flex-col rounded-card border">
               <p class="sg-meta">
                 {theme} · 9 pairs · floor{' '}
                 {Math.min(...text.filter((r) => r.theme === theme).map((r) => r.ratio)).toFixed(2)}:1
@@ -399,7 +399,7 @@ const INDEX = [
       </div>
 
       <div class="gap-md grid md:grid-cols-2">
-        <div class="bg-surface border-line p-md gap-xs flex flex-col rounded-md border">
+        <div class="bg-surface border-line p-md gap-xs flex flex-col rounded-card border">
           <p class="sg-meta">
             Accent group · {accent.length} pairs, {accent.filter((r) => !r.pass).length} failing.
             Inverse fill · {inverse.length} pairs, {inverse.filter((r) => !r.pass).length} failing —
@@ -416,7 +416,7 @@ const INDEX = [
             }
           </ul>
         </div>
-        <div class="bg-surface border-line p-md gap-xs flex flex-col rounded-md border">
+        <div class="bg-surface border-line p-md gap-xs flex flex-col rounded-card border">
           <p class="sg-meta">
             Line group · {lines.length} pairs. <code>--line</code> is decorative and only has to be seen;
             <code> --line-strong</code> is a control boundary and carries WCAG 1.4.11's 3:1.
@@ -463,7 +463,7 @@ const INDEX = [
         }
       </ul>
 
-      <div class="bg-surface border-line p-md gap-xs flex flex-col rounded-md border">
+      <div class="bg-surface border-line p-md gap-xs flex flex-col rounded-card border">
         <h3 class="text-h6 text-primary">Size is still decoupled from level</h3>
         <p class="text-sm text-secondary measure">
           Naming the tokens for their roles does not re-couple them: the decoupling lives in the CLASS, which any
@@ -578,7 +578,7 @@ const INDEX = [
     </div>
 
     <div class="container-main mt-lg">
-      <div class="bg-surface border-line p-md gap-xs flex flex-col rounded-md border">
+      <div class="bg-surface border-line p-md gap-xs flex flex-col rounded-card border">
         <h3 class="text-h6 text-primary">The boundary below Section</h3>
         <ul class="list-bare gap-3xs text-sm text-secondary flex flex-col">
           <li>— no <code>max-w-container-*</code>: the token is outside <code>@theme</code>, so the utility does not exist.</li>
@@ -667,7 +667,7 @@ const INDEX = [
       </SectionHeader>
 
       <div class="gap-md grid md:grid-cols-3">
-        <div class="bg-surface border-line p-md gap-xs flex flex-col rounded-md border md:col-span-1">
+        <div class="bg-surface border-line p-md gap-xs flex flex-col rounded-card border md:col-span-1">
           <p class="text-h6 text-primary">Surface card</p>
           <p class="text-sm text-secondary">Supporting copy, secondary.</p>
           <p class="text-caption text-tertiary">Tertiary meta — {darkTertiaryFloor.toFixed(2)}:1 here, the floor of the dark theme.</p>
@@ -774,7 +774,7 @@ const INDEX = [
         <div class="gap-md grid lg:grid-cols-3">
           {
             FORM_STATES.map((state) => (
-              <div class="bg-surface border-line p-md gap-md flex flex-col rounded-md border">
+              <div class="bg-surface border-line p-md gap-md flex flex-col rounded-card border">
                 <p class="sg-meta">{state.label}</p>
 
                 <FormField
@@ -852,7 +852,7 @@ const INDEX = [
              on light and near-black on dark. A control set that is only ever
              rendered on one ground is a control set whose inverse has never been
              looked at — and this system has shipped exactly that bug before. */}
-        <div data-theme="dark" class="bg-base border-line p-md gap-md flex flex-col rounded-md border">
+        <div data-theme="dark" class="bg-base border-line p-md gap-md flex flex-col rounded-card border">
           <p class="sg-meta">the same controls on theme="dark" — accent and accent-contrast both flip</p>
           <div class="gap-md grid md:grid-cols-2">
             <div class="gap-md flex flex-col">
@@ -885,7 +885,7 @@ const INDEX = [
           </div>
         </div>
 
-        <div class="bg-surface border-line p-md gap-xs flex flex-col rounded-md border">
+        <div class="bg-surface border-line p-md gap-xs flex flex-col rounded-card border">
           <h4 class="text-h6 text-primary">A radio group is a pattern, not a component</h4>
           <p class="text-sm text-secondary measure">
             The groups above are a <span class="sg-mono">&lt;fieldset&gt;</span> with a
@@ -909,17 +909,17 @@ const INDEX = [
       </div>
 
       <div class="gap-md grid md:grid-cols-3">
-        <div class="bg-surface border-line p-md gap-xs flex flex-col rounded-md border">
+        <div class="bg-surface border-line p-md gap-xs flex flex-col rounded-card border">
           <p class="sg-meta">Logo — currentColor, follows the theme.</p>
           <Logo class="w-nav-logo text-primary" title="Placeholder wordmark" />
         </div>
-        <div class="bg-surface border-line p-md gap-xs flex flex-col rounded-md border">
+        <div class="bg-surface border-line p-md gap-xs flex flex-col rounded-card border">
           <p class="sg-meta">VisuallyHidden — present, announced, not painted.</p>
           <p class="text-sm text-secondary">
             Read more<VisuallyHidden> about the demo collection</VisuallyHidden>
           </p>
         </div>
-        <div class="bg-surface border-line p-md gap-xs flex flex-col rounded-md border">
+        <div class="bg-surface border-line p-md gap-xs flex flex-col rounded-card border">
           <p class="sg-meta">JsonLd — emitted into this page, renders nothing.</p>
           <p class="text-sm text-secondary">Data, not script. Excluded from the JS census by type.</p>
           <JsonLd schema={{ '@context': 'https://schema.org', '@type': 'WebPage', name: 'Styleguide' }} />
@@ -940,14 +940,14 @@ const INDEX = [
         split
       />
 
-      <div class="bg-surface border-line p-md gap-sm flex flex-col rounded-md border">
+      <div class="bg-surface border-line p-md gap-sm flex flex-col rounded-card border">
         <h3 class="text-h5 text-primary">The card pattern</h3>
         <p class="text-sm text-secondary measure">
           A card is a <strong class="text-primary">pattern, not a component</strong>. There is no generic Card
           shell and no card family in the base kit. The recipe is:
         </p>
-        <pre class="sg-code" tabindex="0"><code>bg-subtle + rounded-md + p-sm | p-md          &#8592; CentiPack (AUDIT D4)
-bg-surface + border-line + rounded-md + p-*  &#8592; the house default</code></pre>
+        <pre class="sg-code" tabindex="0"><code>bg-subtle + rounded-card + p-sm | p-md          &#8592; CentiPack (AUDIT D4)
+bg-surface + border-line + rounded-card + p-*  &#8592; the house default</code></pre>
         <p class="text-sm text-secondary measure">
           Project cards — ProductCard, CategoryCard — are instantiations of it. They never invent their own
           surface, border or radius treatment; if one needs a different treatment, that is a token decision made
@@ -993,7 +993,7 @@ bg-surface + border-line + rounded-md + p-*  &#8592; the house default</code></p
       <SectionHeader heading="" />
       <LogoStrip label="Trusted by" logos={[]} />
 
-      <div class="bg-surface border-line p-md gap-xs flex flex-col rounded-md border">
+      <div class="bg-surface border-line p-md gap-xs flex flex-col rounded-card border">
         <h3 class="text-h6 text-primary">Two blocks were rendered directly above this</h3>
         <p class="text-sm text-secondary measure">
           An empty <span class="sg-mono">&lt;SectionHeader&gt;</span> and a
@@ -1007,7 +1007,7 @@ bg-surface + border-line + rounded-md + p-*  &#8592; the house default</code></p
 
       <div class="gap-2xs flex flex-col">
         <p class="sg-meta">LogoStrip — the label is a &lt;p&gt;, not a heading: it introduces a list of marks, not a section.</p>
-        <div class="bg-surface border-line p-md rounded-md border">
+        <div class="bg-surface border-line p-md rounded-card border">
           <LogoStrip label="Trusted by" logos={demoLogos} />
         </div>
       </div>
@@ -1039,7 +1039,7 @@ bg-surface + border-line + rounded-md + p-*  &#8592; the house default</code></p
         split
       />
 
-      <div class="bg-surface border-line p-md gap-sm flex flex-col rounded-md border">
+      <div class="bg-surface border-line p-md gap-sm flex flex-col rounded-card border">
         <p class="text-sm text-secondary measure">
           The live one is in the nav at the top of this page — open{' '}
           <strong class="text-primary">Resources</strong> and try each of these:
@@ -1072,7 +1072,7 @@ bg-surface + border-line + rounded-md + p-*  &#8592; the house default</code></p
       />
 
       <div class="gap-md grid md:grid-cols-2">
-        <div class="bg-surface border-line p-md gap-sm flex flex-col rounded-md border">
+        <div class="bg-surface border-line p-md gap-sm flex flex-col rounded-card border">
           <p class="sg-meta">Hover either box. Same duration, different damping ratio.</p>
           <div class="gap-sm flex flex-col">
             <div class="sg-spring sg-spring-soft">
@@ -1088,7 +1088,7 @@ bg-surface + border-line + rounded-md + p-*  &#8592; the house default</code></p
           </p>
         </div>
 
-        <div class="bg-surface border-line p-md gap-sm flex flex-col rounded-md border">
+        <div class="bg-surface border-line p-md gap-sm flex flex-col rounded-card border">
           <h3 class="text-h6 text-primary">Scroll reveal — opt-in per Section</h3>
           <p class="text-sm text-secondary">
             This Section carries <span class="sg-mono">reveal</span>, which sets{' '}
@@ -1104,7 +1104,7 @@ bg-surface + border-line + rounded-md + p-*  &#8592; the house default</code></p
         </div>
       </div>
 
-      <div class="bg-surface border-line p-md gap-xs flex flex-col rounded-md border">
+      <div class="bg-surface border-line p-md gap-xs flex flex-col rounded-card border">
         <h3 class="text-h6 text-primary">The reduced-motion contract</h3>
         <ul class="list-bare gap-3xs text-sm text-secondary flex flex-col">
           <li>— reveals render their content <strong class="text-primary">visible, with no animation</strong> — never hidden;</li>
@@ -1163,7 +1163,7 @@ bg-surface + border-line + rounded-md + p-*  &#8592; the house default</code></p
         </blockquote>
       </div>
 
-      <div class="bg-surface border-line p-md gap-xs flex flex-col rounded-md border">
+      <div class="bg-surface border-line p-md gap-xs flex flex-col rounded-card border">
         <h3 class="text-h6 text-primary">That was a real MDX body</h3>
         <p class="text-sm text-secondary measure">
           Rendered from <span class="sg-mono">src/content/items/item-one.mdx</span> through the adapter, with

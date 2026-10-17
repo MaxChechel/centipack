@@ -154,9 +154,9 @@ const heroPicture = await toPageImage({
 
     BACK INSIDE THE CONTAINER, FOLLOWING THE DESIGN. This went full-bleed on
     instruction and the design has since moved the other way: v1.03 draws a
-    1344 x 640 plate inside the page gutter with the card radius (Figma
-    1327:24508 in a 1440 x 640 band). The picture itself is 756px tall and hangs
-    116px above the band, which is a crop — `object-cover` at 1344/640 does the
+    1344 x 720 plate inside the page gutter with the card radius (Figma
+    1327:24508 in a 1440 x 720 band). The picture itself is 756px tall and hangs
+    100px above the band, which is a crop — `object-cover` at 1344/720 does the
     same thing.
 
     `.hero-media` carries the ratio rather than the `ratio` prop, because Media
@@ -170,11 +170,11 @@ const heroPicture = await toPageImage({
     <Media
       image={heroPicture}
       label="Home hero — the CentiPack range in one line-up"
-      ratio="1344 / 640"
+      ratio="1344 / 720"
       loading="eager"
       fetchpriority="high"
       sizes="(min-width: 90rem) 1344px, 100vw"
-      class="hero-media rounded-md"
+      class="hero-media rounded-plate"
     />
   </Section>
 

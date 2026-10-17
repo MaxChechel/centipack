@@ -81,7 +81,7 @@ const hasImage = Boolean(category.cardImage);
 <article
   data-theme={hasImage ? 'dark' : undefined}
   class:list={[
-    'category-card rounded-md relative isolate overflow-hidden',
+    'category-card rounded-card relative isolate overflow-hidden',
     hasImage ? undefined : 'bg-subtle',
     className,
   ]}

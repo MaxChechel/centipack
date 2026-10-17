@@ -6627,3 +6627,54 @@ rather than silently skipped.
     — `text/secondary`, `text/tertiary` and `border/strong`. `text/tertiary`
     at `#b0aeab` would fail AA outright at 2.07 : 1. Worth confirming which
     side is current before the next palette pass.
+
+## 2026-10-17 — Entry 75. The hero band grows, and the radius becomes a size rule
+
+Re-read Home v1.03 and applied what moved; then a global ruling on card radii.
+
+### What actually changed on the home page
+
+Most of it already matched — the two hero buttons, the title-only cards, the
+testimonial, the section grounds. The design's own card frame now contains
+**only** a `Title` node at y=455, which is the hover-reveal this already builds.
+
+One real difference: **the hero band is 1440 × 720, not 640.** The photograph
+behind it did not change — still the same 756px file hung 100px above the band
+— so the taller plate shows more of it rather than scaling it up. `.hero-media`
+and the `ratio` prop both move to `1344 / 720`.
+
+The CTA plate is unchanged at 600 tall; the instance around it went 728 → 664,
+which is its padding, not the plate.
+
+### Radius becomes a size rule
+
+| | radius | token |
+| --- | --- | --- |
+| large, full-width plates | **4px** | `--radius-plate` |
+| small cards | **6px** | `--radius-card` |
+
+**The larger the box, the tighter its corner** — which reads backwards written
+down and is right on the page: 4px on a 1344px plate is the same optical
+softness as 6px on a 440px card, because the eye reads a radius against the
+edge it sits on.
+
+They are named for the ROLE, not for a size step. `--radius-md` / `--radius-lg`
+would have invited exactly the wrong pick — the bigger number for the bigger
+box — and `--radius-md` was 3px, which matched nothing in Figma's scale
+(radius/0, /2, /4, /6, /32, /full). 2px stays as `--radius-sm` for buttons.
+
+Migrated: 5 plates — the CTA plate, the CTA banner, the liner rows, the home
+hero and the about image — and 36 card uses across 12 files.
+
+Confirmed in the built CSS rather than assumed from the source:
+
+```
+.rounded-plate{border-radius:var(--radius-plate)}   --radius-plate:.25rem
+.rounded-card {border-radius:var(--radius-card)}    --radius-card:.375rem
+```
+
+The dead-class check is what would have caught a utility that did not generate
+— the same failure mode as `sm:w-10` in entry 64 — and it passed with both
+present.
+
+verify: 9 checks, 1118 assertions, 0 failures.

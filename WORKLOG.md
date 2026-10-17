@@ -6785,3 +6785,43 @@ rather than carrying the design's 64px of ground. Ratio stays the plate's
     neutral step darker. Confirm which is intended.
 94. **`border/strong` is `#1f1f1f` in the system and `#888683` here.** Ours was
     tuned for 1.4.11; the system's is ink and would read as a rule on inputs.
+
+## 2026-10-17 — Entry 77. The space before the closing plate, and two rules that should not have been there
+
+Asked to check the padding before the home page's closing band. Measured it:
+**0px** from the testimonial's bottom rule to the plate.
+
+That was technically what the design's geometry says — the `cta desktop`
+instance starts exactly where the testimonial band ends — and it was still
+wrong on the page, because two other things were off and the gap was the
+symptom.
+
+### The band was not holding itself open
+
+The design's testimonial card is `h-[600px] py-[96px]` with its content
+**centred**. Ours had the 96px padding and nothing else, so the band's height
+came from whatever the quote happened to measure, and the attribution ended
+97px above the plate against the design's ~141.
+
+A `min-height` from `md` fixes it, and the content centres inside it:
+
+| | was | design | now |
+| --- | --- | --- | --- |
+| band height | 497 | 600 | **600** |
+| attribution → plate | 97 | ~141 | **147** |
+
+No floor below `md`: 600px of fixed height on a phone is most of a screen of
+nothing.
+
+### The rules were from a design that no longer exists
+
+The section carried a bottom border and the card left and right borders — "the
+one place on this page where `--line` does structural work", per the note that
+shipped with them. The current frame (1351:8662) draws neither. Rendered in
+isolation its edges come back transparent rather than as a hairline, and it has
+no fill of its own either; it sits on the page ground like every other band.
+
+So the rule that was sitting flush against the plate should not have been there
+at all. Removed, with the note that justified it.
+
+verify: 9 checks, 1118 assertions, 0 failures.

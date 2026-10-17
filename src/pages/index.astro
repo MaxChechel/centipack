@@ -123,11 +123,29 @@ const heroPicture = await toPageImage({
         years of combined cold-chain expertise and built for pharmacies that produce at scale.
       </p>
 
-      {/* ONE BUTTON, and it is the secondary. The page had a primary "Contact
-          us" beside this; v1 draws a single 152px secondary. The hero's job
-          here is to open the catalogue, and the closing band at the foot of the
-          page is where the quote request lives. */}
-      <Button href="/products" variant="secondary">Explore products</Button>
+      {/* TWO BUTTONS, AND v1 DRAWS ONE. Added on instruction: the design's hero
+          is a single 152px secondary, and the quote request lived only in the
+          nav and in the closing band at the foot of the page. Recorded as
+          AUDIT D10, because a control the design does not draw is a deviation
+          whoever opens Figma next will otherwise file as a bug.
+
+          `primary`, NOT `action`, and that is a real choice rather than a
+          default. The nav's "Get a quote" is the tan `action` fill, so matching
+          it here is the obvious move — and AUDIT F8 records that the tan
+          measures 1.94:1 against the page ground where WCAG 1.4.11 asks 3.0,
+          i.e. the button's EDGE is not perceivable. That is accepted for the
+          nav; putting a second, larger instance of it on the hero would spread
+          an accepted defect rather than contain it. The ink fill is the site's
+          primary action, it passes, and the pairing with an outlined secondary
+          beside it is what this hero had before v1.
+
+          One line to reverse if the nav's tan is wanted instead: `variant`. */}
+      <div class="gap-sm flex flex-wrap justify-center">
+        <Button href={SITE.contactHref} variant="primary" icon="square" iconPosition="start">
+          Get a quote
+        </Button>
+        <Button href="/products" variant="secondary">Explore products</Button>
+      </div>
     </div>
   </Section>
 

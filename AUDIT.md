@@ -378,3 +378,28 @@ contrast matrix cannot see photographs at all — which is why these numbers com
 from a separate measurement script rather than from `npm run verify`, and why
 running that script is not optional when a photograph is swapped. Both failures
 above were found that way, after the images landed and before they shipped.
+
+## D10 — The home hero carries two buttons; v1 draws one
+
+**Deviation, on instruction, 2026-10-17.**
+
+Figma `Home v1.03` (1005:13606) draws a single 152px secondary button —
+"Explore products" — under the hero paragraph. The quote request lives in the
+nav and in the closing band at the foot of the page.
+
+**It ships with "Get a quote" beside it**, as the primary.
+
+**The fill is `primary`, not `action`.** The nav's "Get a quote" is the tan
+`action/secondary/default`, so matching it here is the obvious move and it is
+deliberately not taken: **F8** records that the tan measures 1.94:1 against the
+page ground where WCAG 1.4.11 asks 3.0 — the button's edge is not perceivable,
+only its label. That is an accepted failure on the nav's one instance. Putting a
+second and larger instance of it at the top of the home page spreads an accepted
+defect instead of containing it.
+
+The ink fill passes, it is the site's primary action, and an ink primary beside
+an outlined secondary is the pairing this hero carried before v1.
+
+**If the nav's tan is wanted here anyway**, it is one word — `variant="action"`
+in `src/pages/index.astro` — and F8 then describes two instances rather than
+one.

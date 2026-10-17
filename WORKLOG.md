@@ -6156,3 +6156,37 @@ Unchanged: 22–26, 28, 29, 31, 33, 34, 36, 37, 40, 41, 44, 48, 51–71, 73, 74,
     If more card or plate photography arrives in this style, expect the same —
     and the answer may be a darker shot rather than a darker scrim. See AUDIT D9
     for what that would take.
+
+## 2026-10-17 — Entry 68. A second button in the home hero
+
+On instruction. v1 draws one button there — a 152px secondary, "Explore
+products" — with the quote request living in the nav and in the closing band.
+"Get a quote" now sits beside it as the primary. Recorded as **AUDIT D10**.
+
+**The fill is the decision worth writing down.** The nav's "Get a quote" is the
+tan `action` fill, so matching it here is the obvious move, and it is
+deliberately not taken. AUDIT F8 records that the tan measures **1.94:1** against
+the page ground where WCAG 1.4.11 asks 3.0 — the button's edge is not
+perceivable, only its label — and that is accepted for the nav's single
+instance. A second and larger instance at the top of the home page spreads an
+accepted defect rather than containing it. The ink `primary` passes, it is the
+site's primary action, and ink-beside-outline is the pairing this hero carried
+before v1.
+
+One word reverses it if the tan is wanted anyway, and F8 then describes two
+instances rather than one.
+
+"Get a quote" now appears three times on the home page — nav, hero, closing
+band — which is the same label pointing at the same place from the top, the
+middle and the foot of the page. Worth a look in review; it reads as
+insistent rather than helpful if the page is short.
+
+verify: 8 checks, 1083 assertions, 0 failures.
+
+### Open questions
+
+Unchanged, plus one added:
+
+89. **Three "Get a quote" buttons on one page.** Deliberate after this entry,
+    but not obviously right. The hero's could be "Talk to a specialist" or the
+    nav's could stand alone.

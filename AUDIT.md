@@ -477,3 +477,22 @@ reasoning above, but because the question stopped being local: `primary` and the
 nav's old `action` variant are now one thing, and F8 covers all of them rather
 than counting instances. What remains true is the measurement; see F8 for the
 numbers on all three grounds.
+
+## D11 — The testimonial keeps its rules, where the current frame draws none
+
+**Deviation, on instruction, 2026-10-17.**
+
+The home page's quote band carries a bottom border on the section and left and
+right borders on the card, inset one step from the page edge. The current Figma
+frame (1351:8662) draws **neither** — rendered in isolation its edges come back
+transparent rather than as a `--line` hairline, and it has no fill of its own.
+An earlier frame did draw them, which is where they came from.
+
+They were removed on that evidence and put back on instruction. What the frame
+draws and what is wanted are different questions, and this is the second
+answering the first.
+
+**The band's 600px height is NOT part of this deviation.** That is the design's
+own `h-[600px]` card with centred content, and it is what gives the quote its
+air before the closing plate — attribution to plate went 97px → 147 against the
+design's ~141. The rules sit on a band that is the right height either way.

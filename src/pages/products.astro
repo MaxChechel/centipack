@@ -39,7 +39,11 @@ const cta = await closingBand();
   description="Three integrated layers — the temperature-controlled shipper, the custom secondary packaging, and the primary format the medication is dispensed in."
 >
   {/* 1 — Hero. The lede sits in a second column, bottom-aligned with the h1. */}
-  <Section spaceTop="nav" spaceBottom="sm" class="bg-subtle">
+  {/* `spaceTop="lg"`, not the shared `nav` step: the design draws the category
+      and index heroes 166px below the nav where the home and product heroes sit
+      at 78. 120 is the nearest step up and still 46 short, which is closer than
+      the 70 the nav step leaves. */}
+  <Section spaceTop="lg" spaceBottom="sm" class="bg-subtle">
     <div class="gap-xl md:gap-lg md:grid md:grid-cols-12 md:items-end flex flex-col">
       <div class="gap-lg md:col-span-7 flex flex-col">
         <Breadcrumb trail={[{ label: 'Home', href: '/' }, { label: 'Products' }]} />

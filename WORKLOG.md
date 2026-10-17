@@ -6825,3 +6825,81 @@ So the rule that was sitting flush against the plate should not have been there
 at all. Removed, with the note that justified it.
 
 verify: 9 checks, 1118 assertions, 0 failures.
+
+## 2026-10-17 — Entry 78. The page-top step was double-counting the nav, on every page
+
+"Less top padding on the home hero" turned out to be a bug rather than a taste
+call, and it was on every page of the site.
+
+### 178px where the design draws 78
+
+`--spacing-section-nav` was
+`calc(var(--nav-height) + var(--spacing-section-md))` — correct for a nav that
+OVERLAYS the page. This one never has: the header is `position: sticky`, so it
+is in flow and already occupies its own 83px. Adding that height again as the
+first section's padding put every first heading 178px below the nav.
+
+Measured on four page types before and after, all previously identical, which
+is what a derived token gets you when the derivation is wrong:
+
+| page | was | now | Figma |
+| --- | --- | --- | --- |
+| home | 178 | **96** | 78 |
+| products index | 213 | 131 → **155** | 166 |
+| category | 213 | 131 → **155** | 166 |
+| product | 260 | **131** | 113 |
+
+The index and category heroes then went to `spaceTop="lg"`, because the design
+draws those two 166px below the nav where the home and product heroes sit at
+78 — one step cannot serve both, so the shared step is the tighter one and
+those two ask for more.
+
+### The product hero was bottom-aligning a row the design top-aligns
+
+`md:items-end` on the product hero hung its two columns off a shared baseline,
+and with a taller right column that pushed the H1 **65px** further down than
+drawn. Figma puts both columns at y=0 (1204:3924 and 1204:3928). The CATEGORY
+hero genuinely is bottom-aligned — its right column sits at y=53 of a 99px row
+— and keeps `items-end`.
+
+### Every page compared band by band
+
+Colour order matches the design exactly on both templated page types, and the
+heights are within 5%:
+
+```
+PRODUCTS INDEX
+  figma  secondary 399 · primary 2329 · ink 568          total 3304
+  built  secondary 395 · primary 2379 · ink 592          total 3449
+
+CATEGORY (cold chain)
+  figma  secondary 306 · primary 1385 · secondary 286 · primary 724 · ink 568
+  built  secondary 267 · primary 1489 · secondary 368 · primary 696 · ink 592
+```
+
+### The nav does not match on two page types
+
+The built runs above begin with 82px of `primary` that the Figma runs do not
+have: our header is `bg-base` on every page, and the index and category heroes
+are `bg/secondary`. In the design the navbar sits INSIDE each hero band and
+takes that band's ground, so it is `#f9f7f5` on home and product and `#f2eee8`
+on index and category.
+
+A sticky bar has to be opaque — it cannot inherit — so matching this means the
+header taking its ground per page rather than once. Not done; open question 95.
+
+### The quote band keeps its rules
+
+Restored on instruction after entry 77 removed them on the evidence that the
+current frame draws none. What a frame draws and what is wanted are different
+questions. AUDIT D11. The 600px band height is NOT part of that deviation — it
+is the design's own, and it is what gives the quote its air before the plate.
+
+verify: 9 checks, 1119 assertions, 0 failures.
+
+### Open questions
+
+95. **The nav's ground is fixed where the design varies it per page** —
+    `#f9f7f5` on home and product, `#f2eee8` on index and category. A sticky
+    bar must be opaque, so this needs the header to take its ground from the
+    page rather than from one token.

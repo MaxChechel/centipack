@@ -221,11 +221,12 @@ const heroPicture = await toPageImage({
   {/*
     4 — Testimonial. One instance on one page, so page markup, not a block.
 
-    NO RULES ANY MORE. This carried a bottom border on the section and left and
-    right borders on the card, which is how the old design drew it. The current
-    frame (1351:8662) draws neither: rendered in isolation its edges come back
-    transparent rather than as a `--line` hairline, and it has no fill of its
-    own either — it sits on the page ground like everything else.
+    THE RULES ARE BACK, ON INSTRUCTION. A bottom border on the section and left
+    and right borders on the card, inset by one step from the page edge — the
+    pair that makes the quote read as a plate set into the page rather than as
+    another band. They came off when the current frame (1351:8662) turned out
+    to draw neither; they are back because they are wanted, which is a
+    different question from what the frame draws. Recorded as AUDIT D11.
 
     THE BAND IS 600px WITH ITS CONTENT CENTRED, which is where the air before
     the closing plate comes from. The design's card is `h-[600px] py-[96px]`
@@ -233,13 +234,13 @@ const heroPicture = await toPageImage({
     ended 97px above it, because the figure's padding was doing the whole job
     and there was nothing holding the band open. Measured before and after.
   */}
-  <Section space="none">
+  <Section space="none" class="border-line border-b">
     {/* 96px of padding from md and a 600px floor, both the design's. The
         padding alone left the band 97px short of the plate; the floor is what
         makes the quote sit in the middle of its own band rather than at the
         bottom of a box its text happened to size. No floor on a phone — 600px
         of fixed height there is most of a screen of nothing. */}
-    <figure class="py-3xl md:py-4xl md:min-h-[37.5rem] px-lg gap-xl md:gap-3xl flex flex-col items-center justify-center text-center">
+    <figure class="border-line py-3xl md:py-4xl md:min-h-[37.5rem] px-lg gap-xl md:gap-3xl flex flex-col items-center justify-center border-x text-center">
       <svg class="text-brand w-icon" viewBox="0 0 44 28.66" fill="currentColor" aria-hidden="true">
         <path d="M22.17 28.66 33.8 0H44l-6.05 28.66zM0 28.66 11.53 0h10.3L15.8 28.66z"></path>
       </svg>

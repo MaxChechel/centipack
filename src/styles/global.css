@@ -288,12 +288,20 @@
   --spacing-section-md: clamp(3rem, 1.8381rem + 4.6243vw, 6rem);     /*  48 →  96px */
   --spacing-section-lg: clamp(4rem, 2.6445rem + 5.395vw, 7.5rem);    /*  64 → 120px */
 
-  /* The page-top step: the first section on a page must clear the fixed nav.
-     DERIVED, never measured — exactly nav height plus one md step, so it stays
-     correct when either input moves. It lives in the section-rhythm group
-     because --spacing-nav is already the nav's own height, and in the
-     --spacing-* namespace because that is what generates `pt-*`. */
-  --spacing-section-nav: calc(var(--nav-height) + var(--spacing-section-md));
+  /* The page-top step.
+     THE NAV HEIGHT CAME OUT OF IT, AND THAT WAS A REAL BUG. This was
+     `calc(var(--nav-height) + var(--spacing-section-md))` — correct for a nav
+     that OVERLAYS the page, which this one has never been. The header is
+     `position: sticky`, so it is in flow and already occupies its own 83px;
+     adding that height again as padding put every first heading on the site
+     **178px** below the nav instead of 96. Measured on four page types, all
+     identical, which is what a derived token gets you when the derivation is
+     wrong.
+
+     Figma draws 78px on the home and product heroes and 166 on the category
+     and index ones, so one step cannot serve both: this is the tighter of the
+     two and the pages that want the looser one ask for `lg`. */
+  --spacing-section-nav: var(--spacing-section-md);
 
   /* Control heights live in the spacing namespace so `h-nav` and `h-control-md`
      generate. --nav-height is also read directly in CSS.

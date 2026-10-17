@@ -145,7 +145,14 @@ const sectionGround = (section: ProductSection, index: number): string =>
   description={product.lede ?? `${product.title} — ${product.summary}. ${category.summary}`}
 >
   <Section spaceTop="nav" spaceBottom="lg" class="bg-subtle">
-    <div class="gap-xl md:gap-lg md:grid md:grid-cols-12 md:items-end flex flex-col">
+    {/* TOP-ALIGNED, not bottom. The design puts both columns at y=0 of the hero
+        row (Figma 1204:3924 and 1204:3928) — the trail and the H1 on the left,
+        the lede and its link on the right, both starting at the same line.
+        `items-end` was hanging them off a shared baseline instead, which with
+        a taller right column pushed the H1 65px further down the page than the
+        design draws it. The CATEGORY hero genuinely is bottom-aligned (its
+        right column sits at y=53 of a 99px row) and keeps `items-end`. */}
+    <div class="gap-xl md:gap-lg md:grid md:grid-cols-12 md:items-start flex flex-col">
       <div class="gap-lg md:col-span-7 flex flex-col">
         {/* Home is the first crumb on every trail on this site. The v1
             product pages start theirs at "Products", and the category pages

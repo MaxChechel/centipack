@@ -64,15 +64,22 @@ const Tag = href ? 'a' : 'button';
  * component decides rather than each caller — a mark that four pages remember
  * to ask for is a mark the fifth page forgets.
  *
- * THE LEFT PADDING OPENS UP WITH IT, and the right closes by the same step, so
- * the LABEL slides across while the button's own width never changes. That is
- * the point of swapping the two rather than just growing the left one: a
- * button that gets wider under the pointer shoves whatever sits beside it, and
- * in the home hero that is the second button moving every time you aim at the
- * first.
+ * THE LEFT PADDING OPENS UP WITH IT, and the RESTING PAIR IS EQUAL.
  *
- *   rest    24 left · 32 right   mark hidden
+ * It was 24/32 at rest, swapping to 32/24 on hover — which held the button's
+ * width constant but left the right side visibly looser than the left at rest,
+ * on every button on the site. The design draws `px-[24px]`, symmetric. Rest
+ * is symmetric now and only the left opens.
+ *
+ *   rest    24 left · 24 right   mark hidden
  *   hover   32 left · 24 right   mark shown, label 8px across
+ *
+ * THE BUTTON THEREFORE GROWS 8px UNDER THE POINTER, which the swap avoided.
+ * That is the trade, stated rather than hidden: a correct rest state against a
+ * 4px nudge of whatever sits beside it in a centred row. Rest is the state
+ * every visitor sees and hover is the state one of them sees at a time, so
+ * rest wins — and 8px is a quarter of what putting the mark in flow would have
+ * cost.
  *
  * The mark itself is absolutely positioned, so it adds no width at either
  * state and the swap above is the only thing moving. The visible square is
@@ -91,8 +98,8 @@ const hasMark = (variant === 'primary' || variant === 'secondary') && size !== '
 
 /** The resting/hover padding pair, per size. Replaces PAD for marked buttons. */
 const MARK_PAD = {
-  sm: 'pl-md pr-lg hover:pl-lg hover:pr-md',
-  md: 'pl-lg pr-xl hover:pl-xl hover:pr-lg',
+  sm: 'px-md hover:pl-lg',
+  md: 'px-lg hover:pl-xl',
   link: '',
 } as const;
 
@@ -124,7 +131,8 @@ const VARIANT = {
    */
   primary: [
     'bg-action text-on-action border-action',
-    'hover:bg-action-hover hover:border-action-hover',
+    'hover:bg-action-hover hover:border-action-hover ' +
+      'active:bg-action-pressed active:border-action-pressed',
   ],
   /**
    * BRONZE OUTLINE, BRONZE LABEL — and it no longer reverses on hover.
@@ -148,7 +156,11 @@ const VARIANT = {
    */
   secondary: [
     'bg-transparent text-outline-action border-outline-action',
-    'hover:bg-action hover:text-on-action hover:border-action',
+    /* `active:` carries the label colour too. On a touch device the press
+       fires without a hover ever happening, so a pressed state that only
+       darkened the fill would put the navy label on the navy fill. */
+    'hover:bg-action hover:text-on-action hover:border-action ' +
+      'active:bg-action-pressed active:border-action-pressed active:text-on-action',
   ],
   /**
    * `ghost` IS THE ARROW LINK, and it is the navy.

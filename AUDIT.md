@@ -333,11 +333,15 @@ design draws, so neither is this file's call.
 
 **Deviation, on instruction, 2026-10-16. Narrowed 2026-10-17.**
 
-**The home hero is no longer part of this.** It went full-bleed with the others,
-and the design then moved the other way — v1.03 draws a 1344 × 640 plate inside
-the page gutter (Figma 1327:24508) — so it is back inside the container and
-matches the design. What is left below applies to the five product pages only.
-The category pages were never part of it: v1 draws their range shot at 1440
+**The home hero is back in scope, 2026-10-17.** It has now moved three times:
+full-bleed on instruction, contained when the design changed to a 1344 plate,
+and full-bleed again on instruction — this time also flush to the band below,
+where the design draws 64px of ground under the picture. The ratio stays the
+plate's 1344/656, so only the box width differs; at 1440 the picture comes out
+703px tall against the drawn 656.
+
+So the deviation now covers the home hero and the five product pages. The
+category pages were never part of it: v1 draws their range shot at 1440
 full-bleed and always did.
 
 The v1 design draws every page's hero photograph as a plate inside the page
@@ -345,7 +349,7 @@ gutter with the card radius:
 
 | page | drawn | ships |
 | --- | --- | --- |
-| Home | 1344 × 640 at x=48 *(Figma 1327:24508)* | **contained — matches** |
+| Home | 1344 × 656 at x=48, 64px ground below *(Figma 1327:24508)* | **full-bleed, flush — deviates** |
 | Product pages | 1344 × 541 at x=48 *(Figma 1179:3206 and siblings)* | **full-bleed — deviates** |
 | Category pages | 1440 × 700 at x=0 *(Figma 1005:14041)* | full-bleed — matches |
 

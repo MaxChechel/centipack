@@ -59,17 +59,15 @@ const linkClass = 'link-underline text-body text-primary aria-[current=page]:tex
 {/* The rule under the nav spans the full viewport; the container starts inside
      it, so the hairline is not interrupted by the gutter. `sticky` also makes
      this the containing block the mega panel positions against. */}
-{/* `bg-subtle`, NOT `bg-base`. The design puts the navbar on the same ground as
-     the band under it, and that band is `#f2eee8` on every page type in the
-     file — home, products index, category and product. Sampled off the Figma
-     renders with the canvas excluded, because the canvas behind those frames
-     is the same colour and reading it instead is the easy mistake here.
+{/* The navbar sits on the ground the page starts on, and that is `bg/primary`
+     (#f9f7f5) again — it was `bg/secondary` for one round while the whole home
+     page was on #f2eee8. Re-sampled off the frame with Figma's canvas
+     excluded, which is the only reliable way to read these (entry 69).
 
      A STICKY BAR HAS TO BE OPAQUE, so it cannot simply inherit: scrolling a
-     white product-page section under a transparent nav puts body copy behind
-     the logo. It therefore picks one ground, and the right one is the ground
-     the page starts on. */}
-<header class="border-line bg-subtle sticky top-0 z-40 border-b">
+     white product-page section under a transparent nav would put body copy
+     behind the logo. It picks one ground, and this is it. */}
+<header class="border-line bg-base sticky top-0 z-40 border-b">
   <div class="container-main">
     <nav aria-label="Main" class="h-nav gap-md flex items-center justify-between">
       {/* `.nav-logo` owns the width, the no-shrink and the badge crop; see

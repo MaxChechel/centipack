@@ -103,7 +103,7 @@ const heroPicture = await toPageImage({
     which is what `.measure` already does for body copy, one step up. The flex
     column centres it, so nothing here needs `mx-auto` (§3.1).
   */}
-  <Section width="main" spaceTop="nav" spaceBottom="lg" class="bg-subtle text-center">
+  <Section width="main" spaceTop="nav" spaceBottom="sm" class="text-center">
     <div class="gap-xl flex flex-col items-center">
       <h1 class="hero-headline text-h1 text-primary">
         Cold chain packaging for high-volume compounding pharmacies
@@ -150,14 +150,22 @@ const heroPicture = await toPageImage({
   </Section>
 
   {/*
-    2 — The hero picture, contained.
+    2 — The hero picture, full-bleed.
 
-    BACK INSIDE THE CONTAINER, FOLLOWING THE DESIGN. This went full-bleed on
-    instruction and the design has since moved the other way: v1.03 draws a
-    1344 x 720 plate inside the page gutter with the card radius (Figma
-    1327:24508 in a 1440 x 720 band). The picture itself is 756px tall and hangs
-    100px above the band, which is a crop — `object-cover` at 1344/720 does the
-    same thing.
+    EDGE TO EDGE AND FLUSH TO THE BAND BELOW IT, on instruction. The design
+    draws a 1344 x 656 plate inside the page gutter with 64px of ground under
+    it (Figma 1327:24508, in a 1440 x 720 band); the ruling is the other way —
+    the picture runs the full viewport width and the next section starts on its
+    bottom edge. Recorded as AUDIT D8, which this hero has now entered, left
+    and re-entered.
+
+    THE RATIO IS STILL THE PLATE'S, 1344/656. Full-bleed changes how wide the
+    box is, not the shape of the crop: at 1440 the picture comes out 703px tall
+    rather than 656, showing slightly more of the same 756px file.
+
+    `width="full"` keeps the Section wrapper — theme and vertical rhythm behave
+    identically — and drops only the max-width and the gutter. No radius with
+    it: there is no card edge to round when a picture meets the screen.
 
     `.hero-media` carries the ratio rather than the `ratio` prop, because Media
     writes that prop as an INLINE custom property and an art-directing class has
@@ -166,15 +174,15 @@ const heroPicture = await toPageImage({
     NO `media-scrim`. A scrim exists to make type legible over a photograph, and
     the four statistics that used to sit on this one are gone.
   */}
-  <Section width="main" space="none" class="bg-subtle">
+  <Section width="full" space="none">
     <Media
       image={heroPicture}
       label="Home hero — the CentiPack range in one line-up"
-      ratio="1344 / 720"
+      ratio="1344 / 656"
       loading="eager"
       fetchpriority="high"
-      sizes="(min-width: 90rem) 1344px, 100vw"
-      class="hero-media rounded-plate"
+      sizes="100vw"
+      class="hero-media"
     />
   </Section>
 
@@ -221,11 +229,12 @@ const heroPicture = await toPageImage({
     structural work.
   */}
   <Section space="none" class="border-line border-b">
-    {/* 64px of air on mobile rather than 192. `py-5xl` is the desktop
-        measure and on a phone it pushed the quote most of a screen away from
-        anything either side of it. */}
-    <figure class="border-line py-3xl md:py-5xl px-lg gap-xl md:gap-3xl flex flex-col items-center border-x text-center">
-      <svg class="text-primary w-icon" viewBox="0 0 44 28.66" fill="currentColor" aria-hidden="true">
+    {/* 96px of air from md, down from 192. `py-5xl` was the desktop measure
+        and the design's card pads it `py-[96px]` — the band came out 690px
+        tall against the 600 Figma draws. 64px on a phone, unchanged: 96 there
+        is already most of a screen away from anything either side of it. */}
+    <figure class="border-line py-3xl md:py-4xl px-lg gap-xl md:gap-3xl flex flex-col items-center border-x text-center">
+      <svg class="text-brand w-icon" viewBox="0 0 44 28.66" fill="currentColor" aria-hidden="true">
         <path d="M22.17 28.66 33.8 0H44l-6.05 28.66zM0 28.66 11.53 0h10.3L15.8 28.66z"></path>
       </svg>
       {/* 794px is the measure the design sets for this one quote, and no token
@@ -255,12 +264,17 @@ const heroPicture = await toPageImage({
     button. v1 replaces it with the shared `cta desktop`, so the closing band is
     now one component reading one string across every page type that has one.
   */}
-  {/* `bg-subtle` HERE AND NOT ON THE CATEGORY PAGES, which is what the design
-      draws rather than an oversight: this page's closing band follows the
-      testimonial's lighter `#f9f7f5`, so it steps back down to the page ground;
-      a category page's follows the cross-links, which are already on it, so it
-      steps up. Sampled off both frames with Figma's canvas excluded. */}
-  <Section space="md" spaceTop="lg" class="bg-subtle">
+  {/* NO GROUND CLASS: the page ground is `bg/primary` and so is this band.
+      It carried `bg-subtle` for one round, when the design had the whole page
+      on `#f2eee8`; it has since moved back to only the card band being
+      `bg/secondary`. Re-sampled off the frame with Figma's canvas excluded,
+      which is the only way to read these reliably — see entry 69. */}
+  {/* NO TOP PADDING. The design's closing band is the plate and the ground
+      under it — the `cta desktop` instance is 664 tall around a 600 plate at
+      y=0, so all 64 of the difference is below. This carried `spaceTop="lg"`,
+      which added 120px the design does not draw. 48 below rather than 64 is
+      the nearest step; see the hero picture for the same trade. */}
+  <Section space="none" spaceBottom="sm">
     <CtaPlate {...cta} />
   </Section>
 </BaseLayout>

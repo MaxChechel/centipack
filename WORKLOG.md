@@ -6678,3 +6678,110 @@ The dead-class check is what would have caught a utility that did not generate
 present.
 
 verify: 9 checks, 1118 assertions, 0 failures.
+
+## 2026-10-17 — Entry 76. The design system, read properly, and what it costs
+
+The real design system frame (1357:30) rather than the variables a page
+happens to use. Three things applied, two refused, and the refusals are the
+point of the entry.
+
+### Applied
+
+**The navy ramp is the system's, not derived.** `color/primary/800 #2b445c`,
+`/900 #0e2a46`, `/950 #0b2035`. The hover step was derived here as `#16375c`
+and the system says `#2b445c`, which is visibly lighter; the pressed step did
+not exist at all. Buttons gain `active:` states and the contrast matrix gains
+the pressed fill — 4 pairs → 6, floor 7.20 : 1.
+
+**The quotation mark is the brand navy.** Sampled off the frame: `#0e2a46`,
+not the ink it shipped as. It takes a new `--text-brand` rather than
+`--outline-action`, because a decorative glyph wearing an action token is what
+makes a later palette split painful.
+
+**Home grounds reverted.** The whole page was `bg/secondary` for one round;
+it is now `bg/primary` everywhere except the card band. The nav went back with
+it, and About and Contact with the nav. Third reading of these in two days —
+and the only reliable way to take it remains `contentsOnly: true`, because
+Figma's canvas behind the frames is the same `#f2eee8`.
+
+### Refused, with numbers
+
+The system's text ramp is **one step lighter at every role** than ours, and the
+tertiary step does not pass:
+
+| token | system | on `#f2eee8` | ours | ours measures |
+| --- | --- | --- | --- | --- |
+| `text/secondary` | `#6b6967` | 4.73 ✓ | `#4d4b4a` | 7.04 |
+| `text/tertiary` | `#8c8a87` | **2.98 ✗** | `#6b6967` | 4.73 |
+| `text/disabled` | `#b0aeab` | 1.92 | — | — |
+
+`--text-tertiary` carries captions, spec-table notes, the footer copyright and
+form placeholders — all normal text, all owing 4.5. Adopting `#8c8a87` puts
+failing text on every page of the site, and it would pass review precisely
+because it came from the design system.
+
+Adopting only `text/secondary` does not work either: it is `#6b6967`, which is
+exactly our tertiary, so the two roles would collide. **The ramp is adopted as
+a whole or not at all, and as a whole it fails.** Ours is the same ramp shifted
+one neutral step darker. Left alone; recorded as open question 93.
+
+`border/strong #1f1f1f` against our `#888683` is also left alone — ours was
+tuned for 1.4.11 and the system's is ink, which would make every input border
+and dashed pending box read as a rule rather than a boundary. Open question 94.
+
+### Spacing, measured band by band
+
+"Too much space after the buttons" was right, and so were two more:
+
+| | was | design | now |
+| --- | --- | --- | --- |
+| hero buttons → picture | 120 | 48 | **48** |
+| testimonial padding | 192 | 96 | **96** |
+| closing band, above the plate | 120 | **0** | **0** |
+
+The closing band's top padding was the biggest single error — the design's
+`cta desktop` instance is 664 tall around a 600 plate at y=0, so every pixel of
+the difference sits below it. Fixed on all three page types.
+
+Built page 4430px → **4070px** against the design's 4114. The remaining gap is
+spread, not concentrated.
+
+### Buttons: the resting padding was wrong
+
+24 left / 32 right, swapping to 32/24 on hover. The asymmetry came from the
+OLD icon spec, where the mark was drawn at rest; the current design draws
+`px-[24px]`, symmetric. Rest is symmetric now and only the left opens on hover.
+
+**That reintroduces the growth the swap avoided, and the measurement is the
+honest version of the trade:**
+
+```
+rest    Get a quote  x 561.1  w 134.4  24/24   ·  Explore products  x 707.5
+hover   Get a quote  x 557.1  w 142.4  32/24   ·  Explore products  x 711.5
+```
+
+The button grows 8px and its neighbour moves 4px. Rest is the state every
+visitor sees; hover is the state one of them sees at a time. Rest wins.
+
+### The home hero, third position in two days
+
+Full-bleed → contained → **full-bleed again**, and now flush to the band below
+rather than carrying the design's 64px of ground. Ratio stays the plate's
+1344/656, so only the box width differs: 703px tall at 1440 against the drawn
+656. AUDIT D8 updated rather than re-argued.
+
+### Measurements
+
+| | before | after |
+| --- | --- | --- |
+| verify | 9 checks, 1118 assertions | **9 checks, 1118 assertions, 0 failures** |
+| contrast pairs | 85 | **87** |
+| home page height | 4430px | **4070px** (design 4114) |
+
+### Open questions
+
+93. **The design system's text ramp fails AA at the tertiary role** —
+    `#8c8a87` measures 2.98 : 1 on `bg/secondary`. Ours is the same ramp one
+    neutral step darker. Confirm which is intended.
+94. **`border/strong` is `#1f1f1f` in the system and `#888683` here.** Ours was
+    tuned for 1.4.11; the system's is ink and would read as a rule on inputs.

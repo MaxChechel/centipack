@@ -203,7 +203,7 @@ export function actionMatrix(scopes) {
   const rows = [];
   for (const theme of THEMES) {
     const label = resolveColor(scopes, theme, '--text-on-action');
-    for (const fillToken of ['--bg-action', '--bg-action-hover']) {
+    for (const fillToken of ['--bg-action', '--bg-action-hover', '--bg-action-pressed']) {
       const fill = resolveColor(scopes, theme, fillToken);
       const ratio = contrastRatio(label, fill);
       rows.push({

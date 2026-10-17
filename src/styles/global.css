@@ -175,8 +175,9 @@
      the three page grounds where WCAG 1.4.11 asks 3.0 — a filled button with
      no perceivable edge, site-wide. The navy measures 12.63–14.60 on the same
      three, and white on it is 14.60. */
-  --navy-800: #0e2a46;  /* Figma action/primary/default, text/link */
-  --navy-700: #16375c;  /* DERIVED — one step up, the hover */
+  --navy-800: #2b445c;  /* Figma color/primary/800 — the hover step */
+  --navy-900: #0e2a46;  /* Figma color/primary/900 — default, and text/link */
+  --navy-950: #0b2035;  /* Figma color/primary/950 — the pressed step */
 
   --accent-700: #8a6424;  /* Figma text/accent              — the light accent */
   --accent-300: var(--tan-300);  /* the same swatch, as the dark-theme accent */
@@ -639,12 +640,14 @@
      THE BOUNDARY FAILURE IS GONE WITH THE TAN. It measured 1.80–2.08 against
      the three page grounds against 1.4.11's 3.0; the navy measures
      12.63–14.60. AUDIT F8 closes. */
-  --bg-action: var(--navy-800);
+  --bg-action: var(--navy-900);
   --text-on-action: var(--gray-0);
-  /* The hover LIGHTENS by one step now rather than darkening: the fill is a
-     dark navy, so a step down would approach black and read as the button
-     switching off. Same gesture as --bg-inverse-hover, same direction. */
-  --bg-action-hover: var(--navy-700);
+  /* The hover LIGHTENS and the press DARKENS, both straight off the design
+     system — `action/primary/hover` and `action/primary/pressed`. These were
+     derived here before the system named them; the derived hover was #16375c
+     against the system's #2b445c, which is a visibly lighter step. */
+  --bg-action-hover: var(--navy-800);
+  --bg-action-pressed: var(--navy-950);
 
   /* --- The outlined and text action --------------------------------------
      The SECONDARY button's border and label, and every arrow link. The same
@@ -654,8 +657,14 @@
      touching the fill. It clears both comfortably: 12.63 : 1 at worst on a
      light ground, against 4.5 for text and 3.0 for the boundary. White on
      dark, where the design draws it white. */
-  --outline-action: var(--navy-800);
-  --outline-action-hover: var(--navy-700);
+  --outline-action: var(--navy-900);
+  --outline-action-hover: var(--navy-800);
+
+  /* The brand navy as a TEXT colour, for a mark that is neither an action nor
+     body copy — the home page's quotation glyph is the only one today. Its own
+     name rather than borrowing `--outline-action`, because a decorative mark
+     wearing an action token is what makes a later palette split painful. */
+  --text-brand: var(--navy-900);
 
   /* --- The inverse fill --------------------------------------------------
      The ink-coloured primary action: ground and ink swapped. CentiPack's
@@ -787,6 +796,9 @@
 @utility border-action { border-color: var(--bg-action); }
 @utility border-action-hover { border-color: var(--bg-action-hover); }
 @utility text-on-action { color: var(--text-on-action); }
+@utility text-brand { color: var(--text-brand); }
+@utility bg-action-pressed { background-color: var(--bg-action-pressed); }
+@utility border-action-pressed { border-color: var(--bg-action-pressed); }
 @utility text-outline-action { color: var(--outline-action); }
 @utility text-outline-action-hover { color: var(--outline-action-hover); }
 @utility border-outline-action { border-color: var(--outline-action); }
@@ -875,11 +887,13 @@
   --bg-inverse-hover: var(--gray-800);
   --text-on-inverse: var(--gray-0);
 
-  --bg-action: var(--navy-800);
-  --bg-action-hover: var(--navy-700);
+  --bg-action: var(--navy-900);
+  --bg-action-hover: var(--navy-800);
+  --bg-action-pressed: var(--navy-950);
   --text-on-action: var(--gray-0);
-  --outline-action: var(--navy-800);
-  --outline-action-hover: var(--navy-700);
+  --outline-action: var(--navy-900);
+  --outline-action-hover: var(--navy-800);
+  --text-brand: var(--navy-900);
 
   /* Re-declared, not inherited — see the note in §2. */
   --bg-overlay: color-mix(in oklab, var(--gray-950) 10%, transparent);
@@ -952,10 +966,12 @@
      light one, which is why they stay two tokens. */
   --bg-action: var(--gray-0);
   --bg-action-hover: var(--gray-300);
+  --bg-action-pressed: var(--gray-400);
   --text-on-action: var(--gray-950);
   /* The outlined and text action go white too — border, label and arrow. */
   --outline-action: var(--gray-0);
   --outline-action-hover: var(--gray-300);
+  --text-brand: var(--gray-0);
 
   --bg-inverse: var(--gray-0);
   /* One step DOWN from white, which is the same gesture inverted: the fill
@@ -2967,15 +2983,19 @@
     aspect-ratio: 1 / 1.25;
   }
 
-  /* 1344 / 720 is the plate v1.03 draws today. It has moved twice: 5:3 while
-     the picture was full-bleed, then 1344/640, now this. The band grew and the
-     photograph behind it did not — it is still the same 756px-tall file hung
-     100px above the band, so widening the plate shows more of it rather than
-     scaling it up. */
+  /* 1344 / 656, AND THE 720 BAND IS NOT THE PLATE. The design's "Full width"
+     frame is 1440 x 720, and reading that as the picture's height was wrong:
+     the image inside it runs y -100 to 656, so the PLATE is 656 tall and the
+     remaining 64px is ground below it. The page shows that 64px as the
+     Section's bottom padding — see index.astro.
+
+     It has now moved three times: 5:3 while the picture was full-bleed, then
+     1344/640, then 1344/720, now this. The photograph behind it has not
+     changed once; only how much of it the plate shows. */
 
   @media (min-width: 48rem) {
     .hero-media {
-      aspect-ratio: 1344 / 720;
+      aspect-ratio: 1344 / 656;
     }
   }
 

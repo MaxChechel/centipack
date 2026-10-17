@@ -253,7 +253,9 @@ const sectionGround = (section: ProductSection, index: number): string =>
     ))
   }
 
-  <Section space="md" spaceTop="lg" class="bg-base">
+  {/* No top padding: the design's `cta desktop` instance is 696 tall around a
+      600 plate at y=0, so the whole 96 sits below it. */}
+  <Section space="md" spaceTop="none" class="bg-base">
     <CtaPlate {...cta} />
   </Section>
 </BaseLayout>

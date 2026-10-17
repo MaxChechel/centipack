@@ -6474,3 +6474,83 @@ AUDIT D9 narrowed to the single band.
 | verify | 8 checks, 1103 assertions | **8 checks, 1105 assertions, 0 failures** |
 | scrim bands per card | 2 | **1** |
 | worst heading contrast | 3.69 | **4.73** |
+
+## 2026-10-17 — Entry 73. The whole card stopped being clickable, and nothing noticed
+
+Asked whether the category card was still clickable. It was not — anywhere, in
+either state, on every page that renders one.
+
+### What broke it
+
+Entry 70 put `position: relative` on **every** button so the hover mark had a
+containing block. That also made each button the containing block for its own
+`::after` — and `.category-card-link::after` exists to stretch that link over
+the whole card. It stopped reaching past the link.
+
+Measured with `elementFromPoint` at nine points across the first card:
+
+```
+REST    top-left div · top-mid div · top-right div · mid-left div · centre div
+        · mid-right div · low-left h3 · low-mid h3 · low-right div
+```
+
+Nine points, nine misses. Three cards on the home page and six more across the
+category pages, all dead.
+
+**`relative` is now scoped to buttons that carry a mark**, which is the only
+reason it was ever added. `size="link"` never carries one, so the stretched hit
+area gets its containing block back and all nine points resolve to the link in
+both states.
+
+### Nothing caught it, and that is the finding
+
+The markup did not change. Every internal link still resolved. axe was happy.
+The keyboard check passed — the link is still reachable by Tab and still paints
+a ring. The sweep saw no overflow. The card looked identical in a screenshot.
+
+**A hit area built out of CSS can be removed by CSS, silently, and the only way
+to know is to press.** So `scripts/verify/pointer.mjs` does: for every container
+that claims a stretched target, it samples nine points and asserts each one
+resolves to an `<a href>` via `elementFromPoint` — the browser's own hit test,
+which accounts for every way CSS can take a target away: a containing block
+that moved, an overflow that clips, a z-index that buries it, inherited
+`pointer-events`.
+
+It tests the REST state deliberately. The card shows only its title until
+hovered, and a target that only exists once you are already on it is not a
+target.
+
+Red path, run through the harness rather than standalone — 9 of 13 targets
+dead, naming the page, the container, the card and the first missing point:
+
+```
+FAIL pointer targets   13 stretched-target checks   9 failures
+  STRETCHED TARGET DEAD — / .category-card "Cold chain packaging…":
+  9 of 9 sampled points do not resolve to a link. First: 0.15,0.12 -> div.
+```
+
+**The first attempt at that injection was invalid and the harness said so.**
+Running `pointer.mjs` directly starts no preview server, so it navigated to
+nothing, found nothing and reported `EMPTY — 0 stretched-target checks` with
+exit 1. That is §9's "a pass with zero reported checks is a failure" catching a
+bad test rather than bad code, which is the first time that rule has fired on
+my own work.
+
+### The card images settle instead of lifting
+
+On instruction: both card types rest at `scale: 1.02` and go to `1` under the
+pointer, reversing a 1 → 1.01 lift. It reads better on a card whose copy opens
+at the same moment — the image relaxes back as the text arrives rather than
+pushing forward into it. `scale` stays on the image only; the card's box must
+not move or a row of them jitters.
+
+Contrast re-measured after it, because a different crop puts different pixels
+behind the type: headings **4.67 – 9.10**, bodies **5.82 – 11.60**, all passing.
+
+### Measurements
+
+| | before | after |
+| --- | --- | --- |
+| verify | 8 checks, 1105 assertions | **9 checks, 1118 assertions, 0 failures** |
+| clickable points per card | **0 of 9** | **9 of 9** |
+| stretched targets asserted | 0 | **13** |

@@ -21,6 +21,7 @@ import { utilities } from './utilities.mjs';
 import { sweep } from './sweep.mjs';
 import { axe } from './axe.mjs';
 import { keyboard } from './keyboard.mjs';
+import { pointer } from './pointer.mjs';
 
 const PORT = Number(process.env.PORT ?? 4321);
 /* The base URL and the wait-for-server loop moved into lib/preview.mjs, which
@@ -96,6 +97,8 @@ try {
   results.push(await sweep());
   process.stdout.write(dim('  keyboard…                    \r'));
   results.push(await keyboard());
+  process.stdout.write(dim('  pointer targets…             \r'));
+  results.push(await pointer());
   process.stdout.write(dim('  axe-core…                    \r'));
   results.push(await axe());
 } finally {

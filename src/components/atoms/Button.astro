@@ -261,8 +261,19 @@ const ICON_FILLED: Partial<Record<ButtonIcon, boolean>> = { square: true };
        and the wrapped arrow will centre against the block. It is a real
        trade-off and not a defect in either position — which is why both are
        written down. */
-    'relative inline-flex items-center justify-center rounded-sm border',
-    hasMark && 'btn-has-mark',
+    'inline-flex items-center justify-center rounded-sm border',
+    /* `relative` ONLY WHERE THE MARK NEEDS IT, and the unconditional version
+       was a real bug. The mark is absolutely positioned, so the button has to
+       be its containing block — but putting `relative` on EVERY button also
+       made it the containing block for `.category-card-link::after`, which
+       exists to stretch that link over the whole category card. The card
+       silently stopped being clickable anywhere: measured with
+       `elementFromPoint` at nine points across it, every one landed on a div,
+       an h3 or a p and none on a link.
+
+       `size="link"` never carries a mark, so this costs it nothing and gives
+       the stretched hit area its containing block back. */
+    hasMark && 'relative btn-has-mark',
     size !== 'link' && 'whitespace-nowrap',
     /* Springs are the default character of the system (§12), including here.
        `padding` joins the colour properties because the marked button slides

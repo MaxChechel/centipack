@@ -2454,18 +2454,27 @@
     pointer-events: none;
   }
 
+  /* THE PICTURE SETTLES, IT DOES NOT LIFT. It rests at 1.02 and goes to 1 under
+     the pointer, which is the reverse of what this did — and the reverse reads
+     better on a card whose copy opens at the same moment: the image relaxes
+     back as the text arrives, rather than pushing forward into it.
+
+     `scale` on the image only, never on the card: the card's own box must not
+     move or a row of them jitters against each other, and `overflow: hidden`
+     on the card is what crops the resting 2%. */
   .category-card .media-slot {
+    scale: 1.02;
     transition: scale var(--transition-duration-spring-soft) var(--ease-spring-soft);
   }
 
   @media (hover: hover) {
     .category-card:hover .media-slot {
-      scale: 1.01;
+      scale: 1;
     }
   }
 
   .category-card:focus-within .media-slot {
-    scale: 1.01;
+    scale: 1;
   }
 }
 
@@ -2649,10 +2658,12 @@
 
      The affordance FILLS rather than recolours — the same gesture the nav's help
      card and the social marks use, so "you can go here" looks like one thing
-     across the site — and the picture lifts 1%. `scale` on the image only: the
+     across the site — and the picture SETTLES from 1.02 back to 1 rather than
+     lifting off it, matching the category card. `scale` on the image only: the
      card's own box must not move, or a row of them would jitter against each
-     other, and `overflow: hidden` on the card is what crops the extra 1%. */
+     other, and `overflow: hidden` on the card is what crops the resting 2%. */
   .product-card .media-slot {
+    scale: 1.02;
     transition: scale var(--transition-duration-spring-soft) var(--ease-spring-soft);
   }
 
@@ -2664,7 +2675,7 @@
     }
 
     .product-card:has(.product-card-link:hover) .media-slot {
-      scale: 1.01;
+      scale: 1;
     }
   }
 
@@ -2675,7 +2686,7 @@
   }
 
   .product-card:has(.product-card-link:focus-visible) .media-slot {
-    scale: 1.01;
+    scale: 1;
   }
 }
 

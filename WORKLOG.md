@@ -6554,3 +6554,76 @@ behind the type: headings **4.67 – 9.10**, bodies **5.82 – 11.60**, all pass
 | verify | 8 checks, 1105 assertions | **9 checks, 1118 assertions, 0 failures** |
 | clickable points per card | **0 of 9** | **9 of 9** |
 | stretched targets asserted | 0 | **13** |
+
+## 2026-10-17 — Entry 74. The actions go navy, and F8 closes
+
+Design system update, read off Figma's variables and checked against what the
+pages actually render.
+
+### One colour for all three actions
+
+`action/primary/default`, `action/secondary/default` and `text/link` now hold
+the same value — **`#0e2a46`**. So the filled button, the outlined button's
+border and label, and every arrow link are one navy, replacing the tan fill and
+the bronze outline from entry 70, which lasted a day.
+
+Only the tokens moved. `Button.astro` is untouched except for comments, because
+the variants already read `--bg-action`, `--text-on-action` and
+`--outline-action`; the dark theme is untouched entirely, since white-on-dark
+was already what the design drew there.
+
+### F8 closes, and nothing was worked around to close it
+
+| fill against | tan | navy | needs |
+| --- | --- | --- | --- |
+| `--bg-base` | 1.94 | **13.66** | 3.0 |
+| `--bg-subtle` | 1.80 | **12.63** | 3.0 |
+| `--bg-surface` | 2.08 | **14.60** | 3.0 |
+
+The label improved with it — white on navy is 14.60 against ink-on-tan's 7.94.
+The matrix floors moved 6.26 → **10.93** on the fill and 5.13 → **8.48** on the
+outline. No check was relaxed and no exemption was taken: the design picked a
+colour that passes.
+
+### The variables and the pages disagree, and the pages won
+
+This is the part worth recording. Figma's variable set is mid-update, and three
+of its values are not what any page renders:
+
+| variable | says | pages render | ours |
+| --- | --- | --- | --- |
+| `text/secondary` | `#6b6967` | `#4d4b4a` | `#4d4b4a` |
+| `text/tertiary` | `#b0aeab` | — | `#6b6967` |
+| `border/strong` | `#1f1f1f` | — | `#888683` |
+
+**`text/tertiary: #b0aeab` measures 2.07 : 1 on `--bg-base`** against the 4.5
+body text owes. Adopting the variable set wholesale would have put failing text
+on every page — and it would have passed review, because it came from the
+design system.
+
+The older button spec frames (1327:24510 and siblings) have the same problem in
+the other direction: they still draw the bronze as a raw hex while the live
+hero (1005:13606) draws the navy as a variable. A variable is a statement of
+intent; a frame is a statement of fact; and when they disagree the thing that
+ships is whichever one the client is looking at. Here that is the page.
+
+**So: the navy is applied, the three above are not.** They are listed here
+rather than silently skipped.
+
+### Measurements
+
+| | before | after |
+| --- | --- | --- |
+| verify | 9 checks, 1118 assertions | **9 checks, 1118 assertions, 0 failures** |
+| action fill floor | 6.26 | **10.93** |
+| outlined/text action floor | 5.13 | **8.48** |
+| AUDIT failures open | F1, F8 | **F1** |
+
+### Open questions
+
+91 **closes** with F8. One added:
+
+92. **Three design-system variables disagree with every frame that uses them**
+    — `text/secondary`, `text/tertiary` and `border/strong`. `text/tertiary`
+    at `#b0aeab` would fail AA outright at 2.07 : 1. Worth confirming which
+    side is current before the next palette pass.

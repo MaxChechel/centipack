@@ -224,9 +224,10 @@ export function actionMatrix(scopes) {
  * 3.0. It is also every arrow link's colour. The stricter of the two decides,
  * so every row is checked at AA and the boundary comes along for free.
  *
- * Unlike the action FILL, this one has no accepted exemption — the bronze was
- * picked to clear both, and if a future palette change drops it under 4.5 on
- * any of the three grounds this is what fails.
+ * Neither this nor the action fill has an accepted exemption any more: the
+ * navy clears both obligations on every ground by a wide margin, and the tan
+ * that did not is gone. If a future palette change drops either under 4.5 on
+ * any of the three grounds, this is what fails.
  */
 export function outlineActionMatrix(scopes) {
   const rows = [];

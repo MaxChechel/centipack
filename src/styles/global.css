@@ -164,14 +164,19 @@
   --tan-300: #c5b197;    /* Figma action/secondary/default */
   --tan-400: #b39c7e;    /* DERIVED — one step down, the hover */
 
-  /* The bronze the v1 button set gives its OUTLINED and its TEXT action. Not
-     the accent (#8a6424) and not the tan: a third brown, darker and less
-     yellow than either, and the design uses it for the secondary button's
-     border and label and for every arrow link on a light ground.
-     Measured against all three light grounds: 5.54 on --bg-base, 5.13 on
-     --bg-subtle, 5.92 on --bg-surface. Text and boundary both clear. */
-  --bronze-700: #7a5f43;  /* Figma, the v1 button set */
-  --bronze-800: #5f4a34;  /* DERIVED — one step down, the hover */
+  /* THE NAVY, and it replaces both the tan fill and the bronze outline.
+     Figma's `action/primary/default`, `action/secondary/default` and
+     `text/link` are now one colour — so the filled button, the outlined
+     button's border and label, and every arrow link are the same navy, which
+     is what the live pages render (1005:13606) whatever the older button spec
+     frames still show.
+
+     IT ALSO CLOSES AUDIT F8. The tan it replaces measured 1.80–2.08 against
+     the three page grounds where WCAG 1.4.11 asks 3.0 — a filled button with
+     no perceivable edge, site-wide. The navy measures 12.63–14.60 on the same
+     three, and white on it is 14.60. */
+  --navy-800: #0e2a46;  /* Figma action/primary/default, text/link */
+  --navy-700: #16375c;  /* DERIVED — one step up, the hover */
 
   --accent-700: #8a6424;  /* Figma text/accent              — the light accent */
   --accent-300: var(--tan-300);  /* the same swatch, as the dark-theme accent */
@@ -609,33 +614,32 @@
 
      --text-on-action is the only legal ink on it — 7.94 : 1, measured.
 
-     IT IS REMAPPED PER THEME NOW, AND IT WAS NOT. This pair was declared once
-     in the bare :root on the reading that the tan is the brand's rather than
-     the ground's. The v1 button set settles it the other way: the design draws
-     three grounds and the fill is the TAN on both light ones and WHITE on the
-     dark one (Figma 1327:24580, 1327:24510, 1327:24598). That is a token that
-     flips with the ground, which is what every other pair here does.
+     IT IS REMAPPED PER THEME, and the light value is now the NAVY. This pair
+     was the tan with ink on it; the design system update makes it
+     `action/primary/default` over `action/on-primary` — navy with white.
+     White on the dark ground, unchanged, which is what the dark scenario
+     draws.
 
-     KNOWN FAILURE, recorded not hidden: the fill is 1.94 : 1 against
-     --bg-base, 1.80 against --bg-subtle and 2.08 against --bg-surface, all
-     under WCAG 1.4.11's 3:1 for a control boundary. AUDIT F8. */
-  --bg-action: var(--tan-300);
-  --text-on-action: var(--gray-950);
-  /* The hover DARKENS rather than inverting. `secondary`'s invert sends an
-     outline to ink, which is right for an empty box and wrong here: this fill
-     is already light, and flipping it to ink would read as a different button
-     rather than the same one under a pointer. One step down the same hue. */
-  --bg-action-hover: var(--tan-400);
+     THE BOUNDARY FAILURE IS GONE WITH THE TAN. It measured 1.80–2.08 against
+     the three page grounds against 1.4.11's 3.0; the navy measures
+     12.63–14.60. AUDIT F8 closes. */
+  --bg-action: var(--navy-800);
+  --text-on-action: var(--gray-0);
+  /* The hover LIGHTENS by one step now rather than darkening: the fill is a
+     dark navy, so a step down would approach black and read as the button
+     switching off. Same gesture as --bg-inverse-hover, same direction. */
+  --bg-action-hover: var(--navy-700);
 
   /* --- The outlined and text action --------------------------------------
-     The bronze the v1 set gives the SECONDARY button's border and label and
-     every arrow link. Its own pair rather than the accent's, because the
-     accent is a text colour spent on `aria-current` and this carries a control
-     boundary as well as a label — a different obligation, and it clears both
-     (5.13 : 1 at worst on a light ground, against 4.5 for text and 3.0 for the
-     boundary). White on dark, where the design draws it white. */
-  --outline-action: var(--bronze-700);
-  --outline-action-hover: var(--bronze-800);
+     The SECONDARY button's border and label, and every arrow link. The same
+     navy as the fill — Figma's `action/secondary/default` and `text/link` hold
+     the same value — but still its own pair, because it carries a control
+     boundary as well as a label and could be re-picked for either without
+     touching the fill. It clears both comfortably: 12.63 : 1 at worst on a
+     light ground, against 4.5 for text and 3.0 for the boundary. White on
+     dark, where the design draws it white. */
+  --outline-action: var(--navy-800);
+  --outline-action-hover: var(--navy-700);
 
   /* --- The inverse fill --------------------------------------------------
      The ink-coloured primary action: ground and ink swapped. CentiPack's
@@ -855,11 +859,11 @@
   --bg-inverse-hover: var(--gray-800);
   --text-on-inverse: var(--gray-0);
 
-  --bg-action: var(--tan-300);
-  --bg-action-hover: var(--tan-400);
-  --text-on-action: var(--gray-950);
-  --outline-action: var(--bronze-700);
-  --outline-action-hover: var(--bronze-800);
+  --bg-action: var(--navy-800);
+  --bg-action-hover: var(--navy-700);
+  --text-on-action: var(--gray-0);
+  --outline-action: var(--navy-800);
+  --outline-action-hover: var(--navy-700);
 
   /* Re-declared, not inherited — see the note in §2. */
   --bg-overlay: color-mix(in oklab, var(--gray-950) 10%, transparent);
@@ -2495,11 +2499,10 @@
   }
 
   @media (hover: hover) {
-    /* DARKENS ONE STEP, it used to lighten to --text-secondary. The arrow link
-       is bronze now rather than ink, and lightening a bronze toward a warm grey
-       is a hue change rather than a step — it reads as the link losing its
-       colour. One step down the same hue, which is the gesture `primary` and
-       `secondary` both use. */
+    /* ONE STEP ALONG THE SAME HUE, through the token the filled and outlined
+       buttons hover with, so all three actions respond identically. It used to
+       go to --text-secondary, which was a hue change rather than a step once
+       the link stopped being ink — it read as the link losing its colour. */
     .btn-link:hover {
       color: var(--outline-action-hover);
     }

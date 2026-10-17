@@ -259,7 +259,25 @@ out of git history and §8 applies again unmodified.
 
 ---
 
-## F8 — The v1 action fill has no visible boundary — now on every primary button
+## F8 — RESOLVED 2026-10-17: the action fill now has a visible boundary
+
+**Closed by the design system update.** `action/primary/default` moved from the
+tan `#c5b197` to the navy `#0e2a46`, and with it the whole failure:
+
+| fill against | tan | navy | needs |
+| --- | --- | --- | --- |
+| `--bg-base` #f9f7f5 | 1.94 | **13.66** | 3.0 |
+| `--bg-subtle` #f2eee8 | 1.80 | **12.63** | 3.0 |
+| `--bg-surface` #ffffff | 2.08 | **14.60** | 3.0 |
+
+The label went with it — white on the navy measures 14.60 against the ink-on-tan
+7.94. Nothing was worked around and no check was relaxed; the design simply
+picked a colour that passes. The history below is kept because the reasoning
+about WHY it failed applies to the next fill anyone proposes.
+
+---
+
+### Original entry — scope widened 2026-10-17, then resolved
 
 **Scope widened 2026-10-17.** This recorded one instance: the nav's "Get a
 quote". The v1 button set makes the tan the fill of the `primary` variant on

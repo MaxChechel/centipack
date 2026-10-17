@@ -151,15 +151,15 @@ const VARIANT = {
     'hover:bg-action hover:text-on-action hover:border-action',
   ],
   /**
-   * `ghost` IS THE ARROW LINK, and it is bronze again.
+   * `ghost` IS THE ARROW LINK, and it is the navy.
    *
-   * THIS REVERSES AN EXPLICIT INSTRUCTION, so the history is here rather than
-   * in a commit nobody reads. It was `text-secondary`, then black on the
-   * instruction "for button with arrow type text use our black(text color)".
-   * The v1 button set draws every arrow link in `#7a5f43` on a light ground and
-   * white on a dark one — the same `--outline-action` the outlined button uses
-   * — and that set is what has now been asked for. Later instruction wins; the
-   * earlier one was not wrong when it was given.
+   * THIS COLOUR HAS MOVED THREE TIMES, so the history is here rather than in
+   * commits nobody reads: `text-secondary` grey, then black on the instruction
+   * "for button with arrow type text use our black(text color)", then the
+   * bronze `#7a5f43` of the first v1 button set, and now Figma's `text/link`
+   * — which holds the same `#0e2a46` as the filled and outlined buttons, so
+   * all three actions are one colour. It takes `--outline-action` either way,
+   * which is why only the token moved and this file did not.
    *
    * The hover darkens one step through `.btn-link`, which used to lighten to
    * --text-secondary and would now be a hue change rather than a step.

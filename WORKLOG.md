@@ -6373,3 +6373,40 @@ Unchanged, plus:
     for the nav and accepting it everywhere are different decisions; the second
     has now been made by following the design. A 1px `--line-strong` border, or
     darkening the tan to about `#a98d6b`, fixes it.
+
+## 2026-10-17 — Entry 71. The hover opens the left padding, and the button stays put
+
+Supersedes entry 70's account of the mark, on instruction: the dot shows on
+hover **and the left padding opens with it**, so the label slides across rather
+than the mark appearing beside a label that never moves.
+
+**The two paddings swap rather than the left one growing.** 24/32 at rest,
+32/24 on hover. A button that only grew its left padding would get wider under
+the pointer, and in the home hero that is the second button stepping aside
+every time you aim at the first. Swapping keeps the button's own width
+constant, so the slide is contained entirely inside it.
+
+Measured on the built page, pointer actually moved onto each button:
+
+| state | padding L/R | mark opacity | x | width |
+| --- | --- | --- | --- | --- |
+| rest | 24 / 32 | 0 | 553.1 | 142.4 |
+| hover primary | **32 / 24** | **1** | 553.1 | 142.4 |
+| hover secondary | 24 / 32 → **32 / 24** | **1** | 707.5 | 179.5 |
+
+`x` and `width` are identical in every row, for both buttons. Neither moves.
+
+**`padding` joins the transition**, which is a layout property animating on
+hover and therefore worth justifying against §12.3: the change is confined
+inside a box whose own size never changes, so nothing outside the button
+reflows. The mark stays absolutely positioned and adds no width in either
+state — the padding pair is the only thing moving.
+
+**The padding is a utility pair, not a component rule.** Utilities outrank
+`@layer components`, so a `px-lg` from the size lookup would beat anything the
+stylesheet tried to set — the same trap `.hero-stats` recorded. `MARK_PAD`
+emits `pl-lg pr-xl hover:pl-xl hover:pr-lg` and the lookup is skipped for these
+buttons. The dead-class count rose 316 → 323 on the build, which is those
+hover variants proving they generate rather than being assumed to.
+
+verify: 8 checks, 1103 assertions, 0 failures.

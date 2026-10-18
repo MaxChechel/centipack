@@ -95,13 +95,30 @@ const hasContent = Boolean(heading) || Boolean(eyebrow) || hasLede || hasAction;
 
   {
     (hasLede || hasAction) && (
-      <div class:list={['gap-md flex flex-col items-start', split && 'md:col-span-5']}>
-        {hasLede && (
-          <p class="text-body text-secondary measure">
-            <slot name="lede">{lede}</slot>
-          </p>
-        )}
-        <slot />
+      /* TWO NESTED DIVS, AND BOTH EARN THEIR KEEP. The outer one places the
+         column and pushes its contents to the RIGHT edge; the inner one is the
+         content block, and its text and action stay LEFT-aligned inside it.
+
+         The split is what makes "right-aligned" mean the right thing. Setting
+         `text-align: right` would rag the lede down its left edge and push the
+         action away from the copy it belongs to. What the design aligns is the
+         BLOCK: its right edge meets the container's, and everything inside it
+         reads from a single left margin.
+
+         `md:col-span-4 md:col-start-9` is the design's own column — 432px at
+         1440 (Figma 1336:25792), the same one the category and product heroes
+         already use. It replaces `md:col-span-5`, which flowed from column 8
+         and came out 546 wide. While the lede fills its column the two read
+         alike; `justify-end` is what holds the edge when it does not. */
+      <div class:list={['flex', split && 'md:col-span-4 md:col-start-9 md:justify-end']}>
+        <div class="gap-md flex flex-col items-start">
+          {hasLede && (
+            <p class="text-body text-secondary measure">
+              <slot name="lede">{lede}</slot>
+            </p>
+          )}
+          <slot />
+        </div>
       </div>
     )
   }

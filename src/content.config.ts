@@ -261,6 +261,35 @@ const section = (image: () => z.ZodType<ImageMetadata>) =>
      * meant either holding the pages back or inventing claims about thermal
      * performance and disposal.
      */
+    /* "Everything you can customize" — one card at a time, centred, with its
+       neighbours showing at both edges (Figma 1268:24141).
+
+       A LIST, NOT A GRID, AND THE DIFFERENCE IS THE CONTENT'S. The eight cards
+       are a catalogue of options a buyer reads through — box style, closures,
+       finish, board, two coatings, inserts, branding — not a ranked set where
+       the first three matter most. A grid would publish seven of them below the
+       fold and imply the top row is the important one; the carousel gives each
+       the same card and the same turn.
+
+       `slides` is `.min(2)` because one slide is not a carousel: it is a card
+       that has grown a scroller, a snap axis and a pair of buttons that cannot
+       do anything. The component renders a plain card at one slide, and this
+       floor keeps content from asking it to. */
+    z
+      .object({
+        type: z.literal('carousel'),
+        heading: z.string(),
+        lede: z.string().optional(),
+        slides: z
+          .array(
+            z
+              .object({ title: z.string(), body: z.string(), image: slot(image) })
+              .strict(),
+          )
+          .min(2),
+      })
+      .strict(),
+
     z
       .object({
         type: z.literal('faq'),
@@ -453,6 +482,30 @@ const categories = defineCollection({
          * three-up hero has room a card in a two-up footer does not.
          */
         crossBody: z.string(),
+
+        /**
+         * THE CATEGORY'S OWN PAGE BODY, where it has one.
+         *
+         * Cold chain and pharmacy formats list their products: a heading and a
+         * rail of cards, which is what `selectionHeading` and the catalogue
+         * give them. Custom boxes does not. Its v1 page (Figma 1005:14931)
+         * draws three split rows describing what can be built, then a carousel
+         * of the options — and no product rail at all, because what it sells is
+         * a capability rather than a shelf of SKUs.
+         *
+         * SO THE BODY IS DATA, for the same reason a product page's is. The
+         * alternative is a template with a `if (slug === 'custom-boxes')` in
+         * it, which is the page's identity hard-coded into the one file that
+         * exists to not know it. A category with sections renders them; a
+         * category without renders its rail. Same template, no branch on a
+         * name.
+         *
+         * It reuses the PRODUCT section union rather than defining a second
+         * one. `split` here is the same block, drawn the same way, from the
+         * same fields — and sharing it means a category page cannot drift into
+         * a parallel vocabulary that looks identical and behaves differently.
+         */
+        sections: z.array(section(image)).default([]),
 
         /** The wide "range header" shot: the whole category in one picture. */
         rangeImage: picture(image).optional(),

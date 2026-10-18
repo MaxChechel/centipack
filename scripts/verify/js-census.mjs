@@ -54,6 +54,12 @@ const EXPECTED = [
     maxGzip: 500,
   },
   {
+    id: 'carousel centre',
+    signature: /data-carousel/,
+    why: 'ARCHITECTURE §6 — "Everything you can customize" is a native scroll-snap row (Figma 1268:24141); the browser owns the scrolling, the snapping, the momentum and the keyboard. The ONE thing it does not expose is which snap target is resting at the centre, and the design sizes that card differently from its neighbours. This module moves one class onto it and nothing else — the scale, the transform origin and the transition are all CSS. An IntersectionObserver over a one-pixel centre strip rather than a scroll listener, so a flick does not re-measure eight slides every frame. Slide one carries the class in the HTML, so the rest state is correct with no JavaScript at all and this only ever moves it. Swiper stays rejected on the rail\'s own measurement: ~15 KB gzipped against 2 KB for this whole site.',
+    maxGzip: 600,
+  },
+  {
     /**
      * A BUNDLER ARTEFACT, NAMED RATHER THAN EXEMPTED. When a module is imported
      * by more than one page, Rollup hoists it into a shared chunk and leaves

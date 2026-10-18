@@ -12,6 +12,7 @@ import MediaCards from '../../../components/blocks/MediaCards.astro';
 import NumberedList from '../../../components/blocks/NumberedList.astro';
 import SpecSheet from '../../../components/blocks/SpecSheet.astro';
 import SplitFeature from '../../../components/blocks/SplitFeature.astro';
+import Carousel from '../../../components/blocks/Carousel.astro';
 import StepList from '../../../components/blocks/StepList.astro';
 import {
   getCatalogue,
@@ -100,6 +101,7 @@ const assertEverySectionIsHandled = (sections: readonly ProductSection[]): void 
       case 'numbered':
       case 'cards':
       case 'formats':
+      case 'carousel':
       case 'faq':
         break;
       default: {
@@ -243,6 +245,18 @@ const sectionGround = (section: ProductSection, index: number): string =>
 
         {section.type === 'formats' && (
           <FormatCards heading={section.heading} cards={section.cards} />
+        )}
+
+        {/* DECLARED HERE, DRAWN ON NO PRODUCT PAGE TODAY. The carousel belongs
+            to the shared section union, so this template has to acknowledge it
+            — the `never` assignment above is what makes that a build error
+            rather than a silent gap. It renders if a product ever declares
+            one; the category pages are where it ships. Note the full-bleed
+            Section this does NOT get: a product section is container-width, so
+            a carousel here would scroll inside the container rather than off
+            the page edges. Flagged rather than faked. */}
+        {section.type === 'carousel' && (
+          <Carousel heading={section.heading} lede={section.lede} slides={section.slides} />
         )}
 
         {/* SELF-SKIP (§4.2). The adapter drops any question whose answer is

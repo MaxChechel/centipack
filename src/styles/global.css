@@ -2778,6 +2778,73 @@
     display: none;
   }
 
+  /* THE CAROUSEL — a native scroll-snap row that centres its slides.
+     See src/components/blocks/Carousel.astro for the shape and
+     src/scripts/carousel.ts for the one class the script moves. */
+  .carousel-track {
+    /* 800px is the design's active card (Figma 1268:24135). Below that it is
+       the viewport less a sliver, so the neighbours still show at the edges on
+       a phone — that peek is what says the row scrolls. */
+    --carousel-slide: min(50rem, 82vw);
+
+    display: flex;
+    gap: var(--spacing-lg);
+    overflow-x: auto;
+    scroll-snap-type: x mandatory;
+    scrollbar-width: none;
+    overscroll-behavior-x: contain;
+
+    /* HALF A TRACK LESS HALF A SLIDE, so the first and last slides can reach
+       the centre. Without it `scroll-snap-align: center` cannot settle on
+       either end: there is no scroll range left to centre them in, and the row
+       parks with slide one pinned to the left edge. */
+    padding-inline: calc(50% - var(--carousel-slide) / 2);
+    padding-block: var(--spacing-xs);
+  }
+
+  .carousel-track::-webkit-scrollbar {
+    display: none;
+  }
+
+  .carousel-slide {
+    flex: 0 0 var(--carousel-slide);
+    scroll-snap-align: center;
+
+    /* EVERY SLIDE IS THE SAME BOX and the inactive ones are scaled, so the
+       active slide changing reflows nothing. The ORIGIN is what makes the
+       spacing match the design: a slide before the active one shrinks toward
+       its right edge and one after it toward its left, so both stay a gap away
+       from the centre card instead of drifting from it. `right center` is the
+       default and the `~` rule below flips it for everything after the active
+       slide — which is the whole before/after split, in CSS, off one class. */
+    transform: scale(0.95);
+    transform-origin: right center;
+    transition:
+      transform var(--duration-spring-soft) var(--ease-spring-soft);
+  }
+
+  .carousel-slide.is-active {
+    transform: scale(1);
+  }
+
+  .carousel-slide.is-active ~ .carousel-slide {
+    transform-origin: left center;
+  }
+
+  /* The scale is decoration: it says which card is centred, and the scroll
+     position says that too. Someone who has asked for less motion gets the
+     same row without the sizes changing under them. */
+  @media (prefers-reduced-motion: reduce) {
+    .carousel-slide {
+      transform: none;
+      transition: none;
+    }
+
+    .carousel-slide.is-active {
+      transform: none;
+    }
+  }
+
   .product-rail-item {
     scroll-snap-align: start;
   }

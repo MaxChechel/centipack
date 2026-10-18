@@ -33,6 +33,17 @@ interface Props {
   image: SlotImage;
   imageSide?: 'start' | 'end';
   headingLevel?: 'h2' | 'h3';
+  /**
+   * Visual size, decoupled from `headingLevel` exactly as SectionHeader's is.
+   *
+   * THE PRODUCT PAGES AND THE CATEGORY PAGE DRAW THIS BLOCK AT TWO SIZES. A
+   * product's split row is the page's own h2 — 48px at 1440 with a 24px
+   * standfirst. The custom boxes category stacks three of them UNDER a 48px
+   * section heading (Figma 1268:4222), so there they are 32 and 20: a step
+   * down, because they are items in a list and not the heading of the band.
+   * Defaulting to `h2` leaves all five product pages exactly as they were.
+   */
+  size?: 'h2' | 'h3';
   id?: string;
 }
 
@@ -45,8 +56,22 @@ const {
   image,
   imageSide = 'end',
   headingLevel = 'h2',
+  size = 'h2',
   id,
 } = Astro.props as Props;
+
+/* Complete class strings — the scanner cannot see `text-${size}`. The two
+   ramps move together: a 48px heading takes a 24px standfirst under it and a
+   32px heading takes 20, which is the type scale's own pairing rather than two
+   independent choices. */
+const HEADING = { h2: 'text-h2 text-primary', h3: 'text-h3 text-primary' } as const;
+const SUBHEADING = { h2: 'text-h4 text-primary', h3: 'text-h5 text-primary' } as const;
+
+/* The design sets all three lines 20px apart at the smaller size (1268:4222)
+   where the larger one runs 24 then 12. There is no 20px step on the spacing
+   scale, so this snaps to 24 and 16 — the same ruling the cross-link card's
+   gap got, and for the same reason. */
+const INNER_GAP = { h2: 'gap-sm', h3: 'gap-md' } as const;
 ---
 
 <div id={id} class="gap-xl md:gap-lg md:grid md:grid-cols-12 md:items-center flex flex-col">
@@ -59,13 +84,13 @@ const {
     <div class="gap-lg flex flex-col">
       {
         headingLevel === 'h3' ? (
-          <h3 class="text-h2 text-primary">{heading}</h3>
+          <h3 class={HEADING[size]}>{heading}</h3>
         ) : (
-          <h2 class="text-h2 text-primary">{heading}</h2>
+          <h2 class={HEADING[size]}>{heading}</h2>
         )
       }
-      <div class="gap-sm flex flex-col">
-        {subheading && <p class="text-h4 text-primary">{subheading}</p>}
+      <div class:list={[INNER_GAP[size], 'flex flex-col']}>
+        {subheading && <p class={SUBHEADING[size]}>{subheading}</p>}
         <p class="text-body text-secondary">{body}</p>
       </div>
     </div>

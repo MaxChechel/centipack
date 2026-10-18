@@ -186,7 +186,20 @@ export type ProductSection =
     }
   | { type: 'cards'; heading: string; cards: readonly ProductMediaCard[] }
   | { type: 'formats'; heading: string; cards: readonly ProductFormatCard[] }
+  | {
+      type: 'carousel';
+      heading: string;
+      lede?: string;
+      slides: readonly ProductCarouselSlide[];
+    }
   | { type: 'faq'; heading: string; items: readonly ProductFaqItem[] };
+
+/** One card in a `carousel` section: a picture slot and two lines under it. */
+export interface ProductCarouselSlide {
+  title: string;
+  body: string;
+  image: SlotImage;
+}
 
 export interface ProductView {
   slug: string;
@@ -252,6 +265,8 @@ export interface CategoryView {
   selectionHeading: string;
   crossBody: string;
   href: string;
+  /** The category's own page body, where it has one. Empty means "show the rail". */
+  sections: readonly ProductSection[];
   rangeImage?: Picture;
   cardImage?: Picture;
   cardThumb?: Picture;
@@ -539,6 +554,19 @@ async function toSection(section: ProductSectionInput): Promise<ProductSection> 
       };
     case 'numbered':
       return { type: 'numbered', heading: section.heading, body: section.body, items: section.items };
+    case 'carousel':
+      return {
+        type: 'carousel',
+        heading: section.heading,
+        lede: section.lede,
+        slides: await Promise.all(
+          section.slides.map(async (slide) => ({
+            title: slide.title,
+            body: slide.body,
+            image: await toSlot(slide.image),
+          })),
+        ),
+      };
     case 'cards':
       return {
         type: 'cards',
@@ -612,6 +640,7 @@ async function toCategory(entry: CollectionEntry<'categories'>): Promise<Categor
     selectionHeading: entry.data.selectionHeading,
     crossBody: entry.data.crossBody,
     href: categoryHref(entry.data.slug),
+    sections: await Promise.all(entry.data.sections.map(toSection)),
     rangeImage: await toPicture(entry.data.rangeImage, WIDE_WIDTH, WIDE_WIDTHS),
     cardImage: await toPicture(entry.data.cardImage, CARD_WIDTH, CATEGORY_CARD_WIDTHS),
     cardThumb: await toPicture(entry.data.cardThumb, CARD_THUMB_WIDTH, CARD_THUMB_WIDTHS),

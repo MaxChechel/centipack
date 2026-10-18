@@ -4,6 +4,8 @@ import Section from '../../components/Section.astro';
 import CrossLinks from '../../components/blocks/CrossLinks.astro';
 import Breadcrumb from '../../components/blocks/Breadcrumb.astro';
 import ProductRail from '../../components/blocks/ProductRail.astro';
+import SplitFeature from '../../components/blocks/SplitFeature.astro';
+import Carousel from '../../components/blocks/Carousel.astro';
 import CtaPlate from '../../components/blocks/CtaPlate.astro';
 import Media from '../../components/blocks/Media.astro';
 import JsonLd from '../../components/atoms/JsonLd.astro';
@@ -108,16 +110,79 @@ const itemList = {
     />
   </Section>
 
-  {/* 3 — The products. Three-up here, where the index is five-up. */}
-  <Section space="lg">
-    <div class="gap-2xl flex flex-col">
-      <h2 class="text-h2 text-primary">{category.selectionHeading}</h2>
-      <ProductRail products={products} columns={3} label={`${category.title} products`} />
-      {/* Emitted beside the rail it describes, for the same reason Breadcrumb
-          emits its own: the markup and the structured data come from one array. */}
-      <JsonLd schema={itemList} />
-    </div>
-  </Section>
+  {/* 3 — The category's own body.
+
+      TWO SHAPES, AND THE CONTENT PICKS. Cold chain and pharmacy formats sell a
+      shelf of products, so their page is a heading and a rail of cards. Custom
+      boxes sells a capability: its v1 page (Figma 1005:14931) draws three rows
+      describing what can be built and then a carousel of the options, and no
+      product rail at all.
+
+      The test is `category.sections.length`, never the slug. A template that
+      asks which page it is has the page's identity compiled into the one file
+      whose job is to not know it — and the next category that wants rows would
+      need a second branch beside the first. See the schema's note. */}
+  {
+    category.sections.length > 0 ? (
+      <Section space="lg">
+        <div class="gap-4xl flex flex-col">
+          {/* THE SAME HEADING THE RAIL BRANCH USES. The design puts
+              "Thoughtfully packaged. Ready to deliver." over the rows exactly
+              where the other two categories put it over their cards, so this
+              is `selectionHeading` doing its job rather than a second field
+              holding the same sentence. */}
+          <h2 class="text-h2 text-primary">{category.selectionHeading}</h2>
+          {category.sections.map((section) =>
+            section.type === 'split' ? (
+              <SplitFeature
+                heading={section.heading}
+                subheading={section.subheading}
+                body={section.body}
+                note={section.note}
+                action={section.action}
+                image={section.image}
+                imageSide={section.imageSide}
+                headingLevel="h3"
+                size="h3"
+              />
+            ) : null,
+          )}
+        </div>
+      </Section>
+    ) : (
+      <Section space="lg">
+        <div class="gap-2xl flex flex-col">
+          <h2 class="text-h2 text-primary">{category.selectionHeading}</h2>
+          <ProductRail products={products} columns={3} label={`${category.title} products`} />
+          {/* Emitted beside the rail it describes, for the same reason Breadcrumb
+              emits its own: the markup and the structured data come from one array.
+
+              IT GOES WITH THE RAIL, not with the page. A category that renders
+              rows instead of cards is not publishing a list of products, and an
+              ItemList naming products the page never mentions is structured
+              data describing a page that does not exist. */}
+          <JsonLd schema={itemList} />
+        </div>
+      </Section>
+    )
+  }
+
+  {/* 4 — The carousel, where there is one.
+      ITS OWN FULL-BLEED SECTION, because the track genuinely needs the
+      viewport: the neighbouring cards run off both edges, which is what says
+      the row scrolls. §4.4 puts that decision at Section level rather than
+      letting the block break its own container. */}
+  {
+    category.sections
+      .filter((section) => section.type === 'carousel')
+      .map((section) =>
+        section.type === 'carousel' ? (
+          <Section width="full" space="lg" class="bg-base">
+            <Carousel heading={section.heading} lede={section.lede} slides={section.slides} />
+          </Section>
+        ) : null,
+      )
+  }
 
   {/* 4 — The other two layers.
 
@@ -148,5 +213,11 @@ const itemList = {
 </BaseLayout>
 
 <script>
+  /* Both modules no-op on a page without their hook — the rail's on the two
+     categories that render cards, the carousel's on the one that renders rows.
+     Astro bundles a template's scripts per page rather than per branch, so the
+     alternative is a second template, which is a page's identity in a filename
+     again. Both are in the census with budgets. */
   import '../../scripts/rail';
+  import '../../scripts/carousel';
 </script>

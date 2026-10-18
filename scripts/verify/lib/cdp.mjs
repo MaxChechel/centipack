@@ -111,6 +111,13 @@ export const PAGES = [
   '/products',
   /* One of the three category pages — same template, same props shape. */
   '/products/cold-chain-shipping',
+  /* THE OTHER CATEGORY SHAPE. Cold chain renders a heading and a rail of
+     cards; custom boxes renders three split rows and a carousel and no rail at
+     all (Figma 1005:14931). Same template, different branch, so one of them
+     does not sweep the other — and the carousel is the only scroll-snap region
+     on the site with a centre-snapping track and a script that moves a class
+     on it. */
+  '/products/custom-boxes',
   /*
    * THREE OF THE FIVE PRODUCT PAGES, CHOSEN TO COVER ALL EIGHT SECTION TYPES.
    *

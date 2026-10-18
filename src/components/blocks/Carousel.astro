@@ -1,0 +1,92 @@
+---
+import Media from './Media.astro';
+import SectionHeader from './SectionHeader.astro';
+import type { ProductCarouselSlide } from '../../lib/catalogue';
+
+/**
+ * "Everything you can customize" — one card at a time, centred, with its
+ * neighbours showing at both edges (Figma 1268:24141).
+ *
+ * THE SCROLLING IS THE PLATFORM'S, exactly as the product rail's is (§6). The
+ * track is `overflow-x: auto` with `scroll-snap-align: center`, so momentum,
+ * rubber-banding, trackpad, touch, `scroll-behavior` and the keyboard arrows
+ * all arrive free and correct. The script's ONLY job is to say which slide is
+ * currently centred, because that is the one thing the browser does not expose
+ * and the one thing the design keys its sizing to.
+ *
+ * SLIDE ONE IS MARKED ACTIVE IN THE HTML, so the rest state is right before any
+ * script runs and stays right if none ever does: the first card at full size,
+ * the rest a step smaller, which is exactly what the design draws. The script
+ * moves the class; it does not create the layout.
+ *
+ * WHY THE NEIGHBOURS SCALE RATHER THAN RESIZE. Every slide is the same 800px
+ * box and the smaller ones are `transform: scale(0.95)`, so nothing reflows
+ * when the active slide changes — a width change would move the snap target
+ * the browser is currently scrolling toward. The origin is what makes it line
+ * up: a slide BEFORE the active one scales toward its right edge and one AFTER
+ * it toward its left, so each stays 24px from the active card instead of
+ * drifting 20px away from it. That reproduces the design's measurements
+ * exactly — slide 08 at -464 and slide 02 at 1144, both 760 wide — with no
+ * layout cost. The `~` selector does the before/after split in CSS off the
+ * single class the script sets.
+ *
+ * A TAB STOP, BECAUSE IT SCROLLS. A scrollable region that cannot be reached
+ * by keyboard fails WCAG 2.1.1, and axe's `scrollable-region-focusable` checks
+ * exactly that. The `tabindex` is in the HTML rather than applied by script for
+ * the same reason the rail's is: it has to be true before anything runs.
+ */
+interface Props {
+  heading: string;
+  lede?: string;
+  slides: readonly ProductCarouselSlide[];
+  headingLevel?: 'h2' | 'h3';
+  id?: string;
+}
+
+const { heading, lede, slides, headingLevel = 'h2', id } = Astro.props as Props;
+
+/* SELF-SKIP (§4.2). Nothing to scroll through is not an empty carousel, it is
+   no carousel. The schema floors this at two; this is the guard for content
+   that arrives before its slides. */
+const hasSlides = slides.length > 0;
+---
+
+{hasSlides && (
+<div id={id} class="gap-2xl flex flex-col">
+  {/* The header is re-constrained to the page container INSIDE a full-bleed
+      Section. The track is what needs the viewport — the heading sits on the
+      same gutter line as every other heading on the page. */}
+  <div class="container-main">
+    <SectionHeader heading={heading} lede={lede} headingLevel={headingLevel} split />
+  </div>
+
+  {/* `data-bleed` declares to the sweep that this deliberately extends past
+      its parent — the same declaration the product rail makes. See
+      scripts/verify/sweep.mjs. */}
+  <ul
+    class="carousel-track list-bare"
+    tabindex="0"
+    data-carousel
+    aria-label={heading}
+    data-bleed
+  >
+    {
+      slides.map((slide, index) => (
+        <li class:list={['carousel-slide gap-lg flex flex-col', index === 0 && 'is-active']}>
+          <Media
+            image={slide.image.picture}
+            label={slide.image.label}
+            ratio="800 / 480"
+            sizes="(min-width: 54rem) 800px, 82vw"
+            class="rounded-card"
+          />
+          <div class="gap-xs flex flex-col">
+            <p class="text-h5 text-primary">{slide.title}</p>
+            <p class="text-body text-secondary">{slide.body}</p>
+          </div>
+        </li>
+      ))
+    }
+  </ul>
+</div>
+)}

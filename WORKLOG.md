@@ -7057,3 +7057,157 @@ verify: 9 checks, 1113 assertions, 0 failures.
 
 Unchanged: 85 (custom boxes carousel), 93 (the design's text ramp fails AA at
 tertiary), 94 (`border/strong`), 95 (the nav's ground).
+
+## 2026-10-18 — Entry 80. The custom boxes page, a carousel, and a category that is not a shelf
+
+### The split header's supporting column goes to the right edge
+
+On instruction, globally: in a two-column section header the supporting column
+is an outer block aligned RIGHT with a content wrapper inside it whose text and
+action stay LEFT-aligned.
+
+The split matters. `text-align: right` would rag the lede down its left edge
+and push the action away from the copy it belongs to. What the design aligns is
+the BLOCK — its right edge meets the container's, and everything inside reads
+from one left margin.
+
+Measured first, because the symptom was not the obvious one. The column already
+ENDED at the container's right edge; it was 546 wide where the design draws 432,
+and the action under the lede sat at the column's left edge rather than the
+block's. So the change is two things: `md:col-span-4 md:col-start-9` — the
+design's own column (Figma 1336:25792), and the same one the category and
+product heroes already use — and `md:justify-end` to hold the edge when the
+content does not fill it.
+
+```
+  before  col1 left=846 right=1392 w=546   lede fills it, link at 846
+  after   col1 left=960 right=1392 w=432   matches the drawn column
+```
+
+### The category template stops assuming a shelf
+
+Cold chain and pharmacy formats sell products: their page is a heading and a
+rail of cards. Custom boxes sells a capability. Its v1 page (Figma 1005:14931)
+draws three rows describing what can be built, then a carousel of the options,
+and NO product rail at all.
+
+So a category now carries `sections`, exactly as a product does, and the
+template branches on `category.sections.length` — never on the slug. A template
+that asks which page it is has the page's identity compiled into the one file
+whose job is to not know it, and the next category wanting rows would need a
+second branch beside the first.
+
+IT REUSES THE PRODUCT SECTION UNION rather than defining a second one. `split`
+on this page is the same block from the same fields; a parallel vocabulary that
+looked identical and behaved differently is exactly what one shared union
+prevents. Adding `carousel` to that union made the product template's
+exhaustiveness guard fail to compile until it acknowledged the new member —
+which is the guard doing the job it was written for, observed rather than
+assumed.
+
+THE ItemList GOES WITH THE RAIL, not with the page. A category rendering rows
+publishes no list of products, and structured data naming products the page
+never mentions describes a page that does not exist.
+
+`sectionsHeading` was added to the schema and then removed: `selectionHeading`
+already holds "Thoughtfully packaged. Ready to deliver.", which is the sentence
+the design puts over the rows. Two fields, one string, no.
+
+### SplitFeature learns a second size
+
+The product pages draw this block as the page's own h2 — 48px with a 24px
+standfirst. The custom boxes rows sit UNDER a 48px section heading, so the
+design sets them at 32 and 20 (Figma 1268:4222): items in a list, not the
+heading of a band. Both land exactly on existing tokens — `text-h3` is 32px at
+1440 and `text-h5` is 20px — so this is a `size` prop over the type scale, not
+a new ramp. Defaulting to `h2` leaves all five product pages untouched.
+
+The design sets all three lines 20px apart where the larger size runs 24 then
+12. Snapped to 24 and 16; there is no 20px step, and the cross-link card got
+the same ruling yesterday.
+
+### The carousel
+
+Eight option cards, one centred at a time, neighbours showing at both edges.
+
+THE SCROLLING IS THE PLATFORM'S, as the rail's is. A native scroll-snap track
+with `scroll-snap-align: center` brings momentum, rubber-banding, trackpad,
+touch, `scroll-behavior` and the keyboard arrows for nothing. The script's only
+job is to say which slide is centred, because that is the one thing the browser
+does not expose and the one thing the design sizes to. Swiper stays rejected on
+the rail's own measurement — ~15 KB gzipped against 2 KB for this whole site.
+
+THE NEIGHBOURS SCALE, THEY DO NOT RESIZE. Every slide is the same 800px box and
+the inactive ones are `scale(0.95)`, so changing the active slide reflows
+nothing — a width change would move the snap target the browser is currently
+scrolling toward. The transform ORIGIN is what makes it line up, and it is the
+part worth recording:
+
+```
+                        figma            built
+  active                320 .. 1120      320 .. 1120   w=800  media 800x480
+  next (inactive)      1144 .. 1904     1144 .. 1904   w=760  media 760x456
+```
+
+A slide before the active one scales toward its RIGHT edge and one after it
+toward its LEFT, so each stays 24px from the centre card instead of drifting 20
+away. The `~` combinator does the before/after split in CSS off the single
+class the script sets.
+
+ITS ONE INEXACTNESS, STATED: two inactive slides that are not adjacent to the
+active one sit 64px apart rather than 24, because each has shrunk 40px away
+from the other. Checked where it would show — at 1440 only the active and one
+neighbour are ever on screen, at 1920 the same, and the gap first peeks past
+about 2400px as a sliver at the extreme edge. Transform origin cannot fix it;
+layout width could, at the cost of reflowing mid-scroll. Taken deliberately.
+
+Slide one carries `is-active` in the HTML, so with no JavaScript at all the
+rest state is the one the design draws: first card full size, the rest a step
+down. The script only ever moves the class. `tabindex="0"` is in the markup for
+the same reason the rail's is — a scrollable region unreachable by keyboard
+fails WCAG 2.1.1, and that has to be true before anything runs.
+
+Verified the class actually follows the scroll rather than just initialising:
+
+```
+  at rest          active=slide0  box=320..1120 w=800
+  scrollLeft 824   active=slide1  box=320..1120 w=800
+  scrollLeft 1648  active=slide2  box=320..1120 w=800
+  scrollLeft 4120  active=slide5  box=320..1120 w=800
+  scrollLeft 5768  active=slide7  box=320..1120 w=800
+```
+
+§6 census entry `carousel centre`, budget 600 B, measured 337 B gzipped. Red
+path run: padding the module to 1,215 B fails the census naming the script, the
+measurement and the budget. Reverted.
+
+Pictures are the design's own placeholder — a labelled slot, no file — which is
+what `slot()` and Media already do, and what the frame itself draws.
+
+### What the checks caught
+
+`dead classes` failed on `carousel-media`: a class in the markup with no rule
+anywhere, left over from sizing the slide picture before the ratio and the flex
+basis did it. Removed rather than given a rule it did not need.
+
+`/products/custom-boxes` joined the sweep list. It is the other category SHAPE —
+same template, different branch — and it carries the only centre-snapping
+scroll region on the site. 10 pages × 7 widths, no overflow; axe at 20 runs.
+
+verify: 9 checks, 1131 assertions, 0 failures.
+
+### Open questions
+
+96. **The design's supporting column is two widths.** 432 on the home page
+    (1336:25792) and the custom boxes hero (1005:14937), 546 in the
+    "Everything you can customize" header (1222:3952). Unified on 432, which is
+    the majority and the one the heroes already use. The right edge is the same
+    either way; the lede wraps one line deeper at 432.
+
+97. **The carousel does not loop, and the design implies it does.** The frame
+    draws slide 08 bleeding in at x=-464, to the LEFT of the active first
+    slide, which only happens if the track wraps. Ours is a plain scroller: at
+    rest there is nothing left of slide one, so the left half of the band is
+    empty. Looping means cloning slides and repositioning on scroll — real
+    JavaScript against a 600 B budget — so it is a decision to take rather than
+    something to slip in.

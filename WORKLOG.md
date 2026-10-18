@@ -7295,3 +7295,126 @@ verify: 9 checks, 1131 assertions, 0 failures.
 
 97 is closed. 96 stands: the design's supporting column is 432 in two places
 and 546 in a third, and this repo uses 432 throughout.
+
+## 2026-10-18 — Entry 82. The drag was clunky, and the guess about why was wrong
+
+### Profiled before changing anything, which is the whole lesson
+
+Reported: the carousel drag is clunky, make it feel like Swiper, and use Swiper
+or similar if a custom solution cannot.
+
+The obvious suspect was the scroll handler. It read 24 bounding boxes a frame,
+which is exactly the shape of a forced-layout problem, and the fix was already
+written in my head. Measured it first:
+
+```
+  scroll handler   0.03 ms/frame   (16.7 ms is one frame at 60fps)
+  rect reads alone 0.02 ms/frame   (24 slides)
+```
+
+Not remotely the problem. The optimisation pass would have shipped, measured
+identically, and fixed nothing — and the next move would have been to reach for
+the 15 KB library on the strength of a theory that was never true.
+
+What was actually wrong was behaviour, in three places:
+
+1. **The scale snapped.** Slides were either 1 or 0.95 with a CSS transition
+   between them, so during a drag the sizes lagged the pointer and then caught
+   up in a lurch. Scale is now a continuous function of scroll position:
+
+   ```
+     at rest             0.950  1.000  0.950
+     quarter of a slide  0.950  0.988  0.963
+     half a slide        0.975  0.975
+     three quarters      0.963  0.988  0.950
+   ```
+
+   The half-slide case reading 0.975 both sides — the exact midpoint of 0.95
+   and 1 — is the check that the interpolation is symmetric rather than merely
+   moving.
+
+2. **A release stopped dead.** Letting go mid-flick parked on the nearest card,
+   which reads as stuck. Pointer velocity is now sampled through the drag and
+   projected on release, capped at a slide and a bit so a hard flick advances
+   decisively rather than flying across the set. Verified with real input
+   events rather than synthetic ones — same distance, different speed:
+
+   ```
+     slow drag left 180px over ~290ms   stays on "Closures"
+     fast flick left 180px under 20ms   carries to "Finish"
+   ```
+
+3. **Snap fought the settle.** Mandatory snap was restored before the settling
+   scroll finished, so the browser snapped to where the row WAS rather than
+   where it was going. It now comes back after.
+
+THE ORIGIN FLIP BECAME FREE, which is the nice part of going continuous. A
+slide left of centre shrinks toward its right edge and one right of centre
+toward its left, and they swap as a slide crosses the middle — where the scale
+is exactly 1 and the origin therefore has no effect at all. The swap cannot be
+seen because at the moment it happens there is nothing to see.
+
+Swiper stays unused. 1,017 B gzipped against the 1100 B budget already set, so
+this cost no new budget — against ~15 KB for Swiper's pagination build alone,
+on a site that ships 9.7 KB of JavaScript in total.
+
+### Three photographs
+
+The home hero gains its portrait companion, which the code has had a commented
+slot for since entry 46. It is a `<picture>` now rather than one 16:9 file
+cropped to 1:1.25 by `.hero-media` — and the crop was never the same picture:
+squeezing a line-up of eleven products into a tall frame kept the middle two
+and cut the rest off both ends. The portrait shot is composed for the frame and
+measures 1206x1509, which IS 1:1.25, so the art direction and the CSS agree
+rather than one overriding the other.
+
+The cold chain range shot's mobile companion was replaced on the same supply.
+It was 1175x1431 (0.821); the new one is 1206x1509 (0.799), so it now matches
+the frame it is drawn in instead of being stretched a percent into it.
+
+```
+  centipack-home-hero-mobile.avif    1206x1509   84.8 KB   new
+  category-cold-chain-mobile.avif    1206x1509   34.1 KB   was 1175x1431, 19.6 KB
+```
+
+### The cross-link card stacks on a phone
+
+On instruction: picture on top, copy below. A 240px square beside three lines
+of text is a row at 768 and a sliver at 390.
+
+THE CORNERS COST NOTHING, which is the argument for clipping on the card rather
+than rounding the picture. `overflow-hidden` on a `rounded-card` parent clips
+whichever corners the child actually touches — left-top and left-bottom when
+the picture is beside the copy, top-left and top-right when it is above it, and
+square on the edge that runs into the card. Rounding the image itself would
+have needed a rule per breakpoint and would have been wrong at one of them.
+
+THIS INVALIDATED YESTERDAY'S LADDER, and the entry that set it said why it
+would hold: `CARD_THUMB_WIDTHS` was 240 / 480 / 720 because "the thumb is 240px
+at every width the card is drawn at". Stacking made that false — below `md` the
+picture is now the width of the screen less its gutters, so a 430px device at
+2x wants 860 and the top rung served 720. Re-encoded from the 960px sources and
+the ladder extended to match; the small rungs are still why this is a separate
+ladder from `CATEGORY_CARD_WIDTHS`.
+
+```
+  category-cold-chain-sm.avif        960x960   24.1 KB   was 720x720, 17.6 KB
+  category-custom-boxes-sm.avif      960x960   30.8 KB   was 720x720, 19.5 KB
+  category-pharmacy-formats-sm.avif  960x960   21.6 KB   was 720x720, 14.0 KB
+```
+
+The mobile picture keeps the drawn 1:1 rather than being re-cropped wider. That
+is the only ratio the design gives for this thumb, and inventing a 16:9 for a
+breakpoint the frame does not draw would be guessing at a design that exists.
+Open question 98.
+
+verify: 9 checks, 1133 assertions, 0 failures.
+
+### Open questions
+
+98. **The stacked cross-link picture is square.** Full width on a 390px phone
+    makes it 358px tall, and the card about 480. The design draws no mobile
+    frame for this band, and 1:1 is the ratio it gives for the thumb, so that
+    is what shipped. A wider mobile crop is a design decision, not a fix.
+
+96 stands. 97 closed in entry 81.

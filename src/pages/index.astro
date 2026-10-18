@@ -66,13 +66,16 @@ const CARD_SIZES_3UP = '(min-width: 90rem) 440px, (min-width: 48rem) 32vw, 92vw'
  * one thing and should not care that this one is a page asset rather than a
  * content field.
  */
-/* PROJECT: drop the portrait-framed hero in beside the wide one and pass it as
-   `mobile` below. Media renders <picture> the moment it is there; until then the
-   wide file is cropped to 1:1.25 on mobile by `.hero-media`. */
-// import heroImageMobile from '../assets/home/centipack-home-hero-mobile.avif';
+/* THE PORTRAIT HERO LANDED, so this is a <picture> now rather than one wide
+   file cropped to 1:1.25 by `.hero-media`. The crop was never the same picture:
+   squeezing a 16:9 line-up into a tall frame kept the middle two products and
+   cut the rest off both ends. The portrait shot is composed for the frame — and
+   it is 1206x1509, which is exactly the 1:1.25 `.hero-media` asks for, so the
+   art direction and the CSS agree instead of one overriding the other. */
+import heroImageMobile from '../assets/home/centipack-home-hero-mobile.avif';
 const heroPicture = await toPageImage({
   src: heroImage,
-  // mobile: heroImageMobile,
+  mobile: heroImageMobile,
   /* RE-READ AGAINST THE PICTURE after the shot was swapped, which is the rule
      entry 46 set and the only way this string stays true. */
   alt:

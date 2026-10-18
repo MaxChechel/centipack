@@ -334,16 +334,21 @@ const CARD_WIDTHS = [260, 440, 520, 880, 1320] as const;
 const CATEGORY_CARD_WIDTHS = [360, 440, 660, 880, 1320, 1970] as const;
 
 /**
- * The 240px SQUARE on a cross-link card.
+ * The square on a cross-link card: 240px beside the copy, FULL WIDTH above it.
  *
- * A fixed size, not a fluid one: the thumb is 240px at every width the card is
- * drawn at and shrinks only when the card stacks on a phone. So this ladder is
- * the density ladder for one number — 240 at 1x, 480 at 2x, 720 at 3x — rather
- * than a viewport sweep, and it stops at 720 because that is the source. Handing
- * this picture `CATEGORY_CARD_WIDTHS` would ship a 1970px file to fill a 240px
- * box, which is the waste that ladder was written to end.
+ * THIS WAS A DENSITY LADDER AND IS NOW BOTH. It was written as 240 / 480 / 720
+ * — one drawn size at 1x, 2x and 3x — on the reasoning that the thumb is 240px
+ * at every width the card is drawn at. Stacking the card on a phone made that
+ * false: below `md` the picture is the width of the card, which is the width of
+ * the screen less its gutters, so a 430px device at 2x wants 860 and the old
+ * top rung served it 720.
+ *
+ * 960 is the ceiling because 960 is the source. It covers every phone at 2x and
+ * is still a quarter of what `CATEGORY_CARD_WIDTHS` would hand a 240px box on a
+ * desktop, which is the waste that ladder exists to avoid — the small rungs are
+ * why this is a separate ladder at all.
  */
-const CARD_THUMB_WIDTHS = [240, 480, 720] as const;
+const CARD_THUMB_WIDTHS = [240, 480, 720, 960] as const;
 const CARD_THUMB_WIDTH = 480;
 
 /**

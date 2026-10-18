@@ -65,7 +65,7 @@ const exploreLabel = (category: CategoryView): string =>
   <ul class="list-bare gap-lg grid md:grid-cols-2">
     {
       categories.map((category) => (
-        <li class="cross-link bg-base rounded-card gap-lg pr-lg relative flex min-h-[8rem] overflow-hidden">
+        <li class="cross-link bg-base rounded-card relative flex flex-col overflow-hidden md:min-h-[8rem] md:flex-row md:gap-lg md:pr-lg">
           {/* `gap-lg`/`pr-lg` ARE 24px AND THE DESIGN DRAWS 20 (Figma 1275:3342).
               Snapped to the scale rather than written as an arbitrary 1.25rem:
               there is no 20px step, rhythm on this site comes off the token scale,
@@ -73,27 +73,40 @@ const exploreLabel = (category: CategoryView): string =>
               The same ruling the section's 80 → 96 padding got, for the same
               reason. Everything else on this card is the drawn number — 128px
               floor, 6px radius, 240px square, 20/16/15px type, 8px title gap. */}
-          {/* 240px wide and the card's full height, flush to the left edge —
-              the card's own radius and `overflow-hidden` round it, so the
-              picture needs no corner of its own. `h-full` on the Media rather
-              than a ratio: the height comes from the text column beside it.
+          {/* STACKED ON A PHONE, BESIDE THE COPY FROM md UP. A 240px square
+              next to three lines of text is a row at 768 and a sliver at 390,
+              so the card turns into a picture over its copy — the usual mobile
+              card, and the only shape that gives the photograph room.
+
+              THE CORNERS COME FREE, which is the point of clipping on the card
+              rather than rounding the picture. `overflow-hidden` on a
+              `rounded-card` parent clips whichever corners the child actually
+              touches: left-top and left-bottom when the picture is beside the
+              copy, top-left and top-right when it is above it, square on the
+              edge that runs into the card. Rounding the image itself would
+              have needed a different rule per breakpoint and would have been
+              wrong at one of them.
+
+              240px wide and the card's full height from md — `md:h-full` on
+              the Media rather than a ratio: the height comes from the text
+              column beside it, and on a phone the 1:1 governs instead.
 
               `cardThumb` FIRST, `cardImage` ONLY AS A FALLBACK. The square is a
               separate photograph for this box; the card shot is a 5:6 portrait
               whose middle band is what a 1:1 crop of it would show. The fallback
               is here so a category that has not been given a square still draws
               a real picture rather than a hole. */}
-          <div class="w-[15rem] flex-none self-stretch">
+          <div class="w-full flex-none md:w-[15rem] md:self-stretch">
             <Media
               image={category.cardThumb ?? category.cardImage}
               label={`${category.pageTitle} — thumbnail`}
               ratio="1 / 1"
-              sizes="240px"
-              class="h-full"
+              sizes="(min-width: 48rem) 240px, 100vw"
+              class="md:h-full"
             />
           </div>
 
-          <div class="py-lg gap-md flex min-w-[0px] flex-1 flex-col justify-between">
+          <div class="p-lg gap-md flex min-w-[0px] flex-1 flex-col justify-between md:px-0">
             <div class="gap-xs flex flex-col">
               <h3 class="text-h5 text-primary">{category.pageTitle}</h3>
               <p class="text-body text-secondary">{category.crossBody}</p>

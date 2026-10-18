@@ -7446,3 +7446,27 @@ written. Recorded because "I checked and it still holds" and "I did not check"
 produce identical diffs, and only one of them is the rule being followed.
 
 verify: 9 checks, 1133 assertions, 0 failures.
+
+## 2026-10-18 — Entry 84. The home hero, final frame
+
+Supersedes entry 83's asset. Marked final on supply.
+
+Same source dimensions as the frame it replaces (4224x2376) and the same
+encode — 3840, the ceiling of `WIDE_WIDTHS` — so this is a swap of the
+photograph and nothing else:
+
+```
+  entry 83   3840 x 2160   218.3 KB
+  final      3840 x 2160   218.2 KB
+```
+
+The two source files are distinct renders (different hashes, 2 KB apart) of the
+same composition, so the emitted ladder is unchanged at 640 / 960 / 1280 /
+1920 / 2560 / 3840 and nothing downstream moves.
+
+Alt re-read against the frame, per entry 46's rule, and unchanged again: the
+same eleven products in the same places. Three hero swaps today, three reads,
+one string — which is the point of the rule. It does not ask for a new
+sentence, it asks that the sentence still be true.
+
+verify: 9 checks, 1133 assertions, 0 failures.

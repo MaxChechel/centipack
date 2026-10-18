@@ -1,32 +1,32 @@
 ---
 import Media from './Media.astro';
+import Button from '../atoms/Button.astro';
 import type { CategoryView } from '../../lib/catalogue';
 
 /**
- * "The rest of the build" (§4.2) — the compact pair of cross-links at the foot
- * of every category page.
+ * "The rest of the build" (§4.2) — the pair of cross-links at the foot of every
+ * category page.
  *
- * A THIRD CARD, AND NOT A VARIANT OF THE OTHER TWO. This replaces a pair of
- * full CategoryCards drawn 1:1 at 656px each, which is what the previous design
- * put here; v1 draws something structurally different — a 128px square thumb, a
- * 208px text column, and a round arrow button pinned to the bottom right, all
- * 154px tall. White type over a photograph has become black type BESIDE one.
+ * REDESIGNED 2026-10-18 (Figma 1005:14054). It was a 432px heading column with
+ * two compact rows beside it; it is now a heading block ACROSS the top with two
+ * half-width cards under it. Each card is a 240px picture flush to its own left
+ * edge, a title and a line of copy beside it, and a text link pinned to the
+ * bottom of that column.
  *
- * Trying to reach that from CategoryCard would have meant a prop that moved the
- * text out of the picture, dropped the scrims, dropped the dark theme and
- * changed the aspect ratio — which is not a variant, it is a different
- * component wearing the same name (§4.2). CategoryCard keeps the home page's
- * three-up tiles and loses the props that only this use needed.
+ * THE CARD IS A LIGHT PLATE ON A DARKER BAND — `bg/primary` on `bg/secondary`,
+ * which is the inverse of the usual arrangement and the reason the card needs
+ * no border: the ground change is the edge.
  *
- * ONE TARGET, ONE ACCESSIBLE NAME, same mechanism CategoryCard uses: the arrow
- * is the only anchor and `.cross-link-target` stretches its ::after over the
- * whole row. The card is NOT wrapped in an <a>, which would fold the heading,
- * the paragraph and the arrow into a single announced name.
+ * ONE TARGET, ONE ACCESSIBLE NAME. The link at the bottom is the only anchor
+ * and `.cross-link-target` stretches its ::after over the whole card, so a
+ * press anywhere follows it. The card is NOT wrapped in an <a>, which would
+ * fold the heading, the copy and the link label into a single announced name.
+ * `scripts/verify/pointer.mjs` asserts that hit area still works.
  */
 interface Props {
   /** The eyebrow over the section's standfirst. */
   eyebrow: string;
-  /** The standfirst. Drawn at h4 in a 432px column, not as a heading. */
+  /** The standfirst. Drawn at h4 in a 600px measure, not as a heading. */
   body: string;
   /** The other categories — two of them, on every page that renders this. */
   categories: readonly CategoryView[];
@@ -37,78 +37,84 @@ const { eyebrow, body, categories, id } = Astro.props as Props;
 
 /* SELF-SKIP (§4.2): nothing to cross-link to, nothing to render. */
 const hasContent = categories.length > 0;
+
+/**
+ * "Explore custom boxes →", derived rather than stored.
+ *
+ * The design writes it out for two of the three categories and both follow the
+ * same rule exactly — "Explore" plus the display name, lower-cased. A fourth
+ * label field on the collection would be three strings nobody can get wrong
+ * stored so they can be, and the third ("Explore cold chain packaging") falls
+ * out of the same rule. If a category ever needs to break it, that is the
+ * moment it becomes a field.
+ */
+const exploreLabel = (category: CategoryView): string =>
+  `Explore ${category.pageTitle.toLowerCase()}`;
 ---
 
 {hasContent && (
-<div id={id} class="gap-xl md:gap-lg md:grid md:grid-cols-12 md:items-start flex flex-col">
-  <div class="gap-sm md:col-span-4 flex flex-col">
+<div id={id} class="gap-lg flex flex-col">
+  <div class="gap-md flex flex-col">
     <p class="text-eyebrow">{eyebrow}</p>
     {/* `text-h4` and a <p>, not a heading: the design sets this at 24px but it
-        is a sentence about the two cards beside it, not a title over them. The
-        cards carry the headings. */}
-    <p class="text-h4 text-primary">{body}</p>
+        is a sentence about the two cards under it, not a title over them. The
+        cards carry the headings. 600px is the measure it is drawn in. */}
+    <p class="text-h4 text-primary max-w-[37.5rem]">{body}</p>
   </div>
 
-  {/* `md:col-span-8 md:col-start-5` is the design's own split: the heading
-      column is 432px and the pair beside it is 888, which at a 1344 container
-      with a 24px gutter is exactly four columns and eight. Each card then comes
-      out at (888 - 24) / 2 = 432px, as drawn.
-
-      TWO-UP ONLY FROM xl, AND THE ARITHMETIC IS WHY. A card spends 212px on
-      furniture before any text — a 128px thumb, a 36px arrow and two 24px gaps
-      — so a pair of them needs 424px of chrome plus two readable columns. At
-      1024 that leaves 96px per paragraph; at 1280 it leaves 180. Below xl the
-      pair stacks and each card gets the full width, which is the same content
-      at a width it can be read at. */}
-  <ul class="list-bare gap-lg md:col-span-8 md:col-start-5 grid xl:grid-cols-2">
+  <ul class="list-bare gap-lg grid md:grid-cols-2">
     {
       categories.map((category) => (
-        /* `min-w-[0px]` on the row and on the text column, because a flex item
-           and a grid item both default to `min-width: auto` — they refuse to
-           shrink below their content, and the row ran up to 183px past its own
-           box at every width the sweep tests. Not `min-w-0`: this repo resets
-           Tailwind's numeric spacing scale, so that class generates no rule.
+        <li class="cross-link bg-base rounded-card gap-lg pr-lg relative flex min-h-[8rem] overflow-hidden">
+          {/* `gap-lg`/`pr-lg` ARE 24px AND THE DESIGN DRAWS 20 (Figma 1275:3342).
+              Snapped to the scale rather than written as an arbitrary 1.25rem:
+              there is no 20px step, rhythm on this site comes off the token scale,
+              and a one-off 20 here would be the first off-scale gap in the repo.
+              The same ruling the section's 80 → 96 padding got, for the same
+              reason. Everything else on this card is the drawn number — 128px
+              floor, 6px radius, 240px square, 20/16/15px type, 8px title gap. */}
+          {/* 240px wide and the card's full height, flush to the left edge —
+              the card's own radius and `overflow-hidden` round it, so the
+              picture needs no corner of its own. `h-full` on the Media rather
+              than a ratio: the height comes from the text column beside it.
 
-           STACKED BELOW sm. At 320 the container is ~272 and the furniture
-           alone is 212, which leaves 60px for a paragraph. The thumb goes above
-           the text instead and the text gets the full width. */
-        <li class="cross-link gap-lg relative flex min-w-[0px] flex-col sm:flex-row">
-          {/* 128px square, fixed: the thumb is a constant in the design and the
-              text column is what absorbs a longer line.
-
-              THE WIDTH IS ON A WRAPPER, NOT ON `Media`. Media puts `w-full` on
-              its own <img> and the `class` prop lands beside it, so a `w-[8rem]`
-              passed through is two width utilities in one layer and `w-full`
-              wins on source order — measured: the thumb came out 432px, the
-              text column 0, and the arrow 48px outside the card. A caller
-              cannot size this element from outside; it can only size the box
-              around it. */}
-          <div class="w-[8rem] flex-none self-start">
+              `cardThumb` FIRST, `cardImage` ONLY AS A FALLBACK. The square is a
+              separate photograph for this box; the card shot is a 5:6 portrait
+              whose middle band is what a 1:1 crop of it would show. The fallback
+              is here so a category that has not been given a square still draws
+              a real picture rather than a hole. */}
+          <div class="w-[15rem] flex-none self-stretch">
             <Media
-              image={category.cardImage}
+              image={category.cardThumb ?? category.cardImage}
               label={`${category.pageTitle} — thumbnail`}
               ratio="1 / 1"
-              sizes="128px"
-              class="rounded-card"
+              sizes="240px"
+              class="h-full"
             />
           </div>
 
-          <div class="gap-xs flex min-w-[0px] flex-1 flex-col">
-            <h3 class="text-h5 text-primary">{category.pageTitle}</h3>
-            <p class="text-body text-secondary">{category.crossBody}</p>
+          <div class="py-lg gap-md flex min-w-[0px] flex-1 flex-col justify-between">
+            <div class="gap-xs flex flex-col">
+              <h3 class="text-h5 text-primary">{category.pageTitle}</h3>
+              <p class="text-body text-secondary">{category.crossBody}</p>
+            </div>
+            {/* `self-start` SHRINK-WRAPS THE LINK. As a stretched flex item it
+                was the full width of the text column with `justify-center`
+                inside it, so the box was flush left and the LABEL sat in the
+                middle of the card — out of line with the title and copy above
+                it. Sizing the box to its content puts the label on the same
+                left edge as everything else. It does not shrink the hit area:
+                that is the `::after`, which is measured against the card. */}
+            <Button
+              href={category.href}
+              variant="ghost"
+              size="link"
+              icon="arrow"
+              class="cross-link-target self-start"
+            >
+              {exploreLabel(category)}
+            </Button>
           </div>
-
-          {/* Bottom-aligned, as drawn. `self-end` rather than a margin, so the
-              row's own height decides where the bottom is. */}
-          <a
-            href={category.href}
-            class="cross-link-target border-line h-control-sm w-control-sm flex flex-none items-center justify-center self-end rounded-full border"
-            aria-label={`Browse ${category.pageTitle}`}
-          >
-            <svg class="size-icon-inline" viewBox="0 0 16 16" fill="none" aria-hidden="true">
-              <path d="M2 8h12M9.5 3.5 14 8l-4.5 4.5" stroke="currentColor" stroke-width="1.25" />
-            </svg>
-          </a>
         </li>
       ))
     }

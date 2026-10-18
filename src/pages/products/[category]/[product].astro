@@ -260,9 +260,11 @@ const sectionGround = (section: ProductSection, index: number): string =>
     ))
   }
 
-  {/* No top padding: the design's `cta desktop` instance is 696 tall around a
-      600 plate at y=0, so the whole 96 sits below it. */}
-  <Section space="md" spaceTop="none" class="bg-base">
+  {/* `space="md"` BOTH SIDES — one global step, 96px, on instruction. The
+      design's `cta desktop` instance has no top padding and 64-96 below, which
+      is what this carried; the ruling is that the closing band sits in the
+      page's normal section rhythm like every other band. */}
+  <Section space="md" class="bg-base">
     <CtaPlate {...cta} />
   </Section>
 </BaseLayout>

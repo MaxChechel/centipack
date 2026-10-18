@@ -458,6 +458,18 @@ const categories = defineCollection({
         rangeImage: picture(image).optional(),
         /** The photograph behind a CategoryCard. */
         cardImage: picture(image).optional(),
+        /**
+         * THE 240px SQUARE on a cross-link card, and a different crop from
+         * `cardImage` rather than the same file at another size.
+         *
+         * `cardImage` is a 5:6 portrait shot to sit behind a whole home-page
+         * card with text over it. The cross-link card draws a 1:1 thumb flush
+         * to its left edge (Figma 1275:3343), and squaring the portrait takes a
+         * band out of the middle of the product — the same argument `images.hero`
+         * makes against reusing `images.main`. Optional, and the adapter falls
+         * back to `cardImage`, so a category without a square still renders.
+         */
+        cardThumb: picture(image).optional(),
       })
       .strict(),
 });

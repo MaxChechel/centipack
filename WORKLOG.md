@@ -6903,3 +6903,157 @@ verify: 9 checks, 1119 assertions, 0 failures.
     `#f9f7f5` on home and product, `#f2eee8` on index and category. A sticky
     bar must be opaque, so this needs the header to take its ground from the
     page rather than from one token.
+
+## 2026-10-18 — Entry 79. The cross-link card is redrawn, and a check that had been passing on skipped work
+
+### The closing band joins the page's rhythm
+
+On instruction: the CTA section takes `space="md"` on BOTH sides — 96px, the
+same global step every other band gets — on the home page, the category
+template and the product template.
+
+The design's `cta desktop` instance draws no top padding and 64–96 below, which
+is what the three pages carried. The ruling is that the closing band is not a
+special case: it sits in the page's normal section rhythm. Recorded as a
+deviation from the frame rather than absorbed, because the frame does say
+otherwise.
+
+### CrossLinks, rebuilt to Figma 1005:14054
+
+The old block was three full-width cards with a picture behind each. The v1
+design is a heading block across the top — eyebrow plus a 24px standfirst at a
+600px measure — over two half-width cards, each a 240px square flush to its own
+left edge with the copy beside it and a text link at the bottom.
+
+Measured against the frame after building it, rather than trusting the markup:
+
+```
+                     figma      built
+  section ground     #f2eee8    #f2eee8      ok
+  card ground        #f9f7f5    #f9f7f5      ok
+  card radius        6px        6px          ok
+  card min-height    128px      128px        ok
+  thumb              240x240    240x240      ok
+  standfirst         24 / 1.2 / 600px measure  same   ok
+  eyebrow            11px       11px         ok
+  title              20 / 1.1   20 / 22      ok
+  title - body gap   8px        8px          ok
+  body               16 / 1.3   16 / 20.8    ok
+  link               15px       15px         ok
+  link colour        #0e2a46    #0e2a46      ok
+  heading gap        16px       16px         ok
+  card gap           24px       24px         ok
+  card gap (inner)   20px       24px         DEVIATION
+  card padding-right 20px       24px         DEVIATION
+  body colour        #6b6967    #4d4b4a      DEVIATION (open question 93)
+  section padding    80px       96px         DEVIATION
+```
+
+The two 20px values are snapped to 24 because there is no 20px step on the
+spacing scale, and a one-off `1.25rem` here would be the first off-scale gap in
+the repo. Same ruling the 80 → 96 section padding got. Both recorded in the
+component rather than left to be discovered.
+
+The body colour is the text ramp refusal standing: the design's
+`text/secondary` is `#6b6967`, which is our `--text-tertiary`, and adopting the
+ramp wholesale puts body copy at 2.98:1. Open question 93, unchanged.
+
+Link labels are derived — `Explore ${pageTitle.toLowerCase()}` — rather than
+stored, because the design writes exactly that for all three and a stored
+string would be three copies of a rule.
+
+### Three square photographs, because a square crop of a portrait is a band
+
+`cardImage` is a 5:6 portrait shot to sit BEHIND a home-page card with text
+over it. The cross-link thumb is 1:1, and cropping the portrait to it shows a
+strip across the middle of the product. So `cardThumb` is a second slot in the
+category schema, not the same file at another size — the same argument
+`images.hero` already makes against reusing `images.main`.
+
+Supplied as 960px PNGs, converted to 720px AVIF at q58:
+
+```
+  category-cold-chain-sm.avif         17.6 KB
+  category-custom-boxes-sm.avif       19.5 KB
+  category-pharmacy-formats-sm.avif   14.0 KB
+```
+
+720 because the thumb is a FIXED 240px at every width it is drawn at, so the
+ladder is a density ladder for one number — 240 / 480 / 720 — not a viewport
+sweep. `CATEGORY_CARD_WIDTHS` would have shipped a 1970px file into a 240px
+box. The adapter falls back to `cardImage` so a category without a square still
+draws a real picture.
+
+The `cross 2-up 656px` row in the `CATEGORY_CARD_WIDTHS` docblock now describes
+a layout this repo no longer ships. Marked as history in place rather than
+deleted: the 656 figure is why that ladder reaches 1970, and the home card
+still uses all of it.
+
+### The link label was centred in a box that was flush left
+
+On report. The link's BOX was correctly at the card's left edge and the full
+width of the text column; `justify-content: center` inside it put the visible
+label in the middle of the card, out of line with the title and copy above.
+`self-start` sizes the box to its content. The hit area is unaffected — that is
+the `::after`, measured against the card, and `pointer targets` confirms it.
+
+### A check that had been passing on work it skipped
+
+`pointer.mjs` went from 13 assertions to 11 when the cross-links were rebuilt.
+Chasing that number found the check was wrong in two ways.
+
+It scrolled each container into view and then probed EVERY matching container
+on the page, so the home page's three cards were counted three times each and
+the total was an artifact of the nested loop rather than a count of targets.
+And anything not wholly inside the viewport after the scroll was `continue`d
+past in silence.
+
+The styleguide's two category cards are 799px tall. They were never pressed, on
+any run since the check shipped, and the line read green every time. That is
+precisely the unfalsifiable green line §9 forbids — the check was reporting on
+the containers that happened to fit.
+
+Rewritten so each declared target is probed ONCE, by index. Nothing is skipped:
+a container taller than the viewport is pressed across the band of it that is
+on screen, and one that cannot be brought on screen at all, or that has lost
+its link, FAILS and is named.
+
+Finding it also required fixing the instrumentation. The site sets
+`scroll-behavior: smooth`, which `scrollIntoView` obeys, so the probe was
+measuring wherever the scroll animation had got to after 260ms. Short hops
+finished and long ones did not — which is exactly how a card 9,000px down came
+to be skipped every single run. `behavior: 'instant'` makes the position
+deterministic instead of a race against an easing curve.
+
+```
+  before   11 checks   home 3 cards counted 3x each, styleguide 2 counted 0x
+  after     7 checks   every stretched target on the site, exactly once
+```
+
+Fewer assertions, more coverage. The count is now a number that means
+something: there are seven stretched targets and seven are pressed.
+
+§9 fault injection, both paths:
+
+- **Primary.** Re-injected the original regression — `relative` on every button
+  instead of only on those with a hover mark. All 7 targets went dead, 9 of 9
+  points each on the cards, 7 of 9 on the cross-links, named per page and per
+  index, non-zero exit. Reverted.
+- **Unreachable.** Fired for real before the scroll fix, naming both styleguide
+  cards with their measured position and the viewport height.
+
+### A comment in a place the compiler accepted and the type system did not
+
+`{/* … */}` placed inside a component's ATTRIBUTE LIST builds clean — the Astro
+compiler strips it and the HTML is correct — and breaks the TypeScript parse of
+the whole file, which took the `exploreLabel` unused-variable hint down with it
+and reported as an unterminated string literal two lines later. `astro check`
+caught it; the build did not. Noted because the build passing is the thing that
+makes this one tempting to trust.
+
+verify: 9 checks, 1113 assertions, 0 failures.
+
+### Open questions
+
+Unchanged: 85 (custom boxes carousel), 93 (the design's text ramp fails AA at
+tertiary), 94 (`border/strong`), 95 (the nav's ground).

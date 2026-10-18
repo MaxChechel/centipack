@@ -254,6 +254,7 @@ export interface CategoryView {
   href: string;
   rangeImage?: Picture;
   cardImage?: Picture;
+  cardThumb?: Picture;
 }
 
 /**
@@ -307,8 +308,28 @@ const CARD_WIDTHS = [260, 440, 520, 880, 1320] as const;
  * against the single 880px file every one of them was served. The source
  * photographs are 2200px wide, so the resolution was there and the pipeline was
  * throwing it away.
+ *
+ * THE `cross 2-up` ROW IS HISTORY, NOT A CURRENT MEASUREMENT. The v1 cross-link
+ * card (Figma 1005:14054) draws a fixed 240px square thumb beside its text
+ * instead of a full-width picture behind it, so that row describes a layout
+ * this repo no longer ships. It is kept because the 656px figure is what
+ * stretched this ladder to 1970 and the home card still uses the whole of it.
+ * The square has its own ladder below.
  */
 const CATEGORY_CARD_WIDTHS = [360, 440, 660, 880, 1320, 1970] as const;
+
+/**
+ * The 240px SQUARE on a cross-link card.
+ *
+ * A fixed size, not a fluid one: the thumb is 240px at every width the card is
+ * drawn at and shrinks only when the card stacks on a phone. So this ladder is
+ * the density ladder for one number — 240 at 1x, 480 at 2x, 720 at 3x — rather
+ * than a viewport sweep, and it stops at 720 because that is the source. Handing
+ * this picture `CATEGORY_CARD_WIDTHS` would ship a 1970px file to fill a 240px
+ * box, which is the waste that ladder was written to end.
+ */
+const CARD_THUMB_WIDTHS = [240, 480, 720] as const;
+const CARD_THUMB_WIDTH = 480;
 
 /**
  * And for the full-bleed page pictures — the category range shot and the page
@@ -593,6 +614,7 @@ async function toCategory(entry: CollectionEntry<'categories'>): Promise<Categor
     href: categoryHref(entry.data.slug),
     rangeImage: await toPicture(entry.data.rangeImage, WIDE_WIDTH, WIDE_WIDTHS),
     cardImage: await toPicture(entry.data.cardImage, CARD_WIDTH, CATEGORY_CARD_WIDTHS),
+    cardThumb: await toPicture(entry.data.cardThumb, CARD_THUMB_WIDTH, CARD_THUMB_WIDTHS),
   };
 }
 

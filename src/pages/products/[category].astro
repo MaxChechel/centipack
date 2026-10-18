@@ -128,7 +128,8 @@ const itemList = {
       category and uses it on both pages that link to it — verified across all
       six cards in Figma — so the override map is gone and `crossBody` is simply
       the category's own line. */}
-  <Section space="lg" class="bg-subtle">
+  {/* `space="md"` — the design pads this band 80px; 96 is the nearest step. */}
+  <Section space="md" class="bg-subtle">
     <CrossLinks
       eyebrow="The rest of the build"
       body="Pharmacy formats, custom boxes, and cold chain packaging — available individually or as a complete solution."
@@ -137,9 +138,11 @@ const itemList = {
   </Section>
 
   {/* 5 — The closing band. */}
-  {/* No top padding: the design's `cta desktop` instance is 696 tall around a
-      600 plate at y=0, so the whole 96 sits below it. */}
-  <Section space="md" spaceTop="none">
+  {/* `space="md"` BOTH SIDES — one global step, 96px, on instruction. The
+      design's `cta desktop` instance has no top padding and 64-96 below, which
+      is what this carried; the ruling is that the closing band sits in the
+      page's normal section rhythm like every other band. */}
+  <Section space="md">
     <CtaPlate {...cta} />
   </Section>
 </BaseLayout>

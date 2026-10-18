@@ -26,6 +26,10 @@ cardImage:
   src: ../../assets/categories/category-pharmacy-formats.avif
   alt: >-
     Navy CentiPack jars, a tall dispenser and a pump bottle grouped together, with one jar open to show its threaded neck and the inserts inside it.
+cardThumb:
+  src: ../../assets/categories/category-pharmacy-formats-sm.avif
+  alt: >-
+    Five navy CentiPack containers grouped together — two screw-top jars, a tall dispenser, a pump bottle, and a wide jar standing open on its threaded neck.
 guideLinkLabel: >-
   Browse pharmacy formats
 ---

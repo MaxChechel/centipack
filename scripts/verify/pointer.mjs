@@ -28,6 +28,26 @@
 // It asserts the hit area at REST, which is the state that matters: the card
 // shows only its title until hovered, and a target that only exists once you
 // are already on it is not a target.
+//
+// A SKIP IS A FAILURE, AND THE FIRST VERSION OF THIS CHECK DID NOT KNOW THAT.
+//
+// It scrolled each container into view and then probed EVERY matching container
+// on the page, so a card was counted once per sibling and the total was an
+// artifact of the nested loop rather than a count of targets. Worse, anything
+// not wholly inside the viewport after the scroll was `continue`d past in
+// silence. The styleguide's two cards are 799px tall and sit where the page
+// cannot centre them; they were never pressed, on any run, and the line still
+// read green. That is the unfalsifiable green line §9 exists to forbid — the
+// check was reporting on the containers that happened to fit, not on the
+// contract.
+//
+// Now each declared target is probed ONCE, by index, and `checks` is the number
+// of stretched targets on the site. Nothing is skipped: a container taller than
+// the viewport is pressed across the band of it that is on screen, and a
+// container that cannot be brought on screen at all, or that has lost its link,
+// FAILS and is named. The count went 11 to 7 making this change and the
+// coverage went up — 11 counted the home page's three cards three times each
+// and the styleguide's two not at all.
 
 import { connect, PAGES, BASE } from './lib/cdp.mjs';
 import { result, line, passed } from './lib/report.mjs';
@@ -50,33 +70,52 @@ const POINTS = [
   [0.15, 0.88], [0.5, 0.88], [0.85, 0.88],
 ];
 
-const PROBE = (selector, linkSelector, points) => `JSON.stringify(function(){
-  var out = [];
-  var nodes = document.querySelectorAll(${JSON.stringify(selector)});
-  var pts = ${JSON.stringify(points)};
-  for (var i = 0; i < nodes.length; i++) {
-    var n = nodes[i];
-    if (!n.querySelector(${JSON.stringify(linkSelector)})) continue;
-    var r = n.getBoundingClientRect();
-    if (r.width < 4 || r.height < 4) continue;
-    /* Only sample what is actually on screen — elementFromPoint is
-       viewport-relative and returns null outside it, which would be a failure
-       about scrolling rather than about the hit area. */
-    if (r.top < 0 || r.bottom > window.innerHeight) continue;
-    var miss = [];
-    for (var p = 0; p < pts.length; p++) {
-      var el = document.elementFromPoint(r.x + r.width * pts[p][0], r.y + r.height * pts[p][1]);
-      var link = el && el.closest ? el.closest('a[href]') : null;
-      if (!link) miss.push(pts[p][0] + ',' + pts[p][1] + ' -> ' + (el ? el.tagName.toLowerCase() : 'null'));
-    }
-    out.push({ label: (n.textContent || '').trim().slice(0, 28), misses: miss });
+/**
+ * Press ONE container — the `index`th match — and report what happened.
+ *
+ * Returns a `state` rather than throwing, so the caller can tell a dead hit
+ * area ("pressed", with misses) apart from a target it could not reach at all
+ * ("offscreen") and from a structural break ("no-link"). All three are
+ * failures; they are different failures and deserve different messages.
+ */
+const PROBE = (selector, linkSelector, index, points) => `JSON.stringify(function(){
+  var n = document.querySelectorAll(${JSON.stringify(selector)})[${index}];
+  if (!n) return { state: 'gone' };
+  var label = (n.textContent || '').trim().replace(/\\s+/g, ' ').slice(0, 28);
+  if (!n.querySelector(${JSON.stringify(linkSelector)})) return { state: 'no-link', label: label };
+
+  var r = n.getBoundingClientRect();
+  if (r.width < 4 || r.height < 4) {
+    return { state: 'degenerate', label: label, w: Math.round(r.width), h: Math.round(r.height) };
   }
-  return out; }())`;
+
+  /* Sample the part that is ON SCREEN. elementFromPoint is viewport-relative
+     and answers null outside it, so clamping to the visible band presses a
+     container taller than the viewport instead of skipping it. */
+  var top = Math.max(r.top, 0), bottom = Math.min(r.bottom, window.innerHeight);
+  var left = Math.max(r.left, 0), right = Math.min(r.right, window.innerWidth);
+  if (bottom - top < 4 || right - left < 4) {
+    return { state: 'offscreen', label: label,
+             top: Math.round(r.top), bottom: Math.round(r.bottom), vh: window.innerHeight };
+  }
+
+  var pts = ${JSON.stringify(points)};
+  var miss = [];
+  for (var p = 0; p < pts.length; p++) {
+    var el = document.elementFromPoint(left + (right - left) * pts[p][0],
+                                       top + (bottom - top) * pts[p][1]);
+    var link = el && el.closest ? el.closest('a[href]') : null;
+    if (!link) miss.push(pts[p][0] + ',' + pts[p][1] + ' -> ' + (el ? el.tagName.toLowerCase() : 'null'));
+  }
+  return { state: 'pressed', label: label, misses: miss,
+           clipped: top > r.top + 1 || bottom < r.bottom - 1 };
+}())`;
 
 export async function pointer() {
   const notes = [];
   let checks = 0;
   let failures = 0;
+  let clipped = 0;
   const page = await connect(9226, 'cp-verify-pointer');
 
   try {
@@ -90,29 +129,64 @@ export async function pointer() {
       await page.sleep(1400);
 
       for (const [container, link] of STRETCHED) {
-        /* Scroll each one into view before testing: a target below the fold is
-           skipped by the probe, and a skipped target is not an asserted one. */
-        const count = await page.eval(
-          `document.querySelectorAll(${JSON.stringify(container)}).length`,
+        const count = Number(
+          await page.eval(`document.querySelectorAll(${JSON.stringify(container)}).length`),
         );
         if (!count) continue;
-        for (let i = 0; i < count; i++) {
+
+        for (let i = 0; i < count; i += 1) {
+          /* Bring this one into view, then press THIS one. Probing every
+             sibling on each pass is what made the old total meaningless.
+
+             `behavior: 'instant'` IS LOAD-BEARING. The site sets
+             `scroll-behavior: smooth`, which scrollIntoView obeys, so the
+             scroll ANIMATES and the probe measures wherever the animation has
+             got to. Short hops finished inside the wait and long ones did not:
+             the styleguide's cards are 9,000px down and were still at their
+             document offset when sampled, which is exactly how they came to be
+             skipped every run. Instant scrolling makes the position
+             deterministic instead of a race against an easing curve. */
           await page.eval(
             `(() => { const n = document.querySelectorAll(${JSON.stringify(container)})[${i}];
-               if (n) n.scrollIntoView({ block: 'center' }); return 1; })()`,
+               if (n) n.scrollIntoView({ block: 'center', behavior: 'instant' }); return 1; })()`,
           );
           await page.sleep(260);
-          const found = JSON.parse(await page.eval(PROBE(container, link, POINTS)));
-          for (const card of found) {
-            checks += 1;
-            if (card.misses.length) {
-              failures += 1;
-              notes.push(
-                `STRETCHED TARGET DEAD — ${path} ${container} "${card.label}": ` +
-                  `${card.misses.length} of ${POINTS.length} sampled points do not resolve to a link. ` +
-                  `First: ${card.misses[0]}. The container claims to be one press and is not.`,
-              );
-            }
+          const card = JSON.parse(await page.eval(PROBE(container, link, i, POINTS)));
+
+          checks += 1;
+          const where = `${path} ${container}[${i}]`;
+
+          if (card.state === 'pressed' && card.misses.length === 0) {
+            if (card.clipped) clipped += 1;
+            continue;
+          }
+
+          failures += 1;
+          if (card.state === 'pressed') {
+            notes.push(
+              `STRETCHED TARGET DEAD — ${where} "${card.label}": ` +
+                `${card.misses.length} of ${POINTS.length} sampled points do not resolve to a link. ` +
+                `First: ${card.misses[0]}. The container claims to be one press and is not.`,
+            );
+          } else if (card.state === 'no-link') {
+            notes.push(
+              `STRETCHED TARGET HAS NO LINK — ${where} "${card.label}": ` +
+                `no \`${link}\` inside. The container claims a stretched hit area ` +
+                `and there is nothing for it to stretch.`,
+            );
+          } else if (card.state === 'offscreen') {
+            notes.push(
+              `STRETCHED TARGET UNREACHABLE — ${where} "${card.label}": ` +
+                `after scrollIntoView it sits at ${card.top}..${card.bottom} in a ${card.vh}px ` +
+                `viewport, so no part of it can be pressed. Unasserted is not passing.`,
+            );
+          } else if (card.state === 'degenerate') {
+            notes.push(
+              `STRETCHED TARGET COLLAPSED — ${where} "${card.label}": ` +
+                `measures ${card.w}x${card.h}. A target that small is not a target.`,
+            );
+          } else {
+            notes.push(`STRETCHED TARGET GONE — ${where}: no node at that index on the second look.`);
           }
         }
       }
@@ -121,7 +195,8 @@ export async function pointer() {
     if (failures === 0) {
       notes.push(
         `${checks} stretched target(s) across ${PAGES.length} page(s), ` +
-          `${POINTS.length} points each — every point lands on a link`,
+          `${POINTS.length} points each — every point lands on a link` +
+          (clipped ? ` (${clipped} taller than the viewport, pressed across the visible band)` : ''),
       );
     }
   } finally {

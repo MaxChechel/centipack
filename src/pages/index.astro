@@ -276,12 +276,11 @@ const heroPicture = await toPageImage({
       on `#f2eee8`; it has since moved back to only the card band being
       `bg/secondary`. Re-sampled off the frame with Figma's canvas excluded,
       which is the only way to read these reliably — see entry 69. */}
-  {/* NO TOP PADDING. The design's closing band is the plate and the ground
-      under it — the `cta desktop` instance is 664 tall around a 600 plate at
-      y=0, so all 64 of the difference is below. This carried `spaceTop="lg"`,
-      which added 120px the design does not draw. 48 below rather than 64 is
-      the nearest step; see the hero picture for the same trade. */}
-  <Section space="none" spaceBottom="sm">
+  {/* `space="md"` BOTH SIDES — one global step, 96px, on instruction. The
+      design's `cta desktop` instance has no top padding and 64-96 below, which
+      is what this carried; the ruling is that the closing band sits in the
+      page's normal section rhythm like every other band. */}
+  <Section space="md">
     <CtaPlate {...cta} />
   </Section>
 </BaseLayout>

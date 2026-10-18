@@ -31,6 +31,10 @@ cardImage:
   src: ../../assets/categories/category-custom-boxes.avif
   alt: >-
     An open blue mailer box holding two navy containers, a blue drawer box slid open on two glass vials, and a white mailer box packed with a branded blue box and blue tissue.
+cardThumb:
+  src: ../../assets/categories/category-custom-boxes-sm.avif
+  alt: >-
+    An open blue mailer box holding two navy jars, a blue slide-out drawer box showing two glass vials, and a white mailer box packed with blue tissue and a small branded blue box.
 guideLinkLabel: >-
   Browse custom boxes
 ---

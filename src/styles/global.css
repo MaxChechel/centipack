@@ -3413,9 +3413,19 @@
     pointer-events: none;
   }
 
+  /* The whole card is one target, so pointing anywhere at it should answer —
+     and the thing that answers is the link's own hover, which `.btn-link`
+     already owns (the label steps along the hue and the arrow travels 4px).
+     This used to fill the round arrow button that the 2026-10-18 redesign
+     replaced with a text link; a background on a text link would have been a
+     highlight rather than a response. */
   @media (hover: hover) {
     .cross-link:hover .cross-link-target {
-      background-color: var(--bg-subtle);
+      color: var(--outline-action-hover);
+    }
+
+    .cross-link:hover .cross-link-target svg {
+      transform: translateX(0.25rem);
     }
   }
 }

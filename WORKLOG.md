@@ -7418,3 +7418,31 @@ verify: 9 checks, 1133 assertions, 0 failures.
     is what shipped. A wider mobile crop is a design decision, not a fix.
 
 96 stands. 97 closed in entry 81.
+
+## 2026-10-18 — Entry 83. The home hero again, and the ladder's top rung comes back
+
+Replaced on supply, second time today. The supplied file is 4224x2376, encoded
+at 3840 — the ceiling of `WIDE_WIDTHS` — because nothing above that rung is
+ever served and storing pixels no build will emit is weight in the repo for
+nothing.
+
+```
+  this morning   4096 x 2304   170.7 KB   srcset ended 3840w
+  midday         3072 x 1728   106.0 KB   srcset ended 3072w   top rung lost
+  now            3840 x 2160   218.3 KB   srcset ends 3840w    restored
+```
+
+ENTRY 81 RECORDED THE LOST RUNG AS SOMETHING A WIDER FILE WOULD FIX, and this
+is that file. The emitted ladder is back to 640 / 960 / 1280 / 1920 / 2560 /
+3840, so a 4K display at 1x gets a true 3840 again rather than a 3072 stretched
+into it. The cost is 112 KB on a picture that is `fetchpriority="high"` and
+above the fold — paid knowingly: the rungs below are unchanged, so every device
+that is not a 4K desktop downloads exactly what it did before.
+
+The alt was re-read against the new photograph rather than carried over, which
+is the rule entry 46 set. It survives unchanged this time — same line-up, same
+arrangement, same products in the same places — so the string stands as
+written. Recorded because "I checked and it still holds" and "I did not check"
+produce identical diffs, and only one of them is the rule being followed.
+
+verify: 9 checks, 1133 assertions, 0 failures.

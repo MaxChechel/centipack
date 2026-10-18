@@ -10,14 +10,22 @@ import type { ProductCarouselSlide } from '../../lib/catalogue';
  * THE SCROLLING IS THE PLATFORM'S, exactly as the product rail's is (§6). The
  * track is `overflow-x: auto` with `scroll-snap-align: center`, so momentum,
  * rubber-banding, trackpad, touch, `scroll-behavior` and the keyboard arrows
- * all arrive free and correct. The script's ONLY job is to say which slide is
- * currently centred, because that is the one thing the browser does not expose
- * and the one thing the design keys its sizing to.
+ * all arrive free and correct. The script adds the three things the platform
+ * has no concept of — the loop, a MOUSE drag, and which slide is centred —
+ * and reimplements none of the rest. See src/scripts/carousel.ts.
+ *
+ * IT LOOPS, so there is always a card bleeding in at both edges, which is what
+ * the design draws and what a plain scroller cannot do. The clones are made at
+ * runtime rather than rendered here: eight slides are what this page has to
+ * say, and twenty-four in the HTML would be a seam in the markup as well as in
+ * the scroll. They are `aria-hidden`, so a screen reader hears each option
+ * once.
  *
  * SLIDE ONE IS MARKED ACTIVE IN THE HTML, so the rest state is right before any
  * script runs and stays right if none ever does: the first card at full size,
- * the rest a step smaller, which is exactly what the design draws. The script
- * moves the class; it does not create the layout.
+ * the rest a step smaller, with no loop and no drag but nothing broken. The
+ * script re-centres on the second slide once it has cloned, which is what puts
+ * three cards in view. It moves the class; it does not create the layout.
  *
  * WHY THE NEIGHBOURS SCALE RATHER THAN RESIZE. Every slide is the same 800px
  * box and the smaller ones are `transform: scale(0.95)`, so nothing reflows

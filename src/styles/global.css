@@ -2806,6 +2806,28 @@
     display: none;
   }
 
+  /* IT DRAGS, SO IT SAYS SO. `grab` is the one affordance a mouse user gets
+     that touch does not need — without it a draggable row looks like a row
+     that does not move, because the scrollbar is hidden. */
+  .carousel-track {
+    cursor: grab;
+  }
+
+  .carousel-track.is-dragging {
+    cursor: grabbing;
+    /* A drag across text selects it otherwise, and the selection survives the
+       release — the row ends up highlighted blue for a gesture that was about
+       scrolling. */
+    user-select: none;
+  }
+
+  /* `scroll-behavior` is deliberately NOT set here. The script assigns
+     `scrollLeft` directly to jump the loop seam, and that assignment obeys
+     this property: smooth scrolling would animate the jump across a set width
+     and turn an invisible seam into a visible rewind. The one place a smooth
+     scroll IS wanted — settling after a drag — asks for it explicitly through
+     scrollTo. */
+
   .carousel-slide {
     flex: 0 0 var(--carousel-slide);
     scroll-snap-align: center;

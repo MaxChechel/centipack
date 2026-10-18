@@ -7211,3 +7211,87 @@ verify: 9 checks, 1131 assertions, 0 failures.
     empty. Looping means cloning slides and repositioning on scroll — real
     JavaScript against a 600 B budget — so it is a decision to take rather than
     something to slip in.
+
+## 2026-10-18 — Entry 81. The carousel loops and drags, and a new home hero
+
+### Open question 97, answered: loop it
+
+On instruction. The carousel now loops, drags, and opens with the SECOND slide
+centred so the first sits to its left and three cards are in view. Entry 80
+left this as a decision to take rather than something to slip in; it was taken.
+
+THE LOOP IS CLONES AND ARITHMETIC, not a rewrite. One clone set either side of
+the real slides, with the scroll position kept inside the middle copy: cross a
+boundary and it jumps exactly one set width, onto identical pixels, so the seam
+cannot be seen. The clones are built at runtime rather than rendered — eight
+slides are what the page has to say, and twenty-four in the markup would be a
+seam in the HTML as well as in the scroll. They carry `aria-hidden` and are
+untabbable, so a screen reader hears eight options rather than twenty-four.
+
+Verified the seam rather than assuming it, in both directions, and the
+important number is the last one:
+
+```
+  on load               scrollLeft 7416   centred "Closures"
+  six steps back        scrollLeft 9064   centred "Paperboard thickness"
+  fourteen steps on     scrollLeft 7416   centred "Closures"
+```
+
+Fourteen forward from four lands on two, and it lands on the SAME scrollLeft it
+started from. The wrap does not drift — which is the failure this arithmetic
+would otherwise have, accumulating a few pixels per crossing until the snap
+points no longer line up with the cards.
+
+`scroll-behavior` is deliberately left unset on the track. The seam jump is a
+direct `scrollLeft` assignment, and that assignment obeys the property: smooth
+scrolling would animate the jump across a whole set width and turn an invisible
+seam into a visible rewind. The one place a smooth scroll IS wanted — settling
+after a drag — asks for it explicitly through `scrollTo`.
+
+THE DRAG IS FOR THE MOUSE ONLY. Touch already drags, natively, with inertia no
+script is going to beat; taking it over would replace working physics with
+worse physics. A mouse does not drag, and on a wide screen that is how most
+people will try it, so pointer events move `scrollLeft` and hand straight back
+to the browser. Snapping is switched off for the duration — mandatory snap
+fights a drag it did not start — and back on at the end with one smooth scroll
+onto the nearest card. `cursor: grab` because the scrollbar is hidden and a
+draggable row with no affordance looks like a row that does not move.
+
+Resize re-centres on whatever was centred: every number here is read from
+layout, so a width change invalidates the seam arithmetic and the resting
+position together.
+
+§6: the budget moved 600 B to 1100 B, and the census entry carries the
+reasoning rather than a bump. The first version centred and nothing else, at
+337 B. Looping and dragging are the two things that cannot be done in CSS.
+Measured at 800 B gzipped.
+
+### The home hero photograph
+
+Replaced on supply. Same 16:9 framing as the one it replaces, so it drops into
+the existing 1344/656 crop with nothing lost.
+
+```
+  was   4096 x 2304   170.7 KB
+  now   3072 x 1728   106.0 KB
+```
+
+THE LADDER LOST ITS TOP RUNG, and that is worth saying rather than leaving to
+be noticed. `WIDE_WIDTHS` reaches 3840 and the new source is 3072 wide, so the
+build caps there instead of upscaling — the emitted srcset now ends 2560w,
+3072w where it ended 3840w. Still comfortably over 1440 at 2x, which is 2880;
+a 4K display at 1x gets 3072 rather than a true 3840. Nothing to fix in code,
+and supplying a wider file is what would restore it.
+
+The alt text was re-read against the new picture rather than carried over —
+the rule entry 46 set, and the reason it exists. The old string claimed "three
+stand-up pouches" and "two navy gel packs"; the new shot does not support that
+count, so the description now names what is actually there without asserting
+numbers it cannot back.
+
+verify: 9 checks, 1131 assertions, 0 failures.
+
+### Open questions
+
+97 is closed. 96 stands: the design's supporting column is 432 in two places
+and 546 in a third, and this repo uses 432 throughout.

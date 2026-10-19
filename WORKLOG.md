@@ -7470,3 +7470,96 @@ one string — which is the point of the rule. It does not ask for a new
 sentence, it asks that the sentence still be true.
 
 verify: 9 checks, 1133 assertions, 0 failures.
+
+## 2026-10-19 — Entry 85. Scroll reveals, wired at last, and the check that had to come with them
+
+### Phase 1 wiring, not a new system
+
+The reveal contract has been written since Phase 0 and dormant since: the CSS
+in global.css §8, the `reveal` prop on Section, §12.2 and §12.3 in the spec.
+What was missing was the three pieces Phase 1 was told to supply. They are
+supplied.
+
+1. **The scripting flag.** One blocking inline line in `<head>`, above every
+   stylesheet and every deferred module. 56 B gzipped.
+2. **The module.** `src/scripts/reveal.ts` — observes each group, sets one
+   attribute when it arrives, unobserves it. 276 B gzipped.
+3. **The opt-ins.** Twelve Sections across four templates.
+
+THE GROUP/CHILD QUESTION, which the original CSS left loose. It described
+itself as "[data-reveal] on the wrapper" with "children stagger via
+[data-reveal-index]" — and those two cannot both be true. One element has one
+transition-delay; a wrapper that animates itself cannot stagger anything inside
+it. So the wrapper is the TRIGGER and its direct children are the subjects:
+
+```css
+  html.js [data-reveal-group] > *                      { hidden }
+  html.js [data-reveal-group][data-reveal='in'] > *     { shown }
+```
+
+Every guarantee the original made is kept exactly — the same two properties
+(§12.3 allows no others), the same spring tokens, the same 60ms step, visible
+without JavaScript, visible under reduced motion.
+
+THE DIRECTION OF THE GUARD IS THE SAFETY PROPERTY, and it is worth stating in
+its own sentence. The hidden state is applied only under `html.js`. A page
+without scripting never hides anything in the first place, rather than hiding
+it and depending on something to put it back. The module cannot hide content;
+it can only reveal it. There is no code path in which failing to load loses a
+word.
+
+### Where reveals were turned on, and where they were not
+
+§12.2 says default off — "a page where everything animates in has no emphasis
+left to spend" — so this is twelve Sections, not every Section:
+
+```
+  home        cards band, testimonial, closing plate
+  category    the body (rows or rail), carousel, cross-links, closing plate
+  product     every content section, closing plate
+  products    the rail band, closing plate
+```
+
+NOT the heroes, on any template, and not the hero pictures. Two reasons and
+both matter: they are above the fold, so there is no scroll to reveal them
+with; and the hero picture is the LCP element on four page types, which is the
+last thing that should start at `opacity: 0`. The hero standing still is also
+what gives the bands below it something to contrast with.
+
+Not `about` or `contact` either. Each is a single section above the fold, and
+animating a contact form into existence is a cost with no benefit.
+
+### The check, and what it found about every other check
+
+A reveal works by hiding content and promising to put it back. Both halves are
+invisible in source and silent when broken, which is the pointer regression's
+shape exactly. So `reveal contract` presses all three states on every page that
+has a group: scripting off, reduced motion, and a real read-through with each
+group scrolled to in turn.
+
+THE RED PATH WAS RUN, and the result is the argument for the check existing.
+Removing the `html.js` guard makes every revealed element on eight pages paint
+invisible with scripting off — and **nine of ten checks pass**. astro check,
+the contrast matrix, dead classes, the JS census, build contracts, the
+seven-width sweep, keyboard, pointer targets and axe-core all report green on a
+site whose content has disappeared. axe has no opinion on an element at
+`opacity: 0`; the sweep sees no overflow; every link still resolves.
+
+The check's own first run failed on seven pages, correctly and for the wrong
+reason: it jumped to the last group and then asserted all of them, and a group
+the scroll skipped never intersects, which is how every reveal on the web
+behaves. Fixed by reading the page the way a person does — each group scrolled
+to in turn. That is the second time a new check here has caught its own probe
+before it caught the code, and both times the §9 rule about running the red
+path is what surfaced it.
+
+### Measured
+
+Per page: 56 B + 276 B = 332 B gzipped. The module inlines rather than hoisting
+into a shared chunk, which is Astro's call for something this small and the
+right one — a shared chunk would cost a round trip to save nothing. The census
+line reads 13.7 KB "total shipped" against 9.7 KB before, and that number is
+the SUM ACROSS PAGES, not what anyone downloads; no visitor fetches more than
+332 B of this.
+
+verify: 10 checks, 1183 assertions, 0 failures.

@@ -54,6 +54,18 @@ const EXPECTED = [
     maxGzip: 500,
   },
   {
+    id: 'scripting flag',
+    signature: /classList\.add\(.js.\)/,
+    why: 'ARCHITECTURE §12.2 — one line in <head>, above every stylesheet and every deferred module, so the reveal contract can hide content ONLY where scripting is on. The direction is the safety property: the hidden state is applied under `html.js` rather than applied always and undone later, so a page without JavaScript never hides anything in the first place. It is blocking and inline on purpose — set late, every revealed element paints visible and then snaps to hidden, which is a worse artefact than no animation at all. Inline is already sanctioned by the CSP for Astro\'s own inlined modules.',
+    maxGzip: 110,
+  },
+  {
+    id: 'scroll reveal',
+    signature: /data-reveal-group/,
+    why: 'ARCHITECTURE §12.2/§6 — the one attribute CSS cannot set for itself. Opacity, transform, the spring tokens, the 60ms stagger and every fallback are in global.css §8; this observes each group and sets `data-reveal="in"` when it reaches the viewport, then unobserves it, because an entrance is not a state. It CANNOT hide anything: the hidden state belongs to the stylesheet and is armed before this file is fetched, so a failure here leaves visible content that simply did not animate. Writing the reveal in JavaScript instead would animate on the main thread and STILL need the CSS for reduced motion.',
+    maxGzip: 420,
+  },
+  {
     id: 'carousel centre',
     signature: /data-carousel/,
     why: 'ARCHITECTURE §6 — "Everything you can customize" (Figma 1268:24141). The track is a native scroll-snap row and STAYS one: momentum, rubber-banding, trackpad, touch and the keyboard arrows are the platform\'s, and nothing here reimplements them. Three things the platform has no concept of are: THE LOOP — one clone set either side of the real slides, with the scroll position kept inside the middle copy, so crossing a boundary jumps exactly one set width onto identical pixels and the seam cannot be seen; clones are aria-hidden and untabbable so a screen reader hears eight options rather than twenty-four. THE MOUSE DRAG — touch already drags natively and is left alone, but a mouse does not, and on a wide screen that is how most people try; pointer events move scrollLeft and hand straight back to the browser rather than animating a transform and owning the physics. WHICH SLIDE IS CENTRED — one class; the scale, the origin and the transition are all CSS. THE BUDGET MOVED 600 to 1100, and this is the reasoning rather than a bump. The first version centred and nothing else and measured 337 B. Looping and dragging were asked for after it shipped, and they are the two things that cannot be done in CSS: the loop needs the clone pass and the seam arithmetic, the drag needs pointer capture and the snap handling around it, and both need the resize pass because every number is read from layout. The drag was then reported as clunky, and the fix cost the rest of the budget rather than a library: scale became a continuous function of scroll position instead of two states with a CSS transition chasing the pointer, and a release now projects the pointer velocity so a flick carries. Profiled before changing anything — the old handler cost 0.03 ms a frame against 16.7, so this was never a speed problem and an optimisation pass would have fixed nothing. Measured at 1,017 B gzipped against the 1100 B budget. Swiper stays rejected on the rail\'s own measurement — ~15 KB gzipped for its pagination build alone, against 2 KB for this whole site, and it would take the native scrolling with it.',

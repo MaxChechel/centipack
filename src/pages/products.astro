@@ -76,7 +76,7 @@ const cta = await closingBand();
   */}
   {
     catalogue.map(({ category, products }) => (
-      <Section space="md" spaceBottom="none">
+      <Section space="md" spaceBottom="none" reveal>
         <div class="gap-xl flex flex-col">
           <div class="gap-md md:gap-2xl md:flex-row md:items-end flex flex-col items-start">
             <div class="gap-2xs flex flex-1 flex-col">
@@ -101,7 +101,7 @@ const cta = await closingBand();
   {/* 5 — The closing band. The body is here too: the v8 copy deck writes it out
        for this page, and it outranks the rendered screen that entry 33 read it
        off (entry 35). */}
-  <Section space="md" spaceTop="lg">
+  <Section space="md" spaceTop="lg" reveal>
     <CtaPlate {...cta} />
   </Section>
 

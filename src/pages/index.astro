@@ -190,7 +190,7 @@ const heroPicture = await toPageImage({
   </Section>
 
   {/* 3 — Three layers. The band the design sets on the cream ground. */}
-  <Section space="lg" class="bg-subtle">
+  <Section space="lg" class="bg-subtle" reveal>
     <div class="gap-2xl flex flex-col">
       <SectionHeader heading="Three integrated layers available individually or as a complete solution. Built to perform." headingLevel="h2" size="h2" split>
         <Fragment slot="lede">
@@ -237,7 +237,7 @@ const heroPicture = await toPageImage({
     ended 97px above it, because the figure's padding was doing the whole job
     and there was nothing holding the band open. Measured before and after.
   */}
-  <Section space="none" class="border-line border-b">
+  <Section space="none" class="border-line border-b" reveal>
     {/* 96px of padding from md and a 600px floor, both the design's. The
         padding alone left the band 97px short of the plate; the floor is what
         makes the quote sit in the middle of its own band rather than at the
@@ -283,7 +283,7 @@ const heroPicture = await toPageImage({
       design's `cta desktop` instance has no top padding and 64-96 below, which
       is what this carried; the ruling is that the closing band sits in the
       page's normal section rhythm like every other band. */}
-  <Section space="md">
+  <Section space="md" reveal>
     <CtaPlate {...cta} />
   </Section>
 </BaseLayout>

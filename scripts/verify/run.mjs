@@ -22,6 +22,7 @@ import { sweep } from './sweep.mjs';
 import { axe } from './axe.mjs';
 import { keyboard } from './keyboard.mjs';
 import { pointer } from './pointer.mjs';
+import { reveal } from './reveal.mjs';
 
 const PORT = Number(process.env.PORT ?? 4321);
 /* The base URL and the wait-for-server loop moved into lib/preview.mjs, which
@@ -99,6 +100,8 @@ try {
   results.push(await keyboard());
   process.stdout.write(dim('  pointer targets…             \r'));
   results.push(await pointer());
+  process.stdout.write(dim('  reveal contract…             \r'));
+  results.push(await reveal());
   process.stdout.write(dim('  axe-core…                    \r'));
   results.push(await axe());
 } finally {

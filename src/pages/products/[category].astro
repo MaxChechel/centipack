@@ -124,7 +124,7 @@ const itemList = {
       need a second branch beside the first. See the schema's note. */}
   {
     category.sections.length > 0 ? (
-      <Section space="lg">
+      <Section space="lg" reveal>
         <div class="gap-4xl flex flex-col">
           {/* THE SAME HEADING THE RAIL BRANCH USES. The design puts
               "Thoughtfully packaged. Ready to deliver." over the rows exactly
@@ -150,7 +150,7 @@ const itemList = {
         </div>
       </Section>
     ) : (
-      <Section space="lg">
+      <Section space="lg" reveal>
         <div class="gap-2xl flex flex-col">
           <h2 class="text-h2 text-primary">{category.selectionHeading}</h2>
           <ProductRail products={products} columns={3} label={`${category.title} products`} />
@@ -177,7 +177,7 @@ const itemList = {
       .filter((section) => section.type === 'carousel')
       .map((section) =>
         section.type === 'carousel' ? (
-          <Section width="full" space="lg" class="bg-base">
+          <Section width="full" space="lg" class="bg-base" reveal>
             <Carousel heading={section.heading} lede={section.lede} slides={section.slides} />
           </Section>
         ) : null,
@@ -194,7 +194,7 @@ const itemList = {
       six cards in Figma — so the override map is gone and `crossBody` is simply
       the category's own line. */}
   {/* `space="md"` — the design pads this band 80px; 96 is the nearest step. */}
-  <Section space="md" class="bg-subtle">
+  <Section space="md" class="bg-subtle" reveal>
     <CrossLinks
       eyebrow="The rest of the build"
       body="Pharmacy formats, custom boxes, and cold chain packaging — available individually or as a complete solution."
@@ -207,7 +207,7 @@ const itemList = {
       design's `cta desktop` instance has no top padding and 64-96 below, which
       is what this carried; the ruling is that the closing band sits in the
       page's normal section rhythm like every other band. */}
-  <Section space="md">
+  <Section space="md" reveal>
     <CtaPlate {...cta} />
   </Section>
 </BaseLayout>

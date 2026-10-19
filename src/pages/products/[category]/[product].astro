@@ -203,7 +203,7 @@ const sectionGround = (section: ProductSection, index: number): string =>
 
   {
     product.sections.map((section, index) => (
-      <Section space="lg" class={sectionGround(section, index)}>
+      <Section space="lg" class={sectionGround(section, index)} reveal>
         {section.type === 'steps' && (
           <StepList heading={section.heading} steps={section.steps} image={section.image} />
         )}
@@ -278,7 +278,7 @@ const sectionGround = (section: ProductSection, index: number): string =>
       design's `cta desktop` instance has no top padding and 64-96 below, which
       is what this carried; the ruling is that the closing band sits in the
       page's normal section rhythm like every other band. */}
-  <Section space="md" class="bg-base">
+  <Section space="md" class="bg-base" reveal>
     <CtaPlate {...cta} />
   </Section>
 </BaseLayout>

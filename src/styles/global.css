@@ -1488,37 +1488,43 @@
    ========================================================================== */
 
 @layer components {
-  /* Scroll reveal. Opt-in per Section via its `reveal` prop, which sets
-     [data-reveal] on the wrapper; children stagger via [data-reveal-index].
-     Default off — a page where everything animates in has no emphasis left to
-     spend. The module that flips [data-reveal] to "in" is the only JavaScript
-     this behaviour costs; the motion itself is CSS. */
-  [data-reveal] {
+  /* Scroll reveal (§12.2). Opt-in per Section via its `reveal` prop, which
+     sets [data-reveal-group] on the inner container; its DIRECT CHILDREN are
+     what move, staggered by --reveal-index. Default off — a page where
+     everything animates in has no emphasis left to spend. The module that
+     flips the group to [data-reveal="in"] is the only JavaScript this costs;
+     the motion itself is CSS.
+
+     PHASE 1 RESOLVED THE GROUP/CHILD QUESTION, which this block was written
+     before and described loosely as "[data-reveal] on the wrapper". Animating
+     the wrapper cannot stagger anything — one element has one delay — so the
+     wrapper is the TRIGGER and its children are the subjects. Every guarantee
+     the original contract made is kept exactly: the same two properties, the
+     same spring tokens, the same 60ms step, visible without JavaScript, and
+     visible under reduced motion.
+
+     ONLY opacity AND transform, per §12.3. They are the two the compositor can
+     animate without layout or paint.
+
+     `html.js` GATES THE HIDING, and the direction matters. The hidden state is
+     applied only when scripting is on, so a page without JavaScript never
+     hides anything in the first place — rather than hiding it and relying on
+     something to put it back. The class is set by a blocking one-liner in
+     <head>, NOT by the deferred module: set late, every revealed element would
+     paint visible and then snap to hidden, which is a worse artefact than no
+     animation at all. */
+  html.js [data-reveal-group] > * {
     opacity: 0;
     transform: translateY(var(--spacing-md));
     transition:
       opacity var(--transition-duration-spring-snappy) var(--ease-spring-snappy),
       transform var(--transition-duration-spring-snappy) var(--ease-spring-snappy);
-    /* Stagger. --reveal-index is set per child; CSS cannot read an integer out
-       of an attribute portably, so the attribute carries the intent in markup
-       and the custom property carries the number. Wired in Phase 1. */
+    /* Stagger. CSS cannot read an integer out of an attribute portably, so the
+       module writes the number into a custom property per child. */
     transition-delay: calc(var(--reveal-index, 0) * 60ms);
   }
 
-  [data-reveal='in'] {
-    opacity: 1;
-    transform: none;
-  }
-
-  /* No JavaScript (or the module failed to load): content must be visible.
-     A reveal system that hides content when its script does not run is a
-     content-loss bug, not an animation.
-
-     The `.js` class is set by a blocking one-liner in <head> — NOT by the
-     deferred reveal module. If it were set late, every revealed element would
-     paint visible and then snap to hidden, which is a worse artefact than no
-     animation at all. BaseLayout ships that one-liner (Phase 1). */
-  html:not(.js) [data-reveal] {
+  html.js [data-reveal-group][data-reveal='in'] > * {
     opacity: 1;
     transform: none;
   }
@@ -1538,7 +1544,9 @@
     scroll-behavior: auto !important;
   }
 
-  [data-reveal] {
+  /* §12.3 — reveals render their content VISIBLE, with no animation, never
+     hidden. Matches the shipping selector, not the pre-wiring one. */
+  [data-reveal-group] > * {
     opacity: 1 !important;
     transform: none !important;
     filter: none !important;

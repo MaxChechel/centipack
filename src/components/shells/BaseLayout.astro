@@ -141,6 +141,23 @@ const structuredData = {
     <meta charset="utf-8" />
     <meta name="viewport" content="width=device-width, initial-scale=1" />
 
+    {/* SCRIPTING, DECLARED BEFORE ANYTHING PAINTS (§12.2).
+
+        The reveal contract hides content only under `html.js`, so this class is
+        what arms it. It is `is:inline` and it is HERE, above every stylesheet
+        and every deferred module, because the order is the whole point: set it
+        late and each revealed element paints visible and then snaps to hidden,
+        which is a worse artefact than no animation at all.
+
+        It is also the reason a page with scripting off, or with this blocked,
+        shows everything — the hidden state is never applied rather than being
+        applied and undone. A reveal system that hides content when its script
+        does not run is a content-loss bug, not an animation.
+
+        Inline is already sanctioned by the CSP for Astro's own inlined
+        modules (public/_headers), so this needs no change there. */}
+    <script is:inline>document.documentElement.classList.add('js');</script>
+
     <title>{title}</title>
     {description && <meta name="description" content={description} />}
     <link rel="canonical" href={canonical} />
@@ -200,3 +217,11 @@ const structuredData = {
     {!bare && <Footer />}
   </body>
 </html>
+
+<script>
+  /* Scroll reveal (§12.2). Sitewide because the hook is a Section prop and any
+     page can set it; the module does nothing at all on a page that has not.
+     The motion, the fallbacks and the reduced-motion rule are CSS — see
+     global.css §8 and the module's own note for why it only ever observes. */
+  import '../../scripts/reveal';
+</script>

@@ -7833,3 +7833,91 @@ verify: 10 checks, 1199 assertions, 0 failures.
 ### Open questions
 
 99 is closed. 96 and 98 stand.
+
+## 2026-10-19 — Entry 88. The failsafe was revealing the page on a timer
+
+### "The quote and the closing band trigger off screen"
+
+Reported twice, and two attempts at the trigger line did not fix it, because
+the trigger was not what fired them.
+
+THE FAILSAFE WAS REVEALING EVERY GROUP THREE SECONDS AFTER LOAD. Entry 85 added
+it to guarantee that content hidden by the stylesheet always comes back, and
+it did that by showing anything un-arrived on a timer. Three seconds is nothing
+on a page someone is actually reading, so on every page everything below the
+fold was revealed while still far off screen — not just the quote and the
+closing band, all of it. The scroll reveal was effectively disabled a few
+seconds after every page load, which is also why it looked inconsistent:
+whether a band animated depended on whether the reader reached it inside three
+seconds.
+
+It now fires only if the module never ARMED. That keeps the safety property
+exactly — a font API that never settles, a missing IntersectionObserver, a
+throw on the way, and the page is shown — while leaving groups alone once the
+observers exist and each one is somebody's responsibility.
+
+Measured under real wheel input driven through Lenis, which is the first time
+this was tested the way it is used rather than with programmatic scrolling:
+
+```
+  before   group0 179   group1 768   group2 792   group3 1576  <- off screen
+  after    group0 179   group1 791   group2 792   group3  789
+```
+
+### The trigger watches content, not the container
+
+A Section's container starts where its padding starts. On a band that is mostly
+air — the 600px quote, the closing plate — the words sit a couple of hundred
+pixels below that edge, so watching the container began the cascade with the
+text still below the fold. Moving the line up the viewport only trades one
+wrong answer for another, because the right offset depends on how tall each
+band is and how much of it is empty.
+
+The observer now watches the group's FIRST REVEALABLE ELEMENT and reveals the
+group it speaks for. Wherever content sits inside its band, the trigger is that
+content coming into view, and a short band and a tall one behave alike.
+
+### An element can be jumped past
+
+Found immediately afterwards, by the reveal check, once the failsafe stopped
+covering for it: three pages had groups that never arrived at all.
+
+An observer fires on a CHANGE of intersection, and a small anchor can go from
+below the viewport to above it in one jump — an anchor link, a restored scroll
+position, a programmatic scroll — without ever being inside it. The state goes
+false to false, no callback runs, and that group stays hidden for the session.
+Watching the container hid this, because a container tall enough is always
+intersecting at some point.
+
+`rootMargin: '9999px 0px -12% 0px'` extends the root far above the viewport, so
+anything at or above the trigger line counts as intersecting and a group that
+was jumped past reveals rather than being lost.
+
+### Lenis on its documented setup
+
+Switched to the explicit rAF loop from the README rather than `autoRaf` — the
+same work, and the shape every Lenis integration note is written against.
+
+THE README'S ScrollTrigger BRIDGE DOES NOT APPLY, and the reason is worth
+recording rather than just omitting the line. `lenis.on('scroll',
+ScrollTrigger.update)` exists because ScrollTrigger caches scroll positions of
+its own and needs telling when they moved. This site reveals with
+IntersectionObserver, and Lenis in its default window mode performs a REAL
+scroll rather than transforming a wrapper — so the observers fire off the
+genuine scroll position with nothing to keep in step. Verified rather than
+assumed: the wheel-driven measurements above were taken with Lenis active, and
+every group fired within a pixel of its trigger line.
+
+### The reveal check stopped racing the animation
+
+It kept losing: 600ms caught headings at 0.999971, 2200ms caught a pending
+media box at 0.89, and every increase in the stagger needed another increase
+here. Waiting longer was not available either, because past three seconds the
+module's own failsafe used to reveal everything, so a generous sleep would have
+passed a run in which nothing fired.
+
+Killing transitions before sampling collapses it to the question that matters:
+an element whose group arrived lands on 1 immediately, one whose group did not
+is still 0. No window, no race, and nothing can rescue a false pass.
+
+verify: 10 checks, 1199 assertions, 0 failures.

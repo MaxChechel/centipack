@@ -208,10 +208,29 @@ export async function reveal() {
         );
         await page.sleep(260);
       }
-      /* LONG ENOUGH FOR THE WHOLE CASCADE. 820ms of transition plus up to a
-         dozen 65ms steps; sampling at 600ms caught headings at 0.999971 and
-         reported them as content that never arrived. */
-      await page.sleep(2200);
+      /* ASK WHETHER IT ARRIVED, NOT WHETHER IT HAS FINISHED MOVING.
+         
+         Waiting out the cascade is a race this check kept losing — 600ms
+         caught headings at 0.999971, 2200ms caught a pending-media box at
+         0.89, and every time the stagger grows the number has to grow with
+         it. Waiting LONGER is also not available: past 3s the module's own
+         failsafe reveals everything, so a generous sleep would pass a run in
+         which the observer never fired at all.
+         
+         Killing transitions collapses the question to the one that matters.
+         An element whose group arrived lands on 1 immediately; one whose group
+         did not is still 0. No timing, no window, and the failsafe cannot
+         rescue a false pass. */
+      await page.sleep(900);
+      await page.eval(
+        `(() => {
+           const kill = document.createElement('style');
+           kill.textContent = '*,*::before,*::after{transition:none !important;animation:none !important}';
+           document.head.append(kill);
+           return 1;
+         })()`,
+      );
+      await page.sleep(100);
       const live = JSON.parse(await page.eval(PROBE));
 
       checks += 1;

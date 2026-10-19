@@ -147,6 +147,9 @@ function unsplit(el: HTMLElement): void {
   el.classList.remove(SPLIT_CLASS);
 }
 
+/** Set once the observers are attached. The failsafe below reads it. */
+let armed = false;
+
 const groups = Array.from(document.querySelectorAll<HTMLElement>('[data-reveal-group]'));
 
 if (groups.length) {
@@ -250,28 +253,54 @@ if (groups.length) {
     });
   }
 
-  /* Everything else: on arrival.
-   
-     THE TRIGGER LINE SITS 70% DOWN THE VIEWPORT, not at its bottom edge. With
-     the line at the edge, a tall band — a 600px quote, a closing plate —
-     started its cascade the instant its top crossed into view, which is while
-     its content is still below the fold. By the time the reader reached the
-     words they had already finished arriving, so the reveal read as firing
-     early and for nothing. Pulling the line up means a section begins when it
-     is genuinely being looked at.
-   
-     `threshold: 0` fires on the first pixel past that line, because a section
-     taller than the viewport must not wait to be some percentage visible —
-     on a short screen it never would be. */
+  /**
+   * Everything else: on arrival.
+   *
+   * WHAT IS WATCHED IS THE FIRST PIECE OF CONTENT, NOT THE CONTAINER, and that
+   * is the fix for a complaint that two attempts at tuning did not solve.
+   *
+   * A Section's container starts where its padding starts. On a band that is
+   * mostly air — the 600px quote, the closing plate — the words sit a couple
+   * of hundred pixels below that edge, dead centre. Watching the container
+   * meant the cascade began when the band's TOP crossed the line, with the
+   * text still below the fold; by the time a reader reached the words they had
+   * finished arriving. Moving the line up the viewport only trades one wrong
+   * answer for another, because the right offset depends on how tall each band
+   * happens to be and how much of it is empty.
+   *
+   * Watching the first revealable element removes the guess. Wherever the
+   * content sits inside its band, the trigger is that content coming into
+   * view, and a short section and a tall one behave the same way.
+   *
+   * `threshold: 0` fires on the first pixel past the line, because an element
+   * taller than the viewport must not wait to be some percentage visible — on
+   * a short screen it never would be.
+   */
+  /** What was watched -> the group it speaks for. */
+  const speaksFor = new WeakMap<Element, HTMLElement>();
+
   const watcher = new IntersectionObserver(
     (entries) => {
       for (const entry of entries) {
         if (!entry.isIntersecting) continue;
-        arrive(entry.target as HTMLElement);
+        const group = speaksFor.get(entry.target);
+        if (group) arrive(group);
         watcher.unobserve(entry.target);
       }
     },
-    { rootMargin: '0px 0px -30% 0px', threshold: 0 },
+    /* The bottom margin is short, because the thing being watched is already
+       the content: it only has to be a little way in before it starts.
+       
+       THE TOP MARGIN IS ENORMOUS ON PURPOSE. An observer fires on a CHANGE of
+       intersection, and an element can go from below the viewport to above it
+       in a single jump — an anchor link, a restored scroll position, a
+       programmatic scroll — without ever being inside it. The state goes false
+       to false, no callback runs, and that group stays hidden for the rest of
+       the session. Extending the root far above the viewport means anything at
+       or above the trigger line counts as intersecting, so a group that was
+       jumped past reveals rather than being lost. Found by the reveal check
+       once its own failsafe stopped covering it up. */
+    { rootMargin: '9999px 0px -12% 0px', threshold: 0 },
   );
 
   /* OBSERVE AFTER MEASURING, for the same reason. An observer attached before
@@ -279,8 +308,15 @@ if (groups.length) {
      fallback face; the split then moves everything, and the recorded trigger
      points refer to positions that no longer exist. */
   measured.then(() => {
+    armed = true;
     for (const group of groups) {
-      if (group.getAttribute('data-reveal-on') !== 'load') watcher.observe(group);
+      if (group.getAttribute('data-reveal-on') === 'load') continue;
+      /* The first revealable element is where the cascade starts, so it is
+         what decides when. Falls back to the container for a group that has
+         no items — which renders nothing either way. */
+      const anchor = itemsOf(group)[0] ?? group;
+      speaksFor.set(anchor, group);
+      watcher.observe(anchor);
     }
   });
 
@@ -314,13 +350,24 @@ if (groups.length) {
   });
 }
 
-/* THE FAILSAFE, and it is not decoration. Everything above can fail in ways
-   this file cannot see — a font API that never settles, an observer that never
-   fires, a browser that does not support one. The stylesheet has already
-   hidden the content by the time any of that matters, so something has to be
-   willing to give up. Three seconds after load, any group that has not arrived
-   is shown. A reveal that never finishes is a page with holes in it. */
+/* THE FAILSAFE, AND IT ONLY FIRES IF THIS MODULE NEVER ARMED.
+ *
+ * It used to reveal every un-arrived group three seconds after load, full
+ * stop, which quietly destroyed the feature it was protecting: three seconds
+ * is nothing on a page anyone is actually reading, so everything below the
+ * fold was revealed on a timer while still far off screen. Reported as the
+ * closing band and the quote "triggering out of screen" — and they were,
+ * along with everything else on the page. Two attempts at moving the trigger
+ * line could not fix it, because the trigger was not what fired them.
+ *
+ * What it is for is the case where the setup never completed: a font API that
+ * never settles, an environment without IntersectionObserver, a throw on the
+ * way. The stylesheet has hidden the content by then, so something must be
+ * willing to give up — but only when there is something to give up on. Once
+ * the observers are attached, each group is somebody's responsibility and the
+ * timer has no business overruling them. */
 setTimeout(() => {
+  if (armed) return;
   for (const group of document.querySelectorAll('[data-reveal-group]:not([data-reveal])')) {
     group.setAttribute('data-reveal', 'in');
   }

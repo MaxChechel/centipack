@@ -30,16 +30,32 @@
 import Lenis from 'lenis';
 
 if (!matchMedia('(prefers-reduced-motion: reduce)').matches) {
-  const lenis = new Lenis({
-    /* LENIS'S OWN DEFAULTS, and the absence of `duration` is the setting.
-       Passing a duration switches Lenis out of its default lerp mode and into
-       a fixed-length tween: every wheel tick then takes the same time to play
-       out regardless of how far it is going, which is what made it feel slow
-       and heavy. The default lerp follows the wheel instead of scheduling
-       against it. `syncTouch` is already false by default and is left that
-       way — touch keeps the platform's own physics. */
-    autoRaf: true,
-  });
+  /* THE SETUP FROM LENIS'S OWN README, defaults and all. The absence of a
+     `duration` is the setting: passing one switches Lenis out of its default
+     lerp mode into a fixed-length tween, so every wheel tick takes the same
+     time regardless of distance, which is what felt slow and heavy.
+     `syncTouch` is already false by default and stays that way — touch keeps
+     the platform's own physics. */
+  const lenis = new Lenis();
+
+  /* The documented rAF loop, written out rather than delegated to `autoRaf`.
+     Same work, and it is the shape every Lenis integration note is written
+     against, so the next person comparing this against the docs sees what
+     they expect.
+
+     THE README'S OTHER HALF IS THE GSAP ScrollTrigger BRIDGE —
+     `lenis.on('scroll', ScrollTrigger.update)` — and it does not apply here:
+     there is no GSAP on this site, and ScrollTrigger needs that line only
+     because it caches scroll positions of its own. What this site reveals
+     with is IntersectionObserver, and Lenis in its default window mode
+     performs a REAL scroll rather than transforming a wrapper, so the
+     observers fire off the genuine scroll position with nothing to keep in
+     step. Verified rather than assumed — see the WORKLOG. */
+  const frame = (time: number): void => {
+    lenis.raf(time);
+    requestAnimationFrame(frame);
+  };
+  requestAnimationFrame(frame);
 
   /* Anchors — the skip link above all. Lenis owns the scroll position, so a
      native hash jump would move the document underneath it and leave the two

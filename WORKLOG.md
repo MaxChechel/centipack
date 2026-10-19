@@ -8035,3 +8035,26 @@ stretched hit area, and `scale` creates a containing block, which is the exact
 shape of the regression that check exists for. 9 of 9 points on all 9 targets.
 
 verify: 10 checks, 1199 assertions, 0 failures.
+
+## 2026-10-19 — Entry 91. The spec sheet's standfirst reads under its heading
+
+On instruction. The sizes table's header put its paragraph in columns 8-12,
+opposite the heading; it now sits beneath it.
+
+IT WAS COMPETING WITH THE BLOCK UNDER IT. The table and its picture are the
+two-column part of this section, so a header split across the same grid gave
+the section two separate reading lines starting at the same height — the eye
+had to pick one. Stacked, the header reads as one thing and the split belongs
+to the data.
+
+THE HEADING KEEPS ITS COLUMN rather than running the full width. Both lines sit
+in `md:col-span-7`: a 48px heading measured across 1344px is a line nobody
+wants to read, and the grid is where the rest of this site states that measure.
+
+Three pages carry a `specs` section — puncture-pack, eps-foam-coolers and
+insulated-metallic-mailers. One component, so one change; puncture-pack is the
+one on the sweep list, which is why the other two are not re-swept (see the
+PAGES note in scripts/verify/lib/cdp.mjs — every section type they declare is
+already instantiated there).
+
+verify: 10 checks, 1199 assertions, 0 failures.

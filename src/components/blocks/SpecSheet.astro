@@ -36,7 +36,7 @@ import type { ProductSpecRow, SlotImage } from '../../lib/catalogue';
  */
 interface Props {
   heading: string;
-  /** The paragraph beside the heading. */
+  /** The paragraph UNDER the heading. */
   intro?: string;
   /** The qualifying sentence under the table. */
   note?: string;
@@ -55,8 +55,18 @@ const hasContent = rows.length > 0;
 
 {hasContent && (
 <div id={id} class="gap-2xl flex flex-col">
-  <div class="gap-md md:gap-lg md:grid md:grid-cols-12 md:items-start flex flex-col">
-    <div class="md:col-span-7">
+  {/* STACKED, NOT SPLIT. The standfirst used to sit in columns 8-12 opposite
+      the heading. On instruction it reads under it, which is also the shape
+      the rest of this block already has — the table and its picture are the
+      two-column part of this section, and a header split across the same grid
+      was competing with them for the same reading line.
+
+      THE HEADING KEEPS ITS COLUMN. Both now sit in `md:col-span-7` rather than
+      running the full width: a 48px heading measured across 1344px is a line
+      nobody wants to read, and the grid is what the rest of the site states
+      that measure in. */}
+  <div class="md:grid md:grid-cols-12">
+    <div class="gap-md flex flex-col md:col-span-7">
       {
         headingLevel === 'h3' ? (
           <h3 class="text-h2 text-primary">{heading}</h3>
@@ -64,8 +74,8 @@ const hasContent = rows.length > 0;
           <h2 class="text-h2 text-primary">{heading}</h2>
         )
       }
+      {intro && <p class="text-body text-secondary">{intro}</p>}
     </div>
-    {intro && <p class="text-body text-secondary md:col-span-5 md:col-start-8">{intro}</p>}
   </div>
 
   <div class="gap-xl md:gap-lg md:grid md:grid-cols-12 md:items-start flex flex-col">

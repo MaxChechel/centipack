@@ -8007,3 +8007,31 @@ verify: 10 checks, 1199 assertions, 0 failures.
      rather than per node, and that does not exist in the library today.
 
 96 and 98 stand.
+
+## 2026-10-19 — Entry 90. The cross-link picture settles too
+
+On instruction: the "other categories" cards get the image hover the product
+and category cards already have.
+
+One gesture, three cards, one rule — the picture rests at `scale: 1.02` and
+settles back to 1 under the pointer, which is the reverse of a lift and was
+ruled on when the category card got it. `scale` on the image only, never on the
+card: the card's box must not move or the pair of them jitters against each
+other, and the card's own `overflow: hidden` crops the resting 2%.
+
+`:focus-within` carries the same state, because the whole card is one target
+and a keyboard user arrives at the link inside it rather than at the card.
+
+Verified under a real pointer rather than by reading the selector:
+
+```
+  at rest          scale 1.02
+  pointer on card  scale 1
+  pointer away     scale 1.02
+```
+
+`pointer targets` re-run deliberately: the picture sits underneath the
+stretched hit area, and `scale` creates a containing block, which is the exact
+shape of the regression that check exists for. 9 of 9 points on all 9 targets.
+
+verify: 10 checks, 1199 assertions, 0 failures.

@@ -3662,8 +3662,25 @@ html.lenis body {
     inset: 0;
   }
 
+  /* THE PICTURE SETTLES, exactly as it does on the category and product cards
+     — 1.02 at rest, back to 1 under the pointer. The same gesture reads the
+     same way on every card that holds a photograph, which is the whole reason
+     it is a rule rather than three implementations.
+
+     `scale` on the image only, never on the card: the card's own box must not
+     move or the pair of them jitters against each other, and the card's
+     `overflow: hidden` is what crops the resting 2%.
+
+     `:focus-within` as well, because the whole card is one target and a
+     keyboard user arrives at the link inside it rather than at the card. */
   .cross-link .media-slot {
     pointer-events: none;
+    scale: 1.02;
+    transition: scale var(--transition-duration-spring-soft) var(--ease-spring-soft);
+  }
+
+  .cross-link:focus-within .media-slot {
+    scale: 1;
   }
 
   /* The whole card is one target, so pointing anywhere at it should answer —
@@ -3679,6 +3696,10 @@ html.lenis body {
 
     .cross-link:hover .cross-link-target svg {
       transform: translateX(0.25rem);
+    }
+
+    .cross-link:hover .media-slot {
+      scale: 1;
     }
   }
 }

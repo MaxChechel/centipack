@@ -8648,3 +8648,47 @@ verify: 10 checks, 1218 assertions, 0 failures.
      of the unbranded shot would restore them.
 
 96, 98, 100, 101, 102 and 103 stand.
+
+## 2026-10-19 — Entry 101. The metallic mailers hero
+
+The file that did not arrive with Entry 100 — it was sent but never landed on
+disk, so that entry shipped without it.
+
+```
+  metallic-mailers-hero.avif   2816x1584   94,079 B   (was 2560x1440, 74,632 B)
+```
+
+AVIF q55 by the same method: convert across a range, read the decode at full
+size. The silver bag is the hard part here — specular highlights on creased
+foil are where a codec gives up first — and it holds. 20.6 KB/Mpx against the
+19.8 of the file it replaces, so the density is unchanged and the extra bytes
+are extra pixels.
+
+THE LADDER GOT LONGER, which is the opposite of what happened to the cold chain
+hero in Entry 100 and worth recording beside it. The master went 2560 to 2816,
+so `WIDE_WIDTHS` now fills a rung it previously capped:
+
+```
+  before   640  960  1280  1920  2400  2560(cap)
+  after    640  960  1280  1920  2400  2560  2816
+```
+
+No change to the plate's shape: `heroRatio` is derived from the image's own
+dimensions, and both files are 16:9.
+
+### The alt said something that is no longer true
+
+It read "one navy, one white and one silver, each carrying the CentiPack
+arrow". In this frame only the navy mailer carries it; the white and the silver
+are unmarked. Flagged before the file arrived and corrected with it, rather
+than left to be found by someone who cannot see the picture.
+
+The same shoot's card image (Entry 100) keeps its alt — "navy with a white
+arrow mark, white with a navy one, and plain silver foil" — because that one
+genuinely does show an arrow on the white bag. Two pictures of the same three
+products, two different truths, which is the argument for checking alt text
+against the file every time a photograph moves.
+
+verify: 10 checks, 1218 assertions, 0 failures.
+
+104 and 105 stand — both concern the COLD CHAIN hero and are untouched by this.

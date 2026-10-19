@@ -484,6 +484,18 @@ const categories = defineCollection({
         crossBody: z.string(),
 
         /**
+         * The standfirst on this category's card in the NAV dropdown.
+         *
+         * A FOURTH LENGTH OF THE SAME SENTENCE, and the design writes all four
+         * separately: `cardBody` for the home page's three-up, `crossBody` for
+         * the cross-link cards, `summary` for the products index, and this for
+         * the menu. The nav's is the tightest of them — a reader with the menu
+         * open is deciding where to go, not reading about the category — and
+         * sharing any of the others put a clause too many in a 384px card.
+         */
+        navBody: z.string(),
+
+        /**
          * THE CATEGORY'S OWN PAGE BODY, where it has one.
          *
          * Cold chain and pharmacy formats list their products: a heading and a

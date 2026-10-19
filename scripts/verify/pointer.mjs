@@ -59,8 +59,30 @@ import { isMain } from './lib/main.mjs';
  * being true, this fails.
  */
 const STRETCHED = [
-  ['.category-card', '.category-card-link'],
-  ['.cross-link', '.cross-link-target'],
+  { container: '.category-card', link: '.category-card-link' },
+  { container: '.cross-link', link: '.cross-link-target' },
+  /**
+   * The nav panel's picture cards, which need the panel OPEN to be pressed.
+   *
+   * Without `open` this entry fails every run and deserves to: a closed panel
+   * is `visibility: hidden`, so `elementFromPoint` answers with whatever is
+   * behind it and all nine points miss. That is the honest result for a hidden
+   * target — which is why the panel is opened rather than the contract being
+   * written to tolerate it.
+   *
+   * SCOPED TO `.nav-panel`, because `.nav-card` is in the DOM twice: the
+   * desktop panel and the mobile sheet both render it, and at this check's
+   * 1440px the sheet is `display: none` — a zero-sized rect, which this check
+   * calls 'degenerate' and fails. The mobile copies therefore go unasserted
+   * here. Stated rather than hidden: the CSS is one rule shared by both, so
+   * pressing the desktop pair proves the mechanism, not the mobile layout.
+   */
+  {
+    container: '.nav-panel .nav-card',
+    link: '.nav-card-link',
+    open: `document.getElementById('nav-products').click()`,
+    close: `document.getElementById('nav-products').click()`,
+  },
 ];
 
 /** Nine points, so a partial hit area fails rather than passing on its centre. */
@@ -128,11 +150,20 @@ export async function pointer() {
       await page.send('Page.navigate', { url: BASE + path });
       await page.sleep(1400);
 
-      for (const [container, link] of STRETCHED) {
+      for (const { container, link, open, close } of STRETCHED) {
         const count = Number(
           await page.eval(`document.querySelectorAll(${JSON.stringify(container)}).length`),
         );
         if (!count) continue;
+
+        /* Some targets only exist in a state a person has to put the page
+           into. Open it, press it, and SHUT IT AGAIN — an open mega panel
+           covers the top of the viewport, so leaving it open would change the
+           answer for every contract probed after it on the same page. */
+        if (open) {
+          await page.eval(`(() => { ${open}; return 1; })()`);
+          await page.sleep(420);
+        }
 
         for (let i = 0; i < count; i += 1) {
           /* Bring this one into view, then press THIS one. Probing every
@@ -188,6 +219,11 @@ export async function pointer() {
           } else {
             notes.push(`STRETCHED TARGET GONE — ${where}: no node at that index on the second look.`);
           }
+        }
+
+        if (close) {
+          await page.eval(`(() => { ${close}; return 1; })()`);
+          await page.sleep(420);
         }
       }
     }

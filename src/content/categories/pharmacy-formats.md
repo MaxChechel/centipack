@@ -15,6 +15,8 @@ selectionHeading: >-
   Our pharmacy format range
 crossBody: >-
   Made-to-order vial kits, bottles, dispensers and jars
+navBody: >-
+  Made-to-order vial kits, bottles, dispensers and jars for compounded medications.
 navLinkLabel: >-
   Browse pharmacy formats
 rangeImage:

@@ -262,6 +262,8 @@ export interface CategoryView {
   cardLinkLabel: string;
   guideLinkLabel: string;
   navLinkLabel: string;
+  /** The standfirst on this category's nav dropdown card. */
+  navBody: string;
   selectionHeading: string;
   crossBody: string;
   href: string;
@@ -642,6 +644,7 @@ async function toCategory(entry: CollectionEntry<'categories'>): Promise<Categor
     cardLinkLabel: entry.data.cardLinkLabel,
     guideLinkLabel: entry.data.guideLinkLabel,
     navLinkLabel: entry.data.navLinkLabel,
+    navBody: entry.data.navBody,
     selectionHeading: entry.data.selectionHeading,
     crossBody: entry.data.crossBody,
     href: categoryHref(entry.data.slug),

@@ -99,6 +99,8 @@ sections:
         body: Your colors, logo, and printing
         image:
           label: branded box in client colors with printed logo
+navBody: >-
+  Individual product boxes, protocol kits and exterior shipping boxes, made to your specification.
 navLinkLabel: >-
   Browse custom boxes
 rangeImage:

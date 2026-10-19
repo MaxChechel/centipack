@@ -1,4 +1,4 @@
-import { getCatalogue, categoryHref } from '../lib/catalogue';
+import { getCatalogue, categoryHref, type Picture } from '../lib/catalogue';
 
 /**
  * Navigation — ONE source per list (§5).
@@ -30,8 +30,6 @@ export interface NavLink {
    */
   href?: string;
   label: string;
-  /** Shown under the label in a mega-menu panel, where there is room for it. */
-  description?: string;
 }
 
 /**
@@ -42,9 +40,16 @@ export interface NavLink {
 export interface NavColumn {
   title: string;
   href: string;
-  /** "Browse cold chain →" — the column's own route to its category page. */
+  /** "Browse cold chain packaging →" — the column's route to its category. */
   browseLabel?: string;
   links: readonly NavLink[];
+  /** The standfirst under the title, in the nav panel. Footer columns have none. */
+  description?: string;
+  /**
+   * The card's picture, shown INSTEAD OF the link list — see `getNavigation`
+   * for which columns get which and why it is not a per-category setting.
+   */
+  image?: Picture;
 }
 
 export interface NavGroup {
@@ -53,12 +58,6 @@ export interface NavGroup {
   /** Stable id — the trigger, the panel and `aria-controls` are wired by it. */
   id: string;
   columns: readonly NavColumn[];
-  /**
-   * The panel's fourth column is not a list. It is the "Not sure which build?"
-   * card the design ends the menu with — a question and a route to Contact,
-   * which is nav furniture rather than content, so it lives in Nav.
-   */
-  help?: { heading: string; body: string; linkLabel: string; href: string };
 }
 
 export type NavItem = NavLink | NavGroup;
@@ -76,18 +75,41 @@ export async function getNavigation(): Promise<readonly NavItem[]> {
     {
       label: 'Products',
       id: 'nav-products',
-      help: {
-        heading: 'Not sure which build?',
-        body: 'Tell us what you ship and where it goes — we come back with a recommended build and a price.',
-        linkLabel: 'Contact Us',
-        href: '/contact',
-      },
-      columns: catalogue.map(({ category, products }) => ({
-        title: category.title,
-        href: categoryHref(category.slug),
-        browseLabel: category.navLinkLabel,
-        links: products.map((product) => ({ href: product.href, label: product.title })),
-      })),
+      /**
+       * A COLUMN LISTS ITS PRODUCTS, OR SHOWS ITS PICTURE — and which one is
+       * DERIVED rather than set per category.
+       *
+       * The v1 menu (Figma 1464:10244) draws the cold chain card as five
+       * product links and the other two as a photograph. That looks like three
+       * separate design decisions and is one: the five cold chain products are
+       * the five that have pages. Custom boxes and pharmacy formats are names
+       * with no destination — `productPagesShip` gates `href` on a product
+       * having sections — and a menu column of five unclickable names is a
+       * list that answers nothing.
+       *
+       * So the test is `products.some(p => p.href)`, not the slug. Give the
+       * custom boxes products pages and that column grows its list on the same
+       * commit, with no edit here; take cold chain's pages away and it falls
+       * back to the picture. A slug check would have frozen today's catalogue
+       * into the navigation.
+       *
+       * THE "NOT SURE WHICH BUILD?" CARD IS GONE with the fourth column it
+       * lived in. The v1 panel is three cards across, and the question it asked
+       * is the closing band's job on every page.
+       */
+      columns: catalogue.map(({ category, products }) => {
+        const linked = products.some((product) => product.href);
+        return {
+          title: category.title,
+          href: categoryHref(category.slug),
+          browseLabel: category.navLinkLabel,
+          description: category.navBody,
+          links: linked
+            ? products.map((product) => ({ href: product.href, label: product.title }))
+            : [],
+          image: linked ? undefined : category.rangeImage,
+        };
+      }),
     },
     { href: '/about', label: 'About' },
   ];

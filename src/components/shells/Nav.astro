@@ -1,6 +1,7 @@
 ---
 import Logo from '../atoms/Logo.astro';
 import Button from '../atoms/Button.astro';
+import Media from '../blocks/Media.astro';
 import { getNavigation, isGroup } from '../../data/navigation';
 import { SITE } from '../../consts';
 import { canonicalPath } from '../../lib/urls';
@@ -112,25 +113,52 @@ const linkClass = 'link-underline text-body text-primary aria-[current=page]:tex
                 </button>
 
                 <div id={`${item.id}-panel`} class="nav-panel" aria-labelledby={item.id}>
-                  <div class="container-main py-xl gap-xl grid lg:grid-cols-4">
-                    {item.columns.map((column) => (
-                      <div class="gap-lg flex flex-col items-start">
-                        <div class="gap-md flex flex-col">
-                          <p class="text-eyebrow">{column.title}</p>
-                          {/* One fade group per column — the set the reader is
-                              scanning is the column, not the panel. */}
-                          {/* A NAME WITH NO PAGE IS A <span>, NOT A DEAD <a>.
-                              While product detail pages are outside the launch
-                              scope the panel still lists what CentiPack makes,
-                              and none of those thirteen names is a link. Not an
-                              `<a>` without an href either: that is still a link
-                              to a screen reader, announced and tab-reachable,
-                              that goes nowhere when pressed. `.link-underline`
-                              comes off with it — the hairline is the hover
-                              affordance, and there is nothing to hover. */}
-                          <ul class="fade-group list-bare gap-md flex flex-col">
+                  {/* THREE CARDS, NOT FOUR COLUMNS (Figma 1464:10244). The
+                      panel used to be four link columns and a help card; it is
+                      now one card per category, each a title, a standfirst,
+                      then either the category's products or its photograph,
+                      with its own route out at the foot. See `getNavigation`
+                      for why the list-or-picture choice is derived. */}
+                  <div class="container-main py-xl gap-lg grid lg:grid-cols-3">
+                    {item.columns.map((column) => {
+                      /* A CARD WITH NO LINKS OF ITS OWN BECOMES ONE TARGET.
+                         The rule is about NESTING, not about pictures: cold
+                         chain lists five product links, and a hit area over
+                         the whole of that card would sit on top of all five.
+                         The other two hold a heading, a sentence, a photograph
+                         and a single route out — nothing to swallow — so the
+                         card is the press. Same derivation as the picture
+                         itself (`getNavigation`), read the same way. */
+                      const wholeCard = column.links.length === 0;
+                      return (
+                      <div
+                        class:list={[
+                          'bg-subtle rounded-card p-lg gap-md flex flex-col',
+                          wholeCard && 'nav-card relative',
+                        ]}
+                      >
+                        <div class="gap-xs flex flex-col">
+                          {/* A REAL HEADING, not a styled label: a panel of
+                              links with no headings is a list a screen-reader
+                              user has to read end to end to navigate. */}
+                          <h2 class="text-h5 text-primary">{column.title}</h2>
+                          {column.description && (
+                            <p class="text-body text-secondary">{column.description}</p>
+                          )}
+                        </div>
+
+                        {/* `mt-auto` on the foot rather than `justify-between`
+                            on the card: the cards are grid siblings and share
+                            a row height, so the route out sits on one line
+                            across all three however long the standfirst runs. */}
+                        {column.links.length > 0 && (
+                          <ul class="fade-group list-bare gap-sm flex flex-col">
                             {column.links.map((link) => (
                               <li>
+                                {/* A NAME WITH NO PAGE IS A <span>, NOT A DEAD
+                                    <a> — still true, and now mostly moot: a
+                                    column of nameless products shows its
+                                    picture instead and never reaches here. */}
                                 {link.href ? (
                                   <a
                                     href={link.href}
@@ -145,48 +173,51 @@ const linkClass = 'link-underline text-body text-primary aria-[current=page]:tex
                               </li>
                             ))}
                           </ul>
-                        </div>
+                        )}
+
+                        {column.links.length === 0 && column.image && (
+                          /* THE CLIP IS THE WRAPPER'S JOB, not the image's.
+                             `.media-slot` IS the <img> — there is no box
+                             around it — so the picture's 2% resting scale has
+                             nothing to crop against and would simply render
+                             2% larger than its slot. The category and
+                             cross-link cards get this free because their
+                             photograph is flush to a card that already clips;
+                             this one is inset inside the padding with its own
+                             radius, so it brings its own. */
+                          <div class="rounded-card overflow-hidden">
+                            <Media
+                              image={column.image}
+                              label={`${column.title} — the range`}
+                              ratio="384 / 169"
+                              sizes="384px"
+                            />
+                          </div>
+                        )}
+
                         {column.browseLabel && (
-                          <Button href={column.href} variant="ghost" size="link" icon="arrow">
-                            {column.browseLabel}
-                          </Button>
+                          <div class="mt-auto">
+                            {/* STILL ONE LINK WITH ONE NAME. The route out
+                                that was already there grows a stretched
+                                ::after; a wrapping <a> would fold the
+                                heading, the sentence and this label into a
+                                single announced name, and would have to
+                                swallow this anchor to avoid nesting one.
+                                Same ruling as `.category-card-link`. */}
+                            <Button
+                              href={column.href}
+                              variant="ghost"
+                              size="link"
+                              icon="arrow"
+                              class={wholeCard ? 'nav-card-link' : undefined}
+                            >
+                              {column.browseLabel}
+                            </Button>
+                          </div>
                         )}
                       </div>
-                    ))}
-
-                    {/*
-                      The panel's fourth column is not a list — it is the question
-                      the menu ends on. Nav furniture rather than content, and it
-                      appears exactly once, so it is markup here rather than a
-                      fifth component (§4.2's counting rule cuts both ways).
-
-                      It wears the house card recipe: `bg-subtle`, `--radius-md`,
-                      interior padding, no border.
-                    */}
-                    {item.help && (
-                      <div class="nav-help-card bg-subtle rounded-card p-lg gap-lg relative isolate hidden flex-col justify-between lg:flex">
-                        <div class="gap-xs flex flex-col">
-                          <p class="text-h5 text-primary">{item.help.heading}</p>
-                          <p class="text-sm text-secondary">{item.help.body}</p>
-                        </div>
-                        <div class="gap-sm flex items-center justify-between">
-                          <a
-                            href={item.help.href}
-                            class="nav-help-link text-sm text-primary font-medium rounded-sm"
-                          >
-                            {item.help.linkLabel}
-                          </a>
-                          <span
-                            class="nav-help-go border-line h-control-md w-control-md flex flex-none items-center justify-center rounded-full border"
-                            aria-hidden="true"
-                          >
-                            <svg class="size-icon-inline" viewBox="0 0 16 16" fill="none">
-                              <path d="M4.5 11.5 11.5 4.5M6 4.5h5.5V10" stroke="currentColor" stroke-width="1.25" />
-                            </svg>
-                          </span>
-                        </div>
-                      </div>
-                    )}
+                      );
+                    })}
                   </div>
                 </div>
               </li>
@@ -224,98 +255,153 @@ const linkClass = 'link-underline text-body text-primary aria-[current=page]:tex
             <span class="nav-burger" aria-hidden="true"></span>
           </summary>
 
-          {/* Full-bleed band, container inside it: the panel's links land on
-               the same gutter line as the logo above them. */}
-          <div class="border-line bg-base absolute inset-x-0 top-full max-h-[80svh] overflow-y-auto border-y">
-            {/* THE DESIGN'S MOBILE MENU IS AN ACCORDION (Figma 788:7961).
-                Two panels exist in the file: 402x800 collapsed, 402x1292
-                expanded. Collapsed is a single row — the group's label with a
-                chevron on the right — and expanding it reveals the category
-                labels with their links indented under each.
+          {/* FULL-HEIGHT SHEET WITH THE ACTION PINNED (Figma 1464:9785).
+               The panel used to be a band that grew to its content and capped
+               at 80svh. The v1 menu is the whole screen below the bar, the
+               links scroll inside it, and "Get a quote" sits on a solid strip
+               at the foot — reachable with the thumb whether the Products fold
+               is open or shut, which is the point of pinning it.
 
-                What shipped before was the expanded state and only that: all
-                thirteen products, always, 677px of list on a 390px screen. The
-                spacing was tuned and the structure was still wrong, which is
-                why it read as unchanged.
+               Container inside the full-bleed band, as everywhere: the rows
+               land on the same gutter line as the logo above them. */}
+          <div
+            class="border-line bg-base absolute inset-x-0 top-full flex h-[calc(100svh-var(--nav-height))] flex-col border-t"
+          >
+            {/* THE DESIGN'S MOBILE MENU IS AN ACCORDION (Figma 1464:10063
+                closed, 1464:9785 open). Collapsed is one row — the group's
+                label with a plus on the right — and expanding it reveals the
+                three category CARDS, the same three the desktop panel draws,
+                without their photographs.
 
-                A NESTED <details>, so it still costs zero JavaScript. The outer
-                one is the burger; this is the second, and the browser owns both.
-                No aria-expanded to keep in sync, and it works before any script
-                runs — the same argument that put the burger in a <details> in
-                the first place. */}
-            <div class="container-main py-lg gap-lg flex flex-col">
-              {
-                navigation.map((item) =>
-                  isGroup(item) ? (
-                    <details class="nav-fold">
-                      <summary class="nav-fold-summary text-h6 text-primary gap-md flex cursor-pointer list-none items-center justify-between">
-                        {item.label}
-                        <span class="nav-caret" aria-hidden="true" />
-                      </summary>
+                A NESTED <details>, so it still costs zero JavaScript. The
+                outer one is the burger; this is the second, and the browser
+                owns both. No aria-expanded to keep in sync, and it works
+                before any script runs. */}
+            <div class="flex-1 overflow-y-auto">
+              <div class="container-main py-lg gap-lg flex flex-col">
+                {
+                  navigation.map((item) =>
+                    isGroup(item) ? (
+                      <details class="nav-fold">
+                        <summary class="nav-fold-summary text-h5 text-primary gap-md flex cursor-pointer list-none items-center justify-between">
+                          {item.label}
+                          <span class="nav-plus" aria-hidden="true" />
+                        </summary>
 
-                      <div class="pt-lg gap-xl flex flex-col">
-                        {item.columns.map((column) => (
-                          <div class="gap-md flex flex-col items-start">
-                            {/* THE CATEGORY'S OWN LINK, which this fold never had.
-                                The desktop panel has carried a "Browse cold chain →"
-                                button per column since it was built; the mobile
-                                fold rendered the title as a plain <p> and listed
-                                the products under it, so the category pages were
-                                reachable on a laptop and not on a phone.
-
-                                That was a gap from the start and the launch gate
-                                turned it into a dead end: with product detail
-                                pages out of scope every name in this list became
-                                a <span>, and the Products menu on a phone went to
-                                ZERO links — thirteen product names, three
-                                headings, and no way out of the menu.
-
-                                The title is the link, rather than a separate
-                                button underneath it as on desktop: this fold is a
-                                stack of rows on a small screen, and a heading that
-                                is not a link sitting above a button that is
-                                gives the same destination two rows. */}
-                            <a
-                              href={column.href}
-                              class="text-eyebrow link-underline rounded-sm py-xs -my-xs aria-[current=page]:text-accent"
-                              aria-current={isCurrent(column.href) ? 'page' : undefined}
+                        <div class="pt-lg gap-md flex flex-col">
+                          {item.columns.map((column) => {
+                            /* Same rule as the desktop panel above, and it
+                               matters more here: a thumb is a blunter
+                               instrument than a pointer. */
+                            const wholeCard = column.links.length === 0;
+                            return (
+                            <div
+                              class:list={[
+                                'bg-subtle rounded-card p-lg gap-md flex flex-col items-start',
+                                wholeCard && 'nav-card relative',
+                              ]}
                             >
-                              {column.title}
-                            </a>
-                            {/* Same rule as the desktop panel above: a product
-                                name with no page renders as text. */}
-                            <ul class="list-bare gap-md pl-xl flex flex-col">
-                              {column.links.map((link) => (
-                                <li>
-                                  {link.href ? (
-                                    <a
-                                      href={link.href}
-                                      class="link-underline text-body text-primary aria-[current=page]:text-accent"
-                                      aria-current={isCurrent(link.href) ? 'page' : undefined}
-                                    >
-                                      {link.label}
-                                    </a>
-                                  ) : (
-                                    <span class="text-body text-secondary">{link.label}</span>
-                                  )}
-                                </li>
-                              ))}
-                            </ul>
-                          </div>
-                        ))}
-                      </div>
-                    </details>
-                  ) : (
-                    <a
-                      href={item.href}
-                      class="link-underline text-h6 text-primary"
-                      aria-current={isCurrent(item.href) ? 'page' : undefined}
-                    >
-                      {item.label}
-                    </a>
-                  ),
-                )
-              }
+                              <div class="gap-xs flex flex-col">
+                                {/* THE TITLE IS A HEADING AGAIN, not a link.
+                                    It was the link because this fold had no
+                                    other route to the category page — the
+                                    desktop panel carried a "Browse cold chain
+                                    →" button per column and the mobile one did
+                                    not, so with product pages out of scope the
+                                    Products menu on a phone reached zero
+                                    destinations.
+
+                                    The v1 card ships that button on both, so
+                                    the heading goes back to being a heading
+                                    and the route out is the one control that
+                                    says where it goes. */}
+                                <h2 class="text-h5 text-primary">{column.title}</h2>
+                                {column.description && (
+                                  <p class="text-body text-secondary">{column.description}</p>
+                                )}
+                              </div>
+
+                              {/* NO PICTURE HERE, and that is the design's
+                                  call rather than a port that ran out of room:
+                                  the mobile cards for custom boxes and
+                                  pharmacy formats are a heading, a standfirst
+                                  and a link, where the desktop ones show the
+                                  range. A 330px-wide photograph between a
+                                  sentence and its link is a scroll cost on the
+                                  one screen that can least afford it. */}
+                              {/* THE LINKS AND THE ROUTE OUT ARE ONE GROUP, at
+                                  `gap-sm`, where the card's own gap is
+                                  `gap-md`. The design spaces every row of this
+                                  card 12px apart and the browse link is one of
+                                  those rows — it is the sixth item in a list of
+                                  places to go, not a footer under a list. A
+                                  card with no links gets the card gap instead,
+                                  which is the 16px the design draws between a
+                                  standfirst and a lone link. */}
+                              <div class="gap-sm flex flex-col items-start">
+                                {column.links.length > 0 && (
+                                  <ul class="list-bare gap-sm flex flex-col">
+                                    {column.links.map((link) => (
+                                      <li>
+                                        {/* Same rule as the desktop panel: a
+                                            product name with no page renders as
+                                            text, not as a dead <a>. */}
+                                        {link.href ? (
+                                          <a
+                                            href={link.href}
+                                            class="link-underline text-body text-primary rounded-sm aria-[current=page]:text-accent"
+                                            aria-current={isCurrent(link.href) ? 'page' : undefined}
+                                          >
+                                            {link.label}
+                                          </a>
+                                        ) : (
+                                          <span class="text-body text-secondary">{link.label}</span>
+                                        )}
+                                      </li>
+                                    ))}
+                                  </ul>
+                                )}
+
+                                {column.browseLabel && (
+                                  <Button
+                                    href={column.href}
+                                    variant="ghost"
+                                    size="link"
+                                    icon="arrow"
+                                    class={wholeCard ? 'nav-card-link' : undefined}
+                                  >
+                                    {column.browseLabel}
+                                  </Button>
+                                )}
+                              </div>
+                            </div>
+                            );
+                          })}
+                        </div>
+                      </details>
+                    ) : (
+                      <a
+                        href={item.href}
+                        class="link-underline text-h5 text-primary self-start aria-[current=page]:text-accent"
+                        aria-current={isCurrent(item.href) ? 'page' : undefined}
+                      >
+                        {item.label}
+                      </a>
+                    ),
+                  )
+                }
+              </div>
+            </div>
+
+            {/* The solid strip. `shrink-0` because it is the one thing in this
+                sheet that must not be scrolled away, and a border above it so
+                it reads as a bar rather than as the last row of the list. */}
+            <div class="border-line bg-base shrink-0 border-t">
+              <div class="container-main py-lg">
+                <Button href={SITE.contactHref} variant="primary" class="w-full">
+                  Get a quote
+                </Button>
+              </div>
             </div>
           </div>
         </details>

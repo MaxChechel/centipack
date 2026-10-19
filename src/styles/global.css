@@ -2299,8 +2299,98 @@ html.lenis body {
     display: none;
   }
 
-  .nav-fold[open] > .nav-fold-summary .nav-caret::before {
-    transform: translateY(25%) rotate(225deg);
+  /* THE WHOLE NAV CARD IS THE TARGET, where the card has no links of its own.
+     Cold chain's card is excluded in the markup, not here: it lists five
+     product links, and a hit area stretched over the whole of it would sit on
+     top of all five. See Nav.astro for the derivation.
+
+     It is still ONE target with ONE accessible name — the browse link that was
+     already the card's only route grows a stretched ::after rather than an <a>
+     being wrapped around everything. Third instance of this pattern on the
+     site, after `.category-card-link` and `.cross-link-target`, and it is
+     written out again rather than generalised: the three differ in which
+     ancestor they stretch against, which is exactly the thing that broke once
+     already (an unconditional `position: relative` on Button silently became
+     the containing block and killed the category card's hit area).
+
+     `scripts/verify/pointer.mjs` presses this at nine points with the panel
+     open. A stretched target nothing asserts is the bug, not the feature. */
+  .nav-card-link::after {
+    content: '';
+    position: absolute;
+    inset: 0;
+  }
+
+  /* THE PICTURE SETTLES, exactly as it does on the category, product and
+     cross-link cards — 1.02 at rest, back to 1 under the pointer. The same
+     gesture reads the same way on every card that holds a photograph, which is
+     the whole reason it is a rule rather than four implementations.
+
+     `scale` on the image only, never on the card: the card's own box must not
+     move or the three of them jitter against each other in the panel. The crop
+     comes from the wrapper Nav.astro puts around this one — see the note there
+     for why this card cannot borrow the card's own clip.
+
+     `pointer-events: none` in the same rule, as on `.cross-link`: without it
+     the image swallows the press the stretched link is there to receive, and a
+     drag on it starts the browser's native image drag instead of following the
+     card.
+
+     `:focus-within` as well, because the whole card is one target and a
+     keyboard user arrives at the link inside it rather than at the card. */
+  .nav-card .media-slot {
+    pointer-events: none;
+    scale: 1.02;
+    transition: scale var(--transition-duration-spring-soft) var(--ease-spring-soft);
+  }
+
+  @media (hover: hover) {
+    .nav-card:hover .media-slot {
+      scale: 1;
+    }
+  }
+
+  .nav-card:focus-within .media-slot {
+    scale: 1;
+  }
+
+  /* THE MOBILE FOLD'S MARK IS A PLUS, NOT A CHEVRON (Figma 1464:10063 closed,
+     1464:9785 open). A chevron says "there is more below this row"; a plus that
+     turns into a close says "this opens, and that closes it", which is what a
+     full-screen sheet with one expandable group actually does.
+
+     It is ONE rotation: two crossed bars rest as `+` and the wrapper turns 45°
+     to become `×`. No second icon, no path swap, and the transform animates
+     where a glyph change could not. The desktop trigger keeps `.nav-caret` —
+     it is a dropdown under a bar, which is the chevron's own case. */
+  .nav-plus {
+    position: relative;
+    display: block;
+    inline-size: 1.25rem;
+    block-size: 1.25rem;
+    transition: transform var(--transition-duration-spring-soft) var(--ease-spring-soft);
+  }
+
+  .nav-plus::before,
+  .nav-plus::after {
+    content: '';
+    position: absolute;
+    inset-block-start: 50%;
+    inset-inline-start: 50%;
+    inline-size: 1.25rem;
+    block-size: var(--border-width);
+    background-color: currentcolor;
+    /* The bars are centred by translating back half their own size, so the
+       rotation below turns about the mark's true centre. */
+    transform: translate(-50%, -50%);
+  }
+
+  .nav-plus::after {
+    transform: translate(-50%, -50%) rotate(90deg);
+  }
+
+  .nav-fold[open] > .nav-fold-summary .nav-plus {
+    transform: rotate(45deg);
   }
 
   /* Same rotated-footprint rule as .faq-chevron above; see the note there. */

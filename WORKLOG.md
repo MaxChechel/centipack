@@ -8332,3 +8332,232 @@ The eight carousel slides on this page stay as labelled placeholders, which is
 how they were asked for.
 
 verify: 10 checks, 1199 assertions, 0 failures.
+
+## 2026-10-19 — Entry 97. The nav menu becomes three cards
+
+Figma 1464:9784. The Products menu was four link columns and a "Not sure which
+build?" card on desktop, and on mobile a fold of three labelled sub-lists. v1
+replaces both with the same three objects: one card per category, each a
+heading, a standfirst, then its products or its photograph, and its own route
+out at the foot.
+
+### The list-or-picture choice is DERIVED, not set per category
+
+The design draws cold chain as five product links and the other two as a
+384x169 photograph. That reads as three separate decisions and is one: the five
+cold chain products are the five that have pages. Custom boxes and pharmacy
+formats are names with no destination — `productPagesShip` gates `href` on a
+product having sections — and a menu column of five unclickable names answers
+nothing, so the design shows the range instead.
+
+So the test in `getNavigation` is `products.some(p => p.href)`, not the slug:
+
+```ts
+const linked = products.some((product) => product.href);
+return {
+  …,
+  links: linked ? products.map(…) : [],
+  image: linked ? undefined : category.rangeImage,
+};
+```
+
+Give the custom boxes products pages and that card grows its list on the same
+commit with no edit in navigation.ts; take cold chain's away and it falls back
+to the picture. A slug check would have frozen today's catalogue into the
+navigation — which is the same failure as a hand-maintained link list, one
+level up.
+
+`navBody` is a new category field for the standfirst. It is not `summary` and
+not `cardBody`: both already exist, both are drawn elsewhere, and the menu's
+sentence is its own in all three frames.
+
+### Two orphans went with the fourth column
+
+`NavGroup.help` described the card the panel used to end with. The question it
+asked is the closing band's job on every page now, so the card is gone and the
+field with it. `NavLink.description` — "shown under the label in a mega-menu
+panel" — was never rendered by any panel this repo has shipped. Both deleted
+rather than left defined and referenced by nothing (§4.5).
+
+### The mobile menu is a sheet, not a band
+
+It was a band that grew to its content and capped at 80svh. v1 (1464:10063
+closed, 1464:9785 open) is the whole screen below the bar: the rows scroll
+inside it and "Get a quote" sits on a solid strip at the foot, reachable with
+the thumb whether the Products fold is open or shut.
+
+Still a nested `<details>`, so it still costs zero JavaScript — the census is
+unchanged at 17,662 B gzipped.
+
+THE FOLD'S MARK IS NOW A PLUS, not a chevron. A chevron says "there is more
+below this row"; a plus that turns into a close says "this opens, and that
+closes it", which is what a full-screen sheet with one expandable group does.
+One rotation does it — two crossed bars rest as `+` and the wrapper turns 45°
+— so there is no second icon and no path swap. The desktop trigger keeps
+`.nav-caret`: a dropdown under a bar is the chevron's own case.
+
+The mobile cards drop the photograph, which is the design's call rather than a
+port that ran out of room: a 330px-wide picture between a sentence and its link
+is a scroll cost on the one screen that can least afford it.
+
+The card's title is a heading again. It was a link because this fold had no
+other route to the category page — the desktop panel carried a browse button
+per column and the mobile one did not, so with product pages out of scope the
+Products menu on a phone reached zero destinations (Entry 71). The v1 card
+ships that button on both, so the heading goes back to being a heading.
+
+### "Cold chain packaging" → "Cold Chain Packaging"
+
+Found by building the panel, not by looking for it: three cards in a row put
+the category names side by side for the first time, and "Cold chain packaging"
+beside "Custom Boxes" and "Pharmacy Formats" reads as a typo.
+
+The schema had contracted this field as title case all along — `title`'s own
+comment says "Title case, for the nav, the footer and the products index" —
+and cold chain was the one entry violating it. Two independent v1 frames label
+the category standalone and both write it title case: the dropdown card
+(1464:10272) and the footer column (381:1540).
+
+Checked every consumer before changing it, because `title` is not page-local:
+
+```
+  CategoryCard       alt text
+  navigation.ts      nav card heading, footer column heading
+  [category].astro   <title> segment, breadcrumb crumb, rail label
+  products.astro     section <h2>
+  [product].astro    <title> segment, breadcrumb crumb
+```
+
+All seven are standalone labels. None puts it mid-sentence, which is the only
+case the lowercase form was right for — and that case is `pageTitle`, which
+keeps "Cold chain packaging" and is no longer a duplicate of `title`. The field
+is doing its job again rather than carrying the same string twice.
+
+### The harness caught a harness bug
+
+`npm run verify` refused to start: Chrome's dev server was holding 4321.
+`PORT=4331` moved the preview but every check still read `BASE` from
+lib/cdp.mjs, which defaults to 4321 — so the run pointed at the dev server
+instead. `assertServingDist` stopped it by comparing bytes, which is exactly
+the net Entry 55 built after a run reported real numbers about the wrong
+website. Run as `PORT=n BASE=http://localhost:n` until the two are tied
+together. Open question 102.
+
+verify: 10 checks, 1196 assertions, 0 failures. Three fewer than Entry 96 — the
+help card's links are gone, so `internalLinksResolve` has three fewer to check.
+
+### Open questions
+
+102. **`PORT` moves the verify preview but not the checks.** One env var reads
+     two ways. `BASE` should be derived from `PORT` in run.mjs rather than
+     defaulted independently in lib/cdp.mjs.
+
+96, 98, 100 and 101 stand.
+
+## 2026-10-19 — Entry 98. The picture cards become one target
+
+Reported: in the nav menu, the Custom Boxes and Pharmacy Formats cards should
+be clickable as a whole.
+
+### The rule is about nesting, not about pictures
+
+Those are the two cards that carry a photograph instead of a link list, so
+"the ones with images" and "the ones that can be one target" name the same two
+cards today. They are not the same rule. Cold chain is excluded because it
+lists five product links, and a hit area stretched over the whole of that card
+would sit on top of all five — it would still be excluded if it had no picture.
+
+So the markup reads `column.links.length === 0`, which is the same derivation
+`getNavigation` already uses to choose the picture, read for the reason it
+actually applies here. Give the custom boxes products pages and that card grows
+its five links, loses its picture AND stops being one press, all from the one
+condition.
+
+### Still one link with one name
+
+The browse link that was already the card's only route grows a stretched
+`::after`; no `<a>` is wrapped around anything. Third instance of the pattern
+after `.category-card-link` and `.cross-link-target`, and written out again
+rather than generalised — the three differ in which ancestor they stretch
+against, which is exactly what broke once before, when an unconditional
+`position: relative` on Button silently became the containing block and killed
+the category card's hit area at all nine points.
+
+`size="link"` still never takes `relative`, so that trap is already shut.
+
+### The image settles, like every other card that holds a photograph
+
+1.02 at rest, back to 1 under the pointer, `:focus-within` as well because the
+whole card is one target and a keyboard user arrives at the link inside it.
+
+THE CLIP NEEDED A WRAPPER HERE, which the other three did not. `.media-slot`
+IS the `<img>` — there is no box around it — and the category and cross-link
+cards get their crop free because their photograph is flush to a card that
+already clips. This one is inset inside the card's padding with its own radius,
+so a 2% scale had nothing to crop against and simply rendered 2% larger than
+its slot. One `rounded-card overflow-hidden` div around the Media.
+
+### The check had to be taught to open the panel
+
+A stretched target nothing asserts is the bug, not the feature — so this went
+into `scripts/verify/pointer.mjs` rather than being left to look right.
+
+`STRETCHED` entries are now objects with optional `open`/`close` expressions. A
+closed panel is `visibility: hidden`, so `elementFromPoint` answers with
+whatever is behind it and all nine points miss; without `open` the contract
+would fail every run, which is the honest result for a hidden target. It is
+SHUT AGAIN afterwards, because an open mega panel covers the top of the
+viewport and would change the answer for every contract probed after it on the
+same page.
+
+SCOPED TO `.nav-panel`, because `.nav-card` is in the DOM twice — the desktop
+panel and the mobile sheet both render it, and at this check's 1440px the sheet
+is `display: none`, a zero-sized rect that this check calls 'degenerate' and
+fails. The mobile copies go unasserted here. Stated rather than hidden: the CSS
+is one rule shared by both, so pressing the desktop pair proves the mechanism,
+not the mobile layout. Open question 103.
+
+### Red path (§9)
+
+Narrowed `.nav-card-link::after` to a 2px strip down the left edge:
+
+```
+  FAIL pointer targets   25 stretched-target checks   18 failures
+    STRETCHED TARGET DEAD — / .nav-panel .nav-card[0] "Custom BoxesIndividual produ":
+      8 of 9 sampled points do not resolve to a link. First: 0.15,0.12 -> h2.
+```
+
+18 of 18 nav-card checks failed, on all nine pages, naming the card and the
+first missed point. Reverted.
+
+The count reads 25 there against 29 in a `verify` run, and that is not
+flakiness: `verify` builds with the styleguide route on and that page carries
+the nav too. Measured three consecutive standalone runs at 25 before trusting
+it.
+
+Measured in the browser rather than read off the cascade: all nine points
+across the Custom Boxes card resolve to `/products/custom-boxes`; the two
+images compute `scale: 1.02` at rest, and hovering the first moves it to `1`
+while the second stays at `1.02`.
+
+verify: 10 checks, 1218 assertions, 0 failures.
+
+### Open questions
+
+103. **The mobile sheet's nav cards are unasserted.** `pointer.mjs` runs at
+     1440 only, where the sheet is `display: none`. Either the check grows a
+     width per contract, or the sheet's cards stay proven by shared CSS alone.
+
+96, 98, 100, 101 and 102 stand.
+
+## 2026-10-19 — Entry 99. A new individual-product-boxes photograph
+
+Supersedes the `custom-boxes-individual.avif` line in Entry 96. Same slot, same
+1650x1200 (1.375, the 660x480 the design draws for these rows, so nothing is
+cropped), different photograph.
+
+```
+  custom-boxes-individual.avif   1650x1200   51,096 B   (was 52,214 B)
+```
+
+The other two rows are untouched.

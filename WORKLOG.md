@@ -8561,3 +8561,90 @@ cropped), different photograph.
 ```
 
 The other two rows are untouched.
+
+## 2026-10-19 — Entry 100. Two photographs, and two things they broke
+
+### The metallic mailers card
+
+`images.main` on the mailers product, which `ProductCard` draws at 4:5.
+
+```
+  insulated-metallic-mailers.avif   1037x1284   33,881 B   (was 28,346 B)
+```
+
+Same subject, same dimensions, different frame: the old shot left roughly the
+top third of the picture as empty cream, so the card cropped to a band of
+background with the bags along the bottom edge. The new one fills it.
+
+AVIF q60, chosen by converting at 50/55/60/65/70 and reading the decode at full
+size rather than trusting the number — the cream backdrop and the foil
+highlights are the two places this image can band, and it does not. 25.5 KB/Mpx,
+which is where the other photographs on this page sit.
+
+The existing alt still describes it exactly ("navy with a white arrow mark,
+white with a navy one, and plain silver foil"), so nothing to change.
+
+### The cold chain range hero
+
+`rangeImage` on the cold chain category — the full-bleed plate under the page
+heading, and also the picture the new nav card shows.
+
+```
+  range-cold-chain.avif   2048x1152   53,684 B   (was 4096x2286, 63,913 B)
+```
+
+AVIF q55, same method. Same shoot and nearly the same arrangement as the
+picture it replaces, with one difference that is the point of the swap: THE
+PRODUCTS ARE UNBRANDED. No arrow on the navy pouch, no CentiPack on the box, no
+"PUNCTURE HERE" on the gel pack.
+
+TWO THINGS FELL OUT OF THAT, neither of them asked about, both recorded rather
+than quietly absorbed:
+
+**1. The alt was already wrong, and is now wrong differently.** It read "an
+open white mailer box, a navy drawer box, three stand-up pouches in navy, white
+and silver, a navy gel pack marked "Puncture here", a spray bottle and a jar,
+and an EPS foam cooler in its open corrugated outer" — a drawer box, a spray
+bottle and a jar that are in neither photograph, old or new. It appears to have
+been written against a wider composition that never shipped. Rewritten against
+what the file actually contains, and the "Puncture here" clause had to go
+regardless, because that print is no longer in the frame.
+
+**2. The mobile crop still has the branding.** `rangeImage.mobile` is
+art-directed — `category-cold-chain-mobile.avif`, a 1206x1509 portrait — and it
+is the BRANDED version of this same shoot. So the page now shows a branded
+range on a phone and an unbranded one on a laptop, same picture, same scroll
+position. Left as it is rather than guessed at: cropping a portrait out of the
+new 2048x1152 landscape yields at most 922x1152, which is smaller than the
+1206x1509 it would replace, on the viewport most likely to be running at 3x.
+That wants an unbranded portrait original, not a crop. Open question 104.
+
+### The resolution dropped by half, and the ladder shows it
+
+The source went 4096 wide to 2048, so `WIDE_WIDTHS` can no longer fill its top
+two rungs. Measured in `dist/` rather than assumed:
+
+```
+  before   640  960  1280  1920  2560  3840
+  after    640  960  1280  1920  2048(cap)
+```
+
+The plate is `sizes="100vw"`, so a 1440 viewport at 2x asks for 2880 device
+pixels and now gets 2048. Visible as softening on a retina screen at desktop
+width; nothing below about 1024 CSS px is affected. Not a defect in the
+photograph — a smaller original — so it is a question for whoever holds the
+masters rather than something to fix in the pipeline. Open question 105.
+
+verify: 10 checks, 1218 assertions, 0 failures.
+
+### Open questions
+
+104. **The cold chain mobile hero is still branded.** Needs an unbranded
+     portrait original at or above 1206x1509; a crop of the new landscape is
+     smaller than what it would replace.
+
+105. **The cold chain hero master is now 2048 wide.** Half the previous linear
+     resolution, so the two largest rungs of the ladder are gone. A 4096 version
+     of the unbranded shot would restore them.
+
+96, 98, 100, 101, 102 and 103 stand.

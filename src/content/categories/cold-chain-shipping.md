@@ -40,7 +40,7 @@ navLinkLabel: >-
 rangeImage:
   src: ../../assets/categories/range-cold-chain.avif
   alt: >-
-    The CentiPack cold chain range laid out on a cream ground — an open white mailer box, a navy drawer box, three stand-up pouches in navy, white and silver, a navy gel pack marked "Puncture here", a spray bottle and a jar, and an EPS foam cooler in its open corrugated outer.
+    The CentiPack cold chain range laid out on a cream ground — a navy gel pack lying flat at the front, three stand-up pouches standing behind it in silver, white and navy, and an open white box at the right holding an EPS foam cooler with its lid propped beside it.
   mobile: ../../assets/categories/category-cold-chain-mobile.avif
 cardImage:
   src: ../../assets/categories/category-cold-chain.avif

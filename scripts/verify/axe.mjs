@@ -54,7 +54,21 @@ export async function axe() {
            page. Dropping `js` makes the stylesheet show everything with no
            transition, which is exactly the state the animation ends in, so
            this audits the page people see rather than one frame of it. */
-        await page.eval(`(() => { document.documentElement.classList.remove('js'); return 1; })()`);
+        await page.eval(
+          `(() => {
+             document.documentElement.classList.remove('js');
+             /* DROPPING THE CLASS IS NOT ENOUGH ON ITS OWN. The hidden rules
+                stop matching, but opacity then TRANSITIONS up to 1 over the
+                reveal's 820ms rather than snapping — so an audit 120ms later
+                still measures half-faded text and reports contrast failures
+                that exist for under a second. Killing transitions makes the
+                settled state immediate, which is the state being audited. */
+             const kill = document.createElement('style');
+             kill.textContent = '*,*::before,*::after{transition:none !important;animation:none !important}';
+             document.head.append(kill);
+             return 1;
+           })()`,
+        );
         await page.sleep(120);
         await page.eval(AXE);
         const violations = JSON.parse(

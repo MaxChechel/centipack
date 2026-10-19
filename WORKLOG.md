@@ -7716,3 +7716,120 @@ verify: 10 checks, 1199 assertions, 0 failures.
     breaks until reverted. Worth doing deliberately or not at all.
 
 96 and 98 stand.
+
+## 2026-10-19 — Entry 87. Per-line text reveal, and one bug that looked like three
+
+Closes open question 99. Headings and paragraphs now arrive a line at a time.
+
+### The measurement, and the two ways it was wrong
+
+Lines are found by asking the browser where it actually broke the text. Both
+wrong versions are worth recording, because both looked right.
+
+**Offsets accumulated from zero.** The first version walked a running total of
+token lengths from the start of the string, which is only correct when the text
+node begins at its first word — and markup written across several lines does
+not. Where there was leading whitespace every Range measured the wrong
+characters.
+
+**Grouping by word.** The second version measured each word's rect and grouped
+by `top`. That is the obvious implementation and it is wrong, because a browser
+does not only break at spaces. The home page h1 breaks INSIDE "high-volume":
+the hyphen ends one line and "volume" starts the next. A Range spanning that
+word covers two line boxes, so `getBoundingClientRect` returns their union —
+top from the first line, left from the second:
+
+```
+  Cold        top=169  left=276
+  chain       top=169  left=426
+  packaging   top=169  left=599
+  for         top=169  left=912
+  high-volume top=169  left=226   <- same top, left jumps back: it straddles
+```
+
+The word looked like it belonged to line one, line one came out 36 characters,
+and rebuilding it as a block wrapped it again.
+
+Measuring ONE CHARACTER at a time fixes it, because a single character cannot
+straddle a break. Slicing the original string at the offsets where the top
+changes also keeps the text exactly as authored.
+
+### The bug that presented as three
+
+```
+  before   <h1> split=192.0  natural=128.0  delta=64.0px
+  after    <h1> split=128.0  natural=128.0  delta= 0.0px
+```
+
+That 64px was reported three separate times as three separate complaints: the
+layout jumped, the category card images flickered, and the quote and closing
+bands fired their reveals too early. All of it was one heading growing by a
+line after the observers had already recorded where everything was. The page is
+64px shorter now and all three are gone.
+
+A SECOND ORDERING BUG was found on the way and is fixed with it: `layout` ran
+at module init, before the webfont swapped, so even a correct measurement would
+have been taken against fallback metrics and frozen. Nothing is measured,
+split, indexed or observed until `document.fonts.ready` settles.
+
+### The splits are permanent
+
+They were not, at first. The lines were unwrapped once the cascade finished —
+a second of split DOM and ordinary markup either side, which is tidier in every
+respect except the one that counts: removing the wrappers recomputes the line
+breaking, and the text visibly shifted. Reported, and reverted on instruction.
+A layout shift a reader can see is worse than extra elements they cannot.
+
+That makes resize load-bearing rather than optional, so it re-measures EVERY
+group, arrived or not, restoring the original text before re-splitting so it is
+a true re-split and not a split of a split:
+
+```
+  1440px   2 lines   "Cold chain packaging for high-" / "volume compounding pharmacies"
+   700px   3 lines   "Cold chain packaging" / "for high-volume" / "compounding pharmacies"
+  1440px   2 lines   back as it was
+```
+
+### Three more fixes the checks forced
+
+**A split element was still hidden.** `.is-split` was written as an override
+and lost on specificity — the hidden selector carries four `:not()`s to the
+override's one. Both the element and its lines were hidden, two opacities
+multiplied, and the text arrived dimmer than either. `:not(.is-split)` on the
+hidden rule itself cannot be outranked. Caught by the reveal check as an
+element hidden with no stagger index.
+
+**axe failed contrast on half-faded text.** Entry 86 made axe drop `js` before
+auditing, which stops the hidden rules matching — but opacity then TRANSITIONS
+to 1 over 820ms rather than snapping, so an audit 120ms later still measured
+text mid-fade. It now kills transitions as well, so the settled state is
+immediate.
+
+**The reveal check could not see split lines.** A split element is forced
+visible, so if its LINES failed to arrive the element would still report 1 and
+the sentence would be invisible with nothing flagged. Lines are now pressed
+separately.
+
+### Elsewhere
+
+`will-change: opacity, transform` on the waiting state only — a card holding a
+photograph that already carries its own `scale` was being repainted rather than
+composited. Declared on the hidden state so it lapses the moment the group
+arrives; a permanent `will-change` is a permanent layer.
+
+The scroll trigger line moved from the viewport's bottom edge to 70% down it.
+With the line at the edge a tall band began its cascade as its top crossed into
+view, which is while its content is still below the fold.
+
+Splitting is PLAIN TEXT ONLY. An element containing inline markup — a link
+mid-sentence, a <br>, an <em> — is left whole, because rebuilding its innerHTML
+from measured line boxes would have to re-create that markup across line
+boundaries and would silently drop anything unanticipated.
+
+Census 6,800 B budget, measured 6,323 B gzipped.
+
+verify: 10 checks, 1199 assertions, 0 failures.
+
+### Open questions
+
+99 is closed. 96 and 98 stand.

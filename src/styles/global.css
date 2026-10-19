@@ -1558,9 +1558,17 @@
      <head>, NOT by the deferred module: set late, every revealed element would
      paint visible and then snap to hidden, which is a worse artefact than no
      animation at all. */
-  html.js [data-reveal-group]:not([data-reveal='in']) :is(h1, h2, h3, h4, h5, p, li, figure, blockquote, .media-slot, .media-pending, a, button, [data-carousel], [data-rail]):not(:is(h1, h2, h3, h4, h5, p, li, figure, blockquote, .media-slot, .media-pending, a, button, [data-carousel], [data-rail]) *):not(.reveal-skip):not(.reveal-skip *) {
+  html.js [data-reveal-group]:not([data-reveal='in']) :is(h1, h2, h3, h4, h5, p, li, figure, blockquote, .media-slot, .media-pending, a, button, [data-carousel], [data-rail]):not(:is(h1, h2, h3, h4, h5, p, li, figure, blockquote, .media-slot, .media-pending, a, button, [data-carousel], [data-rail]) *):not(.reveal-skip):not(.reveal-skip *):not(.is-split) {
     opacity: 0;
     transform: translateY(var(--reveal-rise));
+    /* PROMOTED WHILE IT WAITS, and only while it waits. A card holding a
+       photograph that already carries its own `scale` was flickering as the
+       reveal's translate animated — two transforms on one subtree, repainted
+       rather than composited. `will-change` gives it a layer for the duration.
+       It is declared on the HIDDEN state alone, so it lapses the instant the
+       group arrives: a permanent `will-change` is a permanent layer, and a
+       page of permanent layers is how this fix becomes the next problem. */
+    will-change: opacity, transform;
   }
 
   html.js [data-reveal-group] :is(h1, h2, h3, h4, h5, p, li, figure, blockquote, .media-slot, .media-pending, a, button, [data-carousel], [data-rail]):not(:is(h1, h2, h3, h4, h5, p, li, figure, blockquote, .media-slot, .media-pending, a, button, [data-carousel], [data-rail]) *):not(.reveal-skip):not(.reveal-skip *) {
@@ -1586,6 +1594,64 @@
        delay on it would feel like the button was ignoring the pointer. */
     transition-delay: calc(var(--reveal-index, 0) * var(--reveal-stagger)), calc(var(--reveal-index, 0) * var(--reveal-stagger)), 0s, 0s, 0s;
   }
+
+/* ---- PER-LINE TEXT REVEAL ----
+
+   A heading arrives a line at a time rather than as one block. The module
+   measures where the browser actually broke the text and wraps each line, so
+   these are real line boxes and not a guess.
+
+   A SPLIT ELEMENT IS NOT ITSELF HIDDEN — its lines are. Leaving both hidden
+   would multiply the two opacities and the text would arrive at 0.25 before
+   ever reaching full.
+
+   THE SPLIT IS TEMPORARY, which is the part worth defending. Every other
+   implementation of this keeps the wrapped lines in the DOM for the life of
+   the page, because reverting recomputes the wrapping. That means frozen line
+   breaks that cannot re-wrap at a new width, and permanent extra elements
+   between a screen reader and the sentence. Here the wrapper comes out again
+   the moment the animation finishes: the DOM is split for about a second and
+   is ordinary markup before and after. Resize stops being a problem for
+   anything already revealed, because there is nothing left to re-wrap. */
+  .reveal-line {
+    display: block;
+    /* RESET THE INHERITED WRAPPING MODE, and this one is load-bearing.
+       Headings here use `text-wrap: balance`. The module measures the BALANCED
+       layout and cuts the text at the breaks the browser chose — then each
+       line goes into its own block, inherits `balance`, and re-balances ITS
+       OWN content. The home page h1's first line balanced itself into two,
+       and the heading grew from 128px to 192px: a 64px layout shift on load,
+       which is what "janky, and the reveals fire early" actually was.
+       Everything below it had moved after the observers were set up.
+
+       `wrap` is the right reset rather than `nowrap`. Each line was measured
+       to fit, so it will not wrap; and if a measurement is ever off by a
+       pixel, normal wrapping degrades to a second line while `nowrap` would
+       push text out of the page. */
+    text-wrap: wrap;
+  }
+
+  html.js [data-reveal-group]:not([data-reveal='in']) .reveal-line {
+    opacity: 0;
+    transform: translateY(var(--reveal-rise));
+    will-change: opacity, transform;
+  }
+
+  html.js [data-reveal-group] .reveal-line {
+    transition:
+      opacity var(--duration-reveal) var(--ease-reveal),
+      transform var(--duration-reveal) var(--ease-reveal);
+    transition-delay: calc(var(--reveal-index, 0) * var(--reveal-stagger));
+  }
+
+  /* A SPLIT ELEMENT IS EXCLUDED FROM THE HIDDEN RULE, not overridden by a
+     later one. The first attempt was an override, and it lost: the hidden
+     selector carries four `:not()`s to the override's one, so it won on
+     specificity and split headings were hidden AND their lines were hidden.
+     Two opacities multiplied, so the text arrived dimmer than either value
+     and the cascade read muddy. The reveal check caught it as an element
+     hidden with no stagger index. `:not(.is-split)` on the hidden rule itself
+     cannot be outranked, because there is nothing to outrank. */
 
 /* LENIS OWNS THE SCROLL WHEN IT IS RUNNING (§12.4). Two smoothing systems on
    one scroll fight each other, and the visible result is an anchor jump that

@@ -91,6 +91,24 @@ const PROBE = `JSON.stringify(function(){
       }
     }
   }
+  /* SPLIT LINES ARE CHECKED SEPARATELY, and have to be. A split element is
+     forced visible so its own opacity never multiplies with its lines' — so
+     if the lines failed to arrive, the element would still report 1 and the
+     sentence would be invisible with nothing flagged. The lines are what the
+     reader sees once a heading is split, so the lines are what this asks
+     about. */
+  var lines = document.querySelectorAll('[data-reveal-group] .reveal-line');
+  for (var L = 0; L < lines.length; L++) {
+    var ln = lines[L];
+    if (ln.closest('details:not([open])')) continue;
+    out.items += 1;
+    if (Number(getComputedStyle(ln).opacity) < 0.99) {
+      out.hidden.push('line "' + ln.textContent.trim().slice(0, 24) + '"');
+      if (!ln.style.getPropertyValue('--reveal-index')) {
+        out.unindexed.push('line "' + ln.textContent.trim().slice(0, 24) + '"');
+      }
+    }
+  }
   return out; }())`;
 
 export async function reveal() {

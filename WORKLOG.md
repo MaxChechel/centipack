@@ -7921,3 +7921,89 @@ an element whose group arrived lands on 1 immediately, one whose group did not
 is still 0. No window, no race, and nothing can rescue a false pass.
 
 verify: 10 checks, 1199 assertions, 0 failures.
+
+## 2026-10-19 — Entry 89. Scroll broke on /products, and it was our own opt-out
+
+### The cause
+
+`data-lenis-prevent` on the product rail and the carousel, plus the
+`overscroll-behavior: contain` rule that came with them. Entry 86 added both so
+the native scroll-snap regions would keep their own wheel. The effect on a page
+where the rail fills most of the viewport is that the page stops scrolling:
+Lenis ignores the element, so the wheel falls through to native handling, and
+`contain` then stops that native scroll chaining out to the document at all.
+
+Measured on /products, ten wheel ticks of 200px:
+
+```
+  pointer over the page body   997px
+  pointer over the product rail 400px
+```
+
+Both attributes are gone and the rule with them. The same test now runs the
+page to its scroll limit from either position.
+
+### The trade, stated
+
+Lenis takes every wheel event, so a trackpad swipe sideways over the rail or
+the carousel does nothing on desktop. Three things were tried before accepting
+that:
+
+- `stopPropagation` on the element — no effect. Lenis listens at window
+  CAPTURE, so it sees the event before anything on the element can object.
+  Measured, not assumed.
+- Keeping `data-lenis-prevent` without `overscroll-behavior` — the page scrolls
+  again, but natively rather than through Lenis, so the feel changes under the
+  pointer. One inconsistency traded for another.
+- Forwarding vertical wheel into `lenis.scrollTo` ourselves — re-implementing
+  scroll physics on top of a library that exists to provide them, which is how
+  a smooth-scroll integration becomes the thing people switch off.
+
+The carousel is dragged with the mouse, swiped on touch and stepped with the
+arrow keys; the rail is a grid above `lg` and touch-scrolled below it. Nothing
+is unreachable. Open question 100.
+
+### Hero images were already static
+
+Reported as needing to be visible rather than animated. They are, and were —
+the page hero pictures sit in their own `width="full"` Sections with no
+`reveal` prop, so they were never in a reveal group:
+
+```
+  /                      hero img  revealItem=false  opacity=1.00
+  /products              hero img  revealItem=false  opacity=1.00
+  /products/cold-chain-shipping  hero img  revealItem=false  opacity=1.00
+  puncture-pack          hero img  revealItem=false  opacity=1.00
+```
+
+The media that DOES animate is the pending-placeholder boxes inside content
+sections, which are content rather than backdrop. What was most likely being
+seen is entry 87's 64px layout shift and entry 88's failsafe revealing the page
+on a timer — both fixed, and both would have made a static hero look like it
+was moving because everything around it was.
+
+### No lag from the splitter
+
+The per-character measurement is the obvious suspect, so it was measured rather
+than defended. A full re-measure of every split element on a page:
+
+```
+  /                              6 elements    886 chars   1.9ms
+  /products/custom-boxes         9 elements  1,135 chars   2.5ms
+  puncture-pack                 16 elements  2,519 chars   8.0ms
+```
+
+Once at load, and on a 180ms debounce at resize. 8ms on the heaviest page is
+half a frame, and it is not on the scroll path at all.
+
+verify: 10 checks, 1199 assertions, 0 failures.
+
+### Open questions
+
+100. **Horizontal wheel over the rail and the carousel does nothing on
+     desktop** while Lenis is driving. Everything in them is reachable by
+     drag, touch and keyboard, so this is a papercut rather than a defect —
+     but the honest fix is a Lenis integration that can decide per gesture
+     rather than per node, and that does not exist in the library today.
+
+96 and 98 stand.

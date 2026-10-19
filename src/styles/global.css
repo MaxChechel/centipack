@@ -1668,10 +1668,23 @@ html.lenis body {
   height: auto;
 }
 
-/* Native scroll-snap regions keep their own wheel. */
-html.lenis.lenis-smooth [data-lenis-prevent] {
-  overscroll-behavior: contain;
-}
+/* THE HORIZONTAL SCROLLERS NO LONGER OPT OUT OF LENIS, and the rule that went
+   with them is gone too. `data-lenis-prevent` on the rail and the carousel
+   made Lenis ignore them — which also meant the PAGE stopped scrolling
+   smoothly whenever the pointer was over one, and `overscroll-behavior:
+   contain` then stopped the vertical scroll chaining out of them at all. On
+   /products the rail fills most of the viewport, so the page simply resisted
+   the wheel: ten ticks moved 997px over the body and 400px over the rail.
+   Reported as "scroll breaks", and it did.
+
+   The trade is stated rather than hidden: Lenis takes every wheel event, so a
+   trackpad swipe sideways over the rail or the carousel does nothing on
+   desktop. Stopping propagation at the element does not help — Lenis listens
+   at window capture and sees the event first — and the alternatives all mean
+   re-implementing scroll forwarding, which is how a smooth-scroll integration
+   becomes the thing people turn off. The carousel is dragged with the mouse,
+   swiped on touch and stepped with the arrow keys; the rail is a grid above
+   lg and touch-scrolled below it. Open question 100. */
 
 @media (prefers-reduced-motion: reduce) {
   html {

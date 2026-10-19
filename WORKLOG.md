@@ -8268,3 +8268,42 @@ exactly 1.179. The same correction landed for the mailers an hour later. Both
 card photograph.
 
 verify: 10 checks, 1199 assertions, 0 failures.
+
+## 2026-10-19 — Entry 95. The last of the bronze
+
+Reported: the nav's current-page link is a brownish colour and should be the
+site's blue.
+
+It was `--accent`, still pointing at `--accent-700: #8a6424` — the v1 round's
+`text/accent`. THAT SWATCH IS NOT IN THE DESIGN SYSTEM ANY MORE. Pulled the v1
+variable collection (Figma 1357:30) and there is no bronze in it at all: the
+blue is `text/link`, `action/primary/default` and `color/primary/900`, all
+#0e2a46, which this repo already holds as `--navy-900`.
+
+The accent went navy → bronze → navy. When the design system turned navy, the
+ramp, the actions and the brand mark all followed, and nothing was left
+pointing at the bronze except this one link. One brown word on a navy site,
+and it survived because `--accent` was never wired to anything the earlier
+sweeps touched.
+
+```
+  --accent  light   --accent-700 #8a6424   ->  --navy-900 #0e2a46
+  --accent  dark    --accent-300 (tan)     ->  --gray-0   white
+```
+
+The dark step is the answer `--text-brand` already gives one block down,
+because it is the same question: #0e2a46 measures 1.13:1 on a dark ground.
+
+TWO PRIMITIVES WENT WITH IT, which is the part worth recording. `--accent-700`
+and `--accent-300` had no other consumer, and `--tan-300`/`--tan-400` were kept
+because one swatch did two jobs — the secondary action fill and the accent's
+dark step. The navy took the first when the actions changed; withdrawing the
+bronze took the second. Both were left defined and referenced by nothing. A
+primitive nothing points at is not a palette, it is a note, so they are
+deleted and the measurements are kept in the comment instead.
+
+Verified in the browser rather than by reading the cascade: the current-page
+link on /about computes `rgb(14, 42, 70)`.
+
+verify: 10 checks, 1199 assertions, 0 failures — contrast matrix included,
+which is what says the new accent is legal on every ground it lands on.

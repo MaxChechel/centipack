@@ -128,41 +128,31 @@
   --sand-50: #f9f7f5;     /* Figma Secondary/50       — L* 97.3 */
   --sand-100: #f2eee8;    /* Figma Secondary/100      — L* 94.2 */
 
-  /* Accent primitives.
+  /* Accent primitives — WITHDRAWN, and the history is the point.
 
-     THE ACCENT MOVED FROM NAVY TO BRONZE in the v1 design round (Figma
-     `uMHWj1JRHoqmY9uOQNfyL6`), and both steps are now real values from the
-     client's collection rather than one taken and one derived:
-
-       light  `text/accent`               #8a6424  (was `text/brand` #0e2a46)
-       dark   `action/secondary/default`  #c5b197  (was DERIVED #8fa8c2)
-
-     Measured before the swap, because an accent that fails the matrix is an
-     accent that cannot ship:
+     THE ACCENT WENT NAVY, THEN BRONZE, THEN BACK TO NAVY. v0 used
+     `text/brand` #0e2a46. The v1 round moved it to `text/accent` #8a6424
+     with a #c5b197 dark partner, and both were measured before that swap:
 
        #8a6424 on bg-base 5.00 : 1   on bg-subtle 4.62   on bg-surface 5.34
        #c5b197 on dark base 7.94     on subtle    7.08   on surface    6.16
 
-     THE LIGHT STEP IS MUCH SHALLOWER THAN THE NAVY WAS — 5.00 against 13.66 —
-     so it clears AA for body text with far less headroom than before. The floor
-     is bg-subtle at 4.62. Anything that darkens those grounds, or any new ground
-     between them, has to be re-measured rather than assumed.
+     The design system then went navy everywhere — the ramp, the actions, the
+     brand mark — and the current v1 variable collection contains no bronze at
+     all. Nothing on the site was still pointing at it except the NAV'S
+     CURRENT-PAGE LINK, which is where it was caught: one brown word on a navy
+     site, a year after the colour it belonged to was dropped.
 
-     The dark step is no longer derived. #c5b197 is the same tan the design uses
-     as its secondary action fill, so the accent and that button are one hue on
-     the dark theme instead of two that nearly match.
-
-     Two steps, not one, per §2.4 rule 5: #0e2a46 measures 1.13:1 on the dark
-     ground and is unusable there. The dark step is DERIVED rather than taken
-     from the client's own `color/primary/300` (#bcc3cb): that value clears the
-     matrix but sits at 13% saturation, close enough to --text-secondary on dark
-     (#d4d2cf) that neither reads as distinct from the other. The derived step
-     keeps hue 210° and carries 30% saturation, so it is still legibly the brand
-     blue at L*68. */
-  /* The tan fill, a primitive because one swatch does two jobs: the secondary
-     action fill on both themes, and the accent's dark step. */
-  --tan-300: #c5b197;    /* Figma action/secondary/default */
-  --tan-400: #b39c7e;    /* DERIVED — one step down, the hover */
+     So `--accent` is `--navy-900` in light and white in dark, which is the
+     answer `--text-brand` already gives. The two bronze primitives are deleted
+     rather than left defined and unused; the measurements above are kept so
+     the next accent proposal starts from numbers rather than from a swatch. */
+  /* The tan fill is GONE TOO, and it went the same way. It was a primitive
+     because one swatch did two jobs — the secondary action fill on both
+     themes, and the accent's dark step. The navy took the first when the
+     actions changed, and withdrawing the bronze accent above took the second,
+     which left #c5b197 and its derived hover defined and referenced by
+     nothing. A primitive nothing points at is not a palette, it is a note. */
 
   /* THE NAVY, and it replaces both the tan fill and the bronze outline.
      Figma's `action/primary/default`, `action/secondary/default` and
@@ -179,8 +169,17 @@
   --navy-900: #0e2a46;  /* Figma color/primary/900 — default, and text/link */
   --navy-950: #0b2035;  /* Figma color/primary/950 — the pressed step */
 
-  --accent-700: #8a6424;  /* Figma text/accent              — the light accent */
-  --accent-300: var(--tan-300);  /* the same swatch, as the dark-theme accent */
+  /* THE BRONZE ACCENT IS RETIRED. `--accent-700: #8a6424` and its dark-theme
+     partner were the v0 palette's "Figma text/accent", and the v1 design
+     system has no such swatch — its variables carry no bronze at all. The one
+     place the ramp still showed was the nav's current-page link, which read
+     brown against a navy site. Reported, and it was the last thing wearing
+     the old palette.
+
+     What replaces it is not a new colour: `text/link`,
+     `action/primary/default` and `color/primary/900` are all #0e2a46 in the
+     design system, which this repo already holds as `--navy-900`. The accent
+     is that, and the ramp is gone rather than left pointing at nothing. */
 
   /* --- Typography --------------------------------------------------------
      --font-body is emitted by Astro's font pipeline; see the `fonts` block in
@@ -636,7 +635,7 @@
      accent is introduced it is introduced HERE and every consumer follows.
      --accent is legal as text, as a fill, and as a border; --accent-contrast
      is the only legal text colour on top of an --accent fill. */
-  --accent: var(--accent-700);
+  --accent: var(--navy-900);
   --accent-contrast: var(--gray-0);
 
   /* --- The secondary action fill -----------------------------------------
@@ -900,7 +899,7 @@
   --line: var(--gray-300);
   --line-strong: var(--gray-500);
 
-  --accent: var(--accent-700);
+  --accent: var(--navy-900);
   --accent-contrast: var(--gray-0);
 
   --bg-inverse: var(--gray-950);
@@ -967,9 +966,11 @@
      bg-surface, the tightest of the three. */
   --line-strong: var(--gray-500);
 
-  /* Re-picked, not re-used (rule 5). The light accent measures 1.13:1 here. */
-  --accent: var(--accent-300);       /* 5.21 : 1 on bg-surface */
-  --accent-contrast: var(--gray-950);/* 6.71 : 1 on the accent fill */
+  /* Re-picked, not re-used (rule 5). The navy measures 1.13:1 on a dark
+     ground, so the dark theme takes white — the same answer `--text-brand`
+     gives one block down, because it is the same question. */
+  --accent: var(--gray-0);
+  --accent-contrast: var(--gray-950);
 
   /* The plate and its hairline are WHITE here, which is the whole point of the
      token and the thing the :root declaration could not deliver on its own. */

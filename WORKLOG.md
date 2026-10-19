@@ -8216,3 +8216,55 @@ spanning half the page that reads as a selected state rather than a response to
 the pointer. The summary keeps its pointer cursor and its focus ring.
 
 verify: 10 checks, 1199 assertions, 0 failures.
+
+## 2026-10-19 — Entry 94. Photography for PuncturePack and the metallic mailers
+
+Ten pictures supplied across four drops. Every pending slot on both product
+pages is now filled, and neither page renders a placeholder.
+
+```
+  puncture-pack-hero.avif              2560x1440  60.4 KB   16:9
+  puncture-pack-how-it-works.avif      1650x1400  42.5 KB   1.179
+  puncture-pack-dimensions.avif        1365x1443  38.7 KB   0.946
+  puncture-pack-packout.avif           1655x1240  44.6 KB   1.335
+  puncture-pack-branded.avif           1715x1285  32.2 KB   1.335
+  metallic-mailers-hero.avif           2560x1440  72.9 KB   16:9
+  metallic-mailers-how-it-works.avif   1650x1400  51.6 KB   1.179
+  metallic-mailers-dimensions.avif     1365x1588  47.9 KB   0.860
+  metallic-mailers-packout.avif        1660x1245  41.3 KB   1.333
+  metallic-mailers-branded.avif        1670x1253  45.3 KB   1.333
+```
+
+### Two hardcoded ratios that were only ever right for some pages
+
+THE PICTURES ARE CUT TO THEIR SLOTS, which is what exposed this. Each supplied
+drawing matches its own frame to three decimal places, so where a component
+carried a fixed ratio, the mismatch was the component's.
+
+**The spec drawing.** SpecSheet had `546 / 577`. That is the PuncturePack slot;
+the design draws 546x635 on the metallic mailers, and the supplied drawing is
+0.860 to match. A fixed ratio cropped 9% off its height — at the BOTTOM, where
+the "Shown at true relative scale" caption is. The ratio now comes from the
+picture, so the component follows the artwork.
+
+**The page hero.** `1344 / 541` was hardcoded and is right for three of the
+five pages — EPS coolers, thermal liners and gel packs all draw 1344x541.
+PuncturePack and the metallic mailers draw 1344x756, and both supplied heroes
+are 16:9 to match. A fixed ratio would have taken a quarter of the height off
+a photograph made to fit. Same fix.
+
+Both fall back to the old constant, which is now only reachable by the pending
+placeholder — it has no intrinsic size to read.
+
+### Two assignments corrected mid-drop
+
+The first batch put `Puncture pack hero 1.png` in the "How it works" slot on
+the strength of its content — three mailers, compressed and expanded, which is
+what that section describes. The filename said hero and the follow-up drop
+confirmed it: a purpose-made 1650x1400 image arrived for "How it works",
+exactly 1.179. The same correction landed for the mailers an hour later. Both
+16:9 shots are now the page heroes, which is also the first time
+`images.hero` has been set on any product — until now it fell back to the
+card photograph.
+
+verify: 10 checks, 1199 assertions, 0 failures.

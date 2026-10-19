@@ -138,6 +138,23 @@ assertEverySectionIsHandled(product.sections);
  * alternation and lands on the same `#f9f7f5` as the closing band under it, so
  * the page ends on one ground rather than on a stripe.
  */
+/**
+ * THE HERO'S OWN RATIO, for the same reason the spec drawing has one.
+ *
+ * `1344 / 541` was hardcoded here and it is right for three of the five pages:
+ * EPS coolers, thermal liners and gel packs all draw a 1344x541 hero. The
+ * PuncturePack frame draws 1344x756 — 16:9 — and the supplied photograph is
+ * 16:9 to match. A fixed ratio would have cropped a quarter of its height off
+ * a picture made to fit.
+ *
+ * Reading it from the picture makes the page follow the artwork. The fallback
+ * is the three-page majority, and is only reached by the pending placeholder,
+ * which has no intrinsic size.
+ */
+const heroRatio = product.heroImage
+  ? `${product.heroImage.width} / ${product.heroImage.height}`
+  : '1344 / 541';
+
 const sectionGround = (section: ProductSection, index: number): string =>
   section.type === 'faq' ? 'bg-base' : index % 2 === 0 ? 'bg-surface' : 'bg-subtle';
 ---
@@ -193,7 +210,7 @@ const sectionGround = (section: ProductSection, index: number): string =>
     <Media
       image={product.heroImage}
       label={`${product.title} — hero`}
-      ratio="1344 / 541"
+      ratio={heroRatio}
       sizes="100vw"
       loading="eager"
       fetchpriority="high"

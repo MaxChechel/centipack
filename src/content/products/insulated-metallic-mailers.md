@@ -33,6 +33,10 @@ facts:
   - label: Disposal
     value: Metallized film. Eco liner available where patients ask about disposal.
 images:
+  hero:
+    src: ../../assets/products/metallic-mailers-hero.avif
+    alt: >-
+      Three insulated metallic mailers standing side by side on a cream ground — one navy, one white and one silver, each carrying the CentiPack arrow.
   main:
     src: ../../assets/products/insulated-metallic-mailers.avif
     alt: >-
@@ -56,6 +60,10 @@ sections:
     image:
       label: >-
         A metallic mailer being pulled open, packed and sealed
+      picture:
+        src: ../../assets/products/metallic-mailers-how-it-works.avif
+        alt: >-
+          Three insulated metallic mailers overlapping — navy in front, white and silver behind — each sealed along a zip closure.
 
   - type: features
     heading: Why choose insulated metallic mailers
@@ -121,6 +129,10 @@ sections:
     image:
       label: >-
         The mailer size range, compressed and fully expanded
+      picture:
+        src: ../../assets/products/metallic-mailers-dimensions.avif
+        alt: >-
+          The insulated metallic mailer size range shown at true relative scale: 9 by 12, 12 by 16 and 15 by 20 inches standing expanded, with a compressed mailer lying flat in front.
 
   # FIGMA BRIEF: complete packout + sample performance results (tested
   # configuration, payload, refrigerants, conditioning, ambient profile, target
@@ -139,6 +151,10 @@ sections:
     image:
       label: >-
         A complete mailer pack-out with its measured performance
+      picture:
+        src: ../../assets/products/metallic-mailers-packout.avif
+        alt: >-
+          A silver insulated metallic mailer above a complete pack-out — two gel packs flanking a small navy CentiPack carton.
 
   # FIGMA BRIEF: custom-printed metallic mailer.
   - type: split
@@ -153,6 +169,10 @@ sections:
     image:
       label: >-
         A custom-printed metallic mailer
+      picture:
+        src: ../../assets/products/metallic-mailers-branded.avif
+        alt: >-
+          A navy insulated metallic mailer printed with a "Your logo here" placeholder.
 
   - type: numbered
     heading: Applications

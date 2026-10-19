@@ -14,6 +14,10 @@ lede: >-
 contactLinkLabel: >-
   Request samples & pricing
 images:
+  hero:
+    src: ../../assets/products/puncture-pack-hero.avif
+    alt: >-
+      Three PuncturePack mailers on a cream ground — one lying flat and vacuum-compressed, two standing fully expanded, each marked with four "Puncture here" targets and the CentiPack logo.
   main:
     src: ../../assets/products/puncture-pack.avif
     alt: >-
@@ -46,6 +50,10 @@ sections:
     image:
       label: >-
         PuncturePack being packed, sealed and punctured
+      picture:
+        src: ../../assets/products/puncture-pack-how-it-works.avif
+        alt: >-
+          A single expanded PuncturePack standing upright, printed with "Peel, pack, ship", four "Puncture here" targets and the CentiPack logo.
 
   - type: features
     heading: Why choose PuncturePack
@@ -109,6 +117,10 @@ sections:
     image:
       label: >-
         PuncturePack dimension drawing — envelope measurements and usable payload space
+      picture:
+        src: ../../assets/products/puncture-pack-dimensions.avif
+        alt: >-
+          A dimension drawing of a PuncturePack mailer: 12 inches wide by 14 inches tall measured flat, a dashed outline marking the usable payload space, and a side view showing 1.375 inches of expanded insulation on each face.
 
   # FIGMA BRIEF: sample packout: 12x14 PuncturePack, 1.375" insulation, two 24oz
   # gel packs, 36-48hr under 8C.
@@ -126,6 +138,10 @@ sections:
     image:
       label: >-
         A complete PuncturePack pack-out with gel packs
+      picture:
+        src: ../../assets/products/puncture-pack-packout.avif
+        alt: >-
+          An expanded PuncturePack above a complete pack-out — two gel packs flanking a small navy CentiPack carton.
 
   # FIGMA BRIEF: one custom-printed PuncturePack with a "your brand here"
   # placeholder logo.
@@ -143,6 +159,10 @@ sections:
     image:
       label: >-
         A custom-printed PuncturePack mailer
+      picture:
+        src: ../../assets/products/puncture-pack-branded.avif
+        alt: >-
+          A PuncturePack mailer printed with a "Your logo here" placeholder, standing in front of a second mailer lying flat.
 
   - type: numbered
     heading: Applications

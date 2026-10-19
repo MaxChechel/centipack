@@ -50,6 +50,24 @@ interface Props {
 const { heading, intro, note, columns, rows, image, headingLevel = 'h2', id } =
   Astro.props as Props;
 
+/**
+ * THE DRAWING'S OWN RATIO, not a number typed into this component.
+ *
+ * This was hardcoded `546 / 577`, which is the PuncturePack slot — and the
+ * design draws a DIFFERENT slot per page: 546x577 there, 546x635 on the
+ * insulated metallic mailers. Both supplied drawings match their own slot
+ * exactly, so a fixed ratio here cropped one of them, and it cropped it at the
+ * bottom, where the measurement caption is.
+ *
+ * Taking the ratio from the picture makes the component follow the artwork
+ * instead of the other way round, and any future page gets it for free. The
+ * fallback is only reached by the pending placeholder, which has no intrinsic
+ * size to read.
+ */
+const specRatio = image.picture
+  ? `${image.picture.width} / ${image.picture.height}`
+  : '546 / 577';
+
 const hasContent = rows.length > 0;
 ---
 
@@ -82,7 +100,7 @@ const hasContent = rows.length > 0;
     <Media
       image={image.picture}
       label={image.label}
-      ratio="546 / 577"
+      ratio={specRatio}
       sizes="(min-width: 90rem) 546px, (min-width: 48rem) 45vw, 100vw"
       class="rounded-card md:col-span-5"
     />

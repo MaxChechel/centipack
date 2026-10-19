@@ -47,7 +47,15 @@ interface Props {
    * nothing on the page able to turn it back on. Wiring is a drop-in — see the
    * reveal block in global.css §8 and the WORKLOG entry for Phase 1.
    */
-  reveal?: boolean;
+  /**
+   * `true` reveals on scroll; `"hero"` reveals on load.
+   *
+   * A HERO HAS NO SCROLL TO BE REVEALED BY. It is on screen when the page
+   * opens, so waiting for an intersection means waiting forever — the band
+   * would sit blank until the reader scrolled away and back. Heroes play once
+   * the fonts have settled; everything below waits its turn.
+   */
+  reveal?: boolean | 'hero';
   id?: string;
   class?: string;
   /** Applied to the inner container, for grid/flex composition by the caller. */
@@ -106,7 +114,7 @@ const paddingBottom = PAD_BOTTOM[spaceBottom ?? space];
 ---
 
 <Tag id={id} data-theme={theme} class:list={['relative', paddingTop, paddingBottom, className]} {...rest}>
-  <div class:list={['relative', CONTAINER[width], innerClass]} data-reveal-group={reveal ? '' : undefined}>
+  <div class:list={['relative', CONTAINER[width], innerClass]} data-reveal-group={reveal ? '' : undefined} data-reveal-on={reveal === 'hero' ? 'load' : undefined}>
     <slot />
   </div>
 </Tag>

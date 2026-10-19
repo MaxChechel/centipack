@@ -423,6 +423,18 @@
   --ease-spring-snappy: var(--spring-snappy);
   --transition-duration-spring-snappy: 280ms;
 
+  /* THE REVEAL'S OWN CURVE AND CLOCK (§12.2). A strong decelerate — fast off
+     the mark, long settle — which is what reads as "smooth and quick" rather
+     than "slow". It is NOT a spring: springs overshoot, and content arriving
+     past its resting place and coming back reads as a wobble on a page that
+     is meant to feel composed. Small travel plus a hard out-ease is the pair
+     that does the work; a longer distance needs a longer duration and starts
+     to feel like waiting. */
+  --ease-reveal: cubic-bezier(0.16, 1, 0.3, 1);
+  --duration-reveal: 820ms;
+  --reveal-stagger: 65ms;
+  --reveal-rise: 0.875rem;
+
   --transition-duration-fast: 150ms;
   --transition-duration-base: 300ms;
   --transition-duration-slow: 450ms;
@@ -1488,20 +1500,53 @@
    ========================================================================== */
 
 @layer components {
-  /* Scroll reveal (§12.2). Opt-in per Section via its `reveal` prop, which
-     sets [data-reveal-group] on the inner container; its DIRECT CHILDREN are
-     what move, staggered by --reveal-index. Default off — a page where
-     everything animates in has no emphasis left to spend. The module that
-     flips the group to [data-reveal="in"] is the only JavaScript this costs;
-     the motion itself is CSS.
+}
 
-     PHASE 1 RESOLVED THE GROUP/CHILD QUESTION, which this block was written
-     before and described loosely as "[data-reveal] on the wrapper". Animating
-     the wrapper cannot stagger anything — one element has one delay — so the
-     wrapper is the TRIGGER and its children are the subjects. Every guarantee
-     the original contract made is kept exactly: the same two properties, the
-     same spring tokens, the same 60ms step, visible without JavaScript, and
-     visible under reduced motion.
+/* ---- SCROLL REVEAL — DELIBERATELY OUTSIDE @layer components ----
+
+   UTILITIES OUTRANK LAYERED COMPONENT CSS, and this block is the case that
+   proves it costs something. Written inside `@layer components`, the reveal's
+   `transition` lost to Button's own `transition-[color,background-color,
+   border-color,padding]` utility — layer order decides before specificity ever
+   gets a vote. The hiding still worked, because nothing competes for `opacity`,
+   so every button in a revealed section SNAPPED from 0 to 1 while the heading
+   beside it eased. Caught by sampling mid-flight: at 500ms the hero's heading
+   read 0.97 and its two buttons read 1.00, which is the wrong way round.
+
+   Unlayered rules beat every layer, so these win. That is the narrowest fix
+   that is also the correct one — the alternative was adding opacity and
+   transform to Button's transition utility, which would change how every
+   button on the site behaves to fix how they arrive on four pages.
+
+  /* Scroll reveal (§12.2). Opt-in per Section via its `reveal` prop, which
+     sets [data-reveal-group] on the inner container. Default off — a page
+     where everything animates in has no emphasis left to spend.
+
+     WHAT MOVES IS THE CONTENT PRIMITIVES, not the wrapper and not every div.
+     A heading, a paragraph, a standalone link, a list item, a picture: the
+     things a reader actually sees arrive. Wrapper divs are structure and
+     staggering them would animate the scaffolding rather than the content.
+
+     OUTERMOST MATCH ONLY, which `:not(:is(…) *)` enforces. A link inside a
+     paragraph rides in with the paragraph; a paragraph inside a list item
+     rides in with the item. Without it a card would fade in and then its own
+     heading would fade in again inside it, which reads as a stutter rather
+     than a reveal.
+
+     `.reveal-skip` OPTS A SUBTREE OUT. A class rather than a data attribute
+   because Media forwards `class` and not arbitrary attributes, and the
+   backdrop that needed this first IS a Media. A banner's backdrop photograph is
+   not content arriving, it is the surface the content arrives ON — fading it
+   in with everything else makes the whole plate swim rather than the words
+   landing. The hook is there for that case and for the next one like it, and
+   it excludes the element and everything inside it.
+
+      THE LIST IS DUPLICATED IN src/scripts/reveal.ts, and that is a real risk
+     rather than a tidy one — the stylesheet hides and the module staggers, and
+     a list that drifts means content hidden with no index and therefore no
+     delay, or worse, hidden by a rule nothing will ever reveal. The reveal
+     check asserts the two agree by pressing the result: every element the
+     stylesheet hid must come back. Change one, change the other.
 
      ONLY opacity AND transform, per §12.3. They are the two the compositor can
      animate without layout or paint.
@@ -1513,21 +1558,53 @@
      <head>, NOT by the deferred module: set late, every revealed element would
      paint visible and then snap to hidden, which is a worse artefact than no
      animation at all. */
-  html.js [data-reveal-group] > * {
+  html.js [data-reveal-group]:not([data-reveal='in']) :is(h1, h2, h3, h4, h5, p, li, figure, blockquote, .media-slot, .media-pending, a, button, [data-carousel], [data-rail]):not(:is(h1, h2, h3, h4, h5, p, li, figure, blockquote, .media-slot, .media-pending, a, button, [data-carousel], [data-rail]) *):not(.reveal-skip):not(.reveal-skip *) {
     opacity: 0;
-    transform: translateY(var(--spacing-md));
-    transition:
-      opacity var(--transition-duration-spring-snappy) var(--ease-spring-snappy),
-      transform var(--transition-duration-spring-snappy) var(--ease-spring-snappy);
-    /* Stagger. CSS cannot read an integer out of an attribute portably, so the
-       module writes the number into a custom property per child. */
-    transition-delay: calc(var(--reveal-index, 0) * 60ms);
+    transform: translateY(var(--reveal-rise));
   }
 
-  html.js [data-reveal-group][data-reveal='in'] > * {
-    opacity: 1;
-    transform: none;
+  html.js [data-reveal-group] :is(h1, h2, h3, h4, h5, p, li, figure, blockquote, .media-slot, .media-pending, a, button, [data-carousel], [data-rail]):not(:is(h1, h2, h3, h4, h5, p, li, figure, blockquote, .media-slot, .media-pending, a, button, [data-carousel], [data-rail]) *):not(.reveal-skip):not(.reveal-skip *) {
+    /* THE COLOUR PROPERTIES RIDE ALONG, and leaving them out was a bug.
+       `transition` is a shorthand: it REPLACES whatever was there. These rules
+       are unlayered so they beat Tailwind, which is what makes the reveal work
+       at all — and it also meant a button's own
+       `transition-[color,background-color,border-color]` was overwritten, so
+       hovering any button in a revealed section changed its colours instantly
+       with no ease. Reported as "buttons have no colour transition", and it
+       was this rule taking it away rather than the button losing it.
+
+       Listing them here with the button's own timing restores it. Headings and
+       paragraphs carry the same declarations and never change colour, so it
+       costs them nothing. */
+    transition:
+      opacity var(--duration-reveal) var(--ease-reveal),
+      transform var(--duration-reveal) var(--ease-reveal),
+      color var(--transition-duration-spring-soft) var(--ease-spring-soft),
+      background-color var(--transition-duration-spring-soft) var(--ease-spring-soft),
+      border-color var(--transition-duration-spring-soft) var(--ease-spring-soft);
+    /* The stagger delays the ARRIVAL only. A hover happens long after, and a
+       delay on it would feel like the button was ignoring the pointer. */
+    transition-delay: calc(var(--reveal-index, 0) * var(--reveal-stagger)), calc(var(--reveal-index, 0) * var(--reveal-stagger)), 0s, 0s, 0s;
   }
+
+/* LENIS OWNS THE SCROLL WHEN IT IS RUNNING (§12.4). Two smoothing systems on
+   one scroll fight each other, and the visible result is an anchor jump that
+   eases, stops and eases again. The class is set by Lenis itself, so these
+   rules apply only while it is actually driving — with scripting off, under
+   reduced motion, or if the module fails to load, the CSS smoothing above
+   stands and nothing here applies. */
+html.lenis {
+  scroll-behavior: auto;
+}
+
+html.lenis,
+html.lenis body {
+  height: auto;
+}
+
+/* Native scroll-snap regions keep their own wheel. */
+html.lenis.lenis-smooth [data-lenis-prevent] {
+  overscroll-behavior: contain;
 }
 
 @media (prefers-reduced-motion: reduce) {
@@ -1546,7 +1623,7 @@
 
   /* §12.3 — reveals render their content VISIBLE, with no animation, never
      hidden. Matches the shipping selector, not the pre-wiring one. */
-  [data-reveal-group] > * {
+  [data-reveal-group] * {
     opacity: 1 !important;
     transform: none !important;
     filter: none !important;
@@ -3527,43 +3604,16 @@
   }
 }
 
-/* --- The button's square mark --------------------------------------------
-   A hover state, not a rest state: every filled and outlined button grows a
-   small square before its label when the pointer crosses it, and shows nothing
-   at rest — which is what all three of the v1 button scenarios draw.
+/* --- The button's square mark: REMOVED -----------------------------------
+   Every filled and outlined button grew a small square before its label on
+   hover, and opened 8px of left padding to seat it. Removed on instruction:
+   hover is a colour change and nothing else.
 
-   IN THE LEFT PADDING, NOT IN FLOW. Holding its width in the flex row would
-   push the label about 10px right of centre at rest, on every button on the
-   site. Absolute costs nothing: the mark adds no width in either state, so the
-   only thing that moves on hover is the padding pair the button itself swaps —
-   24/32 to 32/24 — which slides the label across without changing the button's
-   own width. See `hasMark` in Button.astro.
-
-   OPACITY ONLY (§12.3). It is the one property here the compositor can animate
-   without touching layout, and the mark has nowhere to travel from.
-
-   `:focus-visible` as well as `:hover`, because a keyboard user reaching this
-   button should see the same state a pointer user does. */
-@layer components {
-  .btn-mark {
-    position: absolute;
-    /* Inside the resting 24px padding, and clear of the label once the hover
-       has slid it 8px across. */
-    left: 0.875rem;
-    display: flex;
-    align-items: center;
-    opacity: 0;
-    pointer-events: none;
-    transition: opacity var(--transition-duration-spring-soft) var(--ease-spring-soft);
-  }
-
-  @media (hover: hover) {
-    .btn-has-mark:hover .btn-mark {
-      opacity: 1;
-    }
-  }
-
-  .btn-has-mark:focus-visible .btn-mark {
-    opacity: 1;
-  }
-}
+   WHAT WENT WITH IT, because it was never only a decoration. The mark needed
+   `position: relative` on its button to have something to be absolute inside,
+   and that single property is what once made every button the containing block
+   for `.category-card-link::after` and killed the whole-card hit area on nine
+   cards (see scripts/verify/pointer.mjs). It also needed `padding` in the
+   button's transition list — a layout property, animated deliberately — and
+   an asymmetric hover padding pair. All three are gone with it. The button is
+   a simpler object now than it has been since v1. */

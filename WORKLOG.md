@@ -7563,3 +7563,156 @@ the SUM ACROSS PAGES, not what anyone downloads; no visitor fetches more than
 332 B of this.
 
 verify: 10 checks, 1183 assertions, 0 failures.
+
+## 2026-10-19 — Entry 86. Reveals go per-element, heroes play on load, and Lenis arrives
+
+### The reference was GSAP; this is not
+
+Supplied as a worked example: a GSAP + ScrollTrigger + SplitText system from
+another site, with the note that it shows how this should work. Taken as a
+BEHAVIOURAL brief rather than a port. GSAP's three pieces are roughly 40 KB
+gzipped against a site shipping 9.7 KB in total, and §12.4 sanctions
+`motion/mini` only and says never a sitewide default. What the reference
+demonstrates — hero on load, DOM-order cascade, media rising, no overshoot —
+is all expressible in CSS driven by two numbers the module supplies.
+
+ONE PIECE OF IT WAS NOT BUILT, and it is the one that genuinely needs a
+library or a lot of code: SplitText's per-LINE reveal. Splitting a paragraph
+into line boxes means measuring them, wrapping each in an element, and
+re-splitting on every resize and font swap — and it freezes line breaks, which
+is why the reference has to keep the splits in the DOM and revert them on
+breakpoint change. Open question 99.
+
+### Per-element, outermost match
+
+The reveal now moves content primitives at any depth — headings, paragraphs,
+standalone links, list items, pictures — rather than a Section's direct
+children. `:not(:is(…) *)` keeps it to the outermost match in any branch, so a
+link inside a paragraph arrives with the paragraph and a heading inside a card
+arrives with the card. Without it a card fades in and then its own contents
+fade in again inside it, which reads as a stutter.
+
+The two horizontal scrollers are listed as items themselves, which means the
+same rule excludes everything inside them. Eight carousel slides each fading
+separately would fight the scroll position they sit in, and they already carry
+an inline transform the carousel owns.
+
+`.reveal-skip` opts a subtree out. A class and not an attribute because Media
+forwards `class` and not arbitrary props, and the first thing that needed it
+was a Media: the closing banner's backdrop photograph. Measured before and
+after — backdrop fading with the copy, then holding still:
+
+```
+  before   img 0.96   h2 0.92   p 0.87   a 0.77
+  after    img 1.00   h2 0.96   p 0.93   a 0.88
+```
+
+### Heroes play on load
+
+`reveal="hero"` on a Section marks it `data-reveal-on="load"`: the module
+reveals it once the fonts have settled instead of waiting for an intersection
+that can never come for something already on screen. That also made `about`
+and `contact` eligible, which entry 85 had to leave out — each is a single
+section above the fold.
+
+The hero PICTURE is still not revealed, on any template. It is the LCP element
+on four page types, and an element that starts at `opacity: 0` is not painted,
+so animating it would push LCP out by the length of the animation.
+
+### Three bugs the measurements found
+
+**Buttons snapped instead of easing.** Sampling the hero mid-flight at 500ms:
+heading 0.97, paragraph 0.96, and both buttons 1.00 — the wrong way round.
+Utilities outrank `@layer components`, so Button's own
+`transition-[color,background-color,border-color,padding]` beat the reveal's
+transition; the hiding still worked because nothing competes for `opacity`.
+Fixed by moving the reveal rules OUTSIDE `@layer components` entirely —
+unlayered beats every layer. The cascade then read 0.98 / 0.97 / 0.94 / 0.90,
+monotonically trailing by index.
+
+**And then the fix took the button's own colours with it.** `transition` is a
+shorthand and replaces what was there, so the now-unlayered reveal removed the
+colour easing from every button in a revealed section. Reported as "buttons
+have no colour transition". The colour properties are listed in the reveal's
+transition with the button's own 400ms timing, and `transition-delay` is given
+per property so the stagger delays only the arrival — a delayed hover would
+feel like the button ignoring the pointer.
+
+**axe failed on contrast, correctly and uselessly.** Text at half opacity
+genuinely fails contrast, and axe was sampling mid-fade: `color-contrast` on an
+eyebrow at 390px that is perfectly legible once arrived. The check now drops
+`js` before auditing, which shows everything with no transition — the exact
+state the animation ends in. It audits the page people read rather than one
+frame of it.
+
+### The check caught its own hole, twice
+
+Both of the reveal check's own probes were wrong before the code was:
+
+- It failed any element whose `transform` was not `none`, which caught
+  category-card photographs at their resting `scale(1.02)` and called them lost
+  content. Opacity is the test; a transform is placement, not hiddenness.
+- It flagged FAQ answers inside CLOSED disclosures, sixteen of them across the
+  two longest product pages. Worth recording precisely: checking for a missing
+  box does NOT catch these — `::details-content` leaves a collapsed answer with
+  a client rect, so the obvious test passes it through. The disclosure's own
+  state is the only honest question.
+
+AND THE DRIFT DETECTOR DID NOT WORK, which only the red path showed. The item
+list is written twice — once as a selector in global.css §8, once as a string
+in reveal.ts — so the check asserts that everything the stylesheet hides was
+numbered by the module. Dropping `p` from the module's list PASSED a full run:
+the sample was taken after the read-through, by which point every group had
+arrived, nothing was hidden, and an empty set trivially contains no unindexed
+members. Moved to a fresh load before anything is scrolled to. The same
+injection now fails on eight pages naming the element.
+
+Red paths, both confirmed:
+
+```
+  html.js guard removed       8 pages, 14–28 elements each, scripting off
+  module list drifts (p)      8 pages, named per element
+```
+
+### Lenis
+
+Added on instruction. It is the largest script on the site and the entry says
+so: native scrolling is correct, interruptible, accessible and free, and this
+replaces its feel. 9.7 KB of JavaScript to 16.2 KB, recorded rather than
+buried.
+
+It never starts under `prefers-reduced-motion` — smoothing a scroll is adding
+motion to a gesture the reader controls, which is what §12.3 forbids. Not
+slowed, never constructed. `syncTouch` stays off so a finger keeps the
+platform's own physics. The carousel and the product rail carry
+`data-lenis-prevent`, and `scroll-behavior: smooth` is switched off under
+`html.lenis` because two smoothing systems on one scroll fight.
+
+ON DEFAULTS, and the absence of `duration` is the setting. The first version
+passed `duration: 0.9`, which switches Lenis out of its default lerp mode into
+a fixed-length tween — every wheel tick then takes the same time regardless of
+distance, which is what made it feel slow and heavy. Reported as exactly that.
+The default lerp follows the wheel rather than scheduling against it.
+
+### The button's square mark is gone
+
+Removed on instruction: hover is a colour change and nothing else.
+
+IT WAS NEVER ONLY A DECORATION, which is why this is a net simplification. The
+mark needed `position: relative` on its button — the single property that once
+made every button the containing block for `.category-card-link::after` and
+killed the whole-card hit area on nine cards. It needed `padding` in the
+button's transition list, a layout property animated deliberately. And it
+needed an asymmetric hover padding pair. All three went with it, and `pointer
+targets` confirms the hit areas are unaffected.
+
+verify: 10 checks, 1199 assertions, 0 failures.
+
+### Open questions
+
+99. **No per-line text reveal.** The reference splits headings and paragraphs
+    into line boxes and staggers the lines. It needs measurement, element
+    wrapping, and a re-split on every resize and font swap, and it freezes line
+    breaks until reverted. Worth doing deliberately or not at all.
+
+96 and 98 stand.

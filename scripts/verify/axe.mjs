@@ -46,6 +46,16 @@ export async function axe() {
       for (const path of PAGES) {
         await page.send('Page.navigate', { url: BASE + path });
         await page.sleep(650);
+        /* SETTLE THE REVEALS BEFORE AUDITING (§12.2). A scroll reveal fades
+           text in, and text at half opacity genuinely fails contrast on the
+           way — axe reported `color-contrast` on an eyebrow at 390px that is
+           perfectly legible once it has arrived. The violation was real for
+           about 400ms and meaningless: what a reader reads is the settled
+           page. Dropping `js` makes the stylesheet show everything with no
+           transition, which is exactly the state the animation ends in, so
+           this audits the page people see rather than one frame of it. */
+        await page.eval(`(() => { document.documentElement.classList.remove('js'); return 1; })()`);
+        await page.sleep(120);
         await page.eval(AXE);
         const violations = JSON.parse(
           await page.eval(

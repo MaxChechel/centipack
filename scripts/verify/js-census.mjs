@@ -60,10 +60,10 @@ const EXPECTED = [
     maxGzip: 110,
   },
   {
-    id: 'scroll reveal',
+    id: 'smooth scroll + reveal',
     signature: /data-reveal-group/,
-    why: 'ARCHITECTURE §12.2/§6 — the one attribute CSS cannot set for itself. Opacity, transform, the spring tokens, the 60ms stagger and every fallback are in global.css §8; this observes each group and sets `data-reveal="in"` when it reaches the viewport, then unobserves it, because an entrance is not a state. It CANNOT hide anything: the hidden state belongs to the stylesheet and is armed before this file is fetched, so a failure here leaves visible content that simply did not animate. Writing the reveal in JavaScript instead would animate on the main thread and STILL need the CSS for reduced motion.',
-    maxGzip: 420,
+    why: 'TWO MODULES, ONE ENTRY, because one chunk is what dist actually contains — the same ruling the nav disclosure entry makes. BaseLayout imports both, Rollup merges them, and a census that reports modules the bundler merged is a census describing source rather than output. The split: the reveal module measured 276 B gzipped on its own before Lenis arrived, so Lenis is ~5,589 B of this line. REVEAL (§12.2) does the two things CSS cannot: it counts the revealable elements in a container so each can be delayed by its position, and it says when a container has arrived; opacity, transform, the curve and the stagger are all CSS, and it cannot hide anything — a failsafe un-hides the page at 3s. LENIS (§12.4) is the largest script on this site and is here because it was asked for by name, not because the platform fell short: native scrolling is correct, interruptible, accessible and free, and this replaces its feel with an eased one. It never starts under prefers-reduced-motion, never touches touch scrolling (syncTouch off), and the two native scroll-snap regions opt out with data-lenis-prevent. It takes the site from 9.7 KB of JavaScript to 16.2 KB, which is the real price and is recorded rather than buried.',
+    maxGzip: 6200,
   },
   {
     id: 'carousel centre',

@@ -36,17 +36,58 @@ import { connect, PAGES, BASE } from './lib/cdp.mjs';
 import { result, line, passed } from './lib/report.mjs';
 import { isMain } from './lib/main.mjs';
 
-/** Every group child's painted visibility on the current page. */
+/**
+ * Every revealable element's painted visibility, and whether it was indexed.
+ *
+ * IT WALKS THE WHOLE SUBTREE, not just direct children, because that is what
+ * the stylesheet hides: content primitives at any depth, outermost match only.
+ * Checking children alone would have missed every heading and paragraph on the
+ * site the moment the reveal went per-element.
+ *
+ * `unindexed` IS THE DRIFT DETECTOR. The item list is written twice — once in
+ * global.css §8 as a selector, once in src/scripts/reveal.ts as a string — and
+ * a list that drifts means the stylesheet hides something the module never
+ * counts. Such an element gets no `--reveal-index`, so no delay, so it arrives
+ * out of sequence; and if the drift goes the other way it is hidden by a rule
+ * with nothing to reveal it. This reports anything hidden that the module did
+ * not number, which catches both directions without comparing the two lists as
+ * text.
+ */
 const PROBE = `JSON.stringify(function(){
+  var ITEMS = 'h1, h2, h3, h4, h5, p, li, figure, blockquote, .media-slot, .media-pending, a, button, [data-carousel], [data-rail]';
   var groups = document.querySelectorAll('[data-reveal-group]');
-  var out = { groups: groups.length, hidden: [], js: document.documentElement.classList.contains('js') };
+  var out = { groups: groups.length, items: 0, hidden: [], unindexed: [],
+              js: document.documentElement.classList.contains('js') };
   for (var g = 0; g < groups.length; g++) {
-    var kids = groups[g].children;
-    for (var k = 0; k < kids.length; k++) {
-      var cs = getComputedStyle(kids[k]);
-      if (Number(cs.opacity) < 0.99 || cs.transform !== 'none') {
-        out.hidden.push('group ' + g + ' child ' + k + ' opacity=' + cs.opacity +
-                        ' transform=' + (cs.transform === 'none' ? 'none' : 'translated'));
+    var all = groups[g].querySelectorAll(ITEMS);
+    for (var i = 0; i < all.length; i++) {
+      var el = all[i];
+      /* Outermost match only, mirroring the stylesheet. */
+      if (el.parentElement && el.parentElement.closest(ITEMS)) continue;
+      if (el.closest('.reveal-skip')) continue;
+      /* A COLLAPSED DISCLOSURE IS NOT A FAILED REVEAL. An FAQ answer inside a
+         closed details element sits at zero opacity because that is how the
+         disclosure animates open, and the reveal never touched it - the group
+         around it is already marked arrived. It reported sixteen phantom
+         failures across the two longest product pages.
+
+         Checking for a missing box does NOT catch these, which is worth
+         recording: ::details-content leaves the collapsed answer with a client
+         rect, so the obvious test passes it straight through. The disclosure's
+         own state is the only honest question. */
+      if (el.closest('details:not([open])')) continue;
+      out.items += 1;
+      var cs = getComputedStyle(el);
+      var label = 'group ' + g + ' <' + el.tagName.toLowerCase() + '>';
+      /* OPACITY IS THE TEST, and transform deliberately is not. The first
+         version failed any element whose transform was not 'none', which
+         caught category-card photographs sitting at their resting scale(1.02)
+         and called them hidden content. What this check guards is whether a
+         word can be READ; an element with a transform of its own is not
+         hidden, it is placed. */
+      if (Number(cs.opacity) < 0.99) {
+        out.hidden.push(label + ' opacity=' + cs.opacity);
+        if (!el.style.getPropertyValue('--reveal-index')) out.unindexed.push(label);
       }
     }
   }
@@ -118,6 +159,30 @@ export async function reveal() {
          arrive. So the probe has to visit them. */
       await page.send('Page.navigate', { url: BASE + path });
       await page.sleep(900);
+
+      /* THE DRIFT SAMPLE IS TAKEN HERE, BEFORE ANYTHING IS SCROLLED TO, and
+         the timing is the whole point. Everything below the fold is still
+         hidden and has already been indexed by the module, so a stylesheet
+         that hides something the module does not know about shows up as a
+         hidden element with no number.
+
+         The first version sampled this AFTER the read-through and never fired:
+         by then every group had arrived, nothing was hidden, and an empty set
+         of hidden elements trivially contains no unindexed ones. Dropping `p`
+         from the module's list passed a full run. Caught by injecting that
+         exact drift and watching the check stay green — which is the §9 rule
+         doing its job on the check rather than on the code. */
+      const fresh = JSON.parse(await page.eval(PROBE));
+      checks += 1;
+      if (fresh.unindexed.length) {
+        failures += 1;
+        notes.push(
+          `REVEAL ITEM LIST HAS DRIFTED — ${path}: ${fresh.unindexed.length} element(s) hidden ` +
+            `by the stylesheet carry no --reveal-index. First: ${fresh.unindexed[0]}. ` +
+            `global.css §8 and src/scripts/reveal.ts no longer agree on what reveals.`,
+        );
+      }
+
       for (let i = 0; i < off.groups; i += 1) {
         await page.eval(
           `(() => { const g = document.querySelectorAll('[data-reveal-group]')[${i}];
@@ -125,7 +190,10 @@ export async function reveal() {
         );
         await page.sleep(260);
       }
-      await page.sleep(600);
+      /* LONG ENOUGH FOR THE WHOLE CASCADE. 820ms of transition plus up to a
+         dozen 65ms steps; sampling at 600ms caught headings at 0.999971 and
+         reported them as content that never arrived. */
+      await page.sleep(2200);
       const live = JSON.parse(await page.eval(PROBE));
 
       checks += 1;
@@ -143,7 +211,7 @@ export async function reveal() {
 
     if (failures === 0) {
       notes.push(
-        `${groupsSeen} reveal group(s) across ${checks / 3} page(s) — visible with scripting ` +
+        `${groupsSeen} reveal group(s) across ${checks / 4} page(s) — visible with scripting ` +
           `off, visible under reduced motion, and arriving on scroll (${revealed} page(s) confirmed)`,
       );
     }

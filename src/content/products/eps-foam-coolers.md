@@ -4,7 +4,7 @@ pageTitle: "EPS foam coolers with matched corrugated outers"
 slug: eps-foam-coolers
 category: cold-chain-shipping
 order: 4
-summary: "Rigid systems, corrugated outer included · 48–72 hour hold"
+summary: "Corrugated outer included"
 descriptor: >-
   Reliable insulation. Rigid protection. · Proven thermal performance. Built-in strength.
 lede: >-

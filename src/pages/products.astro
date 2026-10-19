@@ -36,7 +36,7 @@ const cta = await closingBand();
 <BaseLayout
   pageType="CollectionPage"
   title="Everything a compounding pharmacy ships — CentiPack"
-  description="Three integrated layers — the temperature-controlled shipper, the custom secondary packaging, and the primary format the medication is dispensed in."
+  description="Three layers, nested — the cold chain build, the custom box inside it, and the format the medication ships in."
 >
   {/* 1 — Hero. The lede sits in a second column, bottom-aligned with the h1. */}
   {/* `spaceTop="lg"`, not the shared `nav` step: the design draws the category
@@ -49,16 +49,27 @@ const cta = await closingBand();
         <Breadcrumb trail={[{ label: 'Home', href: '/' }, { label: 'Products' }]} />
         <h1 class="text-h1 text-primary">Everything a compounding pharmacy ships</h1>
       </div>
-      {/* The client's own line, supplied directly, replacing the v8 deck's
-          "The shipper, the custom box, and the format inside — three layers,
-          one supplier. Additional configurations engineered to your spec."
-          Same ruling as the home hero (WORKLOG 44, 45): a string handed over
-          outranks the deck, and both sit here so the next revision is a
-          decision rather than an excavation. */}
+      {/* FIGMA, AND THAT IS A REVERSAL WORTH RECORDING. This slot has held
+          three lines now: the v8 deck's, then a string the client supplied
+          directly — which WORKLOG 44/45 ruled outranked the deck — and now the
+          v1 frame's (Figma 1007:12982). The standing instruction is that Figma
+          is the source of truth for copy, which overturns that earlier ruling
+          rather than sitting beside it.
+
+          The two it replaces are kept here so the next revision is a decision
+          rather than an excavation:
+            v8 deck    "The shipper, the custom box, and the format inside —
+                        three layers, one supplier. Additional configurations
+                        engineered to your spec."
+            supplied   "Three integrated layers — the temperature-controlled
+                        shipper, the custom secondary packaging, and the
+                        primary format the medication is dispensed in. A
+                        representative selection of our capabilities, with
+                        additional configurations engineered to your
+                        specification." */}
       <p class="text-body text-secondary md:col-span-4 md:col-start-9">
-        Three integrated layers — the temperature-controlled shipper, the custom secondary
-        packaging, and the primary format the medication is dispensed in. A representative selection
-        of our capabilities, with additional configurations engineered to your specification.
+        Three layers, nested — the cold chain build, the custom box inside it, and the format the
+        medication ships in. A selection of what we produce; if you need something else, we make it.
       </p>
     </div>
   </Section>

@@ -3,7 +3,7 @@ title: "Gel packs"
 slug: gel-packs
 category: cold-chain-shipping
 order: 1
-summary: "3–32 oz · regular, flat-profile, and condensation-controlled"
+summary: "3–32 oz · 4 variants"
 # NO DESCRIPTOR AND NO CONTACT LINK. The gel packs hero is the one of the five
 # drawn without the eyebrow line under its H1, and its tertiary button is
 # present in the file but hidden (Figma 1207:3804). Both fields self-skip.

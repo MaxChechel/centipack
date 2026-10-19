@@ -4,7 +4,7 @@ pageTitle: "Pharmacy formats"
 slug: pharmacy-formats
 order: 3
 summary: >-
-  The format the medication ships in — produced to pharmaceutical standards.
+  What the medication itself ships in — same supplier, same invoice.
 lede: >-
   Produced to pharmaceutical standards. Available individually or as part of a complete solution.
 cardBody: >-
@@ -31,5 +31,5 @@ cardThumb:
   alt: >-
     Five navy CentiPack containers grouped together — two screw-top jars, a tall dispenser, a pump bottle, and a wide jar standing open on its threaded neck.
 guideLinkLabel: >-
-  Browse pharmacy formats
+  How to choose a format
 ---

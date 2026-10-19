@@ -40,7 +40,7 @@ const aboutPicture = await toPageImage(
 <BaseLayout
   pageType="AboutPage"
   title={`About — ${SITE.name}`}
-  description="We come from Centigrade Logistics, a cold chain operation — running one teaches you which packaging holds and which fails."
+  description="Our background is Centigrade Logistics, a cold chain logistics operation. Moving product at 2–8°C teaches you which packaging holds and which fails."
 >
   <Section width="narrow" spaceTop="nav" space="lg" reveal="hero">
     <div class="gap-2xl flex flex-col items-center">
@@ -64,27 +64,41 @@ const aboutPicture = await toPageImage(
       />
 
       <div class="gap-2xl flex flex-col">
+        {/* VERBATIM FROM FIGMA 1005:14620, replacing the copy that stood here
+            before. The design runs four paragraphs where this ran three, drops
+            the "20+ years of combined cold-chain experience" line entirely —
+            it still appears in the home hero — and ends the closer two
+            sentences in rather than three.
+
+            ONE WORD IS NOT VERBATIM, and it is recorded rather than quietly
+            fixed: the frame reads "high-volume fulfilment". Every other
+            instance of the word on this site is "fulfillment", and a single
+            British spelling on a US pharmaceutical site reads as a typo rather
+            than a choice. Taken as a slip in the frame, not a copy decision.
+            Open question 101. */}
         <div class="prose">
           <p>
-            We come from Centigrade Logistics, a cold chain operation — running one teaches you
-            which packaging holds and which fails.
+            Our background is Centigrade Logistics, a cold chain logistics operation. Moving product
+            at 2–8°C teaches you which packaging holds and which fails.
           </p>
           <p>
-            Pharmacies scaling into high-volume fulfillment found a fragmented market: gel packs
-            here, coolers there, a distributor marking up both. CentiPack is the single supplier —
-            shipper, refrigerant, custom box, and the formats inside — produced through our own
-            partners and sold direct. That keeps pricing sharp and supply dependable, from hundreds
-            of packages a week to tens of thousands.
+            When compounding pharmacies moved into high-volume fulfillment, they found a fragmented
+            market — one company selling gel packs, another coolers, a distributor marking up both.
           </p>
           <p>
-            Behind it: 20+ years of combined cold-chain experience across logistics, pharmaceutical
-            distribution, and temperature-sensitive fulfillment.
+            CentiPack is that single supplier — shipper, refrigerant, custom box and the formats
+            inside. We produce through our own manufacturing partners and sell direct, which is what
+            keeps pricing competitive and supply dependable at volume.
+          </p>
+          <p>
+            That capacity runs from hundreds of packages a week to tens of thousands — for
+            pharmaceutical, healthcare and other temperature-sensitive products — without giving up
+            consistency, service or speed.
           </p>
         </div>
 
         <p class="text-h5 text-primary measure">
-          Cold chain is what we know. Scale is what we are built for. And one dedicated contact is
-          all you need.
+          Cold chain is what we do. Scale is what we are built for.
         </p>
       </div>
     </div>

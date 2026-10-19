@@ -4,7 +4,7 @@ pageTitle: "Thermal box liners"
 slug: thermal-liners
 category: cold-chain-shipping
 order: 5
-summary: "Paper, PET and foam · 24–48 hour 2–8°C"
+summary: "Curbside recyclable"
 descriptor: >-
   Fitted paper-based, PET, and foam insulation for shipping cartons · Insulation for your box to perform.
 lede: >-

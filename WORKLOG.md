@@ -8058,3 +8058,105 @@ PAGES note in scripts/verify/lib/cdp.mjs — every section type they declare is
 already instantiated there).
 
 verify: 10 checks, 1199 assertions, 0 failures.
+
+## 2026-10-19 — Entry 92. Copy audited against Figma, page by page
+
+Instruction: check every page, update copy where needed, especially the FAQs,
+with Figma as the source of truth.
+
+### Method, because "check every page" needs one
+
+Pulled the whole v1 page as metadata (node 1005:12985) and extracted every text
+layer name — in this file the layer name IS the copy. Normalised both sides for
+quotes, dashes, arrows and case, then diffed 225 design strings against the
+text of all twelve built pages. 56 came back missing; most were artefacts, and
+sorting them BY OWNING FRAME is what separated the real ones:
+
+```
+  Products index v1          16   real
+  About                       1   real
+  Contact                     2   real (one a placeholder attribute)
+  Product family (CMS)       15   SUPERSEDED template, not a page
+  per-product v1 frames       1   breadcrumbs only
+  Category frames             1   a scaffold table
+  everywhere                 20   "IMAGE: …" photography briefs
+```
+
+THE SUPERSEDED FRAME IS THE POINT OF THE EXERCISE. "Product family (CMS)" is a
+generic template still carrying Insulated Metallic Mailers copy that differs
+from the shipping page. Taking the diff at face value would have rewritten a
+correct product page from a stale draft. The five per-product frames are the
+authority, and against those our pages differ by nothing but breadcrumbs.
+
+### The FAQs were already right
+
+All four, checked question by question and answer by answer against their own
+frames:
+
+```
+  PuncturePack                 7 of 7    exact
+  Insulated metallic mailers   8 of 8    exact
+  EPS foam coolers            10 of 10   exact
+  Thermal liners               9 of 9    exact
+```
+
+34 of 34, word for word, including the typographic quotes and the ″ marks.
+Nothing to change. Worth recording that the check ran: "I verified and it
+matches" and "I did not look" produce the same diff.
+
+### What did change
+
+**/products, sixteen strings.** The hero lede, all three category standfirsts,
+all three guide link labels, and every one of the thirteen product card
+sublabels. The design's are terser than what stood here: "The 2–8°C range,
+specified as one system." for a sentence about refrigerants and transit
+windows, "Expands at pack-out" for "Self-expanding insulation · low dimensional
+weight".
+
+The hero lede is a REVERSAL and is marked as one in the file. That slot held
+the v8 deck's line, then a string the client supplied directly — which WORKLOG
+44/45 ruled outranked the deck — and now the frame's. Figma being the source of
+truth overturns that earlier ruling rather than sitting beside it. Both
+superseded lines are kept in the comment so the next revision is a decision
+rather than an excavation.
+
+**The cold chain category is renamed.** `title` was "Cold Chain & Shipping",
+from the original brief's nav IA (WORKLOG 8, 72, 308). That name appears
+NOWHERE in the v1 design, which says "Cold chain packaging" in all sixteen
+places it names the category. Verified against the drawn footer rather than
+inferred — its column heading reads COLD CHAIN PACKAGING. This changes the nav,
+the footer, the products index heading and the rail labels.
+
+**About, four paragraphs replacing three**, plus a shorter closer. The design
+drops the "20+ years of combined cold-chain experience" line, which still
+appears in the home hero, and ends at "Cold chain is what we do. Scale is what
+we are built for."
+
+**Contact's standfirst.** The line it replaces promised a reply "typically
+within one business day"; the design makes no timing claim and says who answers
+instead. Dropping a service commitment is the design's call, not ours to keep.
+
+### What was deliberately NOT taken
+
+**The products index card ORDER.** The design draws gel packs, mailers,
+coolers, PuncturePack, liners — but its own FOOTER, on the same frame, draws
+gel packs, PuncturePack, mailers, coolers, liners, which is ours. The design
+disagrees with itself; ours matches the half of it that also matches the brief,
+so nothing moved.
+
+**One word of the About copy.** The frame reads "high-volume fulfilment".
+Every other instance on this site is "fulfillment", and a lone British spelling
+on a US pharmaceutical site reads as a typo rather than a choice. Taken as a
+slip in the frame rather than a copy decision. Open question 101.
+
+**"Contact us to learn more."** on the custom boxes frame sits inside a table
+whose cells are all placeholder "Full name" text — scaffolding, not copy.
+
+verify: 10 checks, 1199 assertions, 0 failures.
+
+### Open questions
+
+101. **"fulfilment" vs "fulfillment" in the About frame.** Shipped American to
+     match the rest of the site. One word, one edit, if the frame is right.
+
+96, 98 and 100 stand.

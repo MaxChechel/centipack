@@ -6,7 +6,7 @@ pageTitle: "PuncturePack™"
 slug: puncture-pack
 category: cold-chain-shipping
 order: 2
-summary: "Self-expanding insulation · low dimensional weight"
+summary: "Expands at pack-out"
 descriptor: >-
   Self-expanding insulated poly mailer · Compact storage · Expanded protection
 lede: >-

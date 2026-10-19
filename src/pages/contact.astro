@@ -141,9 +141,13 @@ const SHIPMENT_RANGES = [
           {/* Same trail the rest of the site carries — see the note on About. */}
           <Breadcrumb trail={[{ label: 'Home', href: '/' }, { label: 'Contact' }]} />
           <h1 class="text-h2 text-primary">Contact us now</h1>
+          {/* Verbatim from Figma 1005:14646. The line it replaces promised a
+              reply "typically within one business day"; the design makes no
+              timing claim and says who answers instead. Dropping a service
+              commitment is the design's call to make, not ours to keep. */}
           <p class="text-body text-secondary measure">
-            No automated sequence — the form goes straight to the team, and you get a build and
-            pricing back, typically within one business day.
+            We come back with a recommended build and pricing. There is no automated sequence behind
+            this form — it goes straight to the team, and the reply comes from whoever can answer it.
           </p>
         </div>
 

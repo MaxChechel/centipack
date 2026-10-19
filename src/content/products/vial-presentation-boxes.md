@@ -3,7 +3,7 @@ title: "Individual product boxes"
 slug: vial-presentation-boxes
 category: custom-boxes
 order: 1
-summary: "A dedicated fit for every product"
+summary: "A dedicated fit for every product."
 images:
   main:
     src: ../../assets/products/vial-presentation-boxes.avif

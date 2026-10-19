@@ -9,7 +9,7 @@ pageHeading: "Custom interior and exterior boxes"
 slug: custom-boxes
 order: 2
 summary: >-
-  The box the patient opens — your size, closure, finish, and print. Produced to pharmaceutical presentation standards.
+  The box the patient opens, made to your specification.
 lede: >-
   From individual vial holders to complete protocol kits and exterior shipping boxes, CentiPack helps you create packaging around your products, your brand, and the way you fulfill orders.
 cardBody: >-
@@ -103,5 +103,5 @@ cardThumb:
   alt: >-
     An open blue mailer box holding two navy jars, a blue slide-out drawer box showing two glass vials, and a white mailer box packed with blue tissue and a small branded blue box.
 guideLinkLabel: >-
-  Browse custom boxes
+  How the layer works
 ---

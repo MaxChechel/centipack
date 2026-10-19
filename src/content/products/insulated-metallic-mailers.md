@@ -3,7 +3,7 @@ title: "Insulated metallic mailers"
 slug: insulated-metallic-mailers
 category: cold-chain-shipping
 order: 3
-summary: "6 sizes · 1 in and 1.5 in wall · 24 and 48-hour 2–8°C"
+summary: "6 sizes · 1–1.5 in wall"
 descriptor: >-
   Self-expanding foam insulation with an elegant, durable outer shell · Compact storage. Premium protection.
 lede: >-

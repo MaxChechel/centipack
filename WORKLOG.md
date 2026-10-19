@@ -8160,3 +8160,59 @@ verify: 10 checks, 1199 assertions, 0 failures.
      match the rest of the site. One word, one edit, if the frame is right.
 
 96, 98 and 100 stand.
+
+## 2026-10-19 — Entry 93. Three centred headings, and an FAQ that opened onto nothing
+
+### The heading alignment, and why one report meant three bugs
+
+Reported: "Why choose PuncturePack" is left-aligned. The design centres it
+(Figma 1189:4082) — heading, icons, titles and copy, the whole block.
+
+FIXING THE REPORTED ONE WOULD HAVE LEFT TWO. Rather than patching the page
+that was named, every text node in the five product frames was scanned for one
+centred in its PARENT frame. Three components were wrong, not one:
+
+```
+  FeatureGrid   "Why choose …" ×4, "Construction"        reported
+  MediaCards    "Which liner is right for you?"          not reported
+  FormatCards   "Available formats & sizes"              not reported
+```
+
+All three had inherited the page's habit — everything else on these pages is
+left-aligned — rather than reading their own section's layout. The cards under
+each were already centred, which is what made the heading look like a mistake:
+it was one.
+
+### The FAQ opened onto nothing
+
+Reported, and it is the reveal's fault.
+
+An FAQ answer lives inside a CLOSED `<details>`. The reveal treated each answer
+paragraph as a content primitive: it SPLIT it into lines and gave each line a
+stagger index — fourteen of them on the PuncturePack page — for text that
+cannot be seen. The indices are the problem. Open an accordion before the
+cascade has counted down to those numbers and the answer is blank: nothing is
+wrong with it in any inspectable sense, and there is nothing to read.
+
+It could not be reproduced by loading the page and clicking, which is why it
+needed reasoning rather than a repro: the window is the length of the cascade,
+and by the time a probe clicks, it has passed.
+
+Fixed the same way the carousel was. `details` joins the item list, so each row
+is ONE item and everything inside it is excluded by the outermost-match rule.
+An answer is now shown by its disclosure and by nothing else:
+
+```
+  before   lines=2 inside the first answer, indices among 14
+  after    lines=0, no index, no hidden state
+```
+
+That also stops the FAQ inflating every stagger index after it.
+
+### No hover on the accordion
+
+Removed on instruction. It tinted the whole disclosure row on hover; on a row
+spanning half the page that reads as a selected state rather than a response to
+the pointer. The summary keeps its pointer cursor and its focus ring.
+
+verify: 10 checks, 1199 assertions, 0 failures.

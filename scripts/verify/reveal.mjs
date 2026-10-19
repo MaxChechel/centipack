@@ -54,7 +54,7 @@ import { isMain } from './lib/main.mjs';
  * text.
  */
 const PROBE = `JSON.stringify(function(){
-  var ITEMS = 'h1, h2, h3, h4, h5, p, li, figure, blockquote, .media-slot, .media-pending, a, button, [data-carousel], [data-rail]';
+  var ITEMS = 'h1, h2, h3, h4, h5, p, li, figure, blockquote, .media-slot, .media-pending, a, button, details, [data-carousel], [data-rail]';
   var groups = document.querySelectorAll('[data-reveal-group]');
   var out = { groups: groups.length, items: 0, hidden: [], unindexed: [],
               js: document.documentElement.classList.contains('js') };

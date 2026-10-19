@@ -31,11 +31,15 @@ const hasContent = cards.length > 0;
 
 {hasContent && (
 <div id={id} class="gap-2xl flex flex-col">
+  {/* CENTRED, AS DRAWN. Found by scanning every heading in the five product
+      frames for one centred in its parent rather than by looking at this page
+      — the same defect was in three components and only one had been
+      reported. See FeatureGrid (Figma 1206:3839 §02) for the other. */}
   {
     headingLevel === 'h3' ? (
-      <h3 class="text-h2 text-primary">{heading}</h3>
+      <h3 class="text-h2 text-primary text-center">{heading}</h3>
     ) : (
-      <h2 class="text-h2 text-primary">{heading}</h2>
+      <h2 class="text-h2 text-primary text-center">{heading}</h2>
     )
   }
 

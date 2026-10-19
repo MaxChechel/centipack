@@ -1558,7 +1558,7 @@
      <head>, NOT by the deferred module: set late, every revealed element would
      paint visible and then snap to hidden, which is a worse artefact than no
      animation at all. */
-  html.js [data-reveal-group]:not([data-reveal='in']) :is(h1, h2, h3, h4, h5, p, li, figure, blockquote, .media-slot, .media-pending, a, button, [data-carousel], [data-rail]):not(:is(h1, h2, h3, h4, h5, p, li, figure, blockquote, .media-slot, .media-pending, a, button, [data-carousel], [data-rail]) *):not(.reveal-skip):not(.reveal-skip *):not(.is-split) {
+  html.js [data-reveal-group]:not([data-reveal='in']) :is(h1, h2, h3, h4, h5, p, li, figure, blockquote, .media-slot, .media-pending, a, button, details, [data-carousel], [data-rail]):not(:is(h1, h2, h3, h4, h5, p, li, figure, blockquote, .media-slot, .media-pending, a, button, details, [data-carousel], [data-rail]) *):not(.reveal-skip):not(.reveal-skip *):not(.is-split) {
     opacity: 0;
     transform: translateY(var(--reveal-rise));
     /* PROMOTED WHILE IT WAITS, and only while it waits. A card holding a
@@ -1571,7 +1571,7 @@
     will-change: opacity, transform;
   }
 
-  html.js [data-reveal-group] :is(h1, h2, h3, h4, h5, p, li, figure, blockquote, .media-slot, .media-pending, a, button, [data-carousel], [data-rail]):not(:is(h1, h2, h3, h4, h5, p, li, figure, blockquote, .media-slot, .media-pending, a, button, [data-carousel], [data-rail]) *):not(.reveal-skip):not(.reveal-skip *) {
+  html.js [data-reveal-group] :is(h1, h2, h3, h4, h5, p, li, figure, blockquote, .media-slot, .media-pending, a, button, details, [data-carousel], [data-rail]):not(:is(h1, h2, h3, h4, h5, p, li, figure, blockquote, .media-slot, .media-pending, a, button, details, [data-carousel], [data-rail]) *):not(.reveal-skip):not(.reveal-skip *) {
     /* THE COLOUR PROPERTIES RIDE ALONG, and leaving them out was a bug.
        `transition` is a shorthand: it REPLACES whatever was there. These rules
        are unlayered so they beat Tailwind, which is what makes the reveal work
@@ -2128,11 +2128,10 @@ html.lenis body {
     block-size: auto;
   }
 
-  @media (hover: hover) {
-    .faq-item:hover {
-      background-color: var(--bg-subtle);
-    }
-  }
+  /* NO HOVER ON THE ROW. It used to tint the whole disclosure on hover.
+     Removed on instruction: the summary is a control with a pointer cursor and
+     a focus ring, and a full-width tint on a row that spans half the page
+     reads as a selected state rather than a response to the pointer. */
 }
 
 /* --- Nav: mobile burger --------------------------------------------------

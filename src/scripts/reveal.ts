@@ -32,10 +32,19 @@
    `reveal contract` check presses the result rather than trusting the pair. */
 const ITEMS =
   'h1, h2, h3, h4, h5, p, li, figure, blockquote, .media-slot, .media-pending, a, button, ' +
-  /* THE HORIZONTAL SCROLLERS ARRIVE AS ONE OBJECT. Listing them here means the
-     outermost-match rule excludes everything inside them — a carousel whose
-     eight slides each faded in separately would fight its own scroll position,
-     and the slides already carry an inline transform the carousel owns. */
+  /* A DISCLOSURE ARRIVES AS ONE OBJECT, and leaving it out was a bug with a
+     report attached. An FAQ answer lives inside a CLOSED <details>, so the
+     reveal was splitting and staggering text nobody could see — fourteen line
+     indices on the PuncturePack page alone. Open an accordion before the
+     cascade reached those indices and the answer was blank: revealed, in the
+     sense that nothing was wrong with it, and empty, in the sense that mattered.
+     Listing `details` makes each row one item and excludes everything inside
+     it, so an answer is shown by the disclosure and by nothing else. */
+  'details, ' +
+  /* THE HORIZONTAL SCROLLERS ARRIVE AS ONE OBJECT, for the same reason — a
+     carousel whose eight slides each faded in separately would fight its own
+     scroll position, and the slides already carry an inline transform the
+     carousel owns. */
   '[data-carousel], [data-rail]';
 
 /**

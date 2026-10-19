@@ -34,6 +34,10 @@ sections:
     imageSide: start
     image:
       label: a custom box with a fitted insert holding a single vial upright
+      picture:
+        src: ../../assets/categories/custom-boxes-individual.avif
+        alt: >-
+          A blue slide-out drawer box with a grosgrain pull tab, opened to show two glass vials seated upright in a white foam insert.
   - type: split
     heading: Complete protocol kits
     subheading: Everything together. Clearly organized.
@@ -42,6 +46,10 @@ sections:
     imageSide: end
     image:
       label: an open protocol kit box with vials, syringes and swabs each in their own cut-out
+      picture:
+        src: ../../assets/categories/custom-boxes-protocol-kits.avif
+        alt: >-
+          An open blue mailer box holding a protocol kit — a navy screw-top jar, two capped vials, a syringe and two sachets, each in its own cut-out.
   - type: split
     heading: Exterior shipping boxes
     subheading: The finishing touch for your shipment.
@@ -50,6 +58,10 @@ sections:
     imageSide: start
     image:
       label: a printed exterior shipping box closed and ready to ship
+      picture:
+        src: ../../assets/categories/custom-boxes-exterior.avif
+        alt: >-
+          An open white corrugated shipping box holding a small blue CentiPack carton beside a blue gel pack marked "Puncture here".
   - type: carousel
     heading: Everything you can customize
     lede: >-

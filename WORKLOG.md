@@ -8307,3 +8307,28 @@ link on /about computes `rgb(14, 42, 70)`.
 
 verify: 10 checks, 1199 assertions, 0 failures — contrast matrix included,
 which is what says the new accent is legal on every ground it lands on.
+
+## 2026-10-19 — Entry 96. Photography for the custom boxes rows
+
+Three pictures for "Thoughtfully packaged. Ready to deliver.", one per split
+row. All three arrived at 1650x1200 — exactly 1.375, which is the 660x480 slot
+the design draws for these rows, so nothing is cropped.
+
+```
+  custom-boxes-individual.avif      1650x1200  51.0 KB
+  custom-boxes-protocol-kits.avif   1650x1200  45.2 KB
+  custom-boxes-exterior.avif        1650x1200  35.5 KB
+```
+
+ASSIGNED BY LOOKING, NOT BY FILENAME. All three arrived as "IMAGE SLOT.png",
+"IMAGE SLOT-1.png" and "IMAGE SLOT-2.png", which says nothing about which row
+each belongs to, and modification order is not an argument. Built a contact
+sheet and read it: a slide-out drawer box holding two vials, an open kit box
+with a jar, vials, a syringe and sachets in cut-outs, and a white exterior
+mailer holding a small blue carton beside a gel pack. That is the page order —
+individual, kits, exterior — but it is the order because the pictures say so.
+
+The eight carousel slides on this page stay as labelled placeholders, which is
+how they were asked for.
+
+verify: 10 checks, 1199 assertions, 0 failures.

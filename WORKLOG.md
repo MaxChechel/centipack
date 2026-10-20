@@ -8964,3 +8964,51 @@ Confirmed after the change — every hero that introduces an image now sits at
 verify: 10 checks, 1218 assertions, 0 failures.
 
 104 and 105 stand.
+
+## 2026-10-20 — Entry 107. The PuncturePack hero and size drawing
+
+```
+  puncture-pack-hero.avif         2816x1584   78,222 B   (was 2560x1440, 61,821 B)   q55
+  puncture-pack-dimensions.avif   1638x1731   47,544 B   (was 1365x1443, 39,623 B)   q60
+```
+
+BOTH MASTERS GREW, which has not been true of a pair in this run. The hero goes
+2560 to 2816 and gains a rung — the ladder now runs 640 / 960 / 1280 / 1920 /
+2400 / 2560 / 2816 where it used to stop at 2560. The drawing goes 1365 to
+1638, still under `SECTION_WIDTHS`' 1980 cap, so it caps higher than it did.
+Measured in `dist/`, not assumed from the source size.
+
+TWO QUALITIES AGAIN, for the same reason as Entry 104. The hero is a photograph
+— smooth cream sweep, navy gloss — and q55 at 17.1 KB/Mpx lands almost exactly
+on the 16.8 the old file carried. The drawing is a technical illustration that
+gets scaled down to 546px in the spec sheet, so it went to q60 rather than the
+q55 that also looked clean: same ruling as the mailer size chart in Entry 102,
+and the consistency is the point. Checked the two things that break first at
+1:1 before choosing — the caption, and the dashed white payload outline on
+navy, whose corners are where a codec rings. Both hold.
+
+### Both alts were already right, again
+
+Second pair in a row. The hero's names three mailers, one flat and compressed,
+two standing expanded, four "Puncture here" targets and the CentiPack logo —
+all four claims are in the frame, counted rather than assumed. The drawing's
+names 12 by 14 inches, the dashed payload outline and 1.375 inches per face;
+the new illustration carries the same numbers.
+
+That is worth recording because it is now the pattern rather than the
+exception: the alts that broke in Entries 100-102 broke because the PICTURE
+changed what it showed — an unbranded carton, a missing zip, a dropped
+compressed mailer. These two are new renders of the same content, so there was
+nothing to correct. Re-reading is still what establishes which case you are in.
+
+### The drawing fits its slot with no crop
+
+546x577, the ratio-derived height from Entry 102's wrapper fix, so every
+callout and the full caption are visible. Before that fix this picture would
+have been stretched to the spec table's row height and cropped at the sides —
+it is the second photograph to land cleanly into a slot that was quietly
+lossy a day ago.
+
+verify: 10 checks, 1218 assertions, 0 failures.
+
+104 and 105 stand.

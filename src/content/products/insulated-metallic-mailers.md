@@ -63,7 +63,7 @@ sections:
       picture:
         src: ../../assets/products/metallic-mailers-how-it-works.avif
         alt: >-
-          Three insulated metallic mailers overlapping — navy in front, white and silver behind — each sealed along a zip closure.
+          Three insulated metallic mailers overlapping — navy in front, white and silver behind — each closed along a flat sealed top edge.
 
   - type: features
     heading: Why choose insulated metallic mailers

@@ -8876,3 +8876,42 @@ default assumption going in was that these would too. They did not.
 verify: 10 checks, 1218 assertions, 0 failures.
 
 104 and 105 stand, both on the mobile hero crop and the 2048 master.
+
+## 2026-10-20 — Entry 105. The mailer "How it works" picture
+
+```
+  metallic-mailers-how-it-works.avif   1650x1400   57,853 B   (was 52,877 B)   q55
+```
+
+Arrived at exactly the size the slot already held, so the ratio this section
+draws is unchanged. q55 at 24.5 KB/Mpx against the 22.3 the old file sat at —
+one notch up rather than down, because three large smooth gradients (navy,
+white, silver foil) are where banding shows first, and the extra 5 KB buys the
+margin.
+
+### The alt claimed a zip, and this frame does not have one
+
+It read "each sealed along a zip closure". The picture it was written for has
+one: a ridged zip strip running the full width, clearly enough that nobody
+would have questioned the sentence. THIS frame does not. Cropped the top edge
+at 1:1 to be sure rather than squinting at a thumbnail — flat sealed seam, no
+ridge, on all three.
+
+That is not a cosmetic difference, which is why it was worth catching. The spec
+sheet on this same page says "Integrated self-seal strip. Additional zip
+closure available on request" — so the zip is the paid option and the self-seal
+is what ships. An alt describing the option as though it were standard
+misdescribes the product to exactly the reader who cannot check the picture.
+
+Rewritten to "each closed along a flat sealed top edge", which is what is
+visible and claims nothing the photograph does not show. Deliberately NOT
+"self-seal strip": that is the spec sheet's language and a fact about the
+product, not something a reader can see in this frame.
+
+Fifth photograph in this run, fourth alt that stopped being true with it. The
+one pair that survived (Entry 104) is the exception, not the rule — the habit
+of re-reading the alt against the file is earning its keep.
+
+verify: 10 checks, 1218 assertions, 0 failures.
+
+104 and 105 stand.

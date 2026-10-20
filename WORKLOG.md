@@ -8770,3 +8770,68 @@ looks like a caption that was always that length.
 verify: 10 checks, 1218 assertions, 0 failures.
 
 104 and 105 stand — both concern the cold chain hero.
+
+## 2026-10-20 — Entry 103. The cold chain hero, branded again
+
+```
+  range-cold-chain.avif   2048x1152   57,776 B   (was 2048x1152, 53,684 B)
+```
+
+AVIF q55, 23.9 KB/Mpx. The gel pack's "Puncture here" marks are the smallest
+type in this frame, so the choice was made by cropping that corner at 1:1 and
+reading it rather than by the byte count.
+
+### Checked against the 4096 original before installing it
+
+Entry 100 swapped this slot to an UNBRANDED version of the shoot and recorded
+two consequences. This file is branded again, so the first question was whether
+it is simply the picture that stood here before Entry 100 — in which case
+restoring the 4096 original out of git would have been strictly better than
+installing a 2048 one.
+
+It is not. Pulled `28b21e5^:src/assets/categories/range-cold-chain.avif` and
+read both:
+
+```
+  original (4096)   "PUNCTURE HERE" in caps, crosshair marks
+                    box carries the CentiPack logo AND "upright" arrows
+                    group sits smaller in frame, more headroom
+
+  new (2048)        "Puncture here" in title case, pill marks
+                    box carries the logo, no arrows
+                    tighter composition, group fills more of the plate
+```
+
+A later render, not a re-export. So it goes in, and the 4096 file stays
+superseded rather than restored.
+
+### Open question 104 is closed, nearly
+
+The branded/unbranded split between the desktop plate and the art-directed
+mobile crop is gone — both are branded. What is left is a generational
+difference inside the branding: `category-cold-chain-mobile.avif` is cut from
+the OLDER render, so a phone still shows the caps "PUNCTURE HERE" and the
+upright arrows on the box, and a laptop shows the title-case marks and a clean
+box.
+
+That is a different order of problem from the one Entry 100 raised — nobody
+reads the two side by side, and at a glance they are the same photograph — but
+it is not nothing, and it will not fix itself. Downgraded rather than closed.
+
+105 is unchanged: this master is 2048 wide, the same as the one it replaces, so
+`WIDE_WIDTHS` still stops two rungs short of where it did before Entry 100.
+
+The alt gains the detail the frame gained: the gel pack's "Puncture here"
+marks, and the CentiPack box. The rest of the sentence still described the
+arrangement correctly and was left alone.
+
+verify: 10 checks, 1218 assertions, 0 failures.
+
+### Open questions
+
+104. **The cold chain mobile crop is a render behind.** Branded, but the older
+     branding. Wants a portrait cut of the same render as the desktop plate, at
+     or above 1206x1509. Downgraded from Entry 100 — this is a detail
+     mismatch, not branded-against-unbranded.
+
+105 stands. 96, 98, 100, 101, 102 and 103 stand.

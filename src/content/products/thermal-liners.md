@@ -12,6 +12,11 @@ lede: >-
 contactLinkLabel: >-
   Request samples & pricing
 images:
+  # The wide shot this page was letterboxing `main` to stand in for.
+  hero:
+    src: ../../assets/products/thermal-liners-hero.avif
+    alt: >-
+      Three white CentiPack cartons side by side on a cream ground, each opened to show a different thermal liner — kraft paper, white foam under clear film, and silver metallised bubble.
   main:
     src: ../../assets/products/thermal-liners.avif
     alt: >-
@@ -30,18 +35,30 @@ sections:
         image:
           label: >-
             Paper-faced liner panels in an open carton
+          picture:
+            src: ../../assets/products/thermal-liners-paper.avif
+            alt: >-
+              A kraft paper liner fitted inside an open white CentiPack carton, its top panel folded back.
       - title: PET
         body: >-
           The moisture-resistant choice, for consistent performance with gel packs.
         image:
           label: >-
             PET liner panels in an open carton
+          picture:
+            src: ../../assets/products/thermal-liners-pet.avif
+            alt: >-
+              A silver metallised bubble liner fitted inside an open white CentiPack carton, its top panel folded back.
       - title: Foam
         body: >-
           The protective choice, for maximum cushioning, a clean surface, and radiant heat reflection.
         image:
           label: >-
             A foam liner shown outside and inside its carton
+          picture:
+            src: ../../assets/products/thermal-liners-foam.avif
+            alt: >-
+              A white foam liner under clear film fitted inside an open white CentiPack carton, its top panel folded back.
 
   # FIGMA BRIEF: short assembly demonstration (doc asks for one per liner type:
   # paper, PET, foam; to be confirmed).

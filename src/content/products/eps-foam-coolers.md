@@ -12,6 +12,13 @@ lede: >-
 contactLinkLabel: >-
   Request samples & pricing
 images:
+  # Same slot the mailers, PuncturePack and gel packs fill. Without it
+  # `heroImage` was letterboxing `main` — a 5:6 card portrait — across the top
+  # of the page.
+  hero:
+    src: ../../assets/products/eps-foam-coolers-hero.avif
+    alt: >-
+      Three white EPS foam coolers on a cream ground — two closed with their lids on, and a larger one open behind them with its lid propped alongside.
   main:
     src: ../../assets/products/eps-foam-coolers.avif
     alt: >-
@@ -65,6 +72,10 @@ sections:
     image:
       label: >-
         An EPS cooler dimension drawing — interior and exterior measurements
+      picture:
+        src: ../../assets/products/eps-foam-coolers-dimensions.avif
+        alt: >-
+          Three white EPS foam coolers side by side with their outer dimensions marked: 8 by 6 by 4 inches, 8 by 6 by 7 inches, and 12 by 10 by 7 inches.
 
   # FIGMA BRIEF: complete packout + sample performance results (tested cooler
   # configuration, payload, refrigerants, conditioning, ambient profile, target
@@ -83,6 +94,10 @@ sections:
     image:
       label: >-
         A complete cooler pack-out with its measured performance
+      picture:
+        src: ../../assets/products/eps-foam-coolers-packout.avif
+        alt: >-
+          A closed white EPS foam cooler with its pack-out laid out in front of it — two gel packs flanking a small navy CentiPack carton.
 
   # FIGMA BRIEF: EPS cooler inside a branded outer carton, with refrigerants and
   # inner packaging alongside.
@@ -100,6 +115,10 @@ sections:
     image:
       label: >-
         An EPS cooler in a branded outer carton, with its refrigerants alongside
+      picture:
+        src: ../../assets/products/eps-foam-coolers-branded.avif
+        alt: >-
+          An EPS foam cooler inside a white outer carton printed with the CentiPack logo, its foam lid propped open, with two gel packs and a small navy carton alongside.
 
   - type: numbered
     heading: Applications

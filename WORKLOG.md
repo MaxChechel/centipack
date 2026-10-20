@@ -9165,3 +9165,67 @@ above, is not the same as saying the band is legible.
      it — sampling pixels behind live text, which nothing in §9 does today.
 
 96, 98, 100, 101, 102, 103 and 106 stand. 104 and 105 are closed.
+
+## 2026-10-20 — Entry 111. Seven pictures, and six pending boxes gone
+
+Two pages at once: EPS foam coolers and thermal box liners.
+
+```
+  eps-foam-coolers-hero.avif         3840x2160   104,593 B   q50   (new slot)
+  eps-foam-coolers-dimensions.avif   1638x1593    60,988 B   q60   (was pending)
+  eps-foam-coolers-packout.avif      1980x1440    52,344 B   q60   (was pending)
+  eps-foam-coolers-branded.avif      1980x1440    56,186 B   q60   (was pending)
+
+  thermal-liners-hero.avif           2816x1584    89,993 B   q50   (new slot)
+  thermal-liners-paper.avif          1980x1320    43,694 B   q55   (was pending)
+  thermal-liners-pet.avif            1809x1206    60,625 B   q55   (was pending)
+  thermal-liners-foam.avif           1818x1212    32,187 B   q55   (was pending)
+```
+
+SIX OF THESE REPLACED A LABELLED PENDING BOX — the first time in this run that
+photographs have landed in slots that were drawing "[ image pending ]" to a
+visitor rather than replacing an existing picture. Both pages also gained the
+`hero` slot they never had, so both stop letterboxing their 5:6 card portrait
+across the top.
+
+The EPS hero trimmed 4206 to 3840 (the `WIDE_WIDTHS` cap, and 16:9 exactly at
+that width); the other seven arrived at or under their slot's cap and are
+untouched.
+
+Both heroes took q50 for the reason Entry 109 set out — they are
+`fetchpriority="high"` LCP elements and the bytes are a user cost. Checked what
+breaks first in each before choosing: the EPS hero is white foam on cream, so
+the risk is banding across a near-flat gradient, and the bead texture and the
+hard lid edge both survive. The liner cards' silver metallised bubble is the
+opposite problem — thousands of specular highlights — and q55 keeps every cell
+distinct at 27.1 KB/Mpx, the densest file in the run and earning it.
+
+### The one judgement call: which liner is PET and which is Foam
+
+Paper was unambiguous — kraft. The other two were not, and the page's own copy
+pulls both ways:
+
+> **PET** — the moisture-resistant choice, for consistent performance with gel packs.
+> **Foam** — the protective choice, for maximum cushioning, a clean surface, and radiant heat reflection.
+
+"Radiant heat reflection" argues the silver bubble belongs to Foam. The
+materials argue the other way, and more strongly: a metallised bubble liner IS
+metallised PET — polyester film laminated to bubble — while a foam liner is EPE
+under film, which is what the white one is.
+
+THE FOAM CARD'S OWN BRIEF SETTLES IT. Its label reads "A foam liner shown
+outside and inside its carton" — it asks for both faces, which is only worth
+asking for if the two faces differ. A white foam liner with a reflective inner
+face is exactly that, and it is where "radiant heat reflection" in the card
+body comes from. So the silver bubble is PET and the white one is Foam.
+
+Recorded rather than quietly decided, because the cost of being wrong is a
+product shown under the wrong name, and the fix is swapping two `src` lines.
+
+### Pending boxes remaining
+
+From seventeen to eleven. What is left is three more on the liners page (the
+steps image, the pack-out, the branded carton) and eight on custom boxes, all
+of which are carousel slides.
+
+verify: 10 checks, 1218 assertions, 0 failures.

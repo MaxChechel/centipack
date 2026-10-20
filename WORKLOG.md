@@ -9229,3 +9229,46 @@ steps image, the pack-out, the branded carton) and eight on custom boxes, all
 of which are carousel slides.
 
 verify: 10 checks, 1218 assertions, 0 failures.
+
+## 2026-10-20 — Entry 112. PET and Foam were the wrong way round
+
+Corrects Entry 111. Ruled on by the human: the silver metallised bubble is the
+FOAM liner and the white film-wrapped one is PET — the reverse of what shipped.
+
+Entry 111 recorded the reasoning in full precisely so it could be checked, and
+the part that was wrong is worth naming rather than quietly overwriting. The
+materials argument — that a metallised bubble liner is metallised polyester and
+therefore PET — is true about the film and false about the product. The clue
+that pointed the right way was in the card copy all along: "radiant heat
+reflection" sits under **Foam**, and it describes the silver one. I read that
+clause as a property of a reflective inner face on a white foam liner, which
+was an inference; the clause is simply a description of the picture that
+belongs there.
+
+SWAPPED BY EXCHANGING THE TWO FILES, not the two `src` lines. The alternative
+leaves `thermal-liners-pet.avif` holding a photograph of the foam liner, which
+is a trap for whoever opens the directory next. The filenames keep meaning what
+they say and the content file keeps pointing each card at its own name.
+
+Three strings moved with them, because an alt describes a file:
+
+```
+  PET   now "A white liner under clear film fitted inside an open white CentiPack carton…"
+  Foam  now "A silver metallised bubble liner fitted inside an open white CentiPack carton…"
+  hero  now "…kraft paper, a white liner under clear film, and silver metallised bubble"
+```
+
+The hero names all three in order and had called the middle one "white foam".
+Neither alt now asserts a material — the card title above each one already
+says which it is, and the picture can only show what it looks like.
+
+Verified in the BUILT HTML rather than the DOM, after a first check returned an
+empty set from a selector that did not match:
+
+```
+  Paper  thermal-liners-paper   A kraft paper liner fitted inside an open white…
+  PET    thermal-liners-pet     A white liner under clear film fitted inside an open…
+  Foam   thermal-liners-foam    A silver metallised bubble liner fitted inside an…
+```
+
+verify: 10 checks, 1218 assertions, 0 failures.

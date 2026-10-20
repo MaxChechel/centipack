@@ -9391,3 +9391,33 @@ verify: 10 checks, 1,216 assertions, 0 failures.
      CSS — the dead-class check runs HTML to CSS only.
 
 106 and 107 stand.
+
+## 2026-10-20 — Entry 115. A second render of the EPS size drawing
+
+```
+  eps-foam-coolers-dimensions.avif   1638x1593   60,370 B   q60   (was 60,988 B)
+```
+
+Replaces the file Entry 111 installed this afternoon. Same dimensions, same
+three coolers, same callouts — 8x6x4, 8x6x7 and 12x10x7 — so the alt was
+re-read against the new frame and needed no change.
+
+CHECKED THAT IT WAS ACTUALLY DIFFERENT before doing anything, because two
+near-identical drawings is exactly the case where a swap can be a no-op nobody
+notices. Compared at 400px greyscale against the installed file: mean absolute
+difference 6.95/255, which is a real re-render rather than a re-export.
+
+The same comparison caught something else worth a line: the file arrived twice,
+once before an interrupted turn and once after, and the two are IDENTICAL —
+0.00/255 against each other. So there was one new picture here, not two, and no
+question about which of them to use.
+
+q60, matching what the file it replaces was carrying, and chosen the same way:
+cropped a callout at 1:1 and read it. Arrowheads sharp, numerals clean, the
+thin leader lines unbroken, the EPS bead texture intact. 60,370 B against
+60,988 — within 600 bytes of the old file, which is the density staying put
+while the picture changes.
+
+verify: 10 checks, 1,216 assertions, 0 failures.
+
+106, 107 and 108 stand.

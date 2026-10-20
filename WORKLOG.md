@@ -9092,3 +9092,76 @@ verify: 10 checks, 1218 assertions, 0 failures.
      block, or the middots turned into the list they already are.
 
 96, 98, 100, 101, 102 and 103 stand. 104 and 105 are closed (Entry 108).
+
+## 2026-10-20 — Entry 110. The closing band's picture, and what measuring it found
+
+```
+  cta-banner.avif   3840x1866   97,489 B   q45   (was 4096x2286, 70,421 B)
+```
+
+TRIMMED FROM 5664 ON THE WAY IN. `WIDE_WIDTHS` tops out at 3840 and the plate
+is drawn at 1344px at most, so a 5664-wide master stores 2.2x the pixels of the
+largest file anyone is served. Trimmed to the cap exactly, which is also where
+the file it replaces was over: 4096 was already 256px past it.
+
+The alt is `''` and stays that way — this picture is decorative by ruling in
+`closing-band.ts`, the heading beside it says what it is.
+
+q45. The old file sat at 7.3 KB/Mpx, which is aggressive even for a frame this
+smooth; q45's 13.3 is higher and still well under the heroes. Checked the
+finest thing in the frame — the serif "CentiPack" on the gel pack — at 1:1
+before choosing.
+
+THE NEW CROP IS CLOSER TO THE SLOT. 2.058 against the plate's 2.24, where the
+old file was 1.792: the vertical crop goes from about 20% to about 8%, so more
+of the shot survives.
+
+### White type on a light photograph does not clear AA, and did not before
+
+The band renders `data-theme="dark"`, so the heading is pure white, over a
+photograph that is mostly cream. Measured rather than eyeballed: hid the text
+layer, captured the plate, and sampled every other pixel inside the heading's
+own bounding box.
+
+```
+                min contrast   mean   share of box under 3.0 : 1
+  old banner       2.75        7.85            0.1%
+  new banner       2.57        7.56            0.6%
+```
+
+WCAG AA wants 3.0 : 1 for large text. Both fail it somewhere; the new frame
+fails over a little more of the box. This is NOT something the new picture
+introduced — it is what white type centred on a light photograph does.
+
+THE STRUCTURAL CAUSE IS THE SCRIM GEOMETRY. `.cta-plate-scrim-top` runs
+`rgb(0 0 0 / 0.35)` to transparent and `-bottom` runs transparent to
+`rgb(0 0 0 / 0.5)`, both full-height. They are strongest at the edges and
+cancel to nothing at the vertical centre — which is exactly where the heading
+sits. The scrims protect the two places the type is not.
+
+NOTHING IN THE HARNESS CATCHES THIS, and that is worth stating plainly. The
+contrast matrix tests TOKEN PAIRS — a declared colour against a declared
+ground — and there is no token for "whatever pixel of the photograph happens to
+be behind this glyph". axe marks an element over a background image
+`incomplete` rather than failing it. Ten checks, 1218 assertions, and the one
+place on the site where type sits on a photograph is unasserted by all of them.
+
+NOT FIXED HERE, because the fix is a visible change to the closing band on five
+page types and that is a design call, not a defect to patch under cover of an
+image swap. The cheapest version is a floor on the existing gradients so the
+centre never reaches full transparency; it would darken the band slightly
+everywhere. Open question 107.
+
+verify: 10 checks, 1218 assertions, 0 failures — which, per the paragraph
+above, is not the same as saying the band is legible.
+
+### Open questions
+
+107. **The closing band's heading does not clear AA over its photograph.**
+     2.57 : 1 at worst against 3.0, over about 0.6% of the heading's box, on
+     every page that ends with the band. Fix is a floor on the scrim gradients
+     so the vertical centre keeps some density; cost is a slightly darker band
+     sitewide. Needs a design ruling, and then a check that can actually assert
+     it — sampling pixels behind live text, which nothing in §9 does today.
+
+96, 98, 100, 101, 102, 103 and 106 stand. 104 and 105 are closed.

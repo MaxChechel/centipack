@@ -9478,3 +9478,64 @@ A check would press each `[data-carousel]` and `[data-rail]` from the centre of
 its own picture and assert the scroll offset moves. Open question 109.
 
 verify: 10 checks, 1,216 assertions, 0 failures.
+
+## 2026-10-20 — Entry 117. A new home hero
+
+```
+  centipack-home-hero.avif   2816x1584   123,692 B   q50   (was 3840x2160, 223,407 B)
+```
+
+A different arrangement of the same range, not a re-render: 44.29/255 mean
+difference against the file it replaces, which is the largest gap of any swap
+in this run. The pouches stand upright side by side where they were stacked
+flat, the gel pack leans against the shipper where it lay on the table, and the
+pump bottle is gone from the frame.
+
+q50, matching the 26.9 KB/Mpx the old file carried at 27.1. This is the home
+page's LCP element so the number is a user cost, and the thing that breaks
+first was checked at 1:1 — the "Puncture here" crosshair marks on the gel pack
+are the smallest type in the picture, and they hold with the navy gloss smooth
+behind them.
+
+### The alt claimed an object that is not there
+
+It listed "a navy pump bottle, a jar of vials and a loose lid". The new frame
+has the jar and the lid and no pump bottle — confirmed by cropping that corner
+at 1:1 rather than deciding from a thumbnail, because "is there a bottle behind
+the jar" is exactly the question a small reproduction cannot answer.
+
+Two other clauses stopped being true with it: "a stack of silver, white and
+navy pouches" (they stand side by side now) and the gel pack, which leans
+rather than lies. Rewritten against the picture. The comment above this string
+has said since Entry 46 that it must be re-read whenever the shot is swapped;
+this is the second time that rule has caught something.
+
+### Two things the swap leaves open
+
+**The master lost a ladder rung.** 3840 to 2816, so `WIDE_WIDTHS` now stops at
+2816. Measured in `dist/`: 640 / 960 / 1280 / 1920 / 2400 / 2560 / 2816 where
+it used to run to 3840. The hero is `sizes="100vw"`, so a 1440 viewport at 2x
+asks for 2880 and gets 2816 — 2% short, which is a far smaller shortfall than
+the cold chain hero's (Entry 100) and not visible at ordinary viewing distance.
+Open question 110.
+
+**The mobile crop is from the old composition.** `centipack-home-hero-mobile.avif`
+is a 1206x1509 portrait cut from the previous shoot, so a phone shows pouches
+stacked flat and a pump bottle while a laptop shows neither. This is the same
+shape of problem as the cold chain hero's Entry 104, and a worse instance of
+it: there the two renders differed in branding detail, here they are different
+arrangements of different objects. The desktop alt now describes only the
+desktop frame. Open question 111.
+
+verify: 10 checks, 1,216 assertions, 0 failures.
+
+### Open questions
+
+110. **The home hero master is 2816 wide, down from 3840.** Top ladder rung
+     gone; a 2x 1440 viewport is served 2816 against the 2880 it asks for.
+
+111. **The home hero's mobile crop is from the previous composition.** A phone
+     and a laptop show different arrangements, and the alt can only describe
+     one of them. Wants a portrait cut of the new shot at or above 1206x1509.
+
+106, 107, 108 and 109 stand.

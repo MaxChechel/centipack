@@ -9012,3 +9012,31 @@ lossy a day ago.
 verify: 10 checks, 1218 assertions, 0 failures.
 
 104 and 105 stand.
+
+## 2026-10-20 — Entry 108. Open questions 104 and 105 are closed, accepted
+
+Ruled on by the human: both states are acceptable as they stand. Recorded as
+accepted rather than deleted, so the next person to notice either one finds the
+decision instead of re-opening it.
+
+**104 — the cold chain mobile hero is a render behind.**
+`category-cold-chain-mobile.avif` is cut from the older render of the shoot, so
+a phone shows the caps "PUNCTURE HERE" marks and the upright arrows on the box
+while the desktop plate shows the title-case marks and a clean box. Nobody sees
+the two side by side, and at a glance they are the same photograph. Accepted.
+Reversing it needs a portrait cut of the new render at or above 1206x1509 —
+the 1760x2128 category card (Entry 104) is from the right render and large
+enough to crop from, if it is ever wanted.
+
+**105 — the cold chain hero master is 2048 wide.**
+Against the 4096 it replaced, so `WIDE_WIDTHS` stops at 2048 rather than
+filling its 2560 and 3840 rungs. A 1440 viewport at 2x asks for 2880 device
+pixels and gets 2048, which softens on a retina screen at desktop width;
+nothing below about 1024 CSS px is affected. Accepted. Reversing it needs a
+4096 export of the branded render — not a re-upscale of this file, which would
+add bytes and no detail.
+
+Neither is a defect in the code and neither has a fix that lives in this repo,
+which is why both sat as questions rather than bugs. They are now answers.
+
+96, 98, 100, 101, 102 and 103 stand.

@@ -9272,3 +9272,45 @@ empty set from a selector that did not match:
 ```
 
 verify: 10 checks, 1218 assertions, 0 failures.
+
+## 2026-10-20 — Entry 113. The last three liner pictures
+
+```
+  thermal-liners-how-it-works.avif   1980x1680   78,033 B   q55
+  thermal-liners-packout.avif        1980x1440   48,559 B   q55
+  thermal-liners-branded.avif        1980x1485   61,337 B   q55
+```
+
+All three replaced a pending box. The branded shot trimmed 2368 to 1980, the
+`SECTION_WIDTHS` cap; the other two arrived at exactly that width already.
+
+q55 across the set. The hardest thing in it is the "how it works" frame, whose
+kraft liner is printed edge to edge with a small repeating CentiPack lockup —
+serif type at maybe 40px in a 1980-wide file, which is where a codec smears
+first. Cropped it at 1:1: the serifs hold, the arrow marks stay square, and the
+kraft fibre texture survives. The other two are ordinary product photographs on
+cream and were never going to be the constraint.
+
+### The thermal liners page has no pending boxes left
+
+Seven pictures on it now, all of them landed inside the last hour, and the
+built page carries no `media-pending` at all:
+
+```
+  hero           Three white CentiPack cartons side by side…
+  paper          A kraft paper liner fitted inside an open white CentiPack carton…
+  pet            A white liner under clear film…
+  foam           A silver metallised bubble liner…
+  how-it-works   A kraft paper liner printed all over with the CentiPack logo…
+  packout        An open white CentiPack carton with a kraft paper liner…
+  branded        An open blue carton printed with the CentiPack logo…
+```
+
+SITEWIDE THE COUNT IS NOW EIGHT, down from seventeen this morning, and all
+eight are the custom boxes carousel. Every product page that is not custom
+boxes is fully photographed. Media's pending-box branch is still load-bearing
+and stays until those eight land — §9's note about collapsing this component
+to the `<img>` branch is a Phase 4 item, not something to do while a page still
+needs it.
+
+verify: 10 checks, 1218 assertions, 0 failures.

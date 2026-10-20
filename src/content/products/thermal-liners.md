@@ -77,6 +77,10 @@ sections:
     image:
       label: >-
         A thermal liner being fitted, packed and sealed
+      picture:
+        src: ../../assets/products/thermal-liners-how-it-works.avif
+        alt: >-
+          A kraft paper liner printed all over with the CentiPack logo, fitted inside an open white carton marked RUSH, PERISHABLE and INSULATED, with the liner's top panel folded back.
 
   - type: features
     heading: Why choose CentiPack thermal liners
@@ -115,6 +119,10 @@ sections:
     image:
       label: >-
         A complete liner pack-out with its measured performance
+      picture:
+        src: ../../assets/products/thermal-liners-packout.avif
+        alt: >-
+          An open white CentiPack carton with a kraft paper liner fitted inside and its top panel folded back, two gel packs lying in front of it.
 
   # FIGMA BRIEF: thermal box liner inside a branded outer carton, alongside the
   # refrigerants and inner packaging.
@@ -132,6 +140,10 @@ sections:
     image:
       label: >-
         A thermal liner in a branded outer carton, with its refrigerants alongside
+      picture:
+        src: ../../assets/products/thermal-liners-branded.avif
+        alt: >-
+          An open blue carton printed with the CentiPack logo, a kraft paper liner fitted inside with its top panel folded back, and two gel packs with a small navy product box alongside.
 
   - type: numbered
     heading: Applications

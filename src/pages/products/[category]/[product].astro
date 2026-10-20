@@ -163,7 +163,23 @@ const sectionGround = (section: ProductSection, index: number): string =>
   title={`${product.pageTitle} — ${category.title} | ${SITE.name}`}
   description={product.lede ?? `${product.title} — ${product.summary}. ${category.summary}`}
 >
-  <Section spaceTop="nav" spaceBottom="lg" class="bg-subtle" reveal="hero">
+  {/* `spaceBottom="sm"`, NOT `lg`, and the whole reason is the picture below.
+      This hero is copy followed by a full-bleed plate, and the gap between the
+      two is the section's bottom padding — so `lg` put 120px between the lede
+      and the photograph it introduces, against the 48px the home and category
+      heroes leave for exactly the same pairing. Measured, not guessed:
+
+        home      pt-section-nav  pb-section-sm   48px
+        category  pt-section-lg   pb-section-sm   48px
+        product   pt-section-nav  pb-section-lg  120px   <- the odd one
+
+      Fixed here rather than by redefining `.pb-section-lg`, which is what the
+      instruction described: that utility is the `lg` step for every section on
+      the site, and moving it would quietly close the gap under a dozen
+      sections that have no picture under them and want the air. The rule is
+      "a hero whose next element is its own image sits at `sm`", and the place
+      to say that is the hero. Contact keeps `lg` — it has no picture. */}
+  <Section spaceTop="nav" spaceBottom="sm" class="bg-subtle" reveal="hero">
     {/* TOP-ALIGNED, not bottom. The design puts both columns at y=0 of the hero
         row (Figma 1204:3924 and 1204:3928) — the trail and the H1 on the left,
         the lede and its link on the right, both starting at the same line.

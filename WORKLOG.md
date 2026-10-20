@@ -8915,3 +8915,52 @@ of re-reading the alt against the file is earning its keep.
 verify: 10 checks, 1218 assertions, 0 failures.
 
 104 and 105 stand.
+
+## 2026-10-20 — Entry 106. The product hero's picture sat 120px from its copy
+
+Instruction: on hero sections where an image follows the copy, close the gap —
+given as `.pb-section-lg { padding-bottom: var(--spacing-section-sm) }`.
+
+### One section was wrong, not all of them
+
+Measured every hero before changing anything:
+
+```
+  home      pt-section-nav  pb-section-sm    48px
+  category  pt-section-lg   pb-section-sm    48px
+  product   pt-section-nav  pb-section-lg   120px   <- the odd one
+  contact   pt-section-nav  pb-section-lg   120px   (no picture under it)
+```
+
+So this was not a site-wide rule that had never been applied; it was one page
+out of step with the two that already had it right. The product hero is copy
+followed by a full-bleed plate, exactly as the home and category heroes are,
+and it was leaving two and a half times their gap before the photograph it
+introduces.
+
+### Not by redefining the utility
+
+The instruction named `.pb-section-lg`, which is how it reads in devtools, and
+redefining it would have worked for this page. It is also the `lg` step for
+EVERY section on the site — the closing bands, the spec sheets, the contact
+hero — none of which have a picture underneath and all of which want the air.
+That edit fixes one page and silently re-spaces a dozen.
+
+The rule being expressed is narrower than the selector: *a hero whose next
+element is its own image sits at `sm`*. That is a fact about the hero, so it is
+stated on the hero — `spaceBottom="sm"`, the same prop the other two already
+use. One line, no new CSS, and the three heroes now say the same thing in the
+same place rather than one of them being corrected from a stylesheet.
+
+Contact keeps `lg`: no picture, nothing to close the gap to.
+
+Confirmed after the change — every hero that introduces an image now sits at
+48px, and the one that does not is untouched:
+
+```
+  home 48px   category 48px   product 48px   gel-packs 48px
+```
+
+verify: 10 checks, 1218 assertions, 0 failures.
+
+104 and 105 stand.

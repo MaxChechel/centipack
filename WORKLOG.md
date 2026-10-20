@@ -8692,3 +8692,81 @@ against the file every time a photograph moves.
 verify: 10 checks, 1218 assertions, 0 failures.
 
 104 and 105 stand — both concern the COLD CHAIN hero and are untouched by this.
+
+## 2026-10-20 — Entry 102. Three mailer pictures, and the crop one of them exposed
+
+```
+  metallic-mailers-branded.avif      1980x1484   58,682 B   (was 1670x1253, 46,370 B)
+  metallic-mailers-packout.avif      1890x1416   53,898 B   (was 1660x1245, 42,291 B)
+  metallic-mailers-dimensions.avif   1638x1229   49,464 B   (was 1365x1588, 49,031 B)
+```
+
+All AVIF q60, ~19-24 KB/Mpx against the 20-23 the files they replace sat at, so
+the density is unchanged. The size chart is the one that needed looking at
+rather than measuring: it carries dimension callouts and a two-line caption
+burned into the picture, and thin rules and small type are where a codec smears
+first. Cropped the caption band at 1:1 and read it — clean.
+
+BRANDED WAS TRIMMED FROM 2634 TO 1980 ON THE WAY IN. `SECTION_WIDTHS` tops out
+at 1980, so the extra 654px of source is 77% more pixels than any rung serves.
+Same reasoning as the About photograph (Entry 83): the largest file anyone is
+served is the ceiling worth storing. The other two arrived under the cap and
+are untouched.
+
+### The spec picture was being cropped to the table's height
+
+Found by looking at the page after the swap, not by the harness — nothing here
+overflows, nothing fails contrast, and every check stayed green through it.
+
+`SpecSheet` computes `specRatio` from the artwork and says so in its own
+comment: the component follows the picture rather than the other way round. It
+did not. `Media` ships `h-full` on every slot, `height` beats `aspect-ratio`,
+and a grid item's `height: 100%` resolves against its AREA — so the picture
+took whatever row height the spec table set and `object-cover` ate the
+difference off its sides.
+
+INVISIBLE FOR AS LONG AS EVERY SPEC PICTURE WAS PORTRAIT. Puncture Pack's is
+1365x1443, which wants 577px of height at 546 wide against a table of about
+630 — an 8% crop, and it only ever cost that page the last line of its caption.
+The mailers' new chart is landscape: 546 wide wants 409, the table was 691, and
+the crop took the 9" and the 15" mailers out of frame entirely and sliced the
+caption mid-word at "fully expanded f".
+
+```
+  before   .media-slot is the grid item   height: 100%  ->  691px   (ratio lost)
+  after    a div is the grid item         height: 100%  ->  auto    (ratio governs)
+```
+
+FIXED IN THE CASCADE RATHER THAN AGAINST IT. Wrapping the picture in a plain
+div makes the <img>'s `height: 100%` resolve against a box of auto height,
+which computes to `auto`, which lets `aspect-ratio` govern. No `!important`, no
+unlayered override, and no second height utility racing the first inside the
+utilities layer — which is the trap this repo has now hit four times (the nav
+logo's min-width, the reveal transition, the product card arrow, the category
+card's stretched link).
+
+Both spec sheets measured after the change rather than assumed:
+
+```
+  mailers        546x410   ar 1320 / 990
+  puncture pack  546x577   ar 1320 / 1395
+```
+
+Puncture Pack gains its "Measured flat, outside edge to outside edge." line
+back. It was never reported, because a caption that has always been clipped
+looks like a caption that was always that length.
+
+### Two alts and a label stopped being true
+
+- **packout** — the carton in the new frame carries no print. "a small navy
+  CentiPack carton" is now "a small navy carton", and "above a complete
+  pack-out" is "standing behind" it, which is what the picture shows.
+- **dimensions** — the compressed mailer lying flat in front is gone from the
+  frame. The alt named it; so did the slot's `label`, which is the brief shown
+  in the pending box if the file ever goes missing. Both updated.
+- **branded** — unchanged. "printed with a "Your logo here" placeholder" is
+  still exactly what it shows.
+
+verify: 10 checks, 1218 assertions, 0 failures.
+
+104 and 105 stand — both concern the cold chain hero.

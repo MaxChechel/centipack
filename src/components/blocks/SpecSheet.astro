@@ -97,13 +97,33 @@ const hasContent = rows.length > 0;
   </div>
 
   <div class="gap-xl md:gap-lg md:grid md:grid-cols-12 md:items-start flex flex-col">
-    <Media
-      image={image.picture}
-      label={image.label}
-      ratio={specRatio}
-      sizes="(min-width: 90rem) 546px, (min-width: 48rem) 45vw, 100vw"
-      class="rounded-card md:col-span-5"
-    />
+    {/* THE PICTURE IS WRAPPED, AND THE WRAPPER IS THE GRID ITEM.
+        `specRatio` above exists so this block follows the artwork rather than
+        the other way round, and for as long as the <img> was the grid item it
+        did not: `Media` ships `h-full` on every slot, `height` beats
+        `aspect-ratio`, and a grid item's `height: 100%` resolves against its
+        AREA — so the picture took the row height the spec table sets and
+        `object-cover` ate the difference off its sides.
+
+        It was invisible while every spec picture was portrait. The mailers'
+        new size chart is landscape: 546 wide wants 409 of height, the table
+        was 691, and the crop took the 9" and 15" mailers out of frame
+        entirely and sliced the caption mid-word.
+
+        Wrapping it fixes the cascade rather than fighting it. The <img>'s
+        `height: 100%` now resolves against a div of auto height, which
+        computes to `auto`, which lets `aspect-ratio` govern — no `!important`,
+        no unlayered override, no second height utility racing the first in
+        the same layer. Same shape CrossLinks already uses. */}
+    <div class="md:col-span-5">
+      <Media
+        image={image.picture}
+        label={image.label}
+        ratio={specRatio}
+        sizes="(min-width: 90rem) 546px, (min-width: 48rem) 45vw, 100vw"
+        class="rounded-card"
+      />
+    </div>
 
     <div class="gap-md md:col-span-6 md:col-start-7 flex flex-col">
       <table class="spec-sheet">

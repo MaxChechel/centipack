@@ -128,11 +128,11 @@ sections:
       Insulation thickness refers to fully expanded foam on each side of the mailer. Usable interior space depends on the selected size and insulation configuration.
     image:
       label: >-
-        The mailer size range, compressed and fully expanded
+        The mailer size range at true relative scale
       picture:
         src: ../../assets/products/metallic-mailers-dimensions.avif
         alt: >-
-          The insulated metallic mailer size range shown at true relative scale: 9 by 12, 12 by 16 and 15 by 20 inches standing expanded, with a compressed mailer lying flat in front.
+          The insulated metallic mailer size range shown at true relative scale: three navy mailers standing expanded, measured 9 by 12, 12 by 16 and 15 by 20 inches.
 
   # FIGMA BRIEF: complete packout + sample performance results (tested
   # configuration, payload, refrigerants, conditioning, ambient profile, target
@@ -154,7 +154,7 @@ sections:
       picture:
         src: ../../assets/products/metallic-mailers-packout.avif
         alt: >-
-          A silver insulated metallic mailer above a complete pack-out — two gel packs flanking a small navy CentiPack carton.
+          A silver insulated metallic mailer standing behind a complete pack-out — two gel packs flanking a small navy carton.
 
   # FIGMA BRIEF: custom-printed metallic mailer.
   - type: split

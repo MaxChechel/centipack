@@ -9040,3 +9040,55 @@ Neither is a defect in the code and neither has a fix that lives in this repo,
 which is why both sat as questions rather than bugs. They are now answers.
 
 96, 98, 100, 101, 102 and 103 stand.
+
+## 2026-10-20 — Entry 109. The gel packs page gets a real hero
+
+```
+  gel-packs-hero.avif   3423x1925   99,840 B   q50   (new file)
+```
+
+A NEW SLOT, not a replacement. `images.hero` did not exist on this product, so
+`heroImage` was falling back to `images.main` — the 1037x1284 card portrait,
+letterboxed across the top of the page. The adapter's own note called that
+"better than a pending box and no better than that", and said the day a wide
+shot lands `images.hero` picks it up and nothing else moves. It did: one key
+added, no component touched, no ratio declared anywhere — `heroRatio` reads the
+file.
+
+Largest master in the run at 3423 wide, and all of it is usable:
+`WIDE_WIDTHS` tops out at 3840, so every rung up to 3423 generates and nothing
+is stored that cannot be served.
+
+q50, and the reasoning runs the other way from Entry 107's drawing. This hero
+is `loading="eager" fetchpriority="high"` — it is the page's LCP element, so
+bytes are a user-facing cost, not just a repo one. 99,840 B against q55's
+116,554, and the thing that would break first survives: cropped the repeating
+blue arrow motif on the film at 1:1 and every mark stays distinct with the
+film's texture intact. 14.8 KB/Mpx reads low against the other heroes' 17-21,
+but this frame is mostly empty cream — density follows content, not a target.
+
+### The lede on this page is a copy-deck paste
+
+Noticed while checking the hero, not looked for. It renders as one paragraph:
+
+> Built for reliable cold chain performance, our gel packs feature durable,
+> heat-sealed, leak-resistant exteriors that stand up to handling and transit.
+> · Supports 2–8°C chilled shipping applications · Compatible with a variety of
+> cold chain packout systems · Available ambient, refrigerated and frozen ·
+> Custom sizes and formats available · Consistent Performance
+
+A sentence, then five middot-separated fragments, one of which is
+title-cased ("Consistent Performance") where the rest are not. That is a
+feature list that was pasted into a prose field, and it reads as one. Not
+touched: copy is Figma's call, and this is a content decision rather than a
+defect to patch from the repo side. Open question 106.
+
+verify: 10 checks, 1218 assertions, 0 failures.
+
+### Open questions
+
+106. **The gel packs lede is a sentence plus five pasted fragments.** Wants
+     either a real lede with the features moved to a `facts` or `numbered`
+     block, or the middots turned into the list they already are.
+
+96, 98, 100, 101, 102 and 103 stand. 104 and 105 are closed (Entry 108).

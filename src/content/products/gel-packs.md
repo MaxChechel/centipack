@@ -10,6 +10,14 @@ summary: "3–32 oz · 4 variants"
 lede: >-
   Built for reliable cold chain performance, our gel packs feature durable, heat-sealed, leak-resistant exteriors that stand up to handling and transit. · Supports 2–8°C chilled shipping applications · Compatible with a variety of cold chain packout systems · Available ambient, refrigerated and frozen · Custom sizes and formats available · Consistent Performance
 images:
+  # The wide shot this page has been falling back without. `heroImage` took
+  # `main` while no `hero` existed — a 5:6 card portrait letterboxed across the
+  # top of the page, which the adapter calls better than a pending box and no
+  # better than that. Same slot the mailers and PuncturePack already fill.
+  hero:
+    src: ../../assets/products/gel-packs-hero.avif
+    alt: >-
+      Five CentiPack gel packs grouped on a cream ground in a range of sizes, each printed with a repeating pattern of small blue CentiPack arrows.
   main:
     src: ../../assets/products/gel-packs.avif
     alt: >-

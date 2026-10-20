@@ -8835,3 +8835,44 @@ verify: 10 checks, 1218 assertions, 0 failures.
      mismatch, not branded-against-unbranded.
 
 105 stands. 96, 98, 100, 101, 102 and 103 stand.
+
+## 2026-10-20 — Entry 104. The cold chain category cards
+
+```
+  category-cold-chain.avif      1760x2128   57,592 B   (was 45,951 B)   q50
+  category-cold-chain-sm.avif    960x960    25,963 B   (was 24,670 B)   q55
+```
+
+Both cut from the same render as Entry 103's hero — title-case "Puncture
+here", pill marks, the clean CentiPack box — so the category now reads as one
+shoot across the home three-up, the cross-link rows and the page plate.
+
+BOTH ARRIVED AT EXACTLY THE SIZE THEIR SLOT ALREADY HELD: 1760x2128 against
+`CATEGORY_CARD_WIDTHS` topping out at 1970, and 960x960 against
+`CARD_THUMB_WIDTHS` topping out at 960. Nothing to trim and nothing lost, which
+is the first time in this run of photographs that has been true of both at
+once.
+
+TWO DIFFERENT QUALITIES, because the two slots sit at very different densities
+and matching each one beat applying a single number. The square is drawn small
+and was already at 26.1 KB/Mpx, so q55 lands it at 27.5. The portrait card was
+at 12.0 — low, and low enough to be worth testing rather than copying. Cropped
+the box lettering at 1:1 at q50: the serifs on "CentiPack" are crisp, the arrow
+mark's edges are clean, the gradient across the box face does not band. So q50,
+at 15.0 KB/Mpx, which is the closest honest match to what this slot was already
+carrying.
+
+### Both alts were already right
+
+Checked rather than assumed, and this is the first swap in the run where
+nothing had to change. `cardImage` names three pouches in silver, white and
+navy, a gel pack marked "Puncture here" and a branded box holding an EPS cooler
+with its lid off; `cardThumb` says the same of its squarer crop. Every one of
+those is in the new frames. The earlier swaps each broke something in their alt
+— a drawer box that was never there (Entry 100), an arrow on all three mailers
+(Entry 101), a CentiPack carton that lost its print (Entry 102) — so the
+default assumption going in was that these would too. They did not.
+
+verify: 10 checks, 1218 assertions, 0 failures.
+
+104 and 105 stand, both on the mobile hero crop and the 2048 master.

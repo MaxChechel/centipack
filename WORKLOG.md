@@ -9314,3 +9314,80 @@ to the `<img>` branch is a Phase 4 item, not something to do while a page still
 needs it.
 
 verify: 10 checks, 1218 assertions, 0 failures.
+
+## 2026-10-20 — Entry 114. The carousel, and the last pending box on the site
+
+```
+  custom-boxes-box-style.avif        1980x1114   45,768 B
+  custom-boxes-closures.avif         1980x1115   76,423 B
+  custom-boxes-finish.avif           1980x1114   34,877 B
+  custom-boxes-thickness.avif        1980x1113   52,851 B
+  custom-boxes-water-coating.avif    1980x1114   73,062 B
+  custom-boxes-scratch-coating.avif  1980x1114   25,977 B
+  custom-boxes-inserts.avif          1980x1114   50,100 B
+  custom-boxes-branding.avif         1980x1114   38,796 B
+```
+
+Eight slides, eight labels, and the mapping was one-to-one — every brief in the
+carousel described exactly one of the eight frames, so nothing here needed the
+judgement Entry 111 did. All eight arrived between 2166 and 2530 wide and were
+trimmed to the 1980 `SECTION_WIDTHS` cap; the carousel draws at 800px, so 1980
+covers 2x with room and anything above it was storage nobody is served.
+
+q55 across the set, chosen on the two surfaces that break first and verified at
+1:1 rather than by eye: the water-coating frame's droplets, where every
+specular highlight has to survive, and the thickness frame's corrugation
+flutes, which are a fine repeating pattern a codec will happily average away.
+Both hold. The spread in file size — 26 KB for a plain closed box against 76 KB
+for three closures in hard light — is the pictures differing, not the setting.
+
+ORDER VERIFIED IN THE BUILT PAGE, not assumed from the order of the edits:
+
+```
+  Box style  Closures  Finish  Paperboard thickness
+  Water-resistant coating  Scratch-resistant coating  Custom inserts  Color & branding
+    ->  box-style closures finish thickness water-coating scratch-coating inserts branding
+```
+
+A first check paired them wrongly and said so loudly — it zipped titles against
+image matches, and each `<img>` contributes one match per srcset rung, so the
+lists were different lengths and every pair after the first was nonsense. Fixed
+by taking each asset's FIRST appearance. Worth recording because the broken
+version did not error; it printed a confident wrong answer.
+
+### There are no pending boxes left on this site
+
+Seventeen this morning. Zero now. Every image slot on every page holds a
+photograph.
+
+Two classes left the built HTML with them — `media-pending` and `p-sm`, which
+nothing else used — so the dead-class check reads 327 where it read 329, and
+the run is 1,216 assertions against 1,218.
+
+THAT MAKES MEDIA'S PHASE 4 ITEM LIVE. Its own comment has said since it was
+written: "when the last one lands, this component collapses to the `<img>`
+branch and the `slot`/`ratio` props go with it. That removal is the point, and
+it is the thing to check at the Phase 4 gate." The last one has landed.
+
+NOT DONE HERE, and the reason is the rule rather than caution: closing a phase
+is the human's call (CLAUDE.md), and this is the item that phase exists to
+check. It is also not free — `.media-pending`'s CSS is now unreferenced, and
+the dead-class check cannot see it, because it asks only whether every class
+that reaches the browser has a rule behind it, never whether every rule has a
+class. Removing the branch means removing that CSS, the `label` prop, and the
+`label` field from every slot in the content collections, which is a change
+across eleven content files and a component the whole site renders through.
+
+Open question 108.
+
+verify: 10 checks, 1,216 assertions, 0 failures.
+
+### Open questions
+
+108. **Media's pending-box branch is now unreachable.** Every slot is
+     photographed, so the branch, its CSS, and the `label` prop and fields that
+     feed it are dead weight. Removing them is a Phase 4 gate item and touches
+     eleven content files. Note that nothing in §9 would catch the orphaned
+     CSS — the dead-class check runs HTML to CSS only.
+
+106 and 107 stand.

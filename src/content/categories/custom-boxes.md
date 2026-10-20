@@ -71,34 +71,66 @@ sections:
         body: Rigid magnetic or flat-shipped folding
         image:
           label: rigid magnetic box and flat-shipped folding box side by side
+          picture:
+            src: ../../assets/categories/custom-boxes-box-style.avif
+            alt: >-
+              A rigid magnetic-closure box standing open beside a flat-shipped folding mailer, both in blue, on a cream ground.
       - title: Closures
         body: Magnetic, peel-and-seal with tear strip, or pull tabs
         image:
           label: close-ups of magnetic flap, tear strip and pull tab closures
+          picture:
+            src: ../../assets/categories/custom-boxes-closures.avif
+            alt: >-
+              Three blue boxes showing their closures — a magnetic flap folded open, a peel-and-seal tear strip, and a drawer box slid open on its ribbon pull tab.
       - title: Finish
         body: Matte or glossy
         image:
           label: same box in matte and glossy finish under soft light
+          picture:
+            src: ../../assets/categories/custom-boxes-finish.avif
+            alt: >-
+              The same blue mailer box photographed twice side by side, one in a matte finish and one in a glossy finish that catches the light.
       - title: Paperboard thickness
         body: Matched to the strength you need
         image:
           label: stacked board samples showing edge thickness
+          picture:
+            src: ../../assets/categories/custom-boxes-thickness.avif
+            alt: >-
+              Three blue-faced corrugated board samples stacked and offset so their cut edges show, each with a different flute thickness.
       - title: Water-resistant coating
         body: Protects against condensation
         image:
           label: coated box surface with condensation beading off
+          picture:
+            src: ../../assets/categories/custom-boxes-water-coating.avif
+            alt: >-
+              A close view of water droplets beading on the matte blue lid of a coated box.
       - title: Scratch-resistant coating
         body: Arrives looking clean
         image:
           label: pristine box corner and surface detail after transit
+          picture:
+            src: ../../assets/categories/custom-boxes-scratch-coating.avif
+            alt: >-
+              A closed blue mailer box photographed at an angle, its corners and surface unmarked.
       - title: Custom inserts
         body: Paper or EVA foam, cut to fit your product
         image:
           label: paper insert and EVA foam insert holding vials
+          picture:
+            src: ../../assets/categories/custom-boxes-inserts.avif
+            alt: >-
+              Two open blue boxes side by side, one with a paper insert and one with a white EVA foam insert, each holding three glass vials.
       - title: Color & branding
         body: Your colors, logo, and printing
         image:
           label: branded box in client colors with printed logo
+          picture:
+            src: ../../assets/categories/custom-boxes-branding.avif
+            alt: >-
+              Three mailer boxes in blue, green and terracotta, each printed with the same white CentiPack arrow on the lid.
 navBody: >-
   Individual product boxes, protocol kits and exterior shipping boxes, made to your specification.
 navLinkLabel: >-

@@ -9421,3 +9421,60 @@ while the picture changes.
 verify: 10 checks, 1,216 assertions, 0 failures.
 
 106, 107 and 108 stand.
+
+## 2026-10-20 — Entry 116. The carousel stopped dragging when it got pictures
+
+Reported: the custom boxes slider cannot be dragged — grabbing it picks up the
+image instead.
+
+### The regression arrived with the photographs
+
+The carousel has always dragged correctly, and nothing in it changed. Entry 114
+did: every slide was a pending-box `<div>` until this afternoon, and a div is
+not a drag source. The moment the eight slides became `<img>`, the only thing a
+mouse can land on in a slide became an image — and a drag that starts on an
+image is the browser's own image-drag gesture, which ships a ghost of the
+picture after the cursor and never reaches the track.
+
+THE SCRIPT CANNOT FIX THIS. `src/scripts/carousel.ts` already calls
+`preventDefault()` on `pointermove`, and that is too late: the native drag is
+the default action for the `pointerdown` on the image and begins first.
+`setPointerCapture` does not suppress it either. The event has to stop
+targeting the image.
+
+One line, and it is the FOURTH time this exact line has been needed — the
+category card, the product card, the cross-link and the nav card all carry it,
+each with a comment saying a drag on the picture starts the browser's image
+drag instead:
+
+```css
+  .carousel-slide .media-slot { pointer-events: none; }
+```
+
+### Measured, both ways
+
+Dragged the track with a synthetic pointer from the centre of a visible slide's
+image — which is what a person grabs — and read `scrollLeft`:
+
+```
+  without the rule   elementFromPoint -> IMG.media-slot        moved    0px
+  with the rule      elementFromPoint -> LI.carousel-slide     moved  824px
+```
+
+The first attempt at this measured nothing and said so: it took the FIRST
+`.media-slot` in the DOM, which on a looping track sits at x = -6676, well off
+screen. Picking the slide actually inside the viewport is what made the test
+mean anything. A drag test that aims off-screen passes and fails for the same
+reason — it never touches the thing it is testing.
+
+### Nothing in §9 catches this, and it is the fifth instance
+
+The pointer check asserts that a container claiming a stretched hit area
+resolves to a link at nine points. It says nothing about whether a draggable
+region can actually be dragged, and an image swallowing a gesture is now a
+five-time bug on this site. It was found because someone tried to drag it.
+
+A check would press each `[data-carousel]` and `[data-rail]` from the centre of
+its own picture and assert the scroll offset moves. Open question 109.
+
+verify: 10 checks, 1,216 assertions, 0 failures.

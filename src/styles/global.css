@@ -3075,6 +3075,26 @@ html.lenis body {
     user-select: none;
   }
 
+  /* THE PHOTOGRAPH IS NOT A DRAG HANDLE — it is the whole slide, so without
+     this it is the only thing a mouse ever lands on, and a drag starting on an
+     <img> starts the BROWSER'S native image drag: a ghost of the picture
+     follows the cursor and the track never moves.
+
+     `pointerdown` cannot fix this from the script. The native drag is the
+     browser's default action for an image and it begins before `pointermove`
+     runs, so the `preventDefault` there is already too late; `setPointerCapture`
+     does not suppress it either. Taking the image out of hit-testing makes the
+     track the event's target instead, which is what the drag handler is bound
+     to. Fourth instance of this rule after `.category-card`, `.product-card`,
+     `.cross-link` and `.nav-card`, and the same one line each time.
+
+     IT ONLY BROKE WHEN THE PICTURES LANDED. Every slide was a pending-box
+     <div> until Entry 114, and a div is not a drag source — so the carousel
+     dragged correctly for as long as it had nothing in it. */
+  .carousel-slide .media-slot {
+    pointer-events: none;
+  }
+
   /* `scroll-behavior` is deliberately NOT set here. The script assigns
      `scrollLeft` directly to jump the loop seam, and that assignment obeys
      this property: smooth scrolling would animate the jump across a set width

@@ -9672,3 +9672,35 @@ verify: 10 checks, 1,216 assertions, 0 failures.
      table only. Reinstating them means a drawing, not a photograph.
 
 106, 107, 108, 109, 110, 111 and 112 stand.
+
+## 2026-10-22 — Entry 120. The cold chain category card
+
+```
+  category-cold-chain.avif   1320x1596   38,467 B   q50   (was 1760x2128, 57,592 B)
+```
+
+Same 0.827 ratio, so nothing about the card's shape moves.
+
+SMALLER, AND CORRECTLY SO — which is the opposite of the heroes in Entries 100
+and 117, where a smaller master cost a rung. `CATEGORY_CARD_WIDTHS` runs
+360 / 440 / 660 / 880 / 1320 / 1970, and this card is drawn about 440px wide in
+the home three-up, so 1320 is the 3x file and the top rung anything is served
+from. The 1760 master it replaces could not fill 1970 either — it was carrying
+440px of width that no device ever requested. Confirmed in `dist/`: the ladder
+now runs 360 / 440 / 660 / 880 / 1320 and stops exactly where it is used.
+
+q50 at 17.8 KB/Mpx against the old file's 15.0. The navy pouch is most of this
+frame and its gloss is one large smooth gradient, so that is where banding
+would appear; checked at 1:1 and it does not, with the sheen and the arrow's
+edge both intact.
+
+### The alt was already right
+
+Third time in this run that a replacement has needed no copy change, and the
+reason is the same each time: the picture is a new frame of the same subject
+rather than a different subject. It names three pouches in silver, white and
+navy, a gel pack marked "Puncture here" lying in front, and a branded box
+holding an EPS cooler with its lid off — all four are in this frame, read off
+the picture rather than assumed from the filename.
+
+verify: 10 checks, 1,216 assertions, 0 failures.

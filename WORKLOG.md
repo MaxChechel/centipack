@@ -10102,3 +10102,54 @@ is still cut from the composition that preceded Entry 117, so a phone shows a
 third arrangement again. The desktop alt describes the desktop frame only.
 
 verify: 10 checks, 1,216 assertions, 0 failures.
+
+## 2026-10-22 — Entry 131. The home hero's mobile crop, cut from the new shot
+
+Closes question 111.
+
+```
+  centipack-home-hero-mobile.avif   1267x1584   69,510 B   q55   (was 1206x1509, 86,807 B)
+```
+
+Cut from Entry 130's desktop frame rather than supplied separately, on
+instruction. 1584 is the source's full height and `.hero-media` asks for
+1:1.25, so the window is 1267 wide — 45% of a 2816px frame, and the only
+decision was which 45%.
+
+THREE WINDOWS WERE RENDERED AND LOOKED AT, not reasoned about:
+
+```
+  left     the three pouches and the kraft shipper
+  centre   both shippers, the mailer and drawer boxes, the bottles
+  right    the EPS cooler in its shipper, both gel packs, the bottle and jar
+```
+
+Centre carries the most objects and is the obvious choice on paper. Right wins
+anyway, for two reasons that only show up at the size this is actually drawn:
+it has four large subjects where centre has nine small ones, and at 402px the
+nine stop being legible as anything; and it leads with the cooler and the gel
+packs, which is what the H1 above it is about. Rendered the crop at 402 to
+check that rather than trusting the full-size preview.
+
+q55 at 33.8 KB/Mpx against the old file's 47.7 — 20% fewer bytes on 10% more
+pixels. "Puncture here" and its crosshair hold at 1:1, which is what a 3x
+phone is served.
+
+ONE THING THIS CANNOT FIX. `Media` takes one `alt` for the whole `<picture>`,
+so the sentence written for the desktop frame is what a phone gets too — and
+it names pouches, a mailer box and a drawer box that this crop does not
+contain. Every art-directed image on the site has the same shape (the cold
+chain hero too), and narrowing the alt to what both crops share would gut the
+desktop description to buy a smaller improvement on mobile. Left as it is and
+recorded. Open question 115.
+
+verify: 10 checks, 1,216 assertions, 0 failures.
+
+### Open questions
+
+115. **An art-directed `<picture>` has one alt for two crops.** The home hero's
+     alt describes the desktop frame; the mobile crop shows a subset of it.
+     Fixing it properly means `Media` taking an optional `mobileAlt`, which is
+     a component change for a problem nobody has reported.
+
+106, 107, 108, 109, 110, 112 and 113 stand. 111 and 114 are closed.

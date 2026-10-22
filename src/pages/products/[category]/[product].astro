@@ -219,18 +219,22 @@ const sectionGround = (section: ProductSection, index: number): string =>
     </div>
   </Section>
 
-  {/* The hero picture, full-bleed — the same treatment the category pages give
-      their range shot, and the same deviation from the drawn 1344px plate. See
-      the note on the home page's hero. */}
-  <Section width="full" space="none" class="bg-subtle">
+  {/* The hero picture, a plate inside the page gutter — what v1 draws (1344
+      wide at x=48, Figma 1179:3206 and siblings), and the end of AUDIT D8 for
+      the five product pages. Same treatment as the home and category heroes;
+      see the note on the home page's.
+
+      `spaceBottom="sm"`: ground under the plate, the same 48px as the gap
+      above, so the first section's band does not butt against its corners. */}
+  <Section spaceTop="none" spaceBottom="sm" class="bg-subtle">
     <Media
       image={product.heroImage}
       label={`${product.title} — hero`}
       ratio={heroRatio}
-      sizes="100vw"
+      sizes="(min-width: 90rem) 1344px, 100vw"
       loading="eager"
       fetchpriority="high"
-      class="page-hero-media"
+      class="page-hero-media rounded-plate"
     />
   </Section>
 

@@ -10201,3 +10201,54 @@ verify: 10 checks, 1,216 assertions, 0 failures.
      desktop plate going back to branded.
 
 106, 107, 108, 109, 110, 112, 113 and 115 stand. 105, 111 and 114 are closed.
+
+## 2026-10-22 — Entry 133. Every hero inside the container
+
+Instruction: hero images at container width, not full viewport, with padding
+after them, on every page that had a full-width hero.
+
+Three templates did — home, the category template (three pages) and the product
+template (five) — each a `Section width="full" space="none"` around a Media.
+All three now use the default `main` width, `spaceTop="none" spaceBottom="sm"`,
+`rounded-plate` on the picture, and `sizes="(min-width: 90rem) 1344px, 100vw"`
+in place of `100vw` (the closing band's own value, for the same 1344 box).
+`grep 'width="full" space="none"'` across `src/pages` now finds nothing.
+
+Measured on the built pages, not inferred from the classes:
+
+```
+              x    w      h    radius  ground below   ground -> next band
+  desktop
+    home      48   1344   656   4px      48px         base   -> subtle
+    category  48   1344   653   4px      48px         subtle -> base
+    product   48   1344   756   4px      48px         subtle -> surface
+  phone
+    all three 16    370    —    4px      40px         (sm's clamp at 402)
+```
+
+THE HOME PLATE IS NOW EXACTLY THE DESIGN'S 1344 x 656. Full-bleed drew it 703
+tall at 1440, because the ratio stayed the plate's while the box grew.
+
+THE PADDING IS 48px, MATCHING THE GAP ABOVE. Full-bleed had none: the next band
+started on the picture's bottom edge, which was right for a photograph meeting
+the screen and wrong against rounded corners. `sm` is the same token as the
+copy-to-image gap, so the plate sits evenly in its band. The home design draws
+64px there; there is no 64 token and 48 is the nearest step.
+
+THE CATEGORY PICTURE TOOK THE COPY BAND'S GROUND. Its Section had no background,
+so it rendered on base under a `bg-subtle` copy band. Invisible while the
+picture covered the whole Section; a contained plate shows the gutters, and
+that would have been a subtle-to-base seam level with the plate's top corners.
+Now copy and picture are one band, as the product hero already was.
+
+### What this does to AUDIT D8
+
+It flips rather than closes. D8 recorded home and product heroes running
+full-bleed where v1 draws contained plates. Those two now match the design. But
+v1 draws the CATEGORY range shot full-bleed at 1440 x 700 — it was the one hero
+that agreed with the design while the others did not — and it is now the one
+that deviates. Recorded as a superseding note at the top of D8, with the table
+and the reversal for the category pages alone; the full-bleed record below it is
+left as written.
+
+verify: 10 checks, 1,216 assertions, 0 failures.

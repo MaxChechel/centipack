@@ -331,6 +331,28 @@ design draws, so neither is this file's call.
 
 ## D8 — Product page heroes run full-bleed, where v1 draws them as contained plates
 
+> **Superseded 2026-10-22 — every hero is now contained.** The instruction
+> reversed: all hero photographs sit inside the page container, 1344 wide at
+> 1440 with `rounded-plate` and 48px of ground below (`spaceBottom="sm"`).
+>
+> | page | v1 draws | ships now |
+> | --- | --- | --- |
+> | Home | 1344 × 656 plate | 1344 × 656 plate — **matches** |
+> | Product pages | 1344 × 541 plate | 1344 plate — **matches** |
+> | Category pages | 1440 × 700 full-bleed | 1344 plate — **deviates** |
+>
+> So the deviation has **flipped rather than closed**. Home and the five
+> product pages now agree with the design, which is the reversal this entry
+> always named. The three category pages, which v1 draws full-bleed and which
+> were the one hero that matched while the others did not, are now the one
+> that does not. Their picture Section also takes `bg-subtle` to match the
+> copy band above it, so a contained plate does not show a base-coloured seam
+> in its gutters. Reverse for the category pages only: `width="full"`,
+> `space="none"`, drop `rounded-plate`, `sizes="100vw"`.
+>
+> The text below is the record of the full-bleed period and is left as it was.
+
+
 **Deviation, on instruction, 2026-10-16. Narrowed 2026-10-17.**
 
 **The home hero is back in scope, 2026-10-17.** It has now moved three times:

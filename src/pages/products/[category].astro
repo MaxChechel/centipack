@@ -97,16 +97,30 @@ const itemList = {
     </div>
   </Section>
 
-  {/* 2 — The range in one picture. */}
-  <Section width="full" space="none">
+  {/* 2 — The range in one picture, a plate inside the page gutter.
+
+      CONTAINED ON INSTRUCTION, AND THAT IS A DEVIATION. v1 draws this one
+      full-bleed at 1440 x 700 (Figma 1005:14041) — it is the one hero the
+      design never contained — and the ruling is that every hero on the site
+      sits in the container. Recorded in AUDIT D8.
+
+      `bg-subtle`, matching the copy band above. A contained picture shows the
+      Section's ground in the gutters beside it, and on the old base ground
+      that was a seam at the plate's top corners where subtle met base. Now the
+      copy and the picture are one band, the same shape the product hero has.
+
+      `spaceBottom="sm"` gives the plate ground under it, the same 48px as the
+      gap above. Full-bleed had none because the next section started on the
+      picture's edge; against a rounded plate that butts. */}
+  <Section spaceTop="none" spaceBottom="sm" class="bg-subtle">
     <Media
       image={category.rangeImage}
       label={`${category.title} — the range together`}
       ratio="1440 / 700"
       loading="eager"
       fetchpriority="high"
-      sizes="100vw"
-      class="page-hero-media"
+      sizes="(min-width: 90rem) 1344px, 100vw"
+      class="page-hero-media rounded-plate"
     />
   </Section>
 

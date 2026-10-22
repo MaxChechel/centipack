@@ -153,22 +153,27 @@ const heroPicture = await toPageImage({
   </Section>
 
   {/*
-    2 — The hero picture, full-bleed.
+    2 — The hero picture, a plate inside the page gutter.
 
-    EDGE TO EDGE AND FLUSH TO THE BAND BELOW IT, on instruction. The design
-    draws a 1344 x 656 plate inside the page gutter with 64px of ground under
-    it (Figma 1327:24508, in a 1440 x 720 band); the ruling is the other way —
-    the picture runs the full viewport width and the next section starts on its
-    bottom edge. Recorded as AUDIT D8, which this hero has now entered, left
-    and re-entered.
+    CONTAINED, which is what the design draws — a 1344 x 656 plate at x=48
+    with ground under it (Figma 1327:24508) — and the end of AUDIT D8 for this
+    page, which it entered, left and re-entered while it ran full-bleed on
+    instruction. The instruction now runs the other way for every hero on the
+    site; see D8.
 
-    THE RATIO IS STILL THE PLATE'S, 1344/656. Full-bleed changes how wide the
-    box is, not the shape of the crop: at 1440 the picture comes out 703px tall
-    rather than 656, showing slightly more of the same 756px file.
+    THE RATIO IS THE PLATE'S, 1344/656, and at 1440 the box is now exactly
+    that: 1344 wide, 656 tall, where full-bleed drew it 703 tall.
 
-    `width="full"` keeps the Section wrapper — theme and vertical rhythm behave
-    identically — and drops only the max-width and the gutter. No radius with
-    it: there is no card edge to round when a picture meets the screen.
+    THE PADDING BELOW IS THE DESIGN'S GROUND. Full-bleed set this Section to
+    `space="none"` so the next band started on the picture's bottom edge; a
+    contained plate needs ground under it or the band below butts against its
+    rounded corners. `spaceBottom="sm"` is the same 48px as the gap above, so
+    the plate sits evenly between the copy and the band. The design's 64 has no
+    token; 48 is the nearest step and matches the gap it pairs with.
+
+    `rounded-plate`, as the about page's photograph and the closing band carry.
+    A picture that meets the screen has no corner to round; one inside the
+    gutter does.
 
     `.hero-media` carries the ratio rather than the `ratio` prop, because Media
     writes that prop as an INLINE custom property and an art-directing class has
@@ -177,15 +182,15 @@ const heroPicture = await toPageImage({
     NO `media-scrim`. A scrim exists to make type legible over a photograph, and
     the four statistics that used to sit on this one are gone.
   */}
-  <Section width="full" space="none">
+  <Section spaceTop="none" spaceBottom="sm">
     <Media
       image={heroPicture}
       label="Home hero — the CentiPack range in one line-up"
       ratio="1344 / 656"
       loading="eager"
       fetchpriority="high"
-      sizes="100vw"
-      class="hero-media"
+      sizes="(min-width: 90rem) 1344px, 100vw"
+      class="hero-media rounded-plate"
     />
   </Section>
 
@@ -197,7 +202,7 @@ const heroPicture = await toPageImage({
           Your products deserve more than packaging — they require a cold-chain system built to
           maintain thermal integrity from packout through delivery. We manufacture the complete
           solution: insulated shippers validated for 2–8°C performance, refrigerants, custom
-          secondary packaging, and pharmacy formats
+          secondary packaging, and pharmacy formats.
         </Fragment>
         <Button href="/products" variant="ghost" size="link" icon="arrow">Browse all products</Button>
       </SectionHeader>

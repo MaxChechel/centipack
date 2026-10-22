@@ -9889,3 +9889,41 @@ verify: 10 checks, 1,216 assertions, 0 failures.
      the same shot would fix it without changing which picture is shown.
 
 106, 107, 108, 109, 110, 111, 112 and 113 stand.
+
+## 2026-10-22 — Entry 125. How it works gets its own picture back, cut for the slot
+
+Supersedes Entry 124 and closes question 114, which that entry opened.
+
+```
+  puncture-pack-how-it-works.avif   2048x1536   63,973 B   q55
+```
+
+Entry 124 pointed this slot at `puncture-pack.avif` on instruction, and
+recorded the two costs of doing so: a 4:5 source in a 1.179 box lost 31% of its
+height, and a 1037px file in a 660px slot was 1.57x where the picture before it
+had been 2.5x. A landscape cut of the same shot arrived and removes both.
+
+```
+                      ratio    crop into the 1.179 slot   file at 660px
+  the card            0.808    31% off the height          1.57x
+  this one            1.333    12% off the sides           3.1x
+```
+
+The 12% comes off cream either side of the bag, so nothing in the frame is
+lost — where the card's crop took the two lower puncture targets and the
+"BUILT FOR PHARMACY" line with it. All four targets are back, so the alt says
+four corners again rather than upper corners. Same photograph, a cut that fits.
+
+Ladder confirmed in `dist/`: 440 / 660 / 900 / 1320 / 1980, where sharing the
+card's source had capped it at 1037.
+
+q55 at 19.9 KB/Mpx against the 18.8 the deleted file carried. The print is the
+reason to check — crosshair rings, a hairline rule under "PEEL > PACK > SHIP",
+and small caps at the sides — and it holds at 1:1.
+
+Question 114 is closed. The file Entry 124 deleted stays deleted; this is a new
+picture, not that one restored.
+
+verify: 10 checks, 1,216 assertions, 0 failures.
+
+106, 107, 108, 109, 110, 111, 112 and 113 stand.

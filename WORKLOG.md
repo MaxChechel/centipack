@@ -9927,3 +9927,32 @@ picture, not that one restored.
 verify: 10 checks, 1,216 assertions, 0 failures.
 
 106, 107, 108, 109, 110, 111, 112 and 113 stand.
+
+## 2026-10-22 — Entry 126. The paper liner card
+
+```
+  thermal-liners-paper.avif   1320x880   24,064 B   q55   (was 1980x1320, 43,694 B)
+```
+
+Ratio 1.500 into a slot MediaCards declares as 660/440 — 1.500 exactly. No
+crop at all, which is the first picture in this run to land in its slot without
+`object-cover` taking anything.
+
+SMALLER, AND THE TRADE IS WORTH STATING. The slot draws at 660px, so this
+master is a 2x file where the 1980 it replaces was 3x. At the widths that
+matter it is covered: below 768px `sizes` switches to 100vw, and a 402px phone
+at 3x asks for about 1206, which 1320 serves. What is gone is 3x at DESKTOP
+width — 660 x 3 = 1980, exactly the old master. Rare hardware, and the file is
+45% lighter, so not raised as a question. Confirmed in `dist/`: the ladder now
+runs 440 / 660 / 900 / 1320.
+
+q55 at 20.2 KB/Mpx against the old file's 16.3 — higher density on half the
+pixels, so 24 KB against 44. The lockup on the box face is the detail that
+decides it: serifs, the arrow mark's notch and the corrugation flutes behind
+them all hold at 1:1.
+
+The alt is unchanged and was read against the picture, not assumed: a kraft
+paper liner inside an open white CentiPack carton with its top panel folded
+back. That is the frame.
+
+verify: 10 checks, 1,216 assertions, 0 failures.

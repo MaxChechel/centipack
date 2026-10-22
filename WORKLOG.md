@@ -9781,3 +9781,60 @@ silver, white and navy, the gel pack marked "Puncture here" lying in front, and
 the cooler in its open outer alongside. All four in frame.
 
 verify: 10 checks, 1,216 assertions, 0 failures.
+
+## 2026-10-22 — Entry 123. I put a picture in the wrong slot; moving it back
+
+Corrects Entry 118.
+
+```
+  puncture-pack-branded.avif        1884x1414   39,550 B   q55   (was 1715x1285, 32,960 B)
+  puncture-pack-how-it-works.avif   1650x1400   43,545 B   restored byte-for-byte from e355e53^
+```
+
+The "Brand your mailer" picture arrived today and is BYTE-IDENTICAL to one I
+installed as the how-it-works frame two entries ago — 0.00/255 against it at
+400px greyscale. Entry 118 took a batch of three with the instruction
+"puncture pack page 3 new images" and no slot named for any of them, mapped
+them by reading the pictures, and got this one wrong.
+
+WHAT THE EVIDENCE ACTUALLY SAID, in hindsight. The frame holds two blank
+mailers. The how-it-works alt it replaced described "a single expanded
+PuncturePack... printed with 'Peel, pack, ship', four 'Puncture here' targets
+and the CentiPack logo" — one mailer, heavily printed. Nothing about the new
+picture matched the slot it was going into, and I rewrote the alt to fit the
+picture instead of treating the mismatch as a signal that the picture was in
+the wrong place. Entry 118 even recorded the rewrite as a finding.
+
+The reverse test is the one that would have caught it: an alt that has to be
+replaced wholesale is evidence about the SLOT, not only about the string.
+Where a replacement is a new frame of the same subject the alt needs a word or
+two (Entries 104, 120, 122); where it needs every noun changed, ask why.
+
+### Putting it right
+
+`puncture-pack-how-it-works.avif` is restored out of git rather than
+re-encoded, so it is the same bytes that stood there before — 43,545 B, and its
+original alt with it. Nothing about that section is now a re-render of
+anything.
+
+The branded slot takes the picture, at q55 for 14.5 KB/Mpx against the 14.6 the
+file it replaces carried. Most of this frame is one large flat navy surface,
+which is where banding shows, and it is clean at q50 — q55 is margin on the
+density that slot already had.
+
+Its alt loses the "Your logo here" placeholder, which is not in this frame:
+these mailers carry no print at all. That reads oddly under a heading about
+branding and it is also the honest reading — a blank mailer is the canvas the
+section is offering. Recorded rather than smoothed over.
+
+Verified in the built page, all five PuncturePack pictures and their alts:
+
+```
+  hero           Three PuncturePack mailers on a cream ground — one lying flat…
+  how-it-works   A single expanded PuncturePack standing upright, printed with…
+  dimensions     A dimension drawing of a PuncturePack mailer: 12 inches wide…
+  packout        An expanded PuncturePack above a complete pack-out — two gel…
+  branded        Two blank PuncturePack mailers on a cream ground, one expanded…
+```
+
+verify: 10 checks, 1,216 assertions, 0 failures.

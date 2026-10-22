@@ -53,7 +53,7 @@ sections:
       picture:
         src: ../../assets/products/puncture-pack-how-it-works.avif
         alt: >-
-          Two expanded PuncturePack mailers overlapping at an angle on a cream ground.
+          A single expanded PuncturePack standing upright, printed with "Peel, pack, ship", four "Puncture here" targets and the CentiPack logo.
 
   - type: features
     heading: Why choose PuncturePack
@@ -162,7 +162,7 @@ sections:
       picture:
         src: ../../assets/products/puncture-pack-branded.avif
         alt: >-
-          A PuncturePack mailer printed with a "Your logo here" placeholder, standing in front of a second mailer lying flat.
+          Two blank PuncturePack mailers on a cream ground, one expanded in front and one lying flatter behind it.
 
   - type: numbered
     heading: Applications

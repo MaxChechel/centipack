@@ -109,10 +109,11 @@ const itemList = {
       that was a seam at the plate's top corners where subtle met base. Now the
       copy and the picture are one band, the same shape the product hero has.
 
-      `spaceBottom="sm"` gives the plate ground under it, the same 48px as the
-      gap above. Full-bleed had none because the next section started on the
-      picture's edge; against a rounded plate that butts. */}
-  <Section spaceTop="none" spaceBottom="sm" class="bg-subtle">
+      `spaceBottom="md"` gives the plate ground under it — 48px on a phone,
+      96px at 1440, on instruction; see the home hero's note. Full-bleed had
+      none because the next section started on the picture's edge; against a
+      rounded plate that butts. */}
+  <Section spaceTop="none" spaceBottom="md" class="bg-subtle">
     <Media
       image={category.rangeImage}
       label={`${category.title} — the range together`}

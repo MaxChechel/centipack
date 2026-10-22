@@ -10297,3 +10297,22 @@ footer links to "EPS foam coolers", which is a product name. The PU foam inside
 PuncturePack and the mailers is a different material and was left alone.
 
 verify: 10 checks, 1,216 assertions, 0 failures.
+
+## 2026-10-22 — Entry 135. More ground under the hero plates
+
+On instruction: `padding-bottom: var(--spacing-section-md)` after hero images.
+Done as `spaceBottom="md"` on the three hero picture Sections — the prop maps to
+that exact utility, so no new CSS — replacing the `sm` Entry 133 set.
+
+```
+            1440    402
+  was sm     48px   40px
+  now md     96px   48px    measured on home, a category page and a product page
+```
+
+The gap above each plate stays at `sm`, so the plate now sits nearer its copy
+than the band below — it groups with the hero instead of floating evenly
+between the two. The comments on all three templates that justified `sm` as
+"matching the gap above" were rewritten rather than left stale.
+
+verify: 10 checks, 1,216 assertions, 0 failures.

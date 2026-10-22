@@ -167,9 +167,10 @@ const heroPicture = await toPageImage({
     THE PADDING BELOW IS THE DESIGN'S GROUND. Full-bleed set this Section to
     `space="none"` so the next band started on the picture's bottom edge; a
     contained plate needs ground under it or the band below butts against its
-    rounded corners. `spaceBottom="sm"` is the same 48px as the gap above, so
-    the plate sits evenly between the copy and the band. The design's 64 has no
-    token; 48 is the nearest step and matches the gap it pairs with.
+    rounded corners. `spaceBottom="md"`, on instruction — 48px on a phone,
+    96px at 1440 — where it was briefly `sm` to match the 48px gap above. The
+    plate now sits closer to its copy than to the band below, which groups it
+    with the hero rather than splitting the difference.
 
     `rounded-plate`, as the about page's photograph and the closing band carry.
     A picture that meets the screen has no corner to round; one inside the
@@ -182,7 +183,7 @@ const heroPicture = await toPageImage({
     NO `media-scrim`. A scrim exists to make type legible over a photograph, and
     the four statistics that used to sit on this one are gone.
   */}
-  <Section spaceTop="none" spaceBottom="sm">
+  <Section spaceTop="none" spaceBottom="md">
     <Media
       image={heroPicture}
       label="Home hero — the CentiPack range in one line-up"

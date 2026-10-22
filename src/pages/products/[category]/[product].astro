@@ -224,9 +224,9 @@ const sectionGround = (section: ProductSection, index: number): string =>
       the five product pages. Same treatment as the home and category heroes;
       see the note on the home page's.
 
-      `spaceBottom="sm"`: ground under the plate, the same 48px as the gap
-      above, so the first section's band does not butt against its corners. */}
-  <Section spaceTop="none" spaceBottom="sm" class="bg-subtle">
+      `spaceBottom="md"`: ground under the plate, 48px on a phone and 96px at
+      1440, so the first section's band does not butt against its corners. */}
+  <Section spaceTop="none" spaceBottom="md" class="bg-subtle">
     <Media
       image={product.heroImage}
       label={`${product.title} — hero`}

@@ -9838,3 +9838,54 @@ Verified in the built page, all five PuncturePack pictures and their alts:
 ```
 
 verify: 10 checks, 1,216 assertions, 0 failures.
+
+## 2026-10-22 — Entry 124. How it works takes the card's picture
+
+On instruction. `images.main` and the "How it works" step list now point at the
+same file, and `puncture-pack-how-it-works.avif` is deleted.
+
+ONE FILE, TWO REFERENCES, rather than a copy under the second name. The two
+slots draw at different shapes — the card at 4:5, the step list at 660/560 —
+and the image service builds a ladder per slot from one source. Confirmed in
+`dist/`: a single base and the union of both ladders, 260 / 440 / 520 / 660 /
+880 / 900 / 1037, with no duplicated original.
+
+THE CROP WAS CHECKED BEFORE THE SWAP, not after. The card is 0.808 portrait
+going into a 1.179 landscape box, which is `object-cover` taking 404 of 1284
+pixels — 31% of the height — off the top and bottom. Rendered that crop at 1:1
+to see what it costs rather than guessing:
+
+```
+  kept    PEEL > PACK > SHIP, both upper puncture targets, ENGINEERED FOR WHAT
+          MATTERS, COLD CHAIN SOLUTIONS WORLDWIDE, the CentiPack lockup,
+          TEMPERATURE STABILITY
+  lost    the two lower puncture targets, BUILT FOR PHARMACY & SPECIALTY COLD CHAIN
+```
+
+Everything that carries the product's argument survives; what goes is the
+bottom band and the foot of the bag, and it reads as a deliberate crop rather
+than an accident. So the swap stands as asked.
+
+The alt could not be copied across with the picture. The card's says "a
+puncture target marked at each of its four corners", which is true of the card
+and false of this crop — only the upper two are in frame. The section's alt
+says upper corners. Same photograph, two crops, two true sentences.
+
+ONE COST WORTH NAMING: this source is 1037 wide and the step list draws at
+660, so it is a 1.57x file where the 1650-wide picture it replaces was 2.5x.
+On a 2x screen the browser asks for 1320 and gets 1037. Visible as slight
+softness at desktop width; the file it replaced did not have that problem.
+Recorded rather than argued, because the instruction was specific about which
+picture to use. Open question 114.
+
+The deleted asset is in git at e355e53^ and 52cfd9f if it is ever wanted back.
+
+verify: 10 checks, 1,216 assertions, 0 failures.
+
+### Open questions
+
+114. **The step list's picture is now a 1.57x file.** Sharing the card's 1037px
+     source means a 2x desktop request for 1320 is served 1037. A wider cut of
+     the same shot would fix it without changing which picture is shown.
+
+106, 107, 108, 109, 110, 111, 112 and 113 stand.

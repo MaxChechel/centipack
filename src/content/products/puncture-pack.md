@@ -51,9 +51,12 @@ sections:
       label: >-
         PuncturePack being packed, sealed and punctured
       picture:
-        src: ../../assets/products/puncture-pack-how-it-works.avif
+        # THE CARD'S OWN PICTURE, on instruction. One file, two references —
+        # the card draws it at 4:5 and this section at 660/560, and the image
+        # service builds a ladder per slot from the one source.
+        src: ../../assets/products/puncture-pack.avif
         alt: >-
-          A single expanded PuncturePack standing upright, printed with "Peel, pack, ship", four "Puncture here" targets and the CentiPack logo.
+          A navy CentiPack PuncturePack mailer shown front-on, printed "Peel, pack, ship", "Temperature stability" and the CentiPack logo, with a puncture target at each of its upper corners.
 
   - type: features
     heading: Why choose PuncturePack

@@ -9995,3 +9995,34 @@ The paper alt names the liner in its white carton. Same subjects, better
 frames, so the sentences stand.
 
 verify: 10 checks, 1,216 assertions, 0 failures.
+
+## 2026-10-22 — Entry 128. The paper liner card, third frame
+
+```
+  thermal-liners-paper.avif   1650x1100   31,364 B   q55
+```
+
+Supersedes the frame installed in Entry 127, which superseded Entry 126's. Same
+1650x1100 and the same exact 1.500 into the 660/440 slot, so nothing
+structural moves — this is the shot being chosen, not the slot being fixed.
+
+Distances between the three, measured rather than eyeballed, because by the
+third version of one picture it is worth knowing whether a real change is
+happening:
+
+```
+  64 vs 63 (Entry 127)   25.44 / 255
+  64 vs 61 (Entry 126)   18.67 / 255
+```
+
+All three are different frames of the same set-up. This one steps back further
+again and puts the carton right of centre.
+
+q55 at 16.9 KB/Mpx, in line with the 17.0 the frame before it took. The lockup
+holds at 1:1.
+
+The alt has now survived all three: "A kraft paper liner fitted inside an open
+white CentiPack carton, its top panel folded back." Still read against each
+picture rather than carried forward on trust — it is true of this one too.
+
+verify: 10 checks, 1,216 assertions, 0 failures.

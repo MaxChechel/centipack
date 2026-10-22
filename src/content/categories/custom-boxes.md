@@ -49,7 +49,7 @@ sections:
       picture:
         src: ../../assets/categories/custom-boxes-protocol-kits.avif
         alt: >-
-          An open blue mailer box holding a protocol kit — a navy screw-top jar, two capped vials, a syringe and two sachets, each in its own cut-out.
+          An open blue mailer box holding a protocol kit — four orange-capped syringes sealed in a clear sleeve and a stack of white sachets in the upper tray, with two capped glass vials seated in cut-outs below.
   - type: split
     heading: Exterior shipping boxes
     subheading: The finishing touch for your shipment.

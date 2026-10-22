@@ -9704,3 +9704,49 @@ holding an EPS cooler with its lid off — all four are in this frame, read off
 the picture rather than assumed from the filename.
 
 verify: 10 checks, 1,216 assertions, 0 failures.
+
+## 2026-10-22 — Entry 121. The protocol kits picture, and a held-back file placed
+
+```
+  custom-boxes-protocol-kits.avif   1980x1440   66,492 B   q60   (was 1650x1200, 46,240 B)
+```
+
+This is the file Entry 119 held back as unplaceable. It arrived again and the
+instruction came with it — Complete protocol kits, on the custom boxes page —
+and the two copies are byte-identical, 0.00/255 at 400px greyscale, so there
+was no question of which render to use.
+
+Worth recording that holding it was right. Entry 119 guessed it might be the
+PuncturePack "Brand your mailer" slot on the reasoning that it was the only
+section image left unfilled on that page. It is a protocol kit on a different
+page entirely, and placing it there would have put a box of syringes under a
+heading about printing a mailer.
+
+Same 1.375 ratio as the file it replaces, and 1980 is exactly the
+`SECTION_WIDTHS` cap, so nothing is stored that cannot be served.
+
+q60 rather than the q55 that also read clean. This is the most detail-dense
+frame in the run — four syringe barrels with graduation marks, a clear sleeve
+with its own folds and sheen, and a stack of sachet edges — and 22.8 KB/Mpx is
+the density the old file carried for the same subject. Checked the syringes at
+1:1 first: the graduations survive at q55 too, so this is a margin rather than
+a necessity, and it costs 14 KB.
+
+### The alt described a different kit
+
+```
+  was   a navy screw-top jar, two capped vials, a syringe and two sachets
+  is    four orange-capped syringes in a clear sleeve, a stack of sachets, two capped vials
+```
+
+Three of the four nouns were wrong: no jar in this frame, four syringes rather
+than one, and a stack of sachets rather than two. Only the vials survived, and
+even they moved — they are in cut-outs below a tray rather than beside the rest.
+Rewritten against the picture.
+
+The `label` above it still reads "vials, syringes and swabs each in their own
+cut-out", and this kit puts the syringes and sachets in a shared upper tray.
+Left as it is: a label is the brief that was commissioned, not a description of
+what came back, and it renders nowhere now that the slot is filled.
+
+verify: 10 checks, 1,216 assertions, 0 failures.

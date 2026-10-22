@@ -10058,3 +10058,47 @@ because an alt that lists things in sequence is wrong the moment the sequence
 changes, and nothing would catch it.
 
 verify: 10 checks, 1,216 assertions, 0 failures.
+
+## 2026-10-22 — Entry 130. The home hero again, and the pump bottle comes back
+
+```
+  centipack-home-hero.avif   2816x1584   133,055 B   q50   (was 133,692 B at the same size)
+```
+
+Same dimensions as the frame Entry 117 installed this morning, 45.97/255 away
+from it — another arrangement of the same range rather than a re-render, and
+the largest distance of any swap so far.
+
+q50 at 29.1 KB/Mpx against that file's 27.1. The small type is the test on this
+one, and "Puncture here" with its crosshair ring holds at 1:1 with the navy
+gloss smooth behind it.
+
+### Entry 117 removed an object from the alt; this frame puts it back
+
+That entry made a point of the pump bottle: the alt had named one, the new
+photograph did not contain one, and the clause came out. The clause was right
+before that frame and wrong during it, and is right again now — this
+arrangement has the pump bottle, with its cap off beside it.
+
+Cropped that corner at 1:1 again rather than trusting the memory of having
+cropped it before. It is there, and so is a second gel pack lying flat that
+the previous frame did not have, so the alt counts two rather than one.
+
+```
+  before 117   a navy pump bottle, a jar of vials and a loose lid … a gel pack
+  117          an open navy jar of vials with its lid beside it … a gel pack
+  now          a navy pump bottle with its cap off beside an open jar of vials
+               and its lid … two navy gel packs, one standing and one lying flat
+```
+
+THE LESSON IS NOT "THE ALT KEEPS CHANGING". It is that an alt is a description
+of one file and has no life beyond it. Three frames of the same set-up in one
+day have produced three different true sentences, and the only reason each was
+true is that it was written after looking at the file rather than carried
+across from the file before.
+
+Question 111 is untouched and now worse in kind: the art-directed mobile crop
+is still cut from the composition that preceded Entry 117, so a phone shows a
+third arrangement again. The desktop alt describes the desktop frame only.
+
+verify: 10 checks, 1,216 assertions, 0 failures.

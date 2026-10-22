@@ -10153,3 +10153,51 @@ verify: 10 checks, 1,216 assertions, 0 failures.
      a component change for a problem nobody has reported.
 
 106, 107, 108, 109, 110, 112 and 113 stand. 111 and 114 are closed.
+
+## 2026-10-22 — Entry 132. The cold chain hero, and a decision reversed again
+
+```
+  range-cold-chain.avif   3112x1750   79,702 B   q50   (was 2048x1152, 57,776 B)
+```
+
+This is the file held since Entry 119 with no slot named for it. It has one
+now. 2.3x the pixels for 1.4x the bytes, and q50 at 14.3 KB/Mpx holds the
+three hardest surfaces in it — silver foil, white film and navy gloss, all
+creased, all checked at 1:1.
+
+**Closes question 105.** That master was 2048 and the ladder stopped there;
+this one is 3112 and it runs 640 / 960 / 1280 / 1920 / 2400 / 2560 / 3112.
+
+### This frame is unbranded, and that reverses Entry 103
+
+Entry 100 put an unbranded cold chain hero in. Entry 103 took it back out on
+instruction — "the cold chain hero, branded again" — and the branded render
+has stood since. This picture is the unbranded one: cropped the same region in
+both before swapping, and the box face carries the CentiPack lockup in the
+installed file and nothing in this one. The pouches lose their arrow with it.
+
+Done as asked. Recorded as a reversal rather than absorbed, because the
+instruction that put the branded version there was explicit and a later reader
+should not have to guess which way the decision went last.
+
+The alt lost two things that are no longer in frame: the gel pack's "Puncture
+here" marks, and the word CentiPack from the box.
+
+### Question 104 re-opens, and worse
+
+It was closed as accepted in Entry 108 — the mobile crop was a render behind,
+but both were branded, so the gap was a detail. `category-cold-chain-mobile.avif`
+is still that branded crop. With the desktop plate now unbranded, a phone shows
+printed products and a laptop shows blank ones, which is the glaring version of
+the problem, not the subtle one. Re-opened at its original number.
+
+verify: 10 checks, 1,216 assertions, 0 failures.
+
+### Open questions
+
+104. **The cold chain mobile crop is branded; the desktop plate is not.**
+     Re-opened. Was accepted when both were branded and the difference was a
+     render generation. Needs a portrait cut of this unbranded shot, or the
+     desktop plate going back to branded.
+
+106, 107, 108, 109, 110, 112, 113 and 115 stand. 105, 111 and 114 are closed.

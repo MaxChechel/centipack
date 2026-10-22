@@ -9956,3 +9956,42 @@ paper liner inside an open white CentiPack carton with its top panel folded
 back. That is the frame.
 
 verify: 10 checks, 1,216 assertions, 0 failures.
+
+## 2026-10-22 — Entry 127. Two liner pictures that fit their slots exactly
+
+Supersedes the paper card installed an hour ago in Entry 126.
+
+```
+  thermal-liners-branded.avif   1650x1200   39,132 B   q55   (was 1980x1485, 61,337 B)
+  thermal-liners-paper.avif     1650x1100   31,595 B   q55   (was 1320x880,  24,064 B)
+```
+
+BOTH LAND WITHOUT A CROP, and that is now three in a row — Entry 126 was the
+first, these are the second and third. The branded shot is 1.375 into a
+SplitFeature slot of 660/480, and the paper card 1.500 into a MediaCards slot
+of 660/440. Exact, both of them.
+
+The branded one is the more useful of the two swaps for that reason. The file
+it replaces was 1980x1485, ratio 1.333 — close enough that nobody would have
+called it wrong, and `object-cover` was still trimming the sides on every
+render. Now it is not.
+
+The paper card replaces a picture installed an hour ago, and this frame is the
+better one twice over: 30.29/255 different, cut wider so the carton sits in its
+own space rather than filling the frame, and 1650 wide against 1320. Entry 126
+recorded losing 3x at desktop width when that master dropped to 1320; at 1650
+the slot's 1980 rung is still out of reach but 2.5x is back. The note in 126
+stands as written — it was true of the file it described.
+
+q55 for both: 19.3 and 17.0 KB/Mpx, against the 20.4 the branded slot carried.
+The lockup on the blue carton face is the detail that decides it, and the
+serifs, the arrow notch and the corrugation flutes showing through the ink all
+hold at 1:1.
+
+NEITHER ALT CHANGED, and both were read against the picture rather than
+assumed. The branded alt names a blue carton, a kraft liner with its top panel
+folded back, two gel packs and a small navy box — four things, all in frame.
+The paper alt names the liner in its white carton. Same subjects, better
+frames, so the sentences stand.
+
+verify: 10 checks, 1,216 assertions, 0 failures.

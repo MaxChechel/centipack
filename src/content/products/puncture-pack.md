@@ -17,7 +17,7 @@ images:
   hero:
     src: ../../assets/products/puncture-pack-hero.avif
     alt: >-
-      Three PuncturePack mailers on a cream ground — one lying flat and vacuum-compressed, two standing fully expanded, each marked with four "Puncture here" targets and the CentiPack logo.
+      Three PuncturePack mailers on a cream ground — one lying flat and vacuum-compressed, two standing fully expanded.
   main:
     src: ../../assets/products/puncture-pack.avif
     alt: >-
@@ -53,7 +53,7 @@ sections:
       picture:
         src: ../../assets/products/puncture-pack-how-it-works.avif
         alt: >-
-          A single expanded PuncturePack standing upright, printed with "Peel, pack, ship", four "Puncture here" targets and the CentiPack logo.
+          Two expanded PuncturePack mailers overlapping at an angle on a cream ground.
 
   - type: features
     heading: Why choose PuncturePack
@@ -120,7 +120,7 @@ sections:
       picture:
         src: ../../assets/products/puncture-pack-dimensions.avif
         alt: >-
-          A dimension drawing of a PuncturePack mailer: 12 inches wide by 14 inches tall measured flat, a dashed outline marking the usable payload space, and a side view showing 1.375 inches of expanded insulation on each face.
+          A dimension drawing of a PuncturePack mailer: 12 inches wide by 14 inches tall measured flat, a dashed outline marking the usable payload space, and a side view labelled with an expanded thickness of half an inch, 1 inch or 1.5 inches per side.
 
   # FIGMA BRIEF: sample packout: 12x14 PuncturePack, 1.375" insulation, two 24oz
   # gel packs, 36-48hr under 8C.

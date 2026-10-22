@@ -9539,3 +9539,70 @@ verify: 10 checks, 1,216 assertions, 0 failures.
      one of them. Wants a portrait cut of the new shot at or above 1206x1509.
 
 106, 107, 108 and 109 stand.
+
+## 2026-10-22 — Entry 118. Three PuncturePack pictures, and a number that was wrong
+
+```
+  puncture-pack-hero.avif           3680x2070   79,794 B   q50   (was 2816x1584, 78,222 B)
+  puncture-pack-how-it-works.avif   1884x1414   50,140 B   q60   (was 1650x1400, 43,545 B)
+  puncture-pack-dimensions.avif     1510x1596   52,702 B   q55   (was 1638x1731, 47,544 B)
+```
+
+The hero gains pixels — 2816 to 3680, still under the 3840 cap, so the ladder
+grows. It also holds its byte count while carrying 71% more of them: 10.2
+KB/Mpx against the old file's 17.1, because this frame is mostly flat cream
+and flat navy. Checked both of those at 1:1 before trusting the number, since a
+near-flat gradient is where banding appears and a low density is where it
+appears first. The backdrop keeps its paper texture and the navy keeps its
+crease highlights.
+
+### The old size drawing contradicted the spec table beside it
+
+This is the find, and it was the picture that surfaced it rather than any
+check.
+
+The drawing that has been on this page showed **1.375″** of expanded insulation
+on each face, and the alt said so too. Four rows up, in the same section, the
+spec table reads:
+
+```
+  Expanded insulation thicknesses    ½″, 1″ and 1.5″ per side
+```
+
+1.375 is not in that list and never was. It comes from the Figma brief for the
+sample PACK-OUT — "12x14 PuncturePack, 1.375" insulation, two 24oz gel packs" —
+which is one configuration being measured, not the range the product is sold
+in. It had been drawn as though it were the spec.
+
+The new drawing reads "Expanded thickness ½″, 1″ or 1.5″ per side", which is
+the table. Cropped that caption at 1:1 to confirm the figures before writing
+the alt from them, because this is precisely the number not to transcribe from
+a thumbnail.
+
+So the swap closes a contradiction between a picture and the table under it.
+Nothing in §9 could have caught it: no check reads a number out of a photograph
+and compares it to content.
+
+### The other two alts were describing print that is gone
+
+All three frames are unbranded. The hero's alt claimed "each marked with four
+"Puncture here" targets and the CentiPack logo"; the how-it-works alt claimed a
+single mailer "printed with "Peel, pack, ship"" — and that frame now holds two
+mailers and no print at all. Both rewritten to what is there.
+
+ONE THING THIS LEAVES MIXED. `images.main` — the product card — is still the
+branded shot, so the card and the hero on the same product now show printed and
+unprinted mailers. The "Brand your mailer" section being branded is right and
+the pack-out being branded is right; the card is the one that now disagrees
+with its own hero. Not changed, because no replacement was supplied for it.
+Open question 112.
+
+verify: 10 checks, 1,216 assertions, 0 failures.
+
+### Open questions
+
+112. **The PuncturePack card is branded, its hero is not.** `images.main` is
+     the only printed mailer left on the page's own product shots. Wants either
+     an unbranded card shot or a decision that the card stays printed.
+
+106, 107, 108, 109, 110 and 111 stand.

@@ -10026,3 +10026,35 @@ white CentiPack carton, its top panel folded back." Still read against each
 picture rather than carried forward on trust — it is true of this one too.
 
 verify: 10 checks, 1,216 assertions, 0 failures.
+
+## 2026-10-22 — Entry 129. The thermal liners hero
+
+```
+  thermal-liners-hero.avif   3072x1728   76,724 B   q50   (was 2816x1584, 89,993 B)
+```
+
+Bigger and lighter at once: 19% more pixels for 15% fewer bytes. The master
+goes 2816 to 3072, still under the 3840 cap, so the ladder gains a rung —
+confirmed in `dist/`, 640 / 960 / 1280 / 1920 / 2400 / 2560 / 3072.
+
+q50 at 14.1 KB/Mpx against the 19.7 the old file carried, which is a real drop
+in density and so was checked at the two places this frame can fail rather than
+assumed from the subject:
+
+```
+  silver metallised bubble   every cell distinct, specular highlights intact
+  the CentiPack lockup       arrow notch sharp, serifs legible
+```
+
+Both hold. The softness at the right of the lockup crop is the photograph's own
+depth of field, not the codec — worth saying, because at 1:1 the two look
+alike and only one of them is a reason to raise the quality.
+
+THE ALT IS UNCHANGED AND THAT IS NOT LUCK. It reads "three white CentiPack
+cartons side by side… kraft paper, a white liner under clear film, and silver
+metallised bubble" — three liners, named left to right. This frame has the same
+three in the same order. Checked that order rather than the contents alone,
+because an alt that lists things in sequence is wrong the moment the sequence
+changes, and nothing would catch it.
+
+verify: 10 checks, 1,216 assertions, 0 failures.

@@ -50,10 +50,10 @@ sections:
           Our gel packs are made from a drain-safe, non-toxic formulation that provides reliable cold chain performance while allowing for easy and safe disposal after use.
 
   - type: formats
-    heading: Available formats & sizes
+    heading: Sizes & formats
     cards:
       - title: Standard gel packs
-        sizes: ["6 oz", "8 oz", "12 oz", "16 oz", "24 oz", "32 oz", "48 oz"]
+        sizes: ["8 oz", "12 oz", "16 oz", "24 oz", "32 oz", "48 oz"]
       - title: Non-sweat gel packs
         sizes: ["8 oz", "12 oz", "16 oz", "24 oz", "32 oz", "48 oz"]
 

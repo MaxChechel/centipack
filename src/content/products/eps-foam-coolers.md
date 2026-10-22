@@ -56,11 +56,11 @@ sections:
       - label: Interior dimensions
         value: 8″ × 6″ × 4″, 8″ × 6″ × 7″, and 12″ × 10″ × 7″
       - label: Wall thickness
-        value: 1″ and 1.5″
+        value: 1″ and 1½″
       - label: Insulation material
         value: Expanded polystyrene (EPS) foam
       - label: Closure
-        value: Fitted Lid
+        value: Fitted lid
       - label: Custom sizing
         value: Custom sizing and custom molds available
       - label: Corrugated outer carton
@@ -148,7 +148,7 @@ sections:
       - question: What sizes and wall thicknesses are available?
         answer:
           - >-
-            Standard interior sizes are 8″ × 6″ × 4″, 8″ × 6″ × 7″, and 12″ × 10″ × 7″. Standard wall thickness options are 1″ and 1.5″. Contact us for available size and thickness combinations or to discuss a custom mold.
+            Standard interior sizes are 8″ × 6″ × 4″, 8″ × 6″ × 7″, and 12″ × 10″ × 7″. Standard wall thickness options are 1″ and 1½″. Contact us for available size and thickness combinations or to discuss a custom mold.
       - question: How does wall thickness affect the cooler?
         answer:
           - >-

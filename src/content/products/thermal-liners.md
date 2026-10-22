@@ -6,9 +6,9 @@ category: cold-chain-shipping
 order: 5
 summary: "Curbside recyclable"
 descriptor: >-
-  Fitted paper-based, PET, and foam insulation for shipping cartons · Insulation for your box to perform.
+  Fitted paper-based, PET, and bubble wrap insulation for shipping cartons · Insulation for your box to perform.
 lede: >-
-  CentiPack thermal liners turn standard corrugated boxes into insulated shippers for temperature-sensitive products. Choose from paper, PET, and foam options to match your product, packing process, and shipping requirements. Pair your liner with the right gel packs for a complete pack-out built around your target temperature and transit time.
+  CentiPack thermal liners turn standard corrugated boxes into insulated shippers for temperature-sensitive products. Choose from paper, PET, and bubble wrap options to match your product, packing process, and shipping requirements. Pair your liner with the right gel packs for a complete pack-out built around your target temperature and transit time.
 contactLinkLabel: >-
   Request samples & pricing
 images:
@@ -49,14 +49,14 @@ sections:
             src: ../../assets/products/thermal-liners-pet.avif
             alt: >-
               A white liner under clear film fitted inside an open white CentiPack carton, its top panel folded back.
-      - title: Foam
+      - title: Bubble Wrap
         body: >-
           The protective choice, for maximum cushioning, a clean surface, and radiant heat reflection.
         image:
           label: >-
-            A foam liner shown outside and inside its carton
+            A bubble wrap liner shown outside and inside its carton
           picture:
-            src: ../../assets/products/thermal-liners-foam.avif
+            src: ../../assets/products/thermal-liners-bubble-wrap.avif
             alt: >-
               A silver metallised bubble liner fitted inside an open white CentiPack carton, its top panel folded back.
 
@@ -88,7 +88,7 @@ sections:
       - icon: layers
         title: Material options
         body: >-
-          Choose paper, PET, or foam insulation to suit your product, packing process, and sustainability goals.
+          Choose paper, PET, or bubble wrap insulation to suit your product, packing process, and sustainability goals.
       - icon: thermometer-snowflake
         title: Thermal insulation
         body: >-
@@ -171,10 +171,10 @@ sections:
         answer:
           - >-
             A thermal liner fits inside a corrugated shipping carton to slow heat transfer. Paired with refrigerants, it creates an insulated pack-out for temperature-sensitive products.
-      - question: What's the difference between paper, PET, and foam liners?
+      - question: What's the difference between paper, PET, and bubble wrap liners?
         answer:
           - >-
-            Each material has its own strengths. Paper liners offer a familiar, paper-based format. PET liners resist moisture, so they keep performing when gel packs create condensation. Foam liners provide the most cushioning, and their metallic exterior helps reflect heat.
+            Each material has its own strengths. Paper liners offer a familiar, paper-based format. PET liners resist moisture, so they keep performing when gel packs create condensation. Bubble wrap liners provide the most cushioning, and their metallic exterior helps reflect heat.
       - question: Which liner should I choose?
         answer:
           - >-
@@ -202,5 +202,5 @@ sections:
       - question: How can I request samples and pricing?
         answer:
           - >-
-            Click Request Samples & Pricing and choose Paper, PET, Foam, or Help Me Choose. Include your shipping requirements and estimated volume so we can recommend the right options.
+            Click Request Samples & Pricing and choose Paper, PET, Bubble Wrap, or Help Me Choose. Include your shipping requirements and estimated volume so we can recommend the right options.
 ---

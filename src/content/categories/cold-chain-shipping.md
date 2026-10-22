@@ -26,7 +26,7 @@ summary: >-
 lede: >-
   Choose your insulation format and pair it with the right refrigerant. Validated hold times for 24, 48, and 72-hour transit profiles.
 cardBody: >-
-  Gel packs, insulated metallic mailers, EPS coolers, Puncture Packs, and eco liners — designed to maintain 2–8°C. Configurations validated for 24, 48, and 72-hour transit profiles
+  Gel packs, insulated mailers, EPS coolers, PuncturePack™, and thermal liners, designed to maintain 2–8°C, with configurations for 24, 48, and 72-hour transit.
 cardLinkLabel: >-
   Browse formats
 selectionHeading: >-

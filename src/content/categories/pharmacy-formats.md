@@ -8,7 +8,7 @@ summary: >-
 lede: >-
   Produced to pharmaceutical standards. Available individually or as part of a complete solution.
 cardBody: >-
-  Vial kits, pill bottles, spray bottles, pump dispensers and Jars — produced to pharmaceutical standards.
+  Vial kits, pill bottles, spray bottles, pump dispensers and jars — produced to pharmaceutical standards.
 cardLinkLabel: >-
   Browse formats
 selectionHeading: >-

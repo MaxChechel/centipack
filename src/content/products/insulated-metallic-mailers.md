@@ -108,7 +108,7 @@ sections:
       - label: Envelope sizes
         value: 9″ × 12″, 12″ × 16″, and 15″ × 20″
       - label: Expanded insulation thicknesses
-        value: ½″, 1″, or 1.5″ per side
+        value: ½″, 1″, or 1½″ per side
       - label: PU foam densities
         value: 19 kg/m³ - 32 kg/m³
       - label: Custom sizing and insulation specifications
@@ -118,7 +118,7 @@ sections:
         value: Flexible polyurethane (PU) foam
       - label: Exterior and inner liner
         value: >-
-          0.12 mm foil exterior and 0.07 mm white PE liner. Exterior liner is available in matt and metallic finish.
+          0.12 mm foil exterior and 0.07 mm white PE liner. Exterior liner is available in matte and metallic finish.
       - label: Closure
         value: >-
           Integrated self-seal strip. Additional zip closure available on request

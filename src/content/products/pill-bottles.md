@@ -3,7 +3,7 @@ title: "Pill bottles"
 slug: pill-bottles
 category: pharmacy-formats
 order: 2
-summary: "Amber and clear · CR closures"
+summary: "Standard bottle and highly customized · CR closures"
 images:
   main:
     src: ../../assets/products/pill-bottles.avif

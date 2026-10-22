@@ -10252,3 +10252,48 @@ and the reversal for the category pages alone; the full-bleed record below it is
 left as written.
 
 verify: 10 checks, 1,216 assertions, 0 failures.
+
+## 2026-10-22 — Entry 134. Copy pass across six pages
+
+Supplied directly. Every change made by exact-match edit with its count
+asserted, then checked for presence and absence in the built HTML.
+
+```
+  home         cold chain card     → "Gel packs, insulated mailers, EPS coolers, PuncturePack™,
+                                      and thermal liners, designed to maintain 2–8°C, with
+                                      configurations for 24, 48, and 72-hour transit."
+  home         pharmacy card       "Jars" → "jars"
+  pharmacy     pill bottles card   "Amber and clear" → "Standard bottle and highly customized"
+  gel packs    section heading     "Available formats & sizes" → "Sizes & formats"
+  gel packs    standard row        6 oz removed (now 8 / 12 / 16 / 24 / 32 / 48)
+  mailers      spec table          1.5″ → 1½″ ; "matt" → "matte"
+  EPS coolers  spec table          1.5″ → 1½″ ; "Fitted Lid" → "Fitted lid"
+  liners       everywhere          foam → bubble wrap
+```
+
+THREE JUDGEMENT CALLS, all small and all stated:
+
+**Pill bottles keeps "· CR closures".** The instruction was to delete "amber and
+clear"; the closures clause after the middot was not mentioned, so it stays.
+
+**EPS's FAQ followed its table.** "Standard wall thickness options are 1″ and
+1.5″" is the same fact on the same page; leaving it at 1.5 would have the page
+state one number two ways. PuncturePack's table and FAQ also say 1.5″ and were
+NOT changed — not asked, and its size drawing has "1.5″" burned into the
+picture, so changing the text would set the copy against the image.
+
+**"Bubble Wrap" is capitalised where its siblings are.** The card title and the
+"choose Paper, PET, Bubble Wrap, or Help Me Choose" option list are title case;
+the descriptor, lede, feature line and FAQ run "paper, PET, and bubble wrap"
+lowercase, the way they already ran "paper" and "foam".
+
+The bubble wrap card's asset was renamed `thermal-liners-foam.avif` →
+`thermal-liners-bubble-wrap.avif` with `git mv`, so the filename keeps meaning
+what the card says — same reasoning as Entry 112.
+
+"foam" still appears on the liners page in two forms, both correct: YAML
+comments quoting the original Figma brief, which never render, and the nav and
+footer links to "EPS foam coolers", which is a product name. The PU foam inside
+PuncturePack and the mailers is a different material and was left alone.
+
+verify: 10 checks, 1,216 assertions, 0 failures.

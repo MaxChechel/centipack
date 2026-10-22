@@ -75,7 +75,7 @@ sections:
       picture:
         src: ../../assets/products/eps-foam-coolers-dimensions.avif
         alt: >-
-          Three white EPS foam coolers side by side with their outer dimensions marked: 8 by 6 by 4 inches, 8 by 6 by 7 inches, and 12 by 10 by 7 inches.
+          Three white EPS foam coolers closed and side by side on a cream ground, shown in ascending size.
 
   # FIGMA BRIEF: complete packout + sample performance results (tested cooler
   # configuration, payload, refrigerants, conditioning, ambient profile, target

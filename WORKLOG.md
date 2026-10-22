@@ -9606,3 +9606,69 @@ verify: 10 checks, 1,216 assertions, 0 failures.
      an unbranded card shot or a decision that the card stays printed.
 
 106, 107, 108, 109, 110 and 111 stand.
+
+## 2026-10-22 — Entry 119. Three of five placed; two held back
+
+Five pictures arrived with descriptive names that did not survive the upload —
+they land as 50-54.png — so each had to be matched to a slot by reading it.
+Three matched beyond doubt and are in. Two did not, and are not.
+
+```
+  puncture-pack.avif                 1037x1284   31,367 B   q55   (was 21,724 B)
+  cta-banner.avif                    2760x1342   79,122 B   q50   (was 3840x1866, 97,489 B)
+  eps-foam-coolers-dimensions.avif   1638x1260   44,775 B   q60   (was 1638x1593, 60,370 B)
+```
+
+THE DIMENSIONS CONFIRMED TWO OF THE THREE. 52.png is 1037x1284, which is
+exactly what `puncture-pack.avif` already was, and 51.png is ratio 2.057
+against the CTA plate's 2.058. A file that arrives at its slot's own size is
+telling you where it goes.
+
+The card needed no alt change at all — the string already read "printed 'Peel,
+pack, ship' and 'Temperature stability' with a puncture target marked at each
+of its four corners", and that is this frame, down to the corners. Checked the
+print at 1:1 anyway, because this is the densest small type the site carries.
+The CTA's alt is `''` by ruling, so nothing to re-read there either.
+
+### The EPS sizes picture lost its callouts, and the alt had to go with it
+
+The frame that was there was a dimension DRAWING — three coolers with 8x6x4,
+8x6x7 and 12x10x7 marked on them in leader lines. The new one is a clean
+product shot of the same three coolers and carries no measurements at all.
+
+So the alt could not survive: it recited three sets of figures that a reader
+can no longer find in the picture. Rewritten to what is there.
+
+WORTH SAYING PLAINLY, because it is a loss and not a wash: this picture sits in
+the "Sizes and specifications" section, and the measurements now live only in
+the spec table beside it. The table does carry all of them, so nothing is
+unavailable — but the drawing was the thing that made the sizes legible at a
+glance, and a visitor skimming the section no longer gets them from the image.
+Done as asked; recorded as a consequence rather than a defect. Open question
+113.
+
+### The closing band's contrast, re-measured on the new picture
+
+Question 107 is about the white heading over this photograph, so a new
+photograph meant re-running it rather than assuming the number carried:
+
+```
+  previous banner   min 2.57   mean 7.56   0.6% of heading box under 3.0 : 1
+  new banner        min 2.54   mean 8.04   0.9%
+```
+
+Marginally worse at the floor, better on average, and still failing AA in the
+same small way for the same structural reason. 107 stands, with these figures.
+
+The master also went 3840 to 2760, so `WIDE_WIDTHS` loses another rung on this
+plate — though it is drawn at 1344px at most, so 2760 still covers 2x.
+
+verify: 10 checks, 1,216 assertions, 0 failures.
+
+### Open questions
+
+113. **The EPS sizes section no longer shows its measurements.** The callout
+     drawing was replaced by a plain product shot; the figures are in the spec
+     table only. Reinstating them means a drawing, not a photograph.
+
+106, 107, 108, 109, 110, 111 and 112 stand.

@@ -9750,3 +9750,34 @@ Left as it is: a label is the brief that was commissioned, not a description of
 what came back, and it renders nowhere now that the slot is filled.
 
 verify: 10 checks, 1,216 assertions, 0 failures.
+
+## 2026-10-22 — Entry 122. The cold chain cross-link thumbnail
+
+```
+  category-cold-chain-sm.avif   880x902   21,630 B   q55   (was 960x960, 25,963 B)
+```
+
+Completes the cold chain set: hero, card and thumb are now all cut from the
+same render. q55 at 26.6 KB/Mpx against the old file's 28.2, with the arrow's
+edge and the box lettering both checked at 1:1.
+
+TWO THINGS ABOUT THIS ONE ARE SLIGHTLY OFF, and neither is worth a fix:
+
+**It is not square.** 880x902, ratio 0.976, into a slot CrossLinks declares as
+`ratio="1 / 1"`. `object-cover` takes about 2% off the height, which lands in
+the empty cream at the top of the frame and touches nothing.
+
+**It is under the ladder's top rung.** `CARD_THUMB_WIDTHS` runs
+240 / 480 / 720 / 960 and this master stops at 880, so the 960 rung no longer
+generates. That rung is only reached below 768px, where `sizes` switches from
+240px to 100vw: a 402px phone at 3x asks for about 1206 device pixels. The
+960 file it replaces was already short of that, so this is a 9% worsening of a
+shortfall that already existed rather than a new one. Not raised as an open
+question — at 240px beside copy, which is where this thumbnail is drawn on
+every viewport that has room for it, 880 is a 3.7x file.
+
+The alt is unchanged and was checked rather than assumed: three pouches in
+silver, white and navy, the gel pack marked "Puncture here" lying in front, and
+the cooler in its open outer alongside. All four in frame.
+
+verify: 10 checks, 1,216 assertions, 0 failures.

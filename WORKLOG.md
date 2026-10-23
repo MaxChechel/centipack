@@ -10388,3 +10388,12 @@ them by name or by glob. The three `src/assets/clients/*.svg` marks look unused
 by name but are loaded by a glob in `ClientLogo`, so they stay.
 
 verify: 10 checks, 1,216 assertions, 0 failures.
+
+## 2026-10-23 — Entry 138. PuncturePack product card
+
+`puncture-pack.avif` (`images.main`) replaced, trimmed to 1320 wide — the top
+of `CARD_WIDTHS` — at q55. The alt drops "Peel, pack, ship", which is not on
+this mailer, and names the logo, "Temperature stability", the pharmacy line
+and the four puncture targets.
+
+verify: 10 checks, 1,216 assertions, 0 failures.

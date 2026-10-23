@@ -22,7 +22,7 @@ images:
   main:
     src: ../../assets/products/puncture-pack.avif
     alt: >-
-      A navy CentiPack Puncture Pack mailer shown front-on, printed "Peel, pack, ship" and "Temperature stability" with a puncture target marked at each of its four corners.
+      A navy PuncturePack mailer shown front-on, printed with the CentiPack logo, "Temperature stability" and "Built for pharmacy & specialty cold chain", with a puncture target at each of its four corners.
 
 # EVERY `label` BELOW IS WRITTEN FOR A VISITOR, NOT FOR THE PHOTOGRAPHER.
 # Figma fills each empty slot with the production brief for the shot — "IMAGE:

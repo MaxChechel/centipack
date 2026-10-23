@@ -147,7 +147,7 @@ sections:
       picture:
         src: ../../assets/products/puncture-pack-packout.avif
         alt: >-
-          An expanded PuncturePack above a complete pack-out — two gel packs flanking a small navy CentiPack carton.
+          Two navy PuncturePack mailers lying open on a cream ground, flaps folded back to show their silver inner lining — one flat and empty, one expanded with its insulation inside.
 
   # FIGMA BRIEF: one custom-printed PuncturePack with a "your brand here"
   # placeholder logo.

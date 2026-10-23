@@ -10413,3 +10413,11 @@ The alt now describes one mailer with a "Your logo here" placeholder, which
 suits the section better than the two blank mailers it replaces.
 
 verify: 10 checks, 1,216 assertions, 0 failures.
+
+## 2026-10-23 — Entry 141. PuncturePack "Tailored pack-outs" picture
+
+`puncture-pack-packout.avif` replaced, trimmed to the 1980 section cap at q55.
+The alt now describes two open mailers showing their silver lining — the gel
+packs and carton the old one named are not in this frame.
+
+verify: 10 checks, 1,216 assertions, 0 failures.

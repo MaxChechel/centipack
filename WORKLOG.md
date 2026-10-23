@@ -10576,3 +10576,10 @@ window, so the crop is anchored on the navy mailer: navy and white whole, the
 silver one trimmed at the right edge. Alt stands.
 
 verify: 10 checks, 1,216 assertions, 0 failures.
+
+## 2026-10-23 — Entry 162. PuncturePack "How it works" picture
+
+`puncture-pack-how-it-works.avif` replaced (trimmed to 1980, q55). Same sealed
+mailer, so the alt stands.
+
+verify: 10 checks, 1,216 assertions, 0 failures.

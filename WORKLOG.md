@@ -10688,3 +10688,10 @@ verify: 10 checks, 1,229 assertions, 0 failures.
 the alt stands.
 
 verify: 10 checks, 1,229 assertions, 0 failures.
+
+## 2026-10-23 — Entry 172. Closing band picture
+
+`cta-banner.avif` replaced (2576x1449, q50). The alt is `''` by ruling, so
+nothing to re-read. The plate draws at 1344 max, so 2576 still covers 2x.
+
+verify: 10 checks, 1,229 assertions, 0 failures.

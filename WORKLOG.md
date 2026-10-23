@@ -10476,3 +10476,10 @@ verify: 10 checks, 1,216 assertions, 0 failures.
 "Your logo here" placeholder, so the alt stands.
 
 verify: 10 checks, 1,216 assertions, 0 failures.
+
+## 2026-10-23 — Entry 149. Metallic mailers "Tailored pack-outs" picture
+
+`metallic-mailers-packout.avif` replaced (trimmed to 1980, q55). Still a silver
+mailer behind two gel packs and a small navy carton, so the alt stands.
+
+verify: 10 checks, 1,216 assertions, 0 failures.

@@ -10512,3 +10512,10 @@ verify: 10 checks, 1,216 assertions, 0 failures.
 mailer, so the alt stands.
 
 verify: 10 checks, 1,216 assertions, 0 failures.
+
+## 2026-10-23 — Entry 154. Metallic mailers "Tailored pack-outs" picture
+
+`metallic-mailers-packout.avif` replaced (trimmed to 1980, q55). Same silver
+mailer behind two gel packs and a navy carton, so the alt stands.
+
+verify: 10 checks, 1,216 assertions, 0 failures.

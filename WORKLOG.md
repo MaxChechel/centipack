@@ -10540,3 +10540,13 @@ verify: 10 checks, 1,216 assertions, 0 failures.
 "Your logo here" placeholder, so the alt stands.
 
 verify: 10 checks, 1,216 assertions, 0 failures.
+
+## 2026-10-23 — Entry 158. Metallic mailers hero, again
+
+`metallic-mailers-hero.avif` replaced (2048x1152, q50) and the mobile crop
+recut from it (960x1152, 1:1.2). The three mailers span ~1055px of a 2048
+frame, wider than the 960 window, so the silver one is trimmed at the phone
+crop's edge; navy and white stay whole. Same three mailers in the same order,
+so the alt stands.
+
+verify: 10 checks, 1,216 assertions, 0 failures.

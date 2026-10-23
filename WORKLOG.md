@@ -10559,3 +10559,11 @@ three now fit the phone crop whole — the trim noted in Entry 158 is gone. Alt
 stands.
 
 verify: 10 checks, 1,216 assertions, 0 failures.
+
+## 2026-10-23 — Entry 160. PuncturePack hero, again
+
+`puncture-pack-hero.avif` replaced (2048x1152, q50) and the mobile crop recut
+(960x1152, 1:1.2) around both mailers. Same two printed mailers, so the alt
+stands.
+
+verify: 10 checks, 1,216 assertions, 0 failures.

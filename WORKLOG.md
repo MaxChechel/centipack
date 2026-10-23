@@ -10550,3 +10550,12 @@ crop's edge; navy and white stay whole. Same three mailers in the same order,
 so the alt stands.
 
 verify: 10 checks, 1,216 assertions, 0 failures.
+
+## 2026-10-23 — Entry 159. Metallic mailers hero, third
+
+`metallic-mailers-hero.avif` replaced (2816x1584, q50) and the mobile crop
+recut (1320x1584, 1:1.2). The mailers sit closer together in this frame, so all
+three now fit the phone crop whole — the trim noted in Entry 158 is gone. Alt
+stands.
+
+verify: 10 checks, 1,216 assertions, 0 failures.

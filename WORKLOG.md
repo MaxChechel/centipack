@@ -10397,3 +10397,11 @@ this mailer, and names the logo, "Temperature stability", the pharmacy line
 and the four puncture targets.
 
 verify: 10 checks, 1,216 assertions, 0 failures.
+
+## 2026-10-23 — Entry 139. PuncturePack size drawing
+
+`puncture-pack-dimensions.avif` replaced (1365x1443, q60). Same measurements as
+before — 12 x 14 flat, dashed payload outline, ½″ / 1″ / 1.5″ per side — so the
+alt stands.
+
+verify: 10 checks, 1,216 assertions, 0 failures.

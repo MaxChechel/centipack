@@ -10447,3 +10447,10 @@ default centre crop would have cut the silver one. Wired as
 `images.hero.mobile`, same as PuncturePack. Alt updated.
 
 verify: 10 checks, 1,216 assertions, 0 failures.
+
+## 2026-10-23 — Entry 145. Metallic mailers size drawing
+
+`metallic-mailers-dimensions.avif` replaced (1365x1024, q60). Same three sizes
+at true relative scale — 9 x 12, 12 x 16, 15 x 20 — so the alt stands.
+
+verify: 10 checks, 1,216 assertions, 0 failures.

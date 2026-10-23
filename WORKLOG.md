@@ -10526,3 +10526,10 @@ verify: 10 checks, 1,216 assertions, 0 failures.
 stands.
 
 verify: 10 checks, 1,216 assertions, 0 failures.
+
+## 2026-10-23 — Entry 156. Metallic mailers product card
+
+`insulated-metallic-mailers.avif` replaced, front-on this time (trimmed to
+1320, q55). Still one navy mailer with the white arrow, so the alt stands.
+
+verify: 10 checks, 1,216 assertions, 0 failures.

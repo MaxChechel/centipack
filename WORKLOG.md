@@ -10695,3 +10695,10 @@ verify: 10 checks, 1,229 assertions, 0 failures.
 nothing to re-read. The plate draws at 1344 max, so 2576 still covers 2x.
 
 verify: 10 checks, 1,229 assertions, 0 failures.
+
+## 2026-10-23 — Entry 173. Home hero
+
+`centipack-home-hero.avif` replaced (trimmed to 3840x2160, q50) and the mobile
+crop recut the same way as Entry 170. Same arrangement, so the alt stands.
+
+verify: 10 checks, 1,229 assertions, 0 failures.

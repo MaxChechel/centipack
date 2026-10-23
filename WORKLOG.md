@@ -10609,3 +10609,10 @@ logo, "Temperature stability", the pharmacy line, four targets — so the alt
 stands.
 
 verify: 10 checks, 1,216 assertions, 0 failures.
+
+## 2026-10-23 — Entry 166. PuncturePack size drawing
+
+`puncture-pack-dimensions.avif` replaced (q60). Same measurements — 12 x 14,
+payload outline, ½″ / 1″ / 1.5″ per side — so the alt stands.
+
+verify: 10 checks, 1,216 assertions, 0 failures.

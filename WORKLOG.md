@@ -10421,3 +10421,11 @@ The alt now describes two open mailers showing their silver lining — the gel
 packs and carton the old one named are not in this frame.
 
 verify: 10 checks, 1,216 assertions, 0 failures.
+
+## 2026-10-23 — Entry 142. Metallic mailers "How it works" picture
+
+`metallic-mailers-how-it-works.avif` replaced, trimmed to the 1980 section cap
+at q55. The alt now describes one mailer with its flap peeled back to the
+adhesive strip — which matches the section's own Peel and Seal steps.
+
+verify: 10 checks, 1,216 assertions, 0 failures.

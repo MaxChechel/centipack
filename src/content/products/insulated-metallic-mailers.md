@@ -63,7 +63,7 @@ sections:
       picture:
         src: ../../assets/products/metallic-mailers-how-it-works.avif
         alt: >-
-          Three insulated metallic mailers overlapping — navy in front, white and silver behind — each closed along a flat sealed top edge.
+          An expanded navy insulated mailer standing upright, its top flap peeled back to show the silver inner lining and the adhesive strip beneath the release liner.
 
   - type: features
     heading: Why choose insulated metallic mailers

@@ -10461,3 +10461,11 @@ verify: 10 checks, 1,216 assertions, 0 failures.
 drawing (1365x1024, q60). Same sizes, so the alt stands.
 
 verify: 10 checks, 1,216 assertions, 0 failures.
+
+## 2026-10-23 — Entry 147. PuncturePack "How it works" picture, again
+
+`puncture-pack-how-it-works.avif` replaced with a newer frame of the same plain
+mailer, flap sealed (trimmed to 1980, q55). The alt from Entry 143 still
+describes it.
+
+verify: 10 checks, 1,216 assertions, 0 failures.

@@ -10567,3 +10567,12 @@ verify: 10 checks, 1,216 assertions, 0 failures.
 stands.
 
 verify: 10 checks, 1,216 assertions, 0 failures.
+
+## 2026-10-23 — Entry 161. Metallic mailers hero, fourth
+
+`metallic-mailers-hero.avif` replaced (2576x1449, q50) and the mobile crop
+recut (1208x1449, 1:1.2). The group is ~1424px wide here against a 1208
+window, so the crop is anchored on the navy mailer: navy and white whole, the
+silver one trimmed at the right edge. Alt stands.
+
+verify: 10 checks, 1,216 assertions, 0 failures.

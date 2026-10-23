@@ -190,7 +190,7 @@ if (groups.length) {
    */
   const calm = matchMedia('(prefers-reduced-motion: reduce)');
 
-  const layout = (group: HTMLElement): void => {
+  const layout = (group: HTMLElement, start = 0): number => {
     if (!calm.matches) {
       for (const el of group.querySelectorAll<HTMLElement>(SPLITTABLE)) {
         if (el.closest('.reveal-skip')) continue;
@@ -200,13 +200,52 @@ if (groups.length) {
       }
     }
 
-    let index = 0;
+    let index = start;
     for (const item of itemsOf(group)) {
       const lines = item.querySelectorAll<HTMLElement>('.reveal-line');
       if (lines.length) {
         for (const line of lines) line.style.setProperty('--reveal-index', String(index++));
       } else {
         item.style.setProperty('--reveal-index', String(index++));
+      }
+    }
+    return index;
+  };
+
+  /**
+   * THE HERO IS ONE CASCADE ACROSS TWO SECTIONS.
+   *
+   * A hero is a copy band and then its picture, in separate Sections because
+   * they sit on separate grounds and spacing. Both reveal on load, and if each
+   * numbered from zero the picture would arrive on the same beat as the first
+   * line of the heading — the whole hero landing at once, which is the block
+   * reveal the line splitting exists to avoid.
+   *
+   * So load groups CARRY THE INDEX: the picture takes the next number after
+   * the copy's last line and rises as the cascade's final beat, top to bottom
+   * in reading order. Scroll groups still start at zero — each arrives on its
+   * own, and a carried index there would be a delay with nothing to follow.
+   *
+   * CAPPED AT 8, measured rather than chosen. Carried in full, the picture
+   * waited for every line: 8 beats on home, 7 on a category page, but 14 on a
+   * product page, whose copy is a breadcrumb, an H1, a descriptor, a
+   * multi-line lede and a link. Fourteen beats is 910ms before the picture
+   * moves and about 1.5s before it is solid — a late arrival rather than part
+   * of the same moment, and on the page's LCP element. Eight is home's own
+   * natural carry, 520ms: the picture enters while the last lines are still
+   * landing, the same on every hero.
+   *
+   * One function for the first pass and for resize, so the two cannot number
+   * a hero differently.
+   */
+  const HERO_CARRY_MAX = 8;
+  const layoutAll = (): void => {
+    let carried = 0;
+    for (const group of groups) {
+      if (group.getAttribute('data-reveal-on') === 'load') {
+        carried = Math.min(layout(group, carried), HERO_CARRY_MAX);
+      } else {
+        layout(group);
       }
     }
   };
@@ -230,9 +269,7 @@ if (groups.length) {
    * cannot hang — and the 3s failsafe at the foot of this file does not care
    * either way.
    */
-  const measured = document.fonts.ready.then(() => {
-    for (const group of groups) layout(group);
-  });
+  const measured = document.fonts.ready.then(layoutAll);
 
   /**
    * THE SPLIT STAYS, and the reason is a measured one.
@@ -353,9 +390,7 @@ if (groups.length) {
   let resized: number;
   window.addEventListener('resize', () => {
     clearTimeout(resized);
-    resized = window.setTimeout(() => {
-      for (const group of groups) layout(group);
-    }, 180);
+    resized = window.setTimeout(layoutAll, 180);
   });
 }
 

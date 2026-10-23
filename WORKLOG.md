@@ -10316,3 +10316,58 @@ between the two. The comments on all three templates that justified `sm` as
 "matching the gap above" were rewritten rather than left stale.
 
 verify: 10 checks, 1,216 assertions, 0 failures.
+
+## 2026-10-23 — Entry 136. Hero pictures reveal with their copy
+
+On instruction: the hero image reveals with the copy, on every page.
+
+The copy band of each hero was already `reveal="hero"` — a load group, split
+into lines, cascading at 65ms a beat. The picture below it sits in its own
+Section (different ground, different spacing) and belonged to no group, so it
+was simply there from the first paint. All three templates' picture Sections
+now take `reveal="hero"` too.
+
+### Adding the attribute alone would have been wrong
+
+Every group numbers its items from zero. A second load group would have given
+the picture index 0 — the same beat as the first line of the heading — so the
+whole hero would arrive at once, which is precisely the block reveal the line
+splitting exists to replace.
+
+So `reveal.ts` now carries the index across load groups in document order: the
+picture takes the next number after the copy's last line and rises as the
+cascade's final beat, top to bottom in reading order. Scroll groups still start
+at zero, since each arrives on its own and a carried delay there would have
+nothing to follow. One `layoutAll()` serves both the first pass and the resize
+pass, so the two cannot number a hero differently.
+
+### Then capped at 8, because one page took too long
+
+Measured on the built pages, sampling opacity every 150ms:
+
+```
+             copy lines   picture index   picture solid at
+  home           0..7           8              ~0.9s
+  category       0..6           7              ~0.9s
+  product        0..13         14 → 8          ~1.5s → ~1.0s
+```
+
+Product copy is a breadcrumb, an H1, a descriptor, a multi-line lede and a
+link — fourteen beats, so the picture waited 910ms before moving and was not
+solid until about 1.5s. That reads as a late arrival rather than part of the
+same moment, and it is the page's LCP element. `HERO_CARRY_MAX = 8` is home's
+own natural carry (520ms): the picture now enters while the last lines are
+still landing, the same on every hero.
+
+### What it costs
+
+The hero picture is the LCP element on all nine pages, and it is now at
+opacity 0 until its beat, so LCP moves later by roughly half a second after the
+fonts settle. That is the price of animating it at all; the cap is what keeps
+it to half a second rather than a second. Nothing is lost without JavaScript or
+under reduced motion — the reveal contract confirms both, now across 51 groups
+where it was 45.
+
+The script grew and stays inside its census budget: 6,419 of 6,800 B gzipped.
+
+verify: 10 checks, 1,216 assertions, 0 failures.

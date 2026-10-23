@@ -10498,3 +10498,10 @@ verify: 10 checks, 1,216 assertions, 0 failures.
 mailer (trimmed to 1320, q55). Alt from Entry 150 still describes it.
 
 verify: 10 checks, 1,216 assertions, 0 failures.
+
+## 2026-10-23 — Entry 152. Metallic mailers product card, swapped again
+
+`insulated-metallic-mailers.avif` replaced with another framing of the same
+mailer (trimmed to 1320, q55). Alt stands.
+
+verify: 10 checks, 1,216 assertions, 0 failures.

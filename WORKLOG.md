@@ -10639,3 +10639,17 @@ link inside closes it and returns focus to the caret. The label carries
 
 verify: 10 checks, 1,229 assertions, 0 failures — up 13 because every page's
 nav now has one more internal link for the link check to resolve.
+
+## 2026-10-23 — Entry 168. Cold chain hero and its mobile crop
+
+`range-cold-chain.avif` replaced (2576x1449, q50), and
+`category-cold-chain-mobile.avif` recut from the same shot (1208x1449, 1:1.2)
+around the white and navy PuncturePack pair. **Closes question 104** — the
+mobile crop was the last image on the page from an older render; desktop and
+phone now show the same shoot.
+
+The alt is rewritten: this frame is mailers only — two PuncturePacks, one
+mailer lying open, three standing — where the old one named gel packs,
+pouches and a cooler.
+
+verify: 10 checks, 1,229 assertions, 0 failures.

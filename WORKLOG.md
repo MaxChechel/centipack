@@ -10491,3 +10491,10 @@ top of `CARD_WIDTHS` at q55. Alt now describes one navy mailer with the white
 arrow, where it named three.
 
 verify: 10 checks, 1,216 assertions, 0 failures.
+
+## 2026-10-23 — Entry 151. Metallic mailers product card, swapped
+
+`insulated-metallic-mailers.avif` replaced with a wider-framed shot of the same
+mailer (trimmed to 1320, q55). Alt from Entry 150 still describes it.
+
+verify: 10 checks, 1,216 assertions, 0 failures.

@@ -10583,3 +10583,10 @@ verify: 10 checks, 1,216 assertions, 0 failures.
 mailer, so the alt stands.
 
 verify: 10 checks, 1,216 assertions, 0 failures.
+
+## 2026-10-23 — Entry 163. PuncturePack "Brand your mailer" picture
+
+`puncture-pack-branded.avif` replaced (q55). Still one mailer with a "Your logo
+here" placeholder, so the alt stands.
+
+verify: 10 checks, 1,216 assertions, 0 failures.

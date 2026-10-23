@@ -10454,3 +10454,10 @@ verify: 10 checks, 1,216 assertions, 0 failures.
 at true relative scale — 9 x 12, 12 x 16, 15 x 20 — so the alt stands.
 
 verify: 10 checks, 1,216 assertions, 0 failures.
+
+## 2026-10-23 — Entry 146. Metallic mailers size drawing, again
+
+`metallic-mailers-dimensions.avif` replaced with a newer render of the same
+drawing (1365x1024, q60). Same sizes, so the alt stands.
+
+verify: 10 checks, 1,216 assertions, 0 failures.

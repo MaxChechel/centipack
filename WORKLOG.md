@@ -10590,3 +10590,14 @@ verify: 10 checks, 1,216 assertions, 0 failures.
 here" placeholder, so the alt stands.
 
 verify: 10 checks, 1,216 assertions, 0 failures.
+
+## 2026-10-23 — Entry 164. Product card titles at h6 on the products index
+
+On instruction. `ProductCard` takes `titleSize?: 'h5' | 'h6'` (default h5),
+`ProductRail` forwards it, and `/products` passes `h6`. Scoped to the index:
+category pages still draw their card titles at h5. Built output: 13 h6 titles
+on `/products`, none at h5; 7 at h5 on the cold chain page.
+
+The heading level is unchanged — this is the visual size only.
+
+verify: 10 checks, 1,216 assertions, 0 failures.

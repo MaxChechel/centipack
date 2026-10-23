@@ -51,6 +51,11 @@ interface Props {
   /** The heading level this card sits under. One h1 per page, zero skips. */
   headingLevel?: 2 | 3;
   /**
+   * The title's visual size. h5 by default; the products index sets h6, where
+   * five cards share a row and an h5 title wrapped on most of them.
+   */
+  titleSize?: 'h5' | 'h6';
+  /**
    * How wide this card is drawn, forwarded to `Media` as `sizes`. The rail
    * knows, because the rail is what sets the column count; this card does not.
    */
@@ -58,7 +63,7 @@ interface Props {
   class?: string;
 }
 
-const { product, headingLevel = 3, sizes, class: className } = Astro.props as Props;
+const { product, headingLevel = 3, titleSize = 'h5', sizes, class: className } = Astro.props as Props;
 
 const link = 'product-card-link rounded-sm';
 
@@ -76,7 +81,9 @@ const Heading = headingLevel === 2 ? 'h2' : 'h3';
         branches: with the title now conditionally wrapped too, the ternary form
         was four copies of one line. `Heading` is capitalised so Astro renders it
         as the tag its value names. */}
-    <Heading class="text-h5 text-primary">
+    {/* Complete class strings, never `text-${titleSize}` — the scanner reads
+        source as text and would generate neither. */}
+    <Heading class:list={[titleSize === 'h6' ? 'text-h6' : 'text-h5', 'text-primary']}>
       {href ? <a href={href} class={link}>{product.title}</a> : product.title}
     </Heading>
     <p class="text-caption text-secondary">{product.summary}</p>

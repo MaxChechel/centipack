@@ -16,8 +16,9 @@ contactLinkLabel: >-
 images:
   hero:
     src: ../../assets/products/puncture-pack-hero.avif
+    mobile: ../../assets/products/puncture-pack-hero-mobile.avif
     alt: >-
-      Three PuncturePack mailers on a cream ground — one lying flat and vacuum-compressed, two standing fully expanded.
+      Two expanded PuncturePack mailers standing one behind the other on a cream ground, printed with the CentiPack logo, "Temperature stability" and puncture targets at each corner.
   main:
     src: ../../assets/products/puncture-pack.avif
     alt: >-

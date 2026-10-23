@@ -10371,3 +10371,20 @@ where it was 45.
 The script grew and stays inside its census budget: 6,419 of 6,800 B gzipped.
 
 verify: 10 checks, 1,216 assertions, 0 failures.
+
+## 2026-10-23 — Entry 137. PuncturePack hero and its mobile crop; orphaned images removed
+
+```
+  puncture-pack-hero.avif          2816x1584   q50
+  puncture-pack-hero-mobile.avif   1320x1584   q55   new — cut from the same shot
+```
+
+The mobile crop is 1:1.2, what `.page-hero-media` draws on a phone, taken at
+full height and centred on the two mailers. Wired through `images.hero.mobile`,
+which the schema already supported. The alt now describes two printed mailers.
+
+Removed `src/assets/home/cta-banner/home-cta-1..5.avif` — nothing referenced
+them by name or by glob. The three `src/assets/clients/*.svg` marks look unused
+by name but are loaded by a glob in `ClientLogo`, so they stay.
+
+verify: 10 checks, 1,216 assertions, 0 failures.

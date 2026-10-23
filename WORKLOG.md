@@ -10405,3 +10405,11 @@ before — 12 x 14 flat, dashed payload outline, ½″ / 1″ / 1.5″ per side 
 alt stands.
 
 verify: 10 checks, 1,216 assertions, 0 failures.
+
+## 2026-10-23 — Entry 140. PuncturePack "Brand your mailer" picture
+
+`puncture-pack-branded.avif` replaced, trimmed to the 1980 section cap at q55.
+The alt now describes one mailer with a "Your logo here" placeholder, which
+suits the section better than the two blank mailers it replaces.
+
+verify: 10 checks, 1,216 assertions, 0 failures.

@@ -168,7 +168,7 @@ sections:
       picture:
         src: ../../assets/products/puncture-pack-branded.avif
         alt: >-
-          Two blank PuncturePack mailers on a cream ground, one expanded in front and one lying flatter behind it.
+          An expanded PuncturePack mailer standing on a cream ground, printed with a "Your logo here" placeholder.
 
   - type: numbered
     heading: Applications

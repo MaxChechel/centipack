@@ -10702,3 +10702,32 @@ verify: 10 checks, 1,229 assertions, 0 failures.
 crop recut the same way as Entry 170. Same arrangement, so the alt stands.
 
 verify: 10 checks, 1,229 assertions, 0 failures.
+
+## 2026-10-23 — Entry 174. Safari split "high-volume" mid-word
+
+Reported with a screenshot: in Safari the home H1 read "high-v / olume".
+
+The browser broke correctly, after the hyphen. The line splitter in
+`reveal.ts` measures each character's rect to find where lines break, and
+WebKit reports a character that opens a line WITHOUT a space before it at the
+end of the PREVIOUS line — so the top change was seen one character late and
+"high-v" was frozen into line one. Chrome reports the true position, which is
+why only Safari showed it.
+
+Fix, global to every split heading and paragraph: a line can only break after
+whitespace or a breaking hyphen/dash (no `hyphens: auto` on the site), so a
+detected break is snapped back to the last such point inside the line.
+
+Measured, not argued:
+
+```
+  Chrome, 402-1440      unchanged — breaks at "high-" as before
+  WebKit quirk emulated in Chrome (char after a hyphen reported on the prior line)
+    without the fix     ["…for high-v", "olume compounding pharmacies"]   ← the screenshot
+    with the fix        ["…for high-", "volume compounding pharmacies"]
+```
+
+Not yet confirmed in real Safari; the emulation reproduces the reported output
+exactly. Script stays in budget: 6,488 of 6,800 B gzipped.
+
+verify: 10 checks, 1,229 assertions, 0 failures.

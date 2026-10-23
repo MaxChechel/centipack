@@ -63,6 +63,10 @@ const SPLITTABLE = 'h1, h2, h3, h4, p';
 /** Lines live in the DOM only while the animation needs them — see `unsplit`. */
 const SPLIT_CLASS = 'is-split';
 
+/** Characters a line may break after: whitespace and breaking hyphens/dashes
+ *  (not U+2011, the non-breaking hyphen). */
+const BREAK_AFTER = /[\s\-\u2010\u2013\u2014]/;
+
 const escapeText = (text: string): string =>
   text.replace(/&/g, '&amp;').replace(/</g, '&lt;').replace(/>/g, '&gt;');
 
@@ -121,8 +125,24 @@ function linesOf(el: HTMLElement): string[] | null {
     /* A pixel of tolerance: sub-pixel layout puts characters on one visual
        line at tops that differ in the third decimal. */
     if (y - top > 1) {
-      lines.push(text.slice(from, i));
-      from = i;
+      /* SNAP TO A REAL BREAK OPPORTUNITY. WebKit reports a character that
+         opens a line WITHOUT a space before it — the "v" after "high-" — at
+         the end of the PREVIOUS line, so the top change is seen one or more
+         characters late and Safari froze "high-v / olume". A line can only
+         break after whitespace or a hyphen (no `hyphens: auto` here), so walk
+         back to the last one inside this line. Chrome already reports the
+         right index, where this is a no-op. */
+      let cut = i;
+      if (!BREAK_AFTER.test(text[i - 1])) {
+        for (let j = i - 1; j > from; j -= 1) {
+          if (BREAK_AFTER.test(text[j - 1])) {
+            cut = j;
+            break;
+          }
+        }
+      }
+      lines.push(text.slice(from, cut));
+      from = cut;
       top = y;
     }
   }

@@ -10667,3 +10667,17 @@ The whole cold chain category — hero, phone hero, card and thumb — is now on
 shoot.
 
 verify: 10 checks, 1,229 assertions, 0 failures.
+
+## 2026-10-23 — Entry 170. Home hero and its mobile crop
+
+`centipack-home-hero.avif` replaced from a 4096x2304 master, trimmed to the
+3840 `WIDE_WIDTHS` cap (3840x2160, q50) — the full ladder back, closing
+question 110. The mobile crop is recut from the same shot at `.hero-media`'s
+1:1.25, centred on the open shipper and the drawer box, and stored at 1600
+wide (q55). Desktop and phone are one shoot again, closing question 111.
+
+The alt is rewritten for this arrangement: two PuncturePacks, the mailer box,
+an open insulated mailer, the open shipper, the drawer box and three standing
+mailers. No pump bottle, no gel packs, no EPS cooler in this frame.
+
+verify: 10 checks, 1,229 assertions, 0 failures.

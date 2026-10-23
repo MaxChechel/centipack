@@ -10519,3 +10519,10 @@ verify: 10 checks, 1,216 assertions, 0 failures.
 mailer behind two gel packs and a navy carton, so the alt stands.
 
 verify: 10 checks, 1,216 assertions, 0 failures.
+
+## 2026-10-23 — Entry 155. Metallic mailers size drawing
+
+`metallic-mailers-dimensions.avif` replaced (q60). Same three sizes, so the alt
+stands.
+
+verify: 10 checks, 1,216 assertions, 0 failures.

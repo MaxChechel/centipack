@@ -45,11 +45,11 @@ rangeImage:
 cardImage:
   src: ../../assets/categories/category-cold-chain.avif
   alt: >-
-    Three CentiPack stand-up pouches in silver, white and navy, a navy gel pack marked "Puncture here" lying in front of them, and a branded corrugated box holding an EPS foam cooler with its lid off.
+    A navy insulated mailer printed with the CentiPack arrow standing in front of white and silver mailers, with a second navy mailer lying open in the foreground to show its silver lining.
 cardThumb:
   src: ../../assets/categories/category-cold-chain-sm.avif
   alt: >-
-    Three CentiPack stand-up pouches standing in a row in silver, white and navy, a navy gel pack marked "Puncture here" lying in front of them, and a white EPS foam cooler in its open corrugated outer alongside.
+    A navy insulated mailer printed with the CentiPack arrow standing beside white and silver mailers, with a second navy mailer lying open in front to show its silver lining.
 guideLinkLabel: >-
   How to choose a cold chain build
 ---

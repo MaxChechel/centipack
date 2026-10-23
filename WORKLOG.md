@@ -10653,3 +10653,17 @@ mailer lying open, three standing — where the old one named gel packs,
 pouches and a cooler.
 
 verify: 10 checks, 1,229 assertions, 0 failures.
+
+## 2026-10-23 — Entry 169. Cold chain category cards, large and small
+
+`category-cold-chain.avif` (5:6 card, 1320x1596) and
+`category-cold-chain-sm.avif` (1:1 thumb, trimmed 1320 → 960, the top of
+`CARD_THUMB_WIDTHS`) replaced, both q55, both from the same mailers-only shoot
+as Entry 168's hero. Both alts rewritten: they named pouches, a gel pack and a
+cooler; these frames are a standing navy mailer with white and silver behind
+and a second mailer lying open.
+
+The whole cold chain category — hero, phone hero, card and thumb — is now one
+shoot.
+
+verify: 10 checks, 1,229 assertions, 0 failures.

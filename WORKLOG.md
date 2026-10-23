@@ -10681,3 +10681,10 @@ an open insulated mailer, the open shipper, the drawer box and three standing
 mailers. No pump bottle, no gel packs, no EPS cooler in this frame.
 
 verify: 10 checks, 1,229 assertions, 0 failures.
+
+## 2026-10-23 — Entry 171. PuncturePack product card
+
+`puncture-pack.avif` replaced (trimmed to 1320, q55). Same printed mailer, so
+the alt stands.
+
+verify: 10 checks, 1,229 assertions, 0 failures.

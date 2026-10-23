@@ -53,8 +53,10 @@ export interface NavColumn {
 }
 
 export interface NavGroup {
-  /** The disclosure trigger's label. */
+  /** The label, which is also a link — see `href`. */
   label: string;
+  /** Where the label goes. The caret beside it is what toggles the panel. */
+  href: string;
   /** Stable id — the trigger, the panel and `aria-controls` are wired by it. */
   id: string;
   columns: readonly NavColumn[];
@@ -74,6 +76,7 @@ export async function getNavigation(): Promise<readonly NavItem[]> {
   return [
     {
       label: 'Products',
+      href: '/products',
       id: 'nav-products',
       /**
        * A COLUMN LISTS ITS PRODUCTS, OR SHOWS ITS PICTURE — and which one is

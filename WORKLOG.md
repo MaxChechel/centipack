@@ -10616,3 +10616,26 @@ verify: 10 checks, 1,216 assertions, 0 failures.
 payload outline, ½″ / 1″ / 1.5″ per side — so the alt stands.
 
 verify: 10 checks, 1,216 assertions, 0 failures.
+
+## 2026-10-23 — Entry 167. "Products" in the nav is a link
+
+On instruction: clicking "Products" goes to `/products`.
+
+The trigger was one `<button>` carrying the label and the caret. A single
+control cannot both navigate and toggle — a link that toggled would never
+navigate, a button that navigated would never open — so it is now split: the
+label is an `<a href="/products">` and the caret is the disclosure button
+(`aria-label="Products menu"`, 26x26). `NavGroup` gains `href`.
+
+Nothing else had to change. `disclosure.ts` already opens the whole group on
+pointer hover, so a mouse still gets the panel by pointing at the label; the
+caret is what keyboard and touch use. The button stays immediately before the
+panel, which `[aria-expanded='true'] + .nav-panel` depends on.
+
+Exercised on the built site: hover on the label opens the panel, clicking the
+label lands on /products, clicking the caret opens the panel, Escape from a
+link inside closes it and returns focus to the caret. The label carries
+`aria-current` on /products itself.
+
+verify: 10 checks, 1,229 assertions, 0 failures — up 13 because every page's
+nav now has one more internal link for the link check to resolve.

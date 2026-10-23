@@ -91,24 +91,38 @@ const linkClass = 'link-underline text-body text-primary aria-[current=page]:tex
         {
           navigation.map((item) =>
             isGroup(item) ? (
-              <li data-disclosure-group>
+              <li data-disclosure-group class="flex items-center">
+                {/* THE LABEL IS A LINK, THE CARET IS THE TOGGLE. "Products" goes
+                    to /products on click, on instruction; the panel still opens
+                    on hover for a pointer (disclosure.ts, which opens the whole
+                    group on pointerover), and the caret is a real button so
+                    keyboard and touch users can still reach the panel without
+                    leaving the page. One control could not do both — a link
+                    that also toggled would either never navigate or never
+                    open.
+
+                    The button stays immediately before the panel, which is what
+                    `[aria-expanded='true'] + .nav-panel` in global.css needs. */}
+                <a
+                  href={item.href}
+                  class:list={[
+                    linkClass,
+                    'rounded-sm',
+                    groupIsCurrent(item) && 'text-accent',
+                  ]}
+                  aria-current={isCurrent(item.href) ? 'page' : undefined}
+                >
+                  {item.label}
+                </a>
                 <button
                   type="button"
                   id={item.id}
                   data-disclosure
                   aria-expanded="false"
                   aria-controls={`${item.id}-panel`}
-                  class:list={[
-                    linkClass,
-                    'gap-sm flex cursor-pointer items-center rounded-sm',
-                    // A group whose panel contains the current page reads as
-                    // active, but the TRIGGER never takes aria-current: it is a
-                    // button, not a link, and aria-current on it would announce
-                    // a page that is not there. The link inside carries it.
-                    groupIsCurrent(item) && 'text-accent',
-                  ]}
+                  aria-label={`${item.label} menu`}
+                  class="p-xs flex cursor-pointer items-center justify-center rounded-sm"
                 >
-                  {item.label}
                   <span class="nav-caret" aria-hidden="true" />
                 </button>
 

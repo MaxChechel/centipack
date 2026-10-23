@@ -35,8 +35,9 @@ facts:
 images:
   hero:
     src: ../../assets/products/metallic-mailers-hero.avif
+    mobile: ../../assets/products/metallic-mailers-hero-mobile.avif
     alt: >-
-      Three insulated metallic mailers standing in an overlapping row on a cream ground — navy at the front carrying the CentiPack arrow, then white and silver, both unmarked.
+      Three insulated mailers standing one behind the other on a cream ground — navy in front printed with the CentiPack arrow, then white and silver.
   main:
     src: ../../assets/products/insulated-metallic-mailers.avif
     alt: >-

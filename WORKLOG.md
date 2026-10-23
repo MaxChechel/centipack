@@ -10437,3 +10437,13 @@ q55. The alt now describes a plain mailer with its flap sealed; the print it
 named before is not on this one.
 
 verify: 10 checks, 1,216 assertions, 0 failures.
+
+## 2026-10-23 — Entry 144. Metallic mailers hero and its mobile crop
+
+`metallic-mailers-hero.avif` replaced (2816x1584, q50), plus a new
+`metallic-mailers-hero-mobile.avif` (1320x1584, q55) cut at the phone hero's
+1:1.2 around the three mailers — the subject sits right of centre, so the
+default centre crop would have cut the silver one. Wired as
+`images.hero.mobile`, same as PuncturePack. Alt updated.
+
+verify: 10 checks, 1,216 assertions, 0 failures.

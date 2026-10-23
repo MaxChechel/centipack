@@ -10469,3 +10469,10 @@ mailer, flap sealed (trimmed to 1980, q55). The alt from Entry 143 still
 describes it.
 
 verify: 10 checks, 1,216 assertions, 0 failures.
+
+## 2026-10-23 — Entry 148. Metallic mailers "Brand your mailer" picture
+
+`metallic-mailers-branded.avif` replaced (q55). Still a navy mailer with a
+"Your logo here" placeholder, so the alt stands.
+
+verify: 10 checks, 1,216 assertions, 0 failures.

@@ -10601,3 +10601,11 @@ on `/products`, none at h5; 7 at h5 on the cold chain page.
 The heading level is unchanged — this is the visual size only.
 
 verify: 10 checks, 1,216 assertions, 0 failures.
+
+## 2026-10-23 — Entry 165. PuncturePack product card
+
+`puncture-pack.avif` replaced (trimmed to 1320, q55). Same printed mailer —
+logo, "Temperature stability", the pharmacy line, four targets — so the alt
+stands.
+
+verify: 10 checks, 1,216 assertions, 0 failures.

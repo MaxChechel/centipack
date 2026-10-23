@@ -10483,3 +10483,11 @@ verify: 10 checks, 1,216 assertions, 0 failures.
 mailer behind two gel packs and a small navy carton, so the alt stands.
 
 verify: 10 checks, 1,216 assertions, 0 failures.
+
+## 2026-10-23 — Entry 150. Metallic mailers product card
+
+`insulated-metallic-mailers.avif` (`images.main`) replaced, trimmed to the 1320
+top of `CARD_WIDTHS` at q55. Alt now describes one navy mailer with the white
+arrow, where it named three.
+
+verify: 10 checks, 1,216 assertions, 0 failures.

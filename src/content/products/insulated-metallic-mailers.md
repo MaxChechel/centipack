@@ -41,7 +41,7 @@ images:
   main:
     src: ../../assets/products/insulated-metallic-mailers.avif
     alt: >-
-      Three sealed CentiPack insulated mailers standing in a row — navy with a white arrow mark, white with a navy one, and plain silver foil.
+      A navy insulated mailer standing upright on a cream ground, printed with a large white CentiPack arrow.
 
 sections:
   # FIGMA BRIEF: short demonstration video: pull tab clearly visible, transition

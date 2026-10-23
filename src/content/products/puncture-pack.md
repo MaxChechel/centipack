@@ -59,7 +59,7 @@ sections:
         # 12% off the sides where there is only cream, and is a 3.1x file.
         src: ../../assets/products/puncture-pack-how-it-works.avif
         alt: >-
-          A single expanded PuncturePack standing upright, printed with "Peel, pack, ship", "Temperature stability", the CentiPack logo and a puncture target at each of its four corners.
+          An expanded navy PuncturePack mailer standing upright on a cream ground, its top flap folded over and sealed.
 
   - type: features
     heading: Why choose PuncturePack

@@ -10429,3 +10429,11 @@ at q55. The alt now describes one mailer with its flap peeled back to the
 adhesive strip — which matches the section's own Peel and Seal steps.
 
 verify: 10 checks, 1,216 assertions, 0 failures.
+
+## 2026-10-23 — Entry 143. PuncturePack "How it works" picture
+
+`puncture-pack-how-it-works.avif` replaced, trimmed to the 1980 section cap at
+q55. The alt now describes a plain mailer with its flap sealed; the print it
+named before is not on this one.
+
+verify: 10 checks, 1,216 assertions, 0 failures.

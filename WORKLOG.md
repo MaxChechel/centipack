@@ -10533,3 +10533,10 @@ verify: 10 checks, 1,216 assertions, 0 failures.
 1320, q55). Still one navy mailer with the white arrow, so the alt stands.
 
 verify: 10 checks, 1,216 assertions, 0 failures.
+
+## 2026-10-23 — Entry 157. Metallic mailers "Brand your mailer" picture
+
+`metallic-mailers-branded.avif` replaced (q55). Still a navy mailer with a
+"Your logo here" placeholder, so the alt stands.
+
+verify: 10 checks, 1,216 assertions, 0 failures.

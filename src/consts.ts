@@ -54,19 +54,6 @@ export const SITE = {
   email: 'info@centipack.com',
 
   /**
-   * The published phone number, stated once, in the format the design draws it.
-   *
-   * Here rather than in the Footer for the same reason the address is: the
-   * footer is one consumer, the `tel:` href is a second rendering of the same
-   * fact, and structured data will be a third. The Footer strips everything but
-   * digits for the href, so this string is free to be the human-readable form.
-   *
-   * Restored in v1 after Redline v7 §9 removed it site-wide; see the note in
-   * Footer.astro for why that reversal is a decision rather than a regression.
-   */
-  phone: '(877) 350-2799',
-
-  /**
    * The default share image, root-relative.
    *
    * 1200 × 630, which is the size `BaseLayout` writes into `og:image:width` and

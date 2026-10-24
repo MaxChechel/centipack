@@ -10731,3 +10731,15 @@ Not yet confirmed in real Safari; the emulation reproduces the reported output
 exactly. Script stays in budget: 6,488 of 6,800 B gzipped.
 
 verify: 10 checks, 1,229 assertions, 0 failures.
+
+## 2026-10-24 — Entry 175. Phone number removed
+
+On instruction. The number rendered in one place, the footer's contact list,
+from `SITE.phone`. Both are gone: the footer lists email only, and the
+constant is deleted from `src/consts.ts` so nothing can render it again by
+accident. Built output: 0 pages contain the number or a `tel:` link.
+
+It was not in the structured data — BaseLayout's graph never carried a
+telephone — so nothing else needed changing.
+
+verify: 10 checks, 0 failures.

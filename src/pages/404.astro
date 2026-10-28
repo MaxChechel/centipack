@@ -1,0 +1,34 @@
+---
+import BaseLayout from '../components/shells/BaseLayout.astro';
+import Section from '../components/Section.astro';
+import Button from '../components/atoms/Button.astro';
+import { SITE } from '../consts';
+
+/**
+ * Not found.
+ *
+ * THIS PAGE IS WHAT MAKES A MISSING URL RETURN 404. Cloudflare Pages serves
+ * `404.html` with a 404 status when it exists; without one it treats the site
+ * as a single-page app and answers every unknown path with the home page and a
+ * 200. That turned typos into duplicate copies of the home page, and it is why
+ * PageSpeed tried to parse the home page's HTML as `/llms.txt` and as a JSON
+ * manifest.
+ *
+ * Noindexed, and the sitemap already skips the `404` route.
+ */
+---
+
+<BaseLayout title={`Page not found — ${SITE.name}`} noindex>
+  <Section width="narrow" spaceTop="nav" space="lg" reveal="hero">
+    <div class="gap-xl flex flex-col items-center text-center">
+      <h1 class="text-h2 text-primary">Page not found</h1>
+      <p class="text-body text-secondary measure">
+        The page you were looking for has moved or does not exist.
+      </p>
+      <div class="gap-sm flex flex-wrap justify-center">
+        <Button href="/products" variant="primary">Explore products</Button>
+        <Button href="/" variant="secondary">Back to home</Button>
+      </div>
+    </div>
+  </Section>
+</BaseLayout>

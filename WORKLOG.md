@@ -10743,3 +10743,41 @@ It was not in the structured data — BaseLayout's graph never carried a
 telephone — so nothing else needed changing.
 
 verify: 10 checks, 0 failures.
+
+## 2026-10-28 — Entry 176. Canonical host, nav headings, soft 404s, llms.txt
+
+Four issues from an external audit and PageSpeed, all confirmed before fixing.
+
+**Canonical pointed at a redirect.** `centipack.com` 301s to
+`www.centipack.com`, and every canonical, og:url, sitemap `<loc>`, robots
+Sitemap line and JSON-LD url named the apex. `SITE.origin` is now
+`https://www.centipack.com`; it is the one constant all of those read. Built
+output: 12 of 12 canonicals on www. (Redirecting www → apex instead would be a
+Cloudflare change, which is not mine to make.)
+
+**Six h2s before every h1.** The nav card titles were `<h2>`, and the nav
+renders twice (desktop panel, mobile sheet), so each page's outline opened with
+the menu. They are `<p>` now, same `text-h5` style; the panel already sits in
+the `Main` nav landmark. Built output: 0 headings before the h1 on every page.
+
+**Every missing URL returned the home page with 200.** There was no 404 page,
+so Cloudflare Pages fell back to single-page-app mode and served `index.html`
+for any unknown path. That made infinite duplicate copies of the home page, and
+it is the whole cause of both PageSpeed errors: `/llms.txt` and
+`/ai-catalog.json` "existed" and were HTML. `src/pages/404.astro` added
+(noindexed; the sitemap already excluded a `404` route that was never built).
+
+**llms.txt.** Added as `src/pages/llms.txt.ts`, generated from the catalogue
+like the sitemap, so its links track which products have pages. One H1, a
+blockquote summary, H2 sections of `- [name](url): note` links.
+
+**ai-catalog.json is deliberately not added.** The error was "malformed JSON"
+because the home page came back; with a real 404 that resolves to "absent",
+which is correct for a site that publishes no agent manifest. Writing one
+without a reason to would be inventing a spec surface.
+
+Not verifiable locally: the 404 status depends on Cloudflare Pages seeing
+`404.html`, so it is checked after deploy.
+
+verify: 10 checks, 1,270 assertions, 0 failures — up 41 for the new page's
+links and the extra page in each sweep.

@@ -152,10 +152,13 @@ const linkClass = 'link-underline text-body text-primary aria-[current=page]:tex
                         ]}
                       >
                         <div class="gap-xs flex flex-col">
-                          {/* A REAL HEADING, not a styled label: a panel of
-                              links with no headings is a list a screen-reader
-                              user has to read end to end to navigate. */}
-                          <h2 class="text-h5 text-primary">{column.title}</h2>
+                          {/* NOT A HEADING. These were h2s, and the nav renders
+                              twice (desktop panel and mobile sheet), so every
+                              page opened with six h2s before its h1 — the
+                              document outline started with the menu. The
+                              panel is already inside the `Main` nav landmark,
+                              which is how a screen reader user finds it. */}
+                          <p class="text-h5 text-primary">{column.title}</p>
                           {column.description && (
                             <p class="text-body text-secondary">{column.description}</p>
                           )}
@@ -326,10 +329,11 @@ const linkClass = 'link-underline text-body text-primary aria-[current=page]:tex
                                     destinations.
 
                                     The v1 card ships that button on both, so
-                                    the heading goes back to being a heading
-                                    and the route out is the one control that
-                                    says where it goes. */}
-                                <h2 class="text-h5 text-primary">{column.title}</h2>
+                                    the title is plain text again and the route
+                                    out is the one control that says where it
+                                    goes. Not a heading, for the same reason as
+                                    the desktop panel above. */}
+                                <p class="text-h5 text-primary">{column.title}</p>
                                 {column.description && (
                                   <p class="text-body text-secondary">{column.description}</p>
                                 )}

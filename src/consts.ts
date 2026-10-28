@@ -34,8 +34,13 @@ export const SITE = {
    * This is the single source of truth for it. `astro.config.mjs` imports this
    * rather than repeating the URL, so a build cannot disagree with the sitemap
    * about where the site lives.
+   *
+   * WWW, because that is the host that answers. The apex 301s to
+   * www.centipack.com, so a canonical on the apex pointed every page at a
+   * redirect — mixed signals at launch. This one constant feeds the canonical,
+   * og:url, the sitemap, robots.txt and the JSON-LD graph.
    */
-  origin: 'https://centipack.com',
+  origin: 'https://www.centipack.com',
 
   /** Sets <html lang>. */
   locale: 'en',

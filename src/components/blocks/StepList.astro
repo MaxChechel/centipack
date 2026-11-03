@@ -1,6 +1,7 @@
 ---
 import Media from './Media.astro';
-import type { ProductStep, SlotImage } from '../../lib/catalogue';
+import Clip from '../mdx/Clip.astro';
+import type { ProductStep, SlotImage, StepVideo } from '../../lib/catalogue';
 
 /**
  * "How it works" (§4.2) — a short ordered procedure beside a demonstration.
@@ -21,12 +22,14 @@ import type { ProductStep, SlotImage } from '../../lib/catalogue';
 interface Props {
   heading: string;
   steps: readonly ProductStep[];
-  image: SlotImage;
+  image?: SlotImage;
+  /** Shown instead of the image when present — a muted looping clip. */
+  video?: StepVideo;
   headingLevel?: 'h2' | 'h3';
   id?: string;
 }
 
-const { heading, steps, image, headingLevel = 'h2', id } = Astro.props as Props;
+const { heading, steps, image, video, headingLevel = 'h2', id } = Astro.props as Props;
 const hasContent = steps.length > 0;
 ---
 
@@ -53,12 +56,21 @@ const hasContent = steps.length > 0;
     </ol>
   </div>
 
-  <Media
-    image={image.picture}
-    label={image.label}
-    ratio="660 / 560"
-    sizes="(min-width: 90rem) 660px, (min-width: 48rem) 50vw, 100vw"
-    class="rounded-card md:col-span-6 md:col-start-7"
-  />
+  {video ? (
+    <Clip
+      src={video.src}
+      label={video.label}
+      aspect={video.aspect}
+      class="md:col-span-6 md:col-start-7"
+    />
+  ) : image ? (
+    <Media
+      image={image.picture}
+      label={image.label}
+      ratio="660 / 560"
+      sizes="(min-width: 90rem) 660px, (min-width: 48rem) 50vw, 100vw"
+      class="rounded-card md:col-span-6 md:col-start-7"
+    />
+  ) : null}
 </div>
 )}

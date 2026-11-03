@@ -242,7 +242,7 @@ const sectionGround = (section: ProductSection, index: number): string =>
     product.sections.map((section, index) => (
       <Section space="lg" class={sectionGround(section, index)} reveal>
         {section.type === 'steps' && (
-          <StepList heading={section.heading} steps={section.steps} image={section.image} />
+          <StepList heading={section.heading} steps={section.steps} image={section.image} video={section.video} />
         )}
 
         {section.type === 'features' && (

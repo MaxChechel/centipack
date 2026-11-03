@@ -10,9 +10,11 @@ import { videoUrl } from '../../lib/media';
  * on load. Never bare `autoplay`.
  *
  * `label` is required and the component throws without one, because a video
- * element with no accessible name is not shippable. The visible pause control is
- * likewise not optional: these loop well past five seconds, which is WCAG 2.2.2,
- * and a hover-to-reveal control does not exist for touch or keyboard users.
+ * element with no accessible name is not shippable.
+ *
+ * NO PAUSE CONTROL, by client decision (WORKLOG 177): the clips read as moving
+ * photographs. That is a known gap against WCAG 2.2.2 for loops over five
+ * seconds; reduced-motion viewers still get the poster and nothing plays.
  *
  * NOTE FOR THE STARTER: no video ships with this repo — `VIDEO_BASE` in
  * src/lib/media.ts is a per-project decision. Drop a poster in
@@ -22,7 +24,8 @@ import { videoUrl } from '../../lib/media';
 interface Props {
   /** Base name under VIDEO_BASE and under src/assets/posters/. */
   src: string;
-  aspect?: '16/9' | '3/2' | '1/1';
+  /** The video's own ratio, as `w / h`. */
+  aspect?: string;
   /** Accessible name. Required. */
   label: string;
   class?: string;
@@ -46,10 +49,9 @@ const poster = await getImage({ src: entry.default, format: 'webp', width: 1280 
 ---
 
 <figure class:list={['clip', className]} data-clip>
-  <div
-    class="border-line bg-subtle relative overflow-hidden rounded-card border"
-    style={`aspect-ratio: ${aspect};`}
-  >
+  {/* No border: the clip stands where a photograph stood and is framed the
+      same way — the card radius, nothing drawn around it. */}
+  <div class="bg-subtle relative overflow-hidden rounded-card" style={`aspect-ratio: ${aspect};`}>
     <video
       data-src={videoUrl(src)}
       poster={poster.src}
@@ -61,9 +63,12 @@ const poster = await getImage({ src: entry.default, format: 'webp', width: 1280 
       preload="none"
       aria-label={label}
       class="h-full w-full object-cover"></video>
-
-    <button type="button" data-clip-toggle aria-label="Play video" aria-pressed="true" class="clip-toggle">
-      <span class="clip-icon" aria-hidden="true"></span>
-    </button>
   </div>
 </figure>
+
+<script>
+  /* Attaches each MP4 only as its clip nears the viewport, plays it muted and
+     looping once it is in view, pauses it off screen, and leaves it on its poster under reduced
+     motion. Declared in the JS census as "clip playback". */
+  import '../../scripts/clips';
+</script>

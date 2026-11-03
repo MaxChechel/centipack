@@ -58,13 +58,11 @@ sections:
       - title: Seal
         body: >-
           Peel off the release liner and press the adhesive flap closed.
-    image:
+    video:
+      src: mailer-video-compressed
       label: >-
-        A metallic mailer being pulled open, packed and sealed
-      picture:
-        src: ../../assets/products/metallic-mailers-how-it-works.avif
-        alt: >-
-          An expanded navy insulated mailer standing upright, its top flap peeled back to show the silver inner lining and the adhesive strip beneath the release liner.
+        An insulated metallic mailer being opened, packed with gel packs and vials, and sealed.
+      aspect: 1920 / 1080
 
   - type: features
     heading: Why choose insulated metallic mailers

@@ -10,7 +10,7 @@
  * testable end to end before the pull zone exists. No video ships with the
  * starter itself.
  */
-export const VIDEO_BASE = '/videos';
+export const VIDEO_BASE = 'https://media.centipack.com';
 
 /** Single MP4/H.264 per clip. WebM was dropped: it measured 2.5x the MP4. */
 export const videoUrl = (name: string): string => `${VIDEO_BASE}/${name}.mp4`;

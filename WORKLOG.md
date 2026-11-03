@@ -10781,3 +10781,29 @@ Not verifiable locally: the 404 status depends on Cloudflare Pages seeing
 
 verify: 10 checks, 1,270 assertions, 0 failures — up 41 for the new page's
 links and the extra page in each sweep.
+
+## 2026-11-03 — Entry 177. How-it-works videos on PuncturePack and the mailer
+
+The "How it works" picture on both pages is now the product video, served from
+Cloudflare R2 at `https://media.centipack.com` (`VIDEO_BASE`). A steps section
+takes exactly one of `image` or `video` (schema refine); the video carries its
+own `aspect` (both 1920 / 1080) so the frame matches the file, not 660 / 560.
+
+Muted, looping, `preload="none"`. Nothing is fetched on page load: the MP4 is
+attached 400px before the clip reaches the viewport and playback starts at 25%
+visibility; it pauses off screen. Reduced motion keeps the poster and fetches
+nothing. Posters are frames at 8 s and 5 s — both videos fade in from blank.
+The two old how-it-works AVIFs are removed.
+
+DEVIATION: no pause/play control, at the client's instruction. ARCHITECTURE §7
+and WCAG 2.2.2 want one for loops over five seconds (these run 30 s and 21 s).
+The toggle, its script and its CSS are removed rather than hidden.
+
+CSP: `media-src` narrowed from bare `https:` to the R2 origin — the build
+contracts check failed until it was explicit.
+
+Measured in the built page (both): no `src` at load; `src` attached, still
+paused, with the clip 40px into view; playing at 200px from the top; paused
+again after scrolling away.
+
+verify: 10 checks, 1,275 assertions, 0 failures.

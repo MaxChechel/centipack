@@ -92,7 +92,7 @@ const EXPECTED = [
   {
     id: 'clip playback',
     signature: /data-clip/,
-    why: 'ARCHITECTURE §7 — attaches the MP4 only near the viewport, and honours prefers-reduced-motion. Not on any page in this repo; ships when a project adds media.',
+    why: 'ARCHITECTURE §7 — attaches the MP4 only near the viewport, plays it once in view, and honours prefers-reduced-motion. Ships on the PuncturePack and metallic mailer pages.',
     maxGzip: 900,
   },
 ];

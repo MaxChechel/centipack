@@ -156,9 +156,24 @@ const section = (image: () => z.ZodType<ImageMetadata>) =>
         type: z.literal('steps'),
         heading: z.string(),
         steps: z.array(z.object({ title: z.string(), body: z.string() }).strict()).min(1),
-        image: slot(image),
+        image: slot(image).optional(),
+        /* A looping clip in place of the image. `src` is the file's base name
+           under VIDEO_BASE (src/lib/media.ts) and under src/assets/posters/;
+           `aspect` is the video's own ratio, because a remote file cannot be
+           measured at build time. */
+        video: z
+          .object({
+            src: z.string(),
+            label: z.string(),
+            aspect: z.string().regex(/^\d+ ?\/ ?\d+$/),
+          })
+          .strict()
+          .optional(),
       })
-      .strict(),
+      .strict()
+      .refine((s) => Boolean(s.image) !== Boolean(s.video), {
+        message: 'A steps section needs exactly one of `image` or `video`.',
+      }),
 
     /* "Why choose …" / "Construction" — an icon grid. The design draws four
        across and then three or four across; the template lets the grid wrap

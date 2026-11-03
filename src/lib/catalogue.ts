@@ -141,6 +141,13 @@ export interface ProductFaqItem {
  * photographs exists. `Media` prints `label` inside the pending box, so what a
  * reviewer sees in an empty slot is the brief for the shot that is owed.
  */
+/** A looping clip in a steps section, in place of its image. See Clip.astro. */
+export interface StepVideo {
+  src: string;
+  label: string;
+  aspect: string;
+}
+
 export interface SlotImage {
   label: string;
   picture?: Picture;
@@ -157,7 +164,7 @@ export interface SlotImage {
  * this is a union rather than an object with eight optional keys.
  */
 export type ProductSection =
-  | { type: 'steps'; heading: string; steps: readonly ProductStep[]; image: SlotImage }
+  | { type: 'steps'; heading: string; steps: readonly ProductStep[]; image?: SlotImage; video?: StepVideo }
   | { type: 'features'; heading: string; features: readonly ProductFeature[] }
   | {
       type: 'specs';
@@ -535,7 +542,13 @@ async function toSlot(slot: { label: string; picture?: RawPicture }): Promise<Sl
 async function toSection(section: ProductSectionInput): Promise<ProductSection> {
   switch (section.type) {
     case 'steps':
-      return { type: 'steps', heading: section.heading, steps: section.steps, image: await toSlot(section.image) };
+      return {
+        type: 'steps',
+        heading: section.heading,
+        steps: section.steps,
+        image: section.image ? await toSlot(section.image) : undefined,
+        video: section.video,
+      };
     case 'features':
       return { type: 'features', heading: section.heading, features: section.features };
     case 'specs':

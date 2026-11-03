@@ -48,18 +48,11 @@ sections:
       - title: Puncture
         body: >-
           Puncture the outer film at the "Puncture Here" marks to release the vacuum seal and allow the foam insulation to expand.
-    image:
+    video:
+      src: puncture-pack-video-compressed
       label: >-
-        PuncturePack being packed, sealed and punctured
-      picture:
-        # BACK TO ITS OWN FILE, and cut for this slot rather than borrowed from
-        # the card. Entry 124 pointed this at `puncture-pack.avif` on
-        # instruction; that source is 4:5, so a 1.179 box cropped 31% off the
-        # height and served 1037px into a 660px slot. This one is 1.333, loses
-        # 12% off the sides where there is only cream, and is a 3.1x file.
-        src: ../../assets/products/puncture-pack-how-it-works.avif
-        alt: >-
-          An expanded navy PuncturePack mailer standing upright on a cream ground, its top flap folded over and sealed.
+        A PuncturePack being packed with gel packs and vials, sealed, and punctured so its insulation expands.
+      aspect: 1920 / 1080
 
   - type: features
     heading: Why choose PuncturePack

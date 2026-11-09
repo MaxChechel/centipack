@@ -10807,3 +10807,133 @@ paused, with the clip 40px into view; playing at 200px from the top; paused
 again after scrolling away.
 
 verify: 10 checks, 1,275 assertions, 0 failures.
+
+## 2026-11-09 — Entry 178. Client-editable site, Phase 0: audit and cleanup
+
+Start of the CLAUDE-EDITABLE brief (Editing mode, content-only PRs, CI). Phase
+0 only; stopped at Gate 0.
+
+**Baseline on `main` (2d082ac), before any change:** `npm run verify` — 10
+checks, 1,275 assertions, 0 failures, §9 PASS. Matches entry 177.
+
+### Hosting
+
+**Live host: Cloudflare Pages**, confirmed by Max. `vercel.json` was the
+staging-only shim from entry 19 (`cleanUrls` for `build.format: 'file'`) and is
+removed. It never reached `dist/`, so the build output is unchanged. **[template]**
+the config comment on `build.format: 'file'` should say it is a host-coupled
+choice (entry 19 already asked for this; still open).
+
+PR previews: Cloudflare Pages builds a preview for every non-production branch
+**only if the project is Git-connected** (Settings → Builds & deployments →
+Preview branches: "All non-production branches"). It then posts the preview
+URL on the PR as a commit status and a bot comment. A Direct Upload project
+(`wrangler pages deploy`) gets no automatic PR previews. Which kind this project
+is can only be read in the dashboard: open question 1 below, a human
+punch-list item.
+
+### Copy inventory (scope of Phase 2)
+
+E = editorial (moves to content in Phase 2). S = structural (stays in code, with
+the reason).
+
+| # | Where | String(s) | Class | Note |
+|---|---|---|---|---|
+| 1 | `index.astro` | `<title>` "CentiPack — cold chain packaging for compounding pharmacies" | E | page-level field |
+| 2 | `index.astro` | H1 "Cold chain packaging for high-volume compounding pharmacies" | E | `.hero-headline` measure is tuned to this string (see Q4) |
+| 3 | `index.astro` | hero lede "We manufacture complete packaging solutions…" | E | `max-w-[42.5rem]` |
+| 4 | `index.astro` | buttons "Get a quote", "Explore products" (+ hrefs) | E | labels E; hrefs S (routes) |
+| 5 | `index.astro` | hero alt (range line-up) | E | alt belongs with the picture |
+| 6 | `index.astro` | Media label "Home hero — the CentiPack range in one line-up" | S | only renders in the pending box; a dev placeholder |
+| 7 | `index.astro` | layers heading "Three integrated layers…", lede "Your products deserve more…", link "Browse all products" | E | |
+| 8 | `index.astro` | testimonial quote "CentiPack has been great to work with…" and attribution "Compounding pharmacy client" | E | |
+| 9 | `about.astro` | `<title>` "About — CentiPack", meta description | E | description duplicates paragraph 1 by hand (Q6) |
+| 10 | `about.astro` | H1 "We came from the cold chain side" | E | `max-w-[27rem]` sized to it |
+| 11 | `about.astro` | four prose paragraphs, closer "Cold chain is what we do. Scale is what we are built for." | E | |
+| 12 | `about.astro` | photo alt (warehouse aisle) | E | |
+| 13 | `about.astro`, `contact.astro` | breadcrumb labels "Home", "About", "Contact" | E | site-wide labels; same "Home"/"Products" on category and product pages |
+| 14 | `contact.astro` | `<title>`, meta description, H1 "Contact us now", intro "We come back with a recommended build…" | E | |
+| 15 | `contact.astro` | "Email:" label | E | |
+| 16 | `contact.astro` | field labels and placeholders (Full Name, Work email, Company, Projected shipments per week, What are you shipping…) | E | `name=` attributes are S (Formspark field names) |
+| 17 | `contact.astro` | `SHIPMENT_RANGES` (five options) | E | still a stand-in, open question 14 |
+| 18 | `contact.astro` | submit "Send request" | E | |
+| 19 | `contact.astro` | honeypot label "Leave this field empty", `FORM_ENDPOINT`, `TURNSTILE_SITE_KEY`, `HONEYPOT` | S | trap mechanism and integration ids; coupled to Formspark dashboard and `contracts.mjs` |
+| 20 | `scripts/contact.ts` | "Sending…", success "Thank you — your request is with the team…", two failure messages | E | bundled script: needs data-attributes from the page to be content (Q3) |
+| 21 | `scripts/contact.ts` | `info@centipack.com` hardcoded twice | E | duplicates `SITE.email`; drifts if email changes (Q3) |
+| 22 | `products.astro` | `<title>` "Everything a compounding pharmacy ships — CentiPack", description | E | |
+| 23 | `products.astro` | H1 "Everything a compounding pharmacy ships", lede "Three layers, nested…" | E | |
+| 24 | `products.astro` | rail aria-label template `${title} products` | S | accessibility label derived from data |
+| 25 | `404.astro` | `<title>` "Page not found — CentiPack", H1, body, buttons "Explore products", "Back to home" | E | |
+| 26 | `[category].astro` | CrossLinks eyebrow "The rest of the build" and body "Pharmacy formats, custom boxes, and cold chain packaging…" | E | same string on all three category pages → site entry |
+| 27 | `[category].astro` | `<title>` pattern `${pageTitle} — ${title} \| CentiPack` | S | pattern assembled from content fields |
+| 28 | `[category].astro`, `[product].astro` | Media labels `— the range together`, `— hero` | S | pending-box placeholders |
+| 29 | `[product].astro` | title pattern, description fallback | S | assembled from content fields |
+| 30 | `blocks/CrossLinks.astro` | link label `Explore ${pageTitle.toLowerCase()}` | E | derived text; becomes a template string or a per-category field |
+| 31 | `lib/closing-band.ts` | heading "Thermal integrity. Validated performance. Manufacturing scale", body "Mass volume through…", action "Get a quote" | E | → site entry |
+| 32 | `lib/closing-band.ts` | image `alt: ''`, imageLabel | S | alt is decorative by ruling; label is a placeholder |
+| 33 | `consts.ts` | `SITE.description` | E | default meta description, llms.txt summary, JSON-LD |
+| 34 | `consts.ts` | `SITE.email` | E | client may change their inbox; feeds footer, contact, JSON-LD, llms.txt |
+| 35 | `consts.ts` | `SITE.name`, `origin`, `locale`, `contactHref`, `ogImage`, `noindex`, `LAUNCH` | S | identity and build inputs; the brief keeps them in code |
+| 36 | `shells/Nav.astro` | "Get a quote" ×2 (desktop, mobile sheet) | E | site entry |
+| 37 | `shells/Nav.astro` | "Skip to main content", sr-only "Menu", `aria-label` "Main", `${label} menu`, `${SITE.name} — home` | S | accessibility labels |
+| 38 | `data/navigation.ts` | top-level labels "Products", "About" | E | site entry |
+| 39 | `data/navigation.ts` | footer "Company" column: "Company", "All products", "About", "Contact" | E | site entry; hrefs S |
+| 40 | `shells/Footer.astro` | "&copy; {year} {SITE.name}. All rights reserved." | E | "All rights reserved." E; name and year S |
+| 41 | `shells/Footer.astro` | `aria-label` "Footer" | S | |
+| 42 | `blocks/Breadcrumb.astro` | `aria-label` "Breadcrumb" | S | |
+| 43 | `atoms/Button.astro`, `TextLink.astro`, `FormField.astro` | sr-only "(opens in a new tab)", "(required)" | S | accessibility strings, system-wide |
+| 44 | `blocks/Media.astro` | "[ image pending ]" | S | dev placeholder; nothing renders it today (0 in `dist/`) |
+| 45 | `pages/llms.txt.ts` | Company section notes ("The full range across…", "Our background in…", "Request a quote or samples…") | E | small; site entry. "or samples" is a claim no page makes (Q8) |
+
+Already content and out of scope: every product and category string, including
+category `navLinkLabel`, `guideLinkLabel`, `cardLinkLabel`, `navBody`,
+`crossBody`, and all product sections.
+
+### Open questions
+
+Numbering restarts for this brief (CE-n), so it does not collide with the
+running list.
+
+CE-1. **Is the Cloudflare Pages project Git-connected?** PR preview URLs
+      depend on it (see Hosting). Human punch list.
+CE-2. **Videos are not editable by a content PR.** They live on R2
+      (`VIDEO_BASE`, `src/lib/media.ts`), uploaded through the Cloudflare
+      dashboard. A "swap the how-it-works video" request needs a person with
+      R2 access. The swap-image skill and EDITING.md should say so.
+CE-3. **Contact-form messages live in a bundled script.** Making them content
+      means the page renders them into `data-` attributes and `contact.ts`
+      reads them. That is a small dev change to a §6 census script; it also
+      fixes the email drift (#21). Proposed for Phase 2 unless ruled otherwise.
+CE-4. **Some layout is tuned to the exact current copy.** The home H1 measure
+      (`.hero-headline`, sized so it sets in two lines), the hero lede's
+      `max-w-[42.5rem]`, the About H1's `max-w-[27rem]` and the testimonial's
+      `max-w-[49.625rem]`. A longer string still renders and verify still
+      passes (overflow is checked, line count is not), but it may wrap
+      differently from the design. Accept as "preview is the review", or add
+      a line-count check for the few headings the design fixes?
+CE-5. **Code comments claim "verbatim from Figma".** Once the client edits
+      copy, Figma stops being the source of truth for it, and those comments
+      (and the content YAML comments that say the same) become false the
+      first time someone edits. Phase 2 should move copy provenance out of
+      code comments. Who is the source of truth for copy from now on: the
+      repo or Figma?
+CE-6. **Meta descriptions are hand-copied from on-page copy** (About, Contact,
+      Products index's first sentence). Edit the paragraph and the snippet
+      silently goes stale. Phase 2 options: an explicit `description` field on
+      every page (simple, and it can drift), or derived (no drift, but the 160-char
+      cut entry for the products index shows why it is sometimes deliberately
+      different). Recommend an explicit field plus a verify check on length.
+CE-7. **`npm run verify` needs local Chrome.** Claude on the web will usually
+      not have it, so for most client edits CI is the only verify run. That is
+      fine as long as branch protection requires it (punch list); without that
+      protection, Editing mode rests on the agent's word.
+CE-8. **llms.txt says "Request a quote or samples".** No page offers samples.
+      An unsourced claim; confirm with the client or drop "or samples" in Phase 2.
+CE-9. **README is stale on two points.** It lists `functions/api/` (removed with
+      AUDIT D7) and says "forms via a Pages Function". Fix in Phase 5 with the
+      README edit, or now?
+CE-10. **The asset folders in the brief's allowlist** (products, categories,
+      home, about, shared, posters, clients) match `src/assets/` except `brand`
+      and `fonts`, which are correctly excluded. `posters` are video frames
+      tied to R2 videos (CE-2); allowing them is fine but a poster swap without
+      a video swap is a mismatch only a person will notice.

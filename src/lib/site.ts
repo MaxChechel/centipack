@@ -1,5 +1,14 @@
 import { getCollection } from 'astro:content';
-import { toPageImage, toSection, type Picture, type ProductSection } from './catalogue';
+import { SITE } from '../consts';
+import {
+  getCategories,
+  getProducts,
+  toOgImage,
+  toPageImage,
+  toSection,
+  type Picture,
+  type ProductSection,
+} from './catalogue';
 import type { PageData, PageSectionInput, ProductSectionInput, SiteData } from '../content.config';
 
 /**
@@ -60,6 +69,8 @@ export interface PageView {
   lede?: string;
   actions: readonly MenuLink[];
   image?: Picture;
+  ogImage?: string;
+  noindex: boolean;
   /** How llms.txt lists it, or null when it is not listed. */
   listing: { label: string; note: string; order: number } | null;
   sections: readonly PageSection[];
@@ -168,6 +179,8 @@ export function getPages(): Promise<PageView[]> {
           image: data.image
             ? await toPageImage(data.image, data.route ? PAGE_IMAGE_WIDTH[data.route] : undefined)
             : undefined,
+          ogImage: await toOgImage(data.ogImage),
+          noindex: data.noindex,
           listing:
             data.listing === false
               ? null
@@ -206,4 +219,37 @@ export async function getPage(route: PageRoute): Promise<PageView> {
 /** The pages the client added, which src/pages/[slug].astro builds. */
 export async function getNewPages(): Promise<PageView[]> {
   return (await getPages()).filter((p) => p.slug);
+}
+
+/**
+ * ONE NOINDEX RULE (editing addendum A4).
+ *
+ * Two sources, joined here and nowhere else: `SITE.noindex` in src/consts.ts
+ * for the system's own routes (the styleguide), and the `noindex` field on
+ * pages, products and categories for content. BaseLayout's robots tag, the
+ * sitemap and llms.txt all ask this function, so a page cannot be noindexed in
+ * one of them and listed in another.
+ */
+export async function noindexedPaths(): Promise<ReadonlySet<string>> {
+  const [pages, products, categories] = await Promise.all([
+    getPages(),
+    getProducts(),
+    getCategories(),
+  ]);
+  return new Set([
+    ...SITE.noindex,
+    ...pages.filter((p) => p.noindex).map((p) => p.path),
+    ...categories.filter((c) => c.noindex).map((c) => c.href),
+    ...products.filter((p) => p.noindex && p.href).map((p) => p.href!),
+  ]);
+}
+
+/** Is this path kept out of search engines? Covers a noindexed route's children, as SITE.noindex always has. */
+export async function isNoindexedPath(path: string): Promise<boolean> {
+  const paths = await noindexedPaths();
+  for (const route of paths) {
+    if (path === route) return true;
+    if (route !== '/' && path.startsWith(`${route}/`)) return true;
+  }
+  return false;
 }

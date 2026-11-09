@@ -20,7 +20,7 @@ import { getPage } from '../lib/site';
 const page = await getPage('404');
 ---
 
-<BaseLayout title={page.title} description={page.description} noindex>
+<BaseLayout title={page.title} description={page.description} ogImage={page.ogImage} noindex>
   <Section width="narrow" spaceTop="nav" space="lg" reveal="hero">
     <div class="gap-xl flex flex-col items-center text-center">
       <h1 class="text-h2 text-primary">{page.heading}</h1>

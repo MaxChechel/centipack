@@ -157,6 +157,18 @@ const products = defineCollection({
         description: z.string(),
 
         /**
+         * The picture shown when this page is shared (Slack, LinkedIn, iMessage).
+         * Cropped to 1200 x 630 at build. Leave it out to use the site default.
+         */
+        ogImage: picture(image).optional(),
+        /**
+         * true keeps this page out of search engines: a robots noindex tag, and
+         * no entry in the sitemap or llms.txt. The page still exists and links
+         * to it still work.
+         */
+        noindex: z.boolean().default(false),
+
+        /**
          * The line UNDER the product page's H1, set in the eyebrow style.
          *
          * Not the summary and not the lede: it is the product in five words
@@ -321,6 +333,18 @@ const categories = defineCollection({
         description: z.string(),
 
         /**
+         * The picture shown when this page is shared (Slack, LinkedIn, iMessage).
+         * Cropped to 1200 x 630 at build. Leave it out to use the site default.
+         */
+        ogImage: picture(image).optional(),
+        /**
+         * true keeps this page out of search engines: a robots noindex tag, and
+         * no entry in the sitemap or llms.txt. The page still exists and links
+         * to it still work.
+         */
+        noindex: z.boolean().default(false),
+
+        /**
          * The link on this category's cross-link card, at the foot of the
          * OTHER category pages: "Explore custom boxes".
          *
@@ -473,6 +497,10 @@ const pageSchema = ({ image }: { image: () => z.ZodType<ImageMetadata> }) =>
         actions: z.array(z.object({ label: z.string(), href: z.string() }).strict()).max(2).default([]),
         /** The page's main picture, where it has one. */
         image: picture(image).optional(),
+        /** As on products: the share picture. Leave out for the site default. */
+        ogImage: picture(image).optional(),
+        /** As on products: true keeps the page out of search engines, the sitemap and llms.txt. */
+        noindex: z.boolean().default(false),
         /**
          * How the page is listed in llms.txt's "Company" section. Leave it out
          * to list the page under its `label` with its `description`; `false`

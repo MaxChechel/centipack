@@ -125,6 +125,8 @@ const form = page.sections.find((section) => section.type === 'contact-form') as
   pageType="ContactPage"
   title={page.title}
   description={page.description}
+  ogImage={page.ogImage}
+  noindex={page.noindex}
 >
   <Section spaceTop="nav" spaceBottom="lg" reveal="hero">
     <div class="gap-2xl md:gap-xl md:grid md:grid-cols-12 flex flex-col">

@@ -67,6 +67,8 @@ const page = await getPage('home');
 <BaseLayout
   title={page.title}
   description={page.description}
+  ogImage={page.ogImage}
+  noindex={page.noindex}
 >
   {/*
     1 — Text hero.

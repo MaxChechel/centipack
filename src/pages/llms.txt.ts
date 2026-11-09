@@ -1,7 +1,7 @@
 import type { APIRoute } from 'astro';
 import { SITE } from '../consts';
 import { getCatalogue, categoryHref } from '../lib/catalogue';
-import { getPages, getSite } from '../lib/site';
+import { getPages, getSite, isNoindexedPath } from '../lib/site';
 import { canonicalUrl } from '../lib/urls';
 
 /**
@@ -13,7 +13,7 @@ import { canonicalUrl } from '../lib/urls';
  * then H2 sections of `- [name](url): note` links.
  *
  * THE COMPANY SECTION IS THE PAGES COLLECTION (WORKLOG 183): every page with a
- * `listing`, in its `order`. A page the client adds
+ * `listing`, in its `order`, minus anything noindexed. A page the client adds
  * is listed under its label and description unless its entry says otherwise,
  * and the notes are content, so nothing here can drift from the site.
  */
@@ -24,7 +24,7 @@ export const GET: APIRoute = async ({ site }) => {
   const [catalogue, siteEntry, pages] = await Promise.all([getCatalogue(), getSite(), getPages()]);
   const listed = [];
   for (const page of pages) {
-    if (page.listing) listed.push({ ...page.listing, path: page.path });
+    if (page.listing && !(await isNoindexedPath(page.path))) listed.push({ ...page.listing, path: page.path });
   }
   listed.sort((a, b) => a.order - b.order || a.label.localeCompare(b.label));
 

@@ -73,9 +73,11 @@ export const SITE = {
   noindex: ['/styleguide'] as readonly string[],
 } as const;
 
-/** Is this path one of the noindexed routes? */
-export const isNoindexed = (path: string): boolean =>
-  SITE.noindex.some((route) => path === route || path.startsWith(`${route}/`));
+/*
+ * `isNoindexed` lived here and is replaced by `isNoindexedPath` in
+ * src/lib/site.ts, which joins `SITE.noindex` (system routes) with the content
+ * entries' own `noindex` field. One rule, one place (editing addendum A4).
+ */
 
 /**
  * LAUNCH SCOPE — what this build is allowed to ship.

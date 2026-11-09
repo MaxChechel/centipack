@@ -51,7 +51,7 @@ const body = page.sections.filter((section): section is ProductSection => sectio
 const hasClosing = page.sections.some((section) => section.type === 'closing');
 ---
 
-<BaseLayout title={page.title} description={page.description}>
+<BaseLayout title={page.title} description={page.description} ogImage={page.ogImage} noindex={page.noindex}>
   <Section spaceTop="nav" spaceBottom="sm" class="bg-subtle" reveal="hero">
     <div class="gap-xl md:gap-lg md:grid md:grid-cols-12 md:items-start flex flex-col">
       <div class="gap-lg md:col-span-7 flex flex-col">

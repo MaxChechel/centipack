@@ -91,6 +91,8 @@ const heroRatio = product.heroImage
 <BaseLayout
   title={`${product.pageTitle} — ${category.title} | ${SITE.name}`}
   description={product.description}
+  ogImage={product.ogImage}
+  noindex={product.noindex}
 >
   {/* `spaceBottom="sm"`, NOT `lg`, and the whole reason is the picture below.
       This hero is copy followed by a full-bleed plate, and the gap between the

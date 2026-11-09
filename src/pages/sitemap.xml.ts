@@ -1,8 +1,7 @@
 import type { APIRoute } from 'astro';
 import { canonicalPath } from '../lib/urls';
 import { getCategories, getProducts } from '../lib/catalogue';
-import { isNoindexed } from '../consts';
-import { getNewPages } from '../lib/site';
+import { getNewPages, isNoindexedPath } from '../lib/site';
 
 /**
  * /sitemap.xml (§8).
@@ -44,7 +43,6 @@ const staticPaths = Object.keys(pageModules)
   /* The same list BaseLayout emits the robots meta from. A page told not to be
      indexed and then listed in the sitemap is a page giving a crawler two
      contradictory instructions. */
-  .filter((path) => !isNoindexed(path))
   .sort();
 
 export const GET: APIRoute = async ({ site }) => {
@@ -65,7 +63,9 @@ export const GET: APIRoute = async ({ site }) => {
     /* Pages the client added from content (src/pages/[slug].astro). */
     ...newPages.map((page) => page.path),
   ];
-  const listed = paths.filter((path) => !isNoindexed(path)).sort();
+  /* ONE noindex rule for the meta tag, this file and llms.txt (src/lib/site.ts). */
+  const indexed = await Promise.all(paths.map(async (path) => ((await isNoindexedPath(path)) ? null : path)));
+  const listed = indexed.filter((path): path is string => path !== null).sort();
 
   const urls = listed
     .map((path) => `  <url><loc>${new URL(canonicalPath(path), site).href}</loc></url>`)

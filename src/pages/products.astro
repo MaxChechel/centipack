@@ -41,6 +41,8 @@ const site = await getSite();
   pageType="CollectionPage"
   title={page.title}
   description={page.description}
+  ogImage={page.ogImage}
+  noindex={page.noindex}
 >
   {/* 1 — Hero. The lede sits in a second column, bottom-aligned with the h1. */}
   {/* `spaceTop="lg"`, not the shared `nav` step: the design draws the category

@@ -10937,3 +10937,87 @@ CE-10. **The asset folders in the brief's allowlist** (products, categories,
       and `fonts`, which are correctly excluded. `posters` are video frames
       tied to R2 videos (CE-2); allowing them is fine but a poster swap without
       a video swap is a mismatch only a person will notice.
+
+## 2026-11-09 — Entry 179. Rulings on CE-2 to CE-8
+
+Max's rulings on the Phase 0 open questions. CE-1, CE-7, CE-9 and CE-10 are
+untouched and still open. Nothing is implemented in this entry; each ruling
+names the phase that carries it.
+
+**CE-5, copy source of truth: RULED.** From handoff on, the repo owns copy and
+Figma owns layout and components. Comments are not rewritten wholesale: "verbatim
+from Figma" becomes "originally from Figma", node IDs kept (they still find the
+design). 9 occurrences across 8 files under `src/` today. Editing mode in
+`AGENTS.md` gains the line "Copy in src/content/ is the source of truth; it may
+differ from Figma." Lands in Phase 1 (AGENTS.md) and Phase 2 (comments).
+**[template]**
+
+**CE-3, contact messages: RULED, Phase 2.** The four status strings move to
+content and reach `contact.ts` as `data-` attributes or a JSON script tag,
+whichever stays inside the §6 JS census budget. The two hardcoded
+`info@centipack.com` go at the same time. **[template]**
+
+**CE-4, copy-tuned layout: RULED, Phase 2.** No line-count check (brittle across
+the seven sweep widths). The home H1, the home hero lede, the About H1 and the
+testimonial get a schema `.max()` set from their current length plus a little
+headroom, with a comment saying why. The preview stays the visual review. The
+update-copy skill says to keep those fields close to their original length.
+**[template]**
+
+**CE-6, meta descriptions: RULED, Phase 2.** A required `description` on every
+page entry, length-checked in the schema at about 50–160 characters. The same
+applies to products and categories, which have none today: categories ship
+`lede` and products ship `lede` or a built-up fallback. **[template]**
+
+Measured in `dist/` from the baseline build (characters, entities decoded):
+
+| Page | Length | Source today |
+|---|---|---|
+| index | 141 | `SITE.description` |
+| about | 148 | literal in page |
+| contact | 130 | literal in page |
+| products | 110 | literal in page |
+| 404 | 141 | `SITE.description` (default) |
+| cold-chain-shipping | 132 | category `lede` |
+| pharmacy-formats | 95 | category `lede` |
+| **custom-boxes** | **186** | category `lede` |
+| **eps-foam-coolers** | **240** | product `lede` |
+| **gel-packs** | **362** | product `lede` |
+| **insulated-metallic-mailers** | **194** | product `lede` |
+| **puncture-pack** | **252** | product `lede` |
+| **thermal-liners** | **350** | product `lede` |
+
+**CONFLICT, not resolved here.** Six shipped descriptions exceed 160. The brief
+requires Phase 2 to leave `dist/` byte-identical in HTML, and CE-6 requires every
+description to be at most 160. Both cannot hold for those six pages: either the
+cap goes on them (new, shorter copy, which is a visible change and needs an
+AUDIT entry), or they are exempt (the rule has holes on exactly the pages that
+need it). The new strings are copy, and Editing mode's own rule is not to invent
+it. The products-index precedent (`products.astro`: the description is the
+lede's first sentence) is one option, but on these pages it would still need someone to approve it.
+Question CE-11.
+
+**CE-8, samples: RULED, keep.** Four product pages already carry "Request
+samples & pricing" as `contactLinkLabel` (EPS foam coolers, insulated metallic
+mailers, PuncturePack, thermal liners), so llms.txt is consistent with the site.
+Phase 2: llms.txt reads its Company notes from content, not literals.
+
+**CE-2, videos: RULED, accepted limitation.** Video changes need a person with
+Cloudflare (R2) access; Claude says so and does not attempt them. Posters are
+still swapped through content. Documented in the swap-image skill (Phase 3) and
+EDITING.md (Phase 5). **[template]**
+
+### Open questions
+
+CE-11. **The six over-length descriptions** (table above). Options: (a) write
+       new descriptions of 160 characters or fewer for the six, approved by
+       you or the client, with an AUDIT entry recording the `dist/` difference
+       from the Phase 2 no-op rule; (b) cap at 160 only for page entries and
+       leave products and categories uncapped until the client supplies copy;
+       (c) phase it: Phase 2 adds the fields with today's text and no cap on
+       those six, and a later content PR shortens them and turns the cap on.
+       Recommend (c): it keeps Phase 2 a provable no-op and makes the change a
+       visible content PR, which is the workflow this brief exists to test.
+CE-12. **For the client: should the contact form carry an enquiry type
+       (quote / samples)?** Product pages invite samples requests, and the
+       form cannot tell one from a quote. Not to be built now.

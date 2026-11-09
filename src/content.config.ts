@@ -378,17 +378,50 @@ const categories = defineCollection({
 /**
  * PAGES: the site's own pages, and any page the client adds (WORKLOG 183).
  *
- * `route` names one of the five pages the site was built with: home, about,
- * contact, products (the products index) and 404. Each has its own template
- * under src/pages/ that draws its layout and reads its words from here.
- * Exactly one entry per route.
+ * TWO KINDS OF ENTRY, told apart by which key they carry:
+ *
+ *   - `route` names one of the five pages the site was built with: home,
+ *     about, contact, products (the products index) and 404. Each has its own
+ *     template under src/pages/ that draws its layout and reads its words from
+ *     here. Exactly one entry per route.
+ *   - `slug` makes a NEW page at /<slug>, drawn by src/pages/[slug].astro from
+ *     the section types in src/schema/sections.ts. Adding an entry adds the
+ *     page; nothing else has to change. It does NOT add the page to the menus:
+ *     that is the `nav` and `footer` lists in the site entry.
  *
  * Page-level fields (title, description, heading) are fields; the bands under
  * the heading are `sections`, in order, like a product page.
  */
 const ROUTES = ['home', 'about', 'contact', 'products', '404'] as const;
 
-/** Which section types each built-in page draws. */
+/**
+ * URLs a new page may not take, because the system already answers them.
+ *
+ * The five built-in pages, the product tree, the generated files at the root of
+ * the build, and the styleguide (which exists in dev builds). A slug here would
+ * either fail to build or quietly lose to the system's route.
+ */
+const RESERVED_SLUGS = [
+  'index',
+  'home',
+  'about',
+  'contact',
+  'products',
+  '404',
+  'styleguide',
+  'robots.txt',
+  'sitemap.xml',
+  'llms.txt',
+  'favicon.ico',
+  'favicon.svg',
+  'apple-touch-icon.png',
+  'og-default.png',
+  '_astro',
+  '_headers',
+  '_redirects',
+] as const;
+
+/** Which section types each built-in page draws. A new page gets the union and the closing band. */
 const PAGE_SECTIONS_BY_ROUTE: Record<(typeof ROUTES)[number], readonly string[]> = {
   home: ['categories', 'testimonial', 'closing'],
   about: ['prose'],
@@ -396,12 +429,33 @@ const PAGE_SECTIONS_BY_ROUTE: Record<(typeof ROUTES)[number], readonly string[]>
   products: ['catalogue', 'closing'],
   '404': [],
 };
+const NEW_PAGE_SECTIONS = [
+  'split',
+  'features',
+  'numbered',
+  'cards',
+  'carousel',
+  'faq',
+  'steps',
+  'specs',
+  'formats',
+  'closing',
+];
 
 const pageSchema = ({ image }: { image: () => z.ZodType<ImageMetadata> }) =>
     z
       .object({
-        /** Which built-in page this is. Do not change it. */
-        route: z.enum(ROUTES),
+        /** One of the built-in pages. Do not change it, and do not use it on a new page. */
+        route: z.enum(ROUTES).optional(),
+        /**
+         * A new page's URL: /<slug>. Lower case, words joined by hyphens. Not
+         * one of the reserved names (RESERVED_SLUGS above). Changing it on a
+         * live page changes its URL, so it needs a redirect (redirects.yaml).
+         */
+        slug: z
+          .string()
+          .regex(/^[a-z0-9]+(?:-[a-z0-9]+)*$/, 'slug: lower case letters, digits and single hyphens only, e.g. "cold-chain-guide".')
+          .optional(),
         /** The <title> in the browser tab and the headline of a search result. */
         title: z.string(),
         /** The search-result snippet. 50 to 160 characters. */
@@ -434,8 +488,21 @@ const pageSchema = ({ image }: { image: () => z.ZodType<ImageMetadata> }) =>
       })
       .strict()
       .superRefine((page, ctx) => {
-        const where = page.route;
-        const allowed = PAGE_SECTIONS_BY_ROUTE[page.route];
+        const where = page.route ?? page.slug ?? '(no route or slug)';
+        if (Boolean(page.route) === Boolean(page.slug)) {
+          ctx.addIssue({
+            code: 'custom',
+            message: `page "${where}": give exactly one of \`route\` (a built-in page) or \`slug\` (a new page).`,
+          });
+        }
+        if (page.slug && (RESERVED_SLUGS as readonly string[]).includes(page.slug)) {
+          ctx.addIssue({
+            code: 'custom',
+            path: ['slug'],
+            message: `slug "${page.slug}" is reserved: the site already has a page or file at /${page.slug}. Choose another slug.`,
+          });
+        }
+        const allowed = page.route ? PAGE_SECTIONS_BY_ROUTE[page.route] : NEW_PAGE_SECTIONS;
         page.sections.forEach((section, index) => {
           if (!allowed.includes(section.type)) {
             ctx.addIssue({

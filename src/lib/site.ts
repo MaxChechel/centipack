@@ -47,7 +47,9 @@ export type PageSection =
   | { type: 'closing' };
 
 export interface PageView {
-  route: PageRoute;
+  /** Set on the five built-in pages; `slug` is set on pages the client adds. */
+  route?: PageRoute;
+  slug?: string;
   /** The page's URL path. */
   path: string;
   title: string;
@@ -141,8 +143,8 @@ let pagesCache: Promise<PageView[]> | undefined;
  * Every page entry, checked as a set.
  *
  * The schema checks each entry alone; these are the rules that need all of them
- * at once, and it fails the build naming what is wrong: every built-in route
- * has exactly one entry.
+ * at once, and each fails the build naming what is wrong: every built-in route
+ * has exactly one entry, and no two new pages share a slug.
  */
 export function getPages(): Promise<PageView[]> {
   pagesCache ??= (async () => {
@@ -150,9 +152,10 @@ export function getPages(): Promise<PageView[]> {
     const views = await Promise.all(
       entries.map(async (entry: { data: unknown }): Promise<PageView> => {
         const data = entry.data as PageData;
-        const path = ROUTE_PATH[data.route];
+        const path = data.route ? ROUTE_PATH[data.route] : `/${data.slug}`;
         return {
           route: data.route,
+          slug: data.slug,
           path,
           title: data.title,
           description: data.description,
@@ -161,7 +164,7 @@ export function getPages(): Promise<PageView[]> {
           lede: data.lede,
           actions: data.actions,
           image: data.image
-            ? await toPageImage(data.image, PAGE_IMAGE_WIDTH[data.route])
+            ? await toPageImage(data.image, data.route ? PAGE_IMAGE_WIDTH[data.route] : undefined)
             : undefined,
           listing:
             data.listing === false
@@ -179,6 +182,11 @@ export function getPages(): Promise<PageView[]> {
       const count = views.filter((v) => v.route === route).length;
       if (count !== 1) problems.push(`route "${route}" has ${count} entries; it needs exactly one`);
     }
+    const seen = new Map<string, number>();
+    for (const v of views) if (v.slug) seen.set(v.slug, (seen.get(v.slug) ?? 0) + 1);
+    for (const [slug, count] of seen) {
+      if (count > 1) problems.push(`slug "${slug}" is used by ${count} pages; each page needs its own`);
+    }
     if (problems.length) throw new Error(`src/content/pages/: ${problems.join('; ')}.`);
 
     return views;
@@ -191,4 +199,9 @@ export async function getPage(route: PageRoute): Promise<PageView> {
   const page = (await getPages()).find((p) => p.route === route);
   /* getPages() has already thrown if a route is missing. */
   return page!;
+}
+
+/** The pages the client added, which src/pages/[slug].astro builds. */
+export async function getNewPages(): Promise<PageView[]> {
+  return (await getPages()).filter((p) => p.slug);
 }

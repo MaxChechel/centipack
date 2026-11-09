@@ -1,7 +1,8 @@
 import type { APIRoute } from 'astro';
 import { canonicalPath } from '../lib/urls';
-import { isNoindexed } from '../consts';
 import { getCategories, getProducts } from '../lib/catalogue';
+import { isNoindexed } from '../consts';
+import { getNewPages } from '../lib/site';
 
 /**
  * /sitemap.xml (§8).
@@ -49,7 +50,11 @@ const staticPaths = Object.keys(pageModules)
 export const GET: APIRoute = async ({ site }) => {
   if (!site) throw new Error('sitemap.xml: `site` must be set in astro.config.mjs.');
 
-  const [categories, products] = await Promise.all([getCategories(), getProducts()]);
+  const [categories, products, newPages] = await Promise.all([
+    getCategories(),
+    getProducts(),
+    getNewPages(),
+  ]);
 
   const paths = [
     ...staticPaths,
@@ -57,11 +62,12 @@ export const GET: APIRoute = async ({ site }) => {
     /* `undefined` while product pages are outside the launch scope — the same
        field the cards, the nav and the footer read. */
     ...products.map((product) => product.href).filter((href) => href !== undefined),
-  ]
-    .filter((path) => !isNoindexed(path))
-    .sort();
+    /* Pages the client added from content (src/pages/[slug].astro). */
+    ...newPages.map((page) => page.path),
+  ];
+  const listed = paths.filter((path) => !isNoindexed(path)).sort();
 
-  const urls = paths
+  const urls = listed
     .map((path) => `  <url><loc>${new URL(canonicalPath(path), site).href}</loc></url>`)
     .join('\n');
 

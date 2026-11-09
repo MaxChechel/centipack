@@ -1,0 +1,94 @@
+---
+import BaseLayout from '../components/shells/BaseLayout.astro';
+import Section from '../components/Section.astro';
+import SectionStack from '../components/SectionStack.astro';
+import Button from '../components/atoms/Button.astro';
+import Breadcrumb from '../components/blocks/Breadcrumb.astro';
+import CtaPlate from '../components/blocks/CtaPlate.astro';
+import Media from '../components/blocks/Media.astro';
+import { closingBand } from '../lib/closing-band';
+import { getNewPages, getSite, type PageView } from '../lib/site';
+import type { ProductSection } from '../lib/catalogue';
+
+/**
+ * A PAGE THE CLIENT ADDED (editing addendum A1).
+ *
+ * Every entry in src/content/pages/ with a `slug` becomes /<slug> here, with no
+ * code change. The five built-in pages (home, about, contact, products, 404)
+ * keep their own templates, because each draws a layout of its own; this one
+ * draws the product page's grammar, which is the site's general one: the hero
+ * on the cream ground, an optional picture plate, the body as an ordered list
+ * of typed sections on alternating grounds, and the closing band if the entry
+ * asks for one.
+ *
+ * NO PAGE SCRIPT. A `carousel` section here renders as the native scroll-snap
+ * row without the loop and centring script, exactly as it would on a product
+ * page, which does not load it either. Importing it here changed the bundler's
+ * chunking for the category pages even with no new page built (WORKLOG 183,
+ * open question CE-15).
+ *
+ * The slug is checked against the reserved list in the schema, so a page cannot
+ * take a URL the system owns, and the sitemap and llms.txt pick the page up from
+ * the same collection.
+ */
+export async function getStaticPaths() {
+  const pages = await getNewPages();
+  return pages.map((page) => ({ params: { slug: page.slug }, props: { page } }));
+}
+
+interface Props {
+  page: PageView;
+}
+
+const { page } = Astro.props;
+const site = await getSite();
+const cta = await closingBand();
+
+/* `closing` is the one page-only type a new page may use; everything else is
+   the shared vocabulary SectionStack draws. The schema allows nothing else on a
+   new page (NEW_PAGE_SECTIONS, content.config.ts). */
+const body = page.sections.filter((section): section is ProductSection => section.type !== 'closing');
+const hasClosing = page.sections.some((section) => section.type === 'closing');
+---
+
+<BaseLayout title={page.title} description={page.description}>
+  <Section spaceTop="nav" spaceBottom="sm" class="bg-subtle" reveal="hero">
+    <div class="gap-xl md:gap-lg md:grid md:grid-cols-12 md:items-start flex flex-col">
+      <div class="gap-lg md:col-span-7 flex flex-col">
+        <Breadcrumb trail={[{ label: site.labels.home, href: '/' }, { label: page.label }]} />
+        <h1 class="text-h1 text-primary">{page.heading}</h1>
+      </div>
+      <div class="gap-xl md:col-span-4 md:col-start-9 flex flex-col items-start">
+        {page.lede && <p class="text-body text-secondary">{page.lede}</p>}
+        {page.actions.map((action) => (
+          <Button href={action.href} variant="ghost" size="link" icon="arrow">
+            {action.label}
+          </Button>
+        ))}
+      </div>
+    </div>
+  </Section>
+
+  {page.image && (
+    <Section spaceTop="none" spaceBottom="md" class="bg-subtle" reveal="hero">
+      <Media
+        image={page.image}
+        label={`${page.label} — hero`}
+        ratio={`${page.image.width} / ${page.image.height}`}
+        sizes="(min-width: 90rem) 1344px, 100vw"
+        loading="eager"
+        fetchpriority="high"
+        class="page-hero-media rounded-plate"
+      />
+    </Section>
+  )}
+
+  <SectionStack sections={body} />
+
+  {hasClosing && (
+    <Section space="md" class="bg-base" reveal>
+      <CtaPlate {...cta} />
+    </Section>
+  )}
+</BaseLayout>
+

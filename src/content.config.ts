@@ -542,10 +542,22 @@ const pages = defineCollection({
   schema: pageSchema,
 });
 
+/** A link in a hand-made menu: a label and where it goes. */
+const menuLink = z
+  .object({
+    label: z.string(),
+    /** A path on this site ("/about") or a full URL. Every path is checked against the build. */
+    href: z.string().regex(/^(\/|https?:\/\/|mailto:)/, 'href: start with "/" for a page on this site, or a full https:// URL.'),
+  })
+  .strict();
+
 /**
  * SITE: the words every page shares (WORKLOG 183). One entry,
  * src/content/site/site.md.
-
+ *
+ * The menus are part catalogue, part hand-made. The Products menu and the
+ * footer's category columns are built from the products and categories, and
+ * stay that way. The links here sit beside them, in the order written.
  */
 const siteSchema = ({ image }: { image: () => z.ZodType<ImageMetadata> }) =>
     z
@@ -564,8 +576,12 @@ const siteSchema = ({ image }: { image: () => z.ZodType<ImageMetadata> }) =>
             getQuote: z.string(),
           })
           .strict(),
+        /** Links after the Products menu in the header, in order. */
+        nav: z.array(menuLink),
         footer: z
           .object({
+            /** Columns after the category columns, in order. */
+            columns: z.array(z.object({ title: z.string(), links: z.array(menuLink).min(1) }).strict()),
             /** After "© <year> CentiPack." */
             rights: z.string(),
           })

@@ -20,7 +20,8 @@ export interface SiteView {
   description: string;
   email: string;
   labels: { home: string; products: string; getQuote: string };
-  footer: { rights: string };
+  nav: readonly MenuLink[];
+  footer: { columns: readonly { title: string; links: readonly MenuLink[] }[]; rights: string };
   closingBand: { heading: string; body: string; actionLabel: string; image: Picture };
   crossLinks: { eyebrow: string; body: string };
 }
@@ -98,6 +99,7 @@ export function getSite(): Promise<SiteView> {
       description: data.description,
       email: data.email,
       labels: data.labels,
+      nav: data.nav,
       footer: data.footer,
       closingBand: {
         heading: data.closingBand.heading,

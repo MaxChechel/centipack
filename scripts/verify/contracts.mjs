@@ -304,6 +304,70 @@ function internalLinksResolve() {
   return { checks, failures, notes };
 }
 
+/** Does anything in this production build answer `path`? The rule internalLinksResolve uses. */
+function resolverFor(out) {
+  const emitted = new Set(walkRelative(out));
+  return (path) => {
+    const clean = path.split('#')[0].split('?')[0].replace(/^\//, '');
+    if (clean === '') return emitted.has('index.html');
+    return emitted.has(`${clean}.html`) || emitted.has(`${clean}/index.html`) || emitted.has(clean);
+  };
+}
+
+/**
+ * EDITING ADDENDUM A2 — EVERY MENU LINK GOES TO A PAGE THIS BUILD EMITS.
+ *
+ * The header and footer menus are partly content now (`nav` and
+ * `footer.columns` in src/content/site/site.md), so a client edit can point one
+ * at a page that does not exist. `internalLinksResolve` above would catch the
+ * href, but it reports by target; this reports by MENU ENTRY, with the label a
+ * person typed, which is what the person fixing it is looking at.
+ *
+ * Read from the built header and footer of every page, not from the content
+ * file: the question is what a visitor can click.
+ */
+function menusLinkToBuiltPages() {
+  const build = productionBuild();
+  if (!build.ok) return { checks: 1, failures: 1, notes: ['production build failed', build.log] };
+  const resolves = resolverFor(build.out);
+  const pages = walkRelative(build.out).filter((f) => f.endsWith('.html'));
+
+  let checks = 0;
+  let failures = 0;
+  const dead = new Map();
+  for (const file of pages) {
+    const html = readFileSync(join(build.out, file), 'utf8');
+    const menus = [
+      ...(html.match(/<header\b[\s\S]*?<\/header>/g) ?? []),
+      ...(html.match(/<footer\b[\s\S]*?<\/footer>/g) ?? []),
+    ].join('\n');
+    for (const m of menus.matchAll(/<a\b[^>]*\shref=["']([^"']*)["'][^>]*>([\s\S]*?)<\/a>/g)) {
+      const href = m[1].trim();
+      if (!href.startsWith('/') || href.startsWith('//')) continue;
+      checks++;
+      if (resolves(href)) continue;
+      failures++;
+      const label = m[2].replace(/<[^>]+>/g, '').replace(/\s+/g, ' ').trim() || '(no text)';
+      const key = `"${label}" → ${href}`;
+      if (!dead.has(key)) dead.set(key, new Set());
+      dead.get(key).add(file);
+    }
+  }
+  if (checks === 0) {
+    return { checks: 1, failures: 1, notes: ['NO MENU LINKS FOUND in any <header> or <footer>. The check is not reading the menus; fix the check.'] };
+  }
+  const notes = [];
+  if (dead.size) {
+    notes.push(`${dead.size} menu link(s) point at no page in the build:`);
+    for (const [key, files] of [...dead].sort()) {
+      notes.push(`    ${key} — on ${files.size} page(s). Fix the href in src/content/site/site.md, or create the page first.`);
+    }
+  } else {
+    notes.push(`${checks} menu link(s) across ${pages.length} page(s), every one going to a built page`);
+  }
+  return { checks, failures, notes };
+}
+
 /**
  * §4.2 — `as` IS RESERVED FOR SECTION, AS A NAME.
  *
@@ -781,6 +845,7 @@ const CONTRACTS = [
   ['`slot` reserved by Astro', slotIsReserved],
   ['production omits styleguide (§2.4)', productionOmitsStyleguide],
   ['internal links resolve (§8/§9)', internalLinksResolve],
+  ['menus link to built pages (A2)', menusLinkToBuiltPages],
   ['CSP matches the site (§8)', cspMatchesTheSite],
   ['no HTML comments shipped (§2/§8)', noCommentsInShippedHtml],
   ['icon map matches schema enum (§4.1/§5)', iconNamesMatchSchema],

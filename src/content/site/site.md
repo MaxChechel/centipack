@@ -7,7 +7,21 @@ labels:
   home: Home
   products: Products
   getQuote: Get a quote
+# After the Products menu, in order.
+nav:
+  - label: About
+    href: /about
 footer:
+  # After the three category columns, in order.
+  columns:
+    - title: Company
+      links:
+        - label: All products
+          href: /products
+        - label: About
+          href: /about
+        - label: Contact
+          href: /contact
   rights: All rights reserved.
 closingBand:
   heading: Thermal integrity. Validated performance. Manufacturing scale

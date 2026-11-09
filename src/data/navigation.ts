@@ -1,4 +1,5 @@
 import { getCatalogue, categoryHref, type Picture } from '../lib/catalogue';
+import { getSite } from '../lib/site';
 
 /**
  * Navigation — ONE source per list (§5).
@@ -13,6 +14,13 @@ import { getCatalogue, categoryHref, type Picture } from '../lib/catalogue';
  * Async, because the source is a content collection. That is a real constraint
  * and it is the right one: the alternative is a typed module duplicating the
  * collection, which is exactly the migration §5 says never happens for free.
+ *
+ * TWO KINDS OF ENTRY (editing addendum A2). The catalogue-derived lists above
+ * stay derived. The HAND-MADE links (About in the bar, the footer's Company
+ * column) are content: `nav` and `footer.columns` in src/content/site/site.md,
+ * so a page the client adds can be put in a menu without a developer. They sit
+ * beside the catalogue's lists, never instead of them, and the build contract
+ * `menus link to built pages` fails any of them that points nowhere.
  */
 export interface NavLink {
   /**
@@ -71,11 +79,11 @@ export const isGroup = (item: NavItem): item is NavGroup => 'columns' in item;
  * purpose — a nav is a set of promises about where the site goes.
  */
 export async function getNavigation(): Promise<readonly NavItem[]> {
-  const catalogue = await getCatalogue();
+  const [catalogue, site] = await Promise.all([getCatalogue(), getSite()]);
 
   return [
     {
-      label: 'Products',
+      label: site.labels.products,
       href: '/products',
       id: 'nav-products',
       /**
@@ -114,17 +122,17 @@ export async function getNavigation(): Promise<readonly NavItem[]> {
         };
       }),
     },
-    { href: '/about', label: 'About' },
+    ...site.nav.map(({ label, href }) => ({ label, href })),
   ];
 }
 
 /**
- * The footer's four columns. The first three are the catalogue again — same
- * traversal, same order, no second list — and the fourth is the company links
- * the footer owns.
+ * The footer's columns. The first three are the catalogue again — same
+ * traversal, same order, no second list — and the rest are the hand-made
+ * columns from the site entry (`footer.columns`), in the order written there.
  */
 export async function getFooterColumns(): Promise<readonly NavColumn[]> {
-  const catalogue = await getCatalogue();
+  const [catalogue, site] = await Promise.all([getCatalogue(), getSite()]);
 
   return [
     ...catalogue.map(({ category, products }) => ({
@@ -132,15 +140,13 @@ export async function getFooterColumns(): Promise<readonly NavColumn[]> {
       href: categoryHref(category.slug),
       links: products.map((product) => ({ href: product.href, label: product.title })),
     })),
-    {
-      title: 'Company',
-      href: '/products',
-      links: [
-        { href: '/products', label: 'All products' },
-        { href: '/about', label: 'About' },
-        { href: '/contact', label: 'Contact' },
-      ],
-    },
+    /* `href` is the column's first link: a NavColumn needs one for the nav
+       panel's browse button, and the footer never renders it. */
+    ...site.footer.columns.map((column) => ({
+      title: column.title,
+      href: column.links[0].href,
+      links: column.links,
+    })),
   ];
 }
 

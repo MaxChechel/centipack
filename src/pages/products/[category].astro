@@ -233,11 +233,9 @@ const itemList = {
 </BaseLayout>
 
 <script>
-  /* Both modules no-op on a page without their hook — the rail's on the two
-     categories that render cards, the carousel's on the one that renders rows.
-     Astro bundles a template's scripts per page rather than per branch, so the
-     alternative is a second template, which is a page's identity in a filename
-     again. Both are in the census with budgets. */
+  /* The rail no-ops on a page without its hook (custom boxes renders rows,
+     not cards). The carousel's script is not here: it travels with the block,
+     in Carousel.astro, so it loads on any page that draws a carousel and on no
+     other (WORKLOG 186, AUDIT D13). In the census with its budget. */
   import '../../scripts/rail';
-  import '../../scripts/carousel';
 </script>

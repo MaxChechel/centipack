@@ -98,3 +98,12 @@ const hasSlides = slides.length > 0;
   </ul>
 </div>
 )}
+
+<script>
+  /* THE BLOCK OWNS ITS SCRIPT (WORKLOG 186). It was imported by the category
+     template, so a carousel anywhere else (a product page, a page the client
+     adds) rendered as the bare scroll-snap row without the loop, the drag or
+     the centring. Astro emits a component's script on the pages that render
+     the component, once per page however many carousels it draws. */
+  import '../../scripts/carousel';
+</script>

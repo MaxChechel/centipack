@@ -21,11 +21,8 @@ import type { ProductSection } from '../lib/catalogue';
  * of typed sections on alternating grounds, and the closing band if the entry
  * asks for one.
  *
- * NO PAGE SCRIPT. A `carousel` section here renders as the native scroll-snap
- * row without the loop and centring script, exactly as it would on a product
- * page, which does not load it either. Importing it here changed the bundler's
- * chunking for the category pages even with no new page built (WORKLOG 183,
- * open question CE-15).
+ * NO PAGE SCRIPT. A block that needs one carries it (Carousel.astro), so a
+ * carousel here works exactly as it does on the custom boxes page.
  *
  * The slug is checked against the reserved list in the schema, so a page cannot
  * take a URL the system owns, and the sitemap and llms.txt pick the page up from

@@ -24,8 +24,35 @@ export async function getStaticPaths() {
   return [{ params: { redirects: '_redirects' } }];
 }
 
+/** The file as written: its non-comment text, and the old paths it declares. */
+function readRedirectsFile() {
+  const text = readFileSync('src/content/redirects.yaml', 'utf8');
+  const body = text
+    .split('\n')
+    .filter((line) => !/^\s*(#|$)/.test(line))
+    .join('\n')
+    .trim();
+  const paths = text
+    .split('\n')
+    .map((line) => /^["']?(\/\S*?)["']?\s*:\s*$/.exec(line)?.[1])
+    .filter((path): path is string => Boolean(path));
+  return { body, paths };
+}
+
 export const GET: APIRoute = async () => {
-  const entries = (await getCollection('redirects')) as { id: string; data: RedirectData }[];
+  const file = readRedirectsFile();
+
+  /* AN EMPTY FILE IS HANDLED, NOT WARNED ABOUT (CE-16). Asking Astro for an
+     empty collection logs "collection does not exist or is empty" on every
+     build, and a warning that appears on every build teaches everyone to
+     ignore warnings. So the file says it is empty in exactly one way, `{}`,
+     and then the collection is not queried at all. Anything else is loaded and
+     checked below, so a file with rules that failed to parse can never pass
+     for an empty one. */
+  const explicitlyEmpty = file.body === '{}';
+  const entries = explicitlyEmpty
+    ? []
+    : ((await getCollection('redirects')) as { id: string; data: RedirectData }[]);
 
   /* A BROKEN FILE MUST NOT BUILD AS AN EMPTY ONE. Astro's file loader logs a
      YAML error (a duplicate key, a bad indent) and carries on with no entries,
@@ -34,10 +61,13 @@ export const GET: APIRoute = async () => {
      with "/" and ends with ":") against the rules loaded turns that into a
      failed build that says why. Measured: a duplicated key built clean, exit 0,
      before this check existed. */
-  const written = readFileSync('src/content/redirects.yaml', 'utf8')
-    .split('\n')
-    .map((line) => /^["']?(\/\S*?)["']?\s*:\s*$/.exec(line)?.[1])
-    .filter((path): path is string => Boolean(path));
+  const written = file.paths;
+  if (!explicitlyEmpty && entries.length === 0) {
+    throw new Error(
+      'src/content/redirects.yaml: the file has content but no redirect loaded from it. ' +
+        'Write `{}` for no redirects, or fix the rules (check the [file-loader] error above).',
+    );
+  }
   /* By path, not only by count: on a parse error Astro keeps the LAST GOOD
      load in its local content cache, so a broken file can come back as stale
      rules that happen to number the same. (CI has no cache, so there it loads

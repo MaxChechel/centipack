@@ -6,7 +6,8 @@
 // worse trade than 30 lines. Node's built-in WebSocket makes it dependency-free.
 
 import { spawn } from 'node:child_process';
-import { existsSync } from 'node:fs';
+import { existsSync, readdirSync, readFileSync } from 'node:fs';
+import { join } from 'node:path';
 
 /** Where Chrome lives, in the order worth trying. Override with CHROME=. */
 const CANDIDATES = [
@@ -150,7 +151,25 @@ export const PAGES = [
   '/about',
   '/contact',
   '/styleguide',
+  /* EVERY PAGE THE CLIENT ADDS, found from content rather than listed here
+     (WORKLOG 183). They are drawn by src/pages/[slug].astro from the same
+     section union as the product pages, but each is a new combination of it,
+     and a page nobody sweeps is a page whose overflow and contrast nobody has
+     seen. Read from the source so it is known before the build runs. */
+  ...newPagesFromContent(),
 ];
+
+/** The URL of every `slug:` entry in src/content/pages/ (a new page, not a built-in route). */
+function newPagesFromContent() {
+  const dir = 'src/content/pages';
+  if (!existsSync(dir)) return [];
+  return readdirSync(dir)
+    .filter((f) => f.endsWith('.md'))
+    .map((f) => /^slug:\s*["']?([a-z0-9-]+)["']?\s*$/m.exec(readFileSync(join(dir, f), 'utf8'))?.[1])
+    .filter(Boolean)
+    .sort()
+    .map((slug) => `/${slug}`);
+}
 
 /*
  * THE TWO PRODUCT PAGES CAME OFF THIS LIST, AND WHY IS THE POINT.

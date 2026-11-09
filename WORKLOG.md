@@ -11106,3 +11106,48 @@ exist the `scope` job reports but blocks nothing.
 
 verify: 10 checks, 1,275 assertions, 0 failures, §9 PASS. Unchanged from the
 baseline, as expected: nothing in Phase 1 reaches the build.
+
+## 2026-11-09 — Entry 182. First CI run red: `astro check` passed locally by accident
+
+First run of `verify.yml` on a68f1be
+(https://github.com/MaxChechel/centipack/actions/runs/42615394367): `npm ci`
+and the sandbox step passed; `npm run verify` failed in 3m 39s. One failure,
+in `astro check`:
+
+```
+astro.config.mjs:23:19 - error ts(2591): Cannot find name 'process'.
+```
+
+**Root cause: the repo never declared Node's types, and Max's machine hid
+that.** `astro.config.mjs` is `// @ts-check` and is type-checked through
+`tsconfig.json`'s `**/*` include. `process` is only typed if `@types/node` is
+visible. It is not in `package.json`, but TypeScript loads `node_modules/@types`
+from EVERY ANCESTOR directory, and `/Users/maksimcecel/node_modules/@types/node`
+(18.11.18, a stray home-folder install) satisfied it. Every local green
+`astro check` in this log has depended on that folder. Reproduced: a clean clone
+plus `npm ci` in the scratchpad (outside the home folder) fails with the same
+error; the installed versions in both trees were otherwise identical, and
+copying `.verify/` into the clone changed nothing.
+
+**Fix: `@types/node@^22` as a devDependency (Max's ruling).** Major 22 matches
+`.nvmrc` (22.12.0) and the CI runtime. It ships nothing to the site. Vite
+already lists it as an optional peer, so it dedupes. The no-dependency
+alternative, a hand-written `process.env` declaration, was rejected as a
+hand-maintained imitation of Node's types. Deviation from the brief's "nothing
+in this brief needs one", recorded as such: the brief was right about its own
+files; the gap was older and only CI could expose it.
+
+Shown: the same clean clone with the new lockfile, `astro check`: 0 errors.
+
+**[template]** A machine-local `node_modules` above the project can mask a
+missing type package. The template should declare `@types/node` itself, and
+the general lesson is that CI from a clean checkout is the first verify run
+that cannot borrow from the developer's machine.
+
+**Node 20 warning on the same run:** `actions/checkout@v4` and
+`actions/setup-node@v4` target Node 20, which GitHub now forces onto Node 24.
+Harmless today; bumped both to `@v5` (Node 24 targets) so the warning goes and
+does not become a failure when Node 20 is removed. **[template]**
+
+verify (local, with the fix): 10 checks, 1,275 assertions, 0 failures, §9 PASS.
+The CI rerun is the evidence that closes Gate 1.

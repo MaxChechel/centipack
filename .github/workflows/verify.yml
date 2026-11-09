@@ -1,6 +1,6 @@
 # The gate every change passes before it can reach `main`.
 #
-# Branch protection on `main` requires both jobs, so an edit made by anyone,
+# Branch protection on `main` requires all three jobs (scope, urls, verify), so an edit made by anyone,
 # person or agent, is published only by merging a green PR. Nothing here
 # deploys: the host builds `main` and gives every PR its own preview URL.
 
@@ -35,6 +35,25 @@ jobs:
       - name: Developer change (scope check skipped by label)
         if: ${{ contains(github.event.pull_request.labels.*.name, 'dev-change') }}
         run: echo "Labelled dev-change, so the content allowlist does not apply. The full harness still runs."
+
+  # No published URL may disappear without a redirect (scripts/verify/urls.mjs,
+  # ARCHITECTURE §8). Builds the base branch and this one and compares the
+  # sitemaps. NOT skipped by `dev-change`: a developer can break a URL too.
+  urls:
+    if: github.event_name == 'pull_request'
+    runs-on: ubuntu-24.04
+    timeout-minutes: 15
+    steps:
+      - uses: actions/checkout@v5
+        with:
+          fetch-depth: 0
+      - uses: actions/setup-node@v5
+        with:
+          node-version-file: .nvmrc
+          cache: npm
+      - run: npm ci
+      - name: No URL removed without a redirect
+        run: node scripts/verify/urls.mjs origin/${{ github.base_ref }}
 
   verify:
     runs-on: ubuntu-24.04

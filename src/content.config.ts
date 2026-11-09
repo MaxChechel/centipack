@@ -1,5 +1,5 @@
 import { defineCollection } from 'astro:content';
-import { glob } from 'astro/loaders';
+import { file, glob } from 'astro/loaders';
 /* Imported from zod directly: astro:content's `z` re-export is deprecated as of
    Astro 7, and a deprecated import is a migration someone else has to do later. */
 import { z } from 'zod';
@@ -606,8 +606,36 @@ const site = defineCollection({
   schema: siteSchema,
 });
 
+/**
+ * REDIRECTS (editing addendum A3): src/content/redirects.yaml.
+ *
+ * Each key is an OLD path, and its value says where it goes now. The build
+ * writes them to the host's `_redirects` file. Any change that removes a URL
+ * (a renamed slug, a deleted page or product) adds one here in the same PR,
+ * pointing at the nearest useful page; the `urls` check fails the PR otherwise.
+ *
+ *   /products/old-name:
+ *     to: /products/cold-chain-shipping/new-name
+ *     reason: Renamed in November 2026.
+ */
+const redirectSchema = z
+    .object({
+      /** Where the old path goes: a path on this site. */
+      to: z.string().regex(/^\//, 'to: a path on this site, starting with "/".'),
+      /** 301 (moved for good) unless there is a reason for anything else. */
+      status: z.union([z.literal(301), z.literal(302)]).default(301),
+      /** Why it exists, for whoever reads this next. */
+      reason: z.string(),
+    })
+    .strict();
 
-export const collections = { products, categories, pages, site };
+const redirects = defineCollection({
+  loader: file('src/content/redirects.yaml'),
+  schema: redirectSchema,
+});
+
+
+export const collections = { products, categories, pages, site, redirects };
 
 /**
  * The section union as ZOD infers it, exported for the adapter.
@@ -629,9 +657,11 @@ export type ProductSectionInput = z.infer<ReturnType<typeof section>>;
 export type PageSectionInput = z.infer<ReturnType<typeof pageSection>>;
 
 /*
- * THE ENTRY TYPES, inferred from the schemas for the adapter (src/lib/site.ts). Astro's generated `CollectionEntry` data types
+ * THE ENTRY TYPES, inferred from the schemas for the adapters (src/lib/site.ts,
+ * src/pages/[redirects].ts). Astro's generated `CollectionEntry` data types
  * flatten to `any` for these schemas, as noted above `ProductSectionInput`, so
  * reading them off the zod objects is the only way the adapters get checked.
  */
 export type PageData = z.infer<ReturnType<typeof pageSchema>>;
 export type SiteData = z.infer<ReturnType<typeof siteSchema>>;
+export type RedirectData = z.infer<typeof redirectSchema>;

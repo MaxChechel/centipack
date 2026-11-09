@@ -369,6 +369,65 @@ function menusLinkToBuiltPages() {
 }
 
 /**
+ * EDITING ADDENDUM A3 — THE REDIRECTS ARE SOUND.
+ *
+ * dist/_redirects is generated from src/content/redirects.yaml. The schema
+ * checks each rule's shape; these are the rules that need the finished build
+ * and the whole list at once:
+ *
+ *   - every target is a page this build emits (a redirect to a 404 is a 404
+ *     with an extra hop);
+ *   - no source appears twice (the host takes the first and the second is
+ *     silently dead);
+ *   - no target is itself a source (A → B → C is a chain, A → B → A a loop:
+ *     each hop costs a round trip and a share of ranking, and a loop never
+ *     arrives);
+ *   - no source is a live page (the host answers the redirect first, so the
+ *     page could never be reached).
+ */
+function redirectsAreSound() {
+  const build = productionBuild();
+  if (!build.ok) return { checks: 1, failures: 1, notes: ['production build failed', build.log] };
+  const file = join(build.out, '_redirects');
+  let text;
+  try {
+    text = readFileSync(file, 'utf8');
+  } catch {
+    return { checks: 1, failures: 1, notes: ['NO _redirects IN THE BUILD. src/pages/[redirects].ts should always emit one, even when empty.'] };
+  }
+  const resolves = resolverFor(build.out);
+  const rules = text
+    .split('\n')
+    .map((line) => line.trim())
+    .filter((line) => line && !line.startsWith('#'))
+    .map((line) => {
+      const [from, to, status] = line.split(/\s+/);
+      return { from, to, status };
+    });
+
+  let checks = 1;
+  let failures = 0;
+  const notes = [];
+  const fail = (message) => {
+    failures++;
+    notes.push(`    ${message}`);
+  };
+  const froms = new Map();
+  for (const r of rules) froms.set(r.from, (froms.get(r.from) ?? 0) + 1);
+
+  for (const r of rules) {
+    checks += 4;
+    if (!resolves(r.to)) fail(`${r.from} → ${r.to}: the target is not a page in this build.`);
+    if (froms.get(r.from) > 1) fail(`${r.from}: listed ${froms.get(r.from)} times; keep one.`);
+    if (froms.has(r.to)) fail(`${r.from} → ${r.to} → … : ${r.to} is itself redirected. Point ${r.from} at the final page.`);
+    if (resolves(r.from)) fail(`${r.from}: a live page answers this URL, so the redirect would hide it. Remove the redirect or the page.`);
+  }
+  if (failures) notes.unshift(`${failures} problem(s) in src/content/redirects.yaml:`);
+  else notes.push(rules.length ? `${rules.length} redirect(s), every target built, no chains, loops, duplicates or shadowed pages` : '_redirects present, no rules yet');
+  return { checks, failures, notes };
+}
+
+/**
  * §4.2 — `as` IS RESERVED FOR SECTION, AS A NAME.
  *
  * A leaf component whose `Props` declares a key called `as` can have its entire
@@ -846,6 +905,7 @@ const CONTRACTS = [
   ['production omits styleguide (§2.4)', productionOmitsStyleguide],
   ['internal links resolve (§8/§9)', internalLinksResolve],
   ['menus link to built pages (A2)', menusLinkToBuiltPages],
+  ['redirects are sound (A3)', redirectsAreSound],
   ['CSP matches the site (§8)', cspMatchesTheSite],
   ['no HTML comments shipped (§2/§8)', noCommentsInShippedHtml],
   ['icon map matches schema enum (§4.1/§5)', iconNamesMatchSchema],

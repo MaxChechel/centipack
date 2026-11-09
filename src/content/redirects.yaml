@@ -1,0 +1,10 @@
+# Old addresses and where they go now. Read src/content.config.ts (`redirects`)
+# before editing. Each key is an old path:
+#
+#   /products/cold-chain-shipping/old-name:
+#     to: /products/cold-chain-shipping/new-name
+#     reason: Renamed, November 2026.
+#
+# Empty until the first URL changes, or until the old site's addresses are
+# exported (WORKLOG open question CE-13).
+{}

@@ -2,7 +2,7 @@
 import BaseLayout from '../components/shells/BaseLayout.astro';
 import Section from '../components/Section.astro';
 import Button from '../components/atoms/Button.astro';
-import { SITE } from '../consts';
+import { getPage } from '../lib/site';
 
 /**
  * Not found.
@@ -14,20 +14,23 @@ import { SITE } from '../consts';
  * PageSpeed tried to parse the home page's HTML as `/llms.txt` and as a JSON
  * manifest.
  *
- * Noindexed, and the sitemap already skips the `404` route.
+ * Noindexed, and the sitemap already skips the `404` route. The words are
+ * content: src/content/pages/404.md.
  */
+const page = await getPage('404');
 ---
 
-<BaseLayout title={`Page not found — ${SITE.name}`} noindex>
+<BaseLayout title={page.title} description={page.description} ogImage={page.ogImage} noindex>
   <Section width="narrow" spaceTop="nav" space="lg" reveal="hero">
     <div class="gap-xl flex flex-col items-center text-center">
-      <h1 class="text-h2 text-primary">Page not found</h1>
+      <h1 class="text-h2 text-primary">{page.heading}</h1>
       <p class="text-body text-secondary measure">
-        The page you were looking for has moved or does not exist.
+        {page.lede}
       </p>
       <div class="gap-sm flex flex-wrap justify-center">
-        <Button href="/products" variant="primary">Explore products</Button>
-        <Button href="/" variant="secondary">Back to home</Button>
+        {page.actions.map((action, index) => (
+          <Button href={action.href} variant={index === 0 ? 'primary' : 'secondary'}>{action.label}</Button>
+        ))}
       </div>
     </div>
   </Section>

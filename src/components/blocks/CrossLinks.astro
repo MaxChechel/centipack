@@ -38,18 +38,11 @@ const { eyebrow, body, categories, id } = Astro.props as Props;
 /* SELF-SKIP (§4.2): nothing to cross-link to, nothing to render. */
 const hasContent = categories.length > 0;
 
-/**
- * "Explore custom boxes →", derived rather than stored.
- *
- * The design writes it out for two of the three categories and both follow the
- * same rule exactly — "Explore" plus the display name, lower-cased. A fourth
- * label field on the collection would be three strings nobody can get wrong
- * stored so they can be, and the third ("Explore cold chain packaging") falls
- * out of the same rule. If a category ever needs to break it, that is the
- * moment it becomes a field.
- */
-const exploreLabel = (category: CategoryView): string =>
-  `Explore ${category.pageTitle.toLowerCase()}`;
+/* "Explore custom boxes →" is the category's `crossLinkLabel`. It was derived
+   ("Explore" plus `pageTitle`, lower-cased) until the copy became the client's
+   to edit, which is the moment the old note here said it would become a field
+   (WORKLOG 183). */
+const exploreLabel = (category: CategoryView): string => category.crossLinkLabel;
 ---
 
 {hasContent && (

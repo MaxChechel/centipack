@@ -304,6 +304,129 @@ function internalLinksResolve() {
   return { checks, failures, notes };
 }
 
+/** Does anything in this production build answer `path`? The rule internalLinksResolve uses. */
+function resolverFor(out) {
+  const emitted = new Set(walkRelative(out));
+  return (path) => {
+    const clean = path.split('#')[0].split('?')[0].replace(/^\//, '');
+    if (clean === '') return emitted.has('index.html');
+    return emitted.has(`${clean}.html`) || emitted.has(`${clean}/index.html`) || emitted.has(clean);
+  };
+}
+
+/**
+ * EDITING ADDENDUM A2 — EVERY MENU LINK GOES TO A PAGE THIS BUILD EMITS.
+ *
+ * The header and footer menus are partly content now (`nav` and
+ * `footer.columns` in src/content/site/site.md), so a client edit can point one
+ * at a page that does not exist. `internalLinksResolve` above would catch the
+ * href, but it reports by target; this reports by MENU ENTRY, with the label a
+ * person typed, which is what the person fixing it is looking at.
+ *
+ * Read from the built header and footer of every page, not from the content
+ * file: the question is what a visitor can click.
+ */
+function menusLinkToBuiltPages() {
+  const build = productionBuild();
+  if (!build.ok) return { checks: 1, failures: 1, notes: ['production build failed', build.log] };
+  const resolves = resolverFor(build.out);
+  const pages = walkRelative(build.out).filter((f) => f.endsWith('.html'));
+
+  let checks = 0;
+  let failures = 0;
+  const dead = new Map();
+  for (const file of pages) {
+    const html = readFileSync(join(build.out, file), 'utf8');
+    const menus = [
+      ...(html.match(/<header\b[\s\S]*?<\/header>/g) ?? []),
+      ...(html.match(/<footer\b[\s\S]*?<\/footer>/g) ?? []),
+    ].join('\n');
+    for (const m of menus.matchAll(/<a\b[^>]*\shref=["']([^"']*)["'][^>]*>([\s\S]*?)<\/a>/g)) {
+      const href = m[1].trim();
+      if (!href.startsWith('/') || href.startsWith('//')) continue;
+      checks++;
+      if (resolves(href)) continue;
+      failures++;
+      const label = m[2].replace(/<[^>]+>/g, '').replace(/\s+/g, ' ').trim() || '(no text)';
+      const key = `"${label}" → ${href}`;
+      if (!dead.has(key)) dead.set(key, new Set());
+      dead.get(key).add(file);
+    }
+  }
+  if (checks === 0) {
+    return { checks: 1, failures: 1, notes: ['NO MENU LINKS FOUND in any <header> or <footer>. The check is not reading the menus; fix the check.'] };
+  }
+  const notes = [];
+  if (dead.size) {
+    notes.push(`${dead.size} menu link(s) point at no page in the build:`);
+    for (const [key, files] of [...dead].sort()) {
+      notes.push(`    ${key} — on ${files.size} page(s). Fix the href in src/content/site/site.md, or create the page first.`);
+    }
+  } else {
+    notes.push(`${checks} menu link(s) across ${pages.length} page(s), every one going to a built page`);
+  }
+  return { checks, failures, notes };
+}
+
+/**
+ * EDITING ADDENDUM A3 — THE REDIRECTS ARE SOUND.
+ *
+ * dist/_redirects is generated from src/content/redirects.yaml. The schema
+ * checks each rule's shape; these are the rules that need the finished build
+ * and the whole list at once:
+ *
+ *   - every target is a page this build emits (a redirect to a 404 is a 404
+ *     with an extra hop);
+ *   - no source appears twice (the host takes the first and the second is
+ *     silently dead);
+ *   - no target is itself a source (A → B → C is a chain, A → B → A a loop:
+ *     each hop costs a round trip and a share of ranking, and a loop never
+ *     arrives);
+ *   - no source is a live page (the host answers the redirect first, so the
+ *     page could never be reached).
+ */
+function redirectsAreSound() {
+  const build = productionBuild();
+  if (!build.ok) return { checks: 1, failures: 1, notes: ['production build failed', build.log] };
+  const file = join(build.out, '_redirects');
+  let text;
+  try {
+    text = readFileSync(file, 'utf8');
+  } catch {
+    return { checks: 1, failures: 1, notes: ['NO _redirects IN THE BUILD. src/pages/[redirects].ts should always emit one, even when empty.'] };
+  }
+  const resolves = resolverFor(build.out);
+  const rules = text
+    .split('\n')
+    .map((line) => line.trim())
+    .filter((line) => line && !line.startsWith('#'))
+    .map((line) => {
+      const [from, to, status] = line.split(/\s+/);
+      return { from, to, status };
+    });
+
+  let checks = 1;
+  let failures = 0;
+  const notes = [];
+  const fail = (message) => {
+    failures++;
+    notes.push(`    ${message}`);
+  };
+  const froms = new Map();
+  for (const r of rules) froms.set(r.from, (froms.get(r.from) ?? 0) + 1);
+
+  for (const r of rules) {
+    checks += 4;
+    if (!resolves(r.to)) fail(`${r.from} → ${r.to}: the target is not a page in this build.`);
+    if (froms.get(r.from) > 1) fail(`${r.from}: listed ${froms.get(r.from)} times; keep one.`);
+    if (froms.has(r.to)) fail(`${r.from} → ${r.to} → … : ${r.to} is itself redirected. Point ${r.from} at the final page.`);
+    if (resolves(r.from)) fail(`${r.from}: a live page answers this URL, so the redirect would hide it. Remove the redirect or the page.`);
+  }
+  if (failures) notes.unshift(`${failures} problem(s) in src/content/redirects.yaml:`);
+  else notes.push(rules.length ? `${rules.length} redirect(s), every target built, no chains, loops, duplicates or shadowed pages` : '_redirects present, no rules yet');
+  return { checks, failures, notes };
+}
+
 /**
  * §4.2 — `as` IS RESERVED FOR SECTION, AS A NAME.
  *
@@ -690,7 +813,7 @@ function noCommentsInShippedHtml() {
 /**
  * THE ICON MAP AND THE SCHEMA'S ICON ENUM NAME THE SAME FIFTEEN MARKS.
  *
- * `src/components/atoms/icons.ts` holds the drawings; `src/content.config.ts`
+ * `src/components/atoms/icons.ts` holds the drawings; `src/schema/sections.ts`
  * holds the `z.enum` a product's `features` validate against. They are two
  * lists of the same names in two files, which is the shape §5 spends its whole
  * section warning about — and here it is unavoidable, because one is runtime
@@ -726,7 +849,7 @@ function iconNamesMatchSchema() {
   let failures = 0;
 
   const iconsSource = readFileSync('src/components/atoms/icons.ts', 'utf8');
-  const schemaSource = readFileSync('src/content.config.ts', 'utf8');
+  const schemaSource = readFileSync('src/schema/sections.ts', 'utf8');
 
   /** The keys of the ICONS map — top-level entries of the object literal. */
   const mapBlock = iconsSource.slice(
@@ -748,7 +871,7 @@ function iconNamesMatchSchema() {
     failures += 1;
     notes.push(
       `ICON LISTS NOT FOUND — parsed ${inMap.size} name(s) from icons.ts and ` +
-        `${inEnum.size} from content.config.ts. One of the two files has been ` +
+        `${inEnum.size} from src/schema/sections.ts. One of the two files has been ` +
         'restructured and this check is no longer reading it. Fix the check, not the count.',
     );
     return { checks, failures, notes };
@@ -766,7 +889,7 @@ function iconNamesMatchSchema() {
       failures += 1;
       notes.push(
         `ICON "${name}" is in the ICONS map but NOT in the schema's enum ` +
-          '(src/content.config.ts). No product can reference it; the path data is dead.',
+          '(src/schema/sections.ts). No product can reference it; the path data is dead.',
       );
     }
   }
@@ -781,6 +904,8 @@ const CONTRACTS = [
   ['`slot` reserved by Astro', slotIsReserved],
   ['production omits styleguide (§2.4)', productionOmitsStyleguide],
   ['internal links resolve (§8/§9)', internalLinksResolve],
+  ['menus link to built pages (A2)', menusLinkToBuiltPages],
+  ['redirects are sound (A3)', redirectsAreSound],
   ['CSP matches the site (§8)', cspMatchesTheSite],
   ['no HTML comments shipped (§2/§8)', noCommentsInShippedHtml],
   ['icon map matches schema enum (§4.1/§5)', iconNamesMatchSchema],

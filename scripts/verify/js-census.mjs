@@ -38,7 +38,8 @@ const EXPECTED = [
       'THE TURNSTILE RESET CAME BACK when Turnstile did, and it is not optional: a token is single-use, so without it a second attempt posts a spent one and is refused again for a reason the visitor cannot see or fix. ' +
       'It also tells Turnstile to release its widget before the success path removes the form, or Turnstile keeps tracking a node that has left the document and logs "Cannot find Widget" into the console of a page that has just succeeded. Seen in production, not predicted. ' +
       'THE BUDGET MOVED 550 to 620, and this is the reasoning rather than a bump. The reset cost 16 B (519 to 535) and fitted. The widget cleanup did not: 592 B. A shorter version that reads the id off the container alone measures 560 B and was REJECTED — if Cloudflare puts the id on a child element instead it passes undefined, cleans nothing, and leaves the warning it exists to remove. 32 B for a fix that works rather than one that might. ' +
-      'Measured at 592 B gzipped against the 620 B budget.',
+      'THE MESSAGES MOVED OUT (WORKLOG 183): the four status strings are content now and arrive as data attributes on the status element, so the script carries no copy and no email address. 592 B to 508 B. The budget is unchanged. ' +
+      'Measured at 508 B gzipped against the 620 B budget.',
     maxGzip: 620,
   },
   {

@@ -6,10 +6,9 @@ import SectionHeader from '../components/blocks/SectionHeader.astro';
 import CategoryCard from '../components/blocks/CategoryCard.astro';
 import CtaPlate from '../components/blocks/CtaPlate.astro';
 import Media from '../components/blocks/Media.astro';
-import { getCategories, toPageImage } from '../lib/catalogue';
+import { getCategories } from '../lib/catalogue';
+import { getPage } from '../lib/site';
 import { closingBand } from '../lib/closing-band';
-import { SITE } from '../consts';
-import heroImage from '../assets/home/centipack-home-hero.avif';
 
 /**
  * Home (§4.4).
@@ -23,8 +22,9 @@ import heroImage from '../assets/home/centipack-home-hero.avif';
  * adapter, from the first commit — not a hardcoded trio that would have to be
  * migrated later (§5).
  *
- * Copy and structure are v1 (Figma uMHWj1JRHoqmY9uOQNfyL6, `Home v1.03`,
- * 1005:13599). Three things changed in that round and all three are
+ * THE WORDS ARE CONTENT: src/content/pages/home.md, through src/lib/site.ts
+ * (WORKLOG 183). This file is the layout. Structure is v1, and the copy was
+ * originally from Figma uMHWj1JRHoqmY9uOQNfyL6 (`Home v1.03`, 1005:13599). Three things changed in that round and all three are
  * subtractions, which is worth saying because the page got better by losing
  * them:
  *
@@ -60,32 +60,15 @@ const cta = await closingBand();
  */
 const CARD_SIZES_3UP = '(min-width: 90rem) 440px, (min-width: 48rem) 32vw, 92vw';
 
-/**
- * The hero picture. Normalized here the way the adapter normalizes a
- * collection's — same `{ src, width, height, alt }` shape — because Media takes
- * one thing and should not care that this one is a page asset rather than a
- * content field.
- */
-/* THE PORTRAIT HERO LANDED, so this is a <picture> now rather than one wide
-   file cropped to 1:1.25 by `.hero-media`. The crop was never the same picture:
-   squeezing a 16:9 line-up into a tall frame kept the middle two products and
-   cut the rest off both ends. The portrait shot is composed for the frame — and
-   it is 1206x1509, which is exactly the 1:1.25 `.hero-media` asks for, so the
-   art direction and the CSS agree instead of one overriding the other. */
-import heroImageMobile from '../assets/home/centipack-home-hero-mobile.avif';
-const heroPicture = await toPageImage({
-  src: heroImage,
-  mobile: heroImageMobile,
-  /* RE-READ AGAINST THE PICTURE after the shot was swapped, which is the rule
-     entry 46 set and the only way this string stays true. */
-  alt:
-    'The CentiPack range laid out together: a white and a navy PuncturePack marked "Puncture here"; a navy mailer box open on two containers; a navy insulated mailer lying open to show its silver lining; an open white shipper holding a navy box and a navy mailer; a navy drawer box slid open on two glass vials; and three insulated mailers in navy, white and silver standing in a row.',
-});
+const page = await getPage('home');
+
 ---
 
 <BaseLayout
-  title={`${SITE.name} — cold chain packaging for compounding pharmacies`}
-  description={SITE.description}
+  title={page.title}
+  description={page.description}
+  ogImage={page.ogImage}
+  noindex={page.noindex}
 >
   {/*
     1 — Text hero.
@@ -109,7 +92,7 @@ const heroPicture = await toPageImage({
   <Section width="main" spaceTop="nav" spaceBottom="sm" class="text-center" reveal="hero">
     <div class="gap-xl flex flex-col items-center">
       <h1 class="hero-headline text-h1 text-primary">
-        Cold chain packaging for high-volume compounding pharmacies
+        {page.heading}
       </h1>
 
       {/* `text-large`, not `text-body`: the design sets this one paragraph at
@@ -121,9 +104,7 @@ const heroPicture = await toPageImage({
           `measure` is 66ch of the current size, which at 18px overshoots by
           about 60px. An arbitrary value with its reason stated (§4.2). */}
       <p class="text-large text-secondary max-w-[42.5rem]">
-        We manufacture complete packaging solutions for temperature-sensitive medications — from
-        insulated shippers and refrigerants to custom boxes and pharmacy formats — backed by 20+
-        years of combined cold-chain expertise and built for pharmacies that produce at scale.
+        {page.lede}
       </p>
 
       {/* TWO BUTTONS, AND v1 DRAWS ONE. Added on instruction: the design's hero
@@ -144,10 +125,9 @@ const heroPicture = await toPageImage({
 
           One line to reverse if the nav's tan is wanted instead: `variant`. */}
       <div class="gap-sm flex flex-wrap justify-center">
-        <Button href={SITE.contactHref} variant="primary">
-          Get a quote
-        </Button>
-        <Button href="/products" variant="secondary">Explore products</Button>
+        {page.actions.map((action, index) => (
+          <Button href={action.href} variant={index === 0 ? 'primary' : 'secondary'}>{action.label}</Button>
+        ))}
       </div>
     </div>
   </Section>
@@ -185,7 +165,7 @@ const heroPicture = await toPageImage({
   */}
   <Section spaceTop="none" spaceBottom="md" reveal="hero">
     <Media
-      image={heroPicture}
+      image={page.image}
       label="Home hero — the CentiPack range in one line-up"
       ratio="1344 / 656"
       loading="eager"
@@ -195,17 +175,22 @@ const heroPicture = await toPageImage({
     />
   </Section>
 
+  {/*
+    3–5 — THE BANDS, IN THE ENTRY'S ORDER. The content says which bands the
+    page has and in what order (src/content/pages/home.md); each `type` is
+    drawn here, and the schema allows Home exactly these three.
+  */}
+  {page.sections.map((section) => (
+  <>
   {/* 3 — Three layers. The band the design sets on the cream ground. */}
+  {section.type === 'categories' && (
   <Section space="lg" class="bg-subtle" reveal>
     <div class="gap-2xl flex flex-col">
-      <SectionHeader heading="Three integrated layers available individually or as a complete solution. Built to perform." headingLevel="h2" size="h2" split>
+      <SectionHeader heading={section.heading} headingLevel="h2" size="h2" split>
         <Fragment slot="lede">
-          Your products deserve more than packaging — they require a cold-chain system built to
-          maintain thermal integrity from packout through delivery. We manufacture the complete
-          solution: insulated shippers validated for 2–8°C performance, refrigerants, custom
-          secondary packaging, and pharmacy formats.
+          {section.lede}
         </Fragment>
-        <Button href="/products" variant="ghost" size="link" icon="arrow">Browse all products</Button>
+        <Button href={section.action.href} variant="ghost" size="link" icon="arrow">{section.action.label}</Button>
       </SectionHeader>
 
       {/*
@@ -226,6 +211,7 @@ const heroPicture = await toPageImage({
       </ul>
     </div>
   </Section>
+  )}
 
   {/*
     4 — Testimonial. One instance on one page, so page markup, not a block.
@@ -243,6 +229,7 @@ const heroPicture = await toPageImage({
     ended 97px above it, because the figure's padding was doing the whole job
     and there was nothing holding the band open. Measured before and after.
   */}
+  {section.type === 'testimonial' && (
   <Section space="none" class="border-line border-b" reveal>
     {/* 96px of padding from md and a 600px floor, both the design's. The
         padding alone left the band 97px short of the plate; the floor is what
@@ -260,17 +247,16 @@ const heroPicture = await toPageImage({
           token. */}
       <blockquote class="text-h3 text-primary max-w-[49.625rem]">
         <p>
-          CentiPack has been great to work with. As our pharmacy has grown, they’ve been able to
-          scale right along with us. They’re reliable, easy to work with, and their pricing has been
-          some of the best we’ve seen.
+          {section.quote}
         </p>
       </blockquote>
       {/* v1's attribution, replacing "Director of Operations, high-volume
           compounding pharmacy". Shorter and less specific — which is the
           client's call about their own reference. */}
-      <figcaption class="text-body text-secondary">Compounding pharmacy client</figcaption>
+      <figcaption class="text-body text-secondary">{section.attribution}</figcaption>
     </figure>
   </Section>
+  )}
 
   {/*
     5 — The closing band, and it is the SAME ONE every other page ends on.
@@ -289,7 +275,11 @@ const heroPicture = await toPageImage({
       design's `cta desktop` instance has no top padding and 64-96 below, which
       is what this carried; the ruling is that the closing band sits in the
       page's normal section rhythm like every other band. */}
+  {section.type === 'closing' && (
   <Section space="md" reveal>
     <CtaPlate {...cta} />
   </Section>
+  )}
+  </>
+  ))}
 </BaseLayout>

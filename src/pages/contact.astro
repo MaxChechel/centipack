@@ -34,8 +34,8 @@
  * own filtering, the honeypot below (a bot that fills every field), and
  * Turnstile (a bot that fills only the visible ones).
  *
- * NO CTA BAND: this page is the call to action. Copy is verbatim from Figma
- * 788:9565; the five controls are exactly the ones the design draws, mapped onto
+ * NO CTA BAND: this page is the call to action. Copy was originally from Figma
+ * 788:9565 and is content now (src/content/pages/contact.md, WORKLOG 183); the five controls are exactly the ones the design draws, mapped onto
  * FormField in the Phase 1 audit.
  */
 import BaseLayout from '../components/shells/BaseLayout.astro';
@@ -44,7 +44,7 @@ import FormField from '../components/atoms/FormField.astro';
 import Button from '../components/atoms/Button.astro';
 import TextLink from '../components/atoms/TextLink.astro';
 import Breadcrumb from '../components/blocks/Breadcrumb.astro';
-import { SITE } from '../consts';
+import { getPage, getSite, type ContactFormView } from '../lib/site';
 
 /**
  * The Formspark endpoint.
@@ -114,24 +114,19 @@ const TURNSTILE_SITE_KEY = '0x4AAAAAAFHCIE9r1TW2roAB';
  */
 const HONEYPOT = 'company_contact';
 
-/**
- * The select's ranges are NOT in the design — only the placeholder is drawn.
- * Open question 14. These are a stand-in shaped like the placeholder promises
- * ("up to 10,000+") and flagged rather than presented as final.
- */
-const SHIPMENT_RANGES = [
-  'Under 500 / week',
-  '500 – 2,000 / week',
-  '2,000 – 5,000 / week',
-  '5,000 – 10,000 / week',
-  '10,000+ / week',
-];
+const page = await getPage('contact');
+const site = await getSite();
+/* The schema requires exactly one contact-form section on this page, so there
+   is always a form to render (PAGE_SECTIONS_BY_ROUTE, content.config.ts). */
+const form = page.sections.find((section) => section.type === 'contact-form') as ContactFormView;
 ---
 
 <BaseLayout
   pageType="ContactPage"
-  title={`Contact — ${SITE.name}`}
-  description="We come back with a recommended build and pricing. There is no automated sequence behind this form — it goes straight to the team."
+  title={page.title}
+  description={page.description}
+  ogImage={page.ogImage}
+  noindex={page.noindex}
 >
   <Section spaceTop="nav" spaceBottom="lg" reveal="hero">
     <div class="gap-2xl md:gap-xl md:grid md:grid-cols-12 flex flex-col">
@@ -139,23 +134,22 @@ const SHIPMENT_RANGES = [
       <div class="gap-xl md:col-span-5 flex flex-col">
         <div class="gap-md flex flex-col">
           {/* Same trail the rest of the site carries — see the note on About. */}
-          <Breadcrumb trail={[{ label: 'Home', href: '/' }, { label: 'Contact' }]} />
-          <h1 class="text-h2 text-primary">Contact us now</h1>
-          {/* Verbatim from Figma 1005:14646. The line it replaces promised a
+          <Breadcrumb trail={[{ label: site.labels.home, href: '/' }, { label: page.label }]} />
+          <h1 class="text-h2 text-primary">{page.heading}</h1>
+          {/* Originally from Figma 1005:14646. The line it replaces promised a
               reply "typically within one business day"; the design makes no
               timing claim and says who answers instead. Dropping a service
               commitment is the design's call to make, not ours to keep. */}
           <p class="text-body text-secondary measure">
-            We come back with a recommended build and pricing. There is no automated sequence behind
-            this form — it goes straight to the team, and the reply comes from whoever can answer it.
+            {page.lede}
           </p>
         </div>
 
         <hr class="border-line w-full border-t" />
 
         <p class="gap-xl text-body flex">
-          <span class="text-secondary">Email:</span>
-          <TextLink href={`mailto:${SITE.email}`}>{SITE.email}</TextLink>
+          <span class="text-secondary">{form.emailLabel}</span>
+          <TextLink href={`mailto:${site.email}`}>{site.email}</TextLink>
         </p>
       </div>
 
@@ -176,40 +170,40 @@ const SHIPMENT_RANGES = [
           </div>
 
           <FormField
-            label="Full Name"
+            label={form.fields.name.label}
             name="name"
             required
             autocomplete="name"
-            placeholder="Your name"
+            placeholder={form.fields.name.placeholder}
           />
           <FormField
-            label="Work email"
+            label={form.fields.email.label}
             name="email"
             type="email"
             required
             autocomplete="email"
             inputmode="email"
-            placeholder="you@pharmacy.com"
+            placeholder={form.fields.email.placeholder}
           />
           <FormField
-            label="Company"
+            label={form.fields.company.label}
             name="company"
             autocomplete="organization"
-            placeholder="Pharmacy or brand name"
+            placeholder={form.fields.company.placeholder}
           />
           <FormField
-            label="Projected shipments per week"
+            label={form.fields.volume.label}
             name="volume"
             type="select"
-            placeholder="Select a range — up to 10,000+"
-            options={SHIPMENT_RANGES}
+            placeholder={form.fields.volume.placeholder}
+            options={form.volumeOptions}
           />
           <FormField
-            label="What are you shipping, and where?"
+            label={form.fields.message.label}
             name="message"
             type="textarea"
             rows={5}
-            placeholder="e.g. GLP-1 injectables, nationwide next-day air, 3,000 packages/week"
+            placeholder={form.fields.message.placeholder}
           />
 
           {/* INSIDE the form: the widget injects `cf-turnstile-response` as a real
@@ -223,7 +217,7 @@ const SHIPMENT_RANGES = [
           </div>
 
           <Button type="submit" variant="primary" class="w-full">
-            Send request
+            {form.submitLabel}
           </Button>
 
           {/*
@@ -238,11 +232,20 @@ const SHIPMENT_RANGES = [
             `role="status"` + `aria-live="polite"` so the reply is announced
             rather than only drawn. It is empty and `hidden` at rest, so it
             occupies nothing until there is something to say.
+
+            ITS WORDS RIDE ON IT AS DATA ATTRIBUTES (WORKLOG 183, CE-3): the four
+            messages are content, and scripts/contact.ts reads them from here
+            rather than carrying its own copies, which is also what stopped the
+            email address being typed into the script twice.
           */}
           <p
             data-contact-status
             role="status"
             aria-live="polite"
+            data-sending={form.messages.sending}
+            data-success={form.messages.success}
+            data-failed={form.messages.failed}
+            data-unreachable={form.messages.unreachable}
             class="text-sm text-secondary"
             hidden
           />

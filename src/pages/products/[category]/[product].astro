@@ -1,27 +1,19 @@
 ---
 import BaseLayout from '../../../components/shells/BaseLayout.astro';
 import Section from '../../../components/Section.astro';
+import SectionStack from '../../../components/SectionStack.astro';
 import Button from '../../../components/atoms/Button.astro';
 import Breadcrumb from '../../../components/blocks/Breadcrumb.astro';
 import CtaPlate from '../../../components/blocks/CtaPlate.astro';
 import Media from '../../../components/blocks/Media.astro';
-import Faq from '../../../components/blocks/Faq.astro';
-import FeatureGrid from '../../../components/blocks/FeatureGrid.astro';
-import FormatCards from '../../../components/blocks/FormatCards.astro';
-import MediaCards from '../../../components/blocks/MediaCards.astro';
-import NumberedList from '../../../components/blocks/NumberedList.astro';
-import SpecSheet from '../../../components/blocks/SpecSheet.astro';
-import SplitFeature from '../../../components/blocks/SplitFeature.astro';
-import Carousel from '../../../components/blocks/Carousel.astro';
-import StepList from '../../../components/blocks/StepList.astro';
 import {
   getCatalogue,
   type CategoryView,
-  type ProductSection,
   type ProductView,
 } from '../../../lib/catalogue';
 import { closingBand } from '../../../lib/closing-band';
 import { SITE } from '../../../consts';
+import { getSite } from '../../../lib/site';
 
 /**
  * Product family — one template, and as many pages as there are products with
@@ -50,7 +42,7 @@ import { SITE } from '../../../consts';
  * copy came from the client's own redline and deleting it to tidy a template is
  * not this change's business. Flagged for review rather than quietly dropped.
  *
- * Copy is verbatim from Figma uMHWj1JRHoqmY9uOQNfyL6, nodes 1179:3192,
+ * Copy was originally from Figma uMHWj1JRHoqmY9uOQNfyL6, nodes 1179:3192,
  * 1204:3919, 1205:3879, 1206:3839 and 1207:3793.
  */
 export async function getStaticPaths() {
@@ -74,70 +66,9 @@ interface Props {
 
 const { product, category } = Astro.props;
 const cta = await closingBand();
+const site = await getSite();
 
-/**
- * EXHAUSTIVENESS, ENFORCED AT COMPILE TIME.
- *
- * The template below renders each section with a `===` test, which TypeScript
- * narrows but does not COUNT: adding a ninth member to `ProductSection` and
- * forgetting it here would type-check cleanly and render a silent gap in the
- * page. This loop is what makes that a build error instead — the `never`
- * assignment in the default branch stops compiling the moment a member exists
- * that the cases above do not name.
- *
- * It asserts that every type is ACKNOWLEDGED, not that every type is drawn;
- * those are different claims and this is the one a type system can make. Its
- * failure mode was run before it shipped (§9): a `{ type: 'gallery' }` member
- * added to the union fails `astro check` with "Type 'Gallery' is not assignable
- * to type 'never'" and names the file and line.
- */
-const assertEverySectionIsHandled = (sections: readonly ProductSection[]): void => {
-  for (const section of sections) {
-    switch (section.type) {
-      case 'steps':
-      case 'features':
-      case 'specs':
-      case 'split':
-      case 'numbered':
-      case 'cards':
-      case 'formats':
-      case 'carousel':
-      case 'faq':
-        break;
-      default: {
-        const unhandled: never = section;
-        throw new Error(`Unhandled product section: ${JSON.stringify(unhandled)}`);
-      }
-    }
-  }
-};
-assertEverySectionIsHandled(product.sections);
 
-/**
- * WHICH GROUND A SECTION SITS ON, and it ALTERNATES.
- *
- * The v1 product pages band themselves: the hero is `#f2eee8`, then every
- * content section after it flips between white and `#f2eee8` down the page,
- * and the FAQ and closing band settle onto `#f9f7f5`. Sampled off two pages
- * with different section mixes to establish that it is alternation rather than
- * a colour per section type — the same `split` block is white on one row and
- * `#f2eee8` two rows later:
- *
- *   mailers (1204:3919)   hero f2eee8 · steps #fff · features f2eee8 ·
- *                         specs #fff · split f2eee8 · split #fff ·
- *                         numbered f2eee8 · faq f9f7f5 · cta f9f7f5
- *   gel packs (1207:3793) hero f2eee8 · numbered #fff · features f2eee8 ·
- *                         formats #fff · numbered f2eee8 · cta f9f7f5
- *
- * So it is the INDEX that decides, not the type — which is why this is a
- * function of the position rather than a field on the section. A ground stored
- * in the content would have to be re-typed every time a section is inserted,
- * and would be wrong the moment someone forgot.
- *
- * The FAQ is the one exception, and it is the design's: it leaves the
- * alternation and lands on the same `#f9f7f5` as the closing band under it, so
- * the page ends on one ground rather than on a stripe.
- */
 /**
  * THE HERO'S OWN RATIO, for the same reason the spec drawing has one.
  *
@@ -155,13 +86,13 @@ const heroRatio = product.heroImage
   ? `${product.heroImage.width} / ${product.heroImage.height}`
   : '1344 / 541';
 
-const sectionGround = (section: ProductSection, index: number): string =>
-  section.type === 'faq' ? 'bg-base' : index % 2 === 0 ? 'bg-surface' : 'bg-subtle';
 ---
 
 <BaseLayout
   title={`${product.pageTitle} — ${category.title} | ${SITE.name}`}
-  description={product.lede ?? `${product.title} — ${product.summary}. ${category.summary}`}
+  description={product.description}
+  ogImage={product.ogImage}
+  noindex={product.noindex}
 >
   {/* `spaceBottom="sm"`, NOT `lg`, and the whole reason is the picture below.
       This hero is copy followed by a full-bleed plate, and the gap between the
@@ -196,8 +127,8 @@ const sectionGround = (section: ProductSection, index: number): string =>
             structured-data graph has one root. */}
         <Breadcrumb
           trail={[
-            { label: 'Home', href: '/' },
-            { label: 'Products', href: '/products' },
+            { label: site.labels.home, href: '/' },
+            { label: site.labels.products, href: '/products' },
             { label: category.title, href: category.href },
             { label: product.title },
           ]}
@@ -238,78 +169,7 @@ const sectionGround = (section: ProductSection, index: number): string =>
     />
   </Section>
 
-  {
-    product.sections.map((section, index) => (
-      <Section space="lg" class={sectionGround(section, index)} reveal>
-        {section.type === 'steps' && (
-          <StepList heading={section.heading} steps={section.steps} image={section.image} video={section.video} />
-        )}
-
-        {section.type === 'features' && (
-          <FeatureGrid heading={section.heading} features={section.features} />
-        )}
-
-        {section.type === 'specs' && (
-          <SpecSheet
-            heading={section.heading}
-            intro={section.intro}
-            note={section.note}
-            columns={section.columns}
-            rows={section.rows}
-            image={section.image}
-          />
-        )}
-
-        {section.type === 'split' && (
-          <SplitFeature
-            heading={section.heading}
-            subheading={section.subheading}
-            body={section.body}
-            note={section.note}
-            action={section.action}
-            image={section.image}
-            imageSide={section.imageSide}
-          />
-        )}
-
-        {section.type === 'numbered' && (
-          <NumberedList heading={section.heading} body={section.body} items={section.items} />
-        )}
-
-        {section.type === 'cards' && (
-          <MediaCards heading={section.heading} cards={section.cards} />
-        )}
-
-        {section.type === 'formats' && (
-          <FormatCards heading={section.heading} cards={section.cards} />
-        )}
-
-        {/* DECLARED HERE, DRAWN ON NO PRODUCT PAGE TODAY. The carousel belongs
-            to the shared section union, so this template has to acknowledge it
-            — the `never` assignment above is what makes that a build error
-            rather than a silent gap. It renders if a product ever declares
-            one; the category pages are where it ships. Note the full-bleed
-            Section this does NOT get: a product section is container-width, so
-            a carousel here would scroll inside the container rather than off
-            the page edges. Flagged rather than faked. */}
-        {section.type === 'carousel' && (
-          <Carousel heading={section.heading} lede={section.lede} slides={section.slides} />
-        )}
-
-        {/* SELF-SKIP (§4.2). The adapter drops any question whose answer is
-            still owed, so this list can arrive empty — and `Faq` would render
-            its top rule and nothing else. A heading over one hairline is worse
-            than no section. Every answer exists today; this is the guard for
-            the next FAQ that arrives as questions first. */}
-        {section.type === 'faq' && section.items.length > 0 && (
-          <div class="gap-xl md:gap-lg md:grid md:grid-cols-12 md:items-start flex flex-col">
-            <h2 class="text-h2 text-primary md:col-span-4">{section.heading}</h2>
-            <Faq items={section.items} class="md:col-span-7 md:col-start-6" />
-          </div>
-        )}
-      </Section>
-    ))
-  }
+  <SectionStack sections={product.sections} />
 
   {/* `space="md"` BOTH SIDES — one global step, 96px, on instruction. The
       design's `cta desktop` instance has no top padding and 64-96 below, which

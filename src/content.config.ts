@@ -1,8 +1,9 @@
 import { defineCollection } from 'astro:content';
-import { glob } from 'astro/loaders';
+import { file, glob } from 'astro/loaders';
 /* Imported from zod directly: astro:content's `z` re-export is deprecated as of
    Astro 7, and a deprecated import is a migration someone else has to do later. */
 import { z } from 'zod';
+import { picture, section, pageSection, LENGTH_CAPS } from './schema/sections';
 
 /**
  * Content collections (§5).
@@ -48,277 +49,71 @@ import { z } from 'zod';
 /** The three product categories, in the order they appear everywhere. */
 const CATEGORY = z.enum(['cold-chain-shipping', 'custom-boxes', 'pharmacy-formats']);
 
-/**
- * A picture and the sentence that replaces it for anyone who cannot see it.
- * Non-null alt is required by the SCHEMA, not by review (§7).
- *
- * NOTHING IS FILLED YET, ON PURPOSE. The client's own image plan (Figma
- * 676:6358) is three slots per product and most of them have no photograph
- * taken; the design draws a labelled "[ image pending ]" box for exactly that
- * state. So every image field here is optional and `Media` renders the pending
- * box when one is absent — see src/components/blocks/Media.astro, which also
- * records how that box gets removed.
- */
-const picture = (image: () => z.ZodType<ImageMetadata>) =>
-  z.object({
-    src: image(),
-    alt: z.string(),
-    /**
-     * OPTIONAL SECOND FILE, for art direction — a different framing of the same
-     * subject shot for a portrait screen, not the desktop file rescaled. One
-     * `alt` covers both: it is the same subject, and a second description is a
-     * second thing to keep in sync. Absent means the desktop file serves every
-     * width, which is true of everything not yet reshot.
-     */
-    mobile: image().optional(),
-  });
 
 /**
- * THE ICONS THE v1 PRODUCT PAGES DRAW, as a closed set.
+ * THE META DESCRIPTION, as a field on every entry that has a page (WORKLOG 179,
+ * 180).
  *
- * Every one is a lucide mark, named here exactly as the design names its layer
- * (`lucide/package` → `package`). An enum rather than a free string because an
- * icon name that does not exist renders NOTHING — a silent hole in a feature
- * grid — and a typo should fail the build with the bad name printed instead.
- * The paths themselves live in `src/components/atoms/Icon.astro`; this list and
- * that map are asserted to agree by the build contracts.
+ * It was derived: a category shipped its `lede`, a product its `lede` or a
+ * sentence assembled from its title and summary, and a page typed its own. A
+ * derived snippet changes whenever the paragraph does, and nobody editing the
+ * paragraph is thinking about the search result. A field is a decision someone
+ * can see.
+ *
+ * 50 TO 160 CHARACTERS. Below 50 says nothing a search result can use; above
+ * 160 is cut off mid-clause with an ellipsis. Counted in characters as
+ * JavaScript counts them, which is what the search engines' own limits
+ * approximate.
  */
-const ICON = z.enum([
-  'box',
-  'droplets',
-  'expand',
-  'feather',
-  'layers',
-  'leaf',
-  'lock-keyhole',
-  'package',
-  'repeat',
-  'shield',
-  'sparkles',
-  'target',
-  'thermometer-snowflake',
-  'truck',
-  'zap',
-]);
+const DESCRIPTION_MIN = 50;
+const DESCRIPTION_MAX = 160;
 
 /**
- * AN IMAGE SLOT ON A PRODUCT PAGE, which is a picture AND the brief for it.
+ * THE ONLY ENTRIES ALLOWED OVER 160, and each may not grow.
  *
- * The v1 product pages are drawn with nineteen photographic slots between them
- * and not one of the photographs exists — the design fills each one with the
- * instruction for the shot ("IMAGE: short demonstration video, pull tab clearly
- * visible, transition from compressed to expanded"). That instruction is
- * CONTENT, not a comment: it is what `Media` prints inside the pending box, so
- * the client reviewing the page reads the brief for the picture that is
- * missing rather than looking at an unlabelled grey rectangle.
+ * These six shipped longer descriptions before the cap existed (measured in
+ * dist/, WORKLOG 179). Phase 2 of the editing brief had to leave the built site
+ * unchanged, so their text was carried over as it was rather than rewritten in
+ * a refactor. Each is capped at its measured length, so the exemption can only
+ * shrink. An entry leaves this list by being shortened to 160 or fewer in a
+ * content PR, and then the normal cap applies to it like everything else.
  *
- * `label` is therefore required and `picture` is optional, which is the exact
- * inverse of how an image field is usually shaped — and it is the honest shape
- * here, because today every one of these slots is a brief and none is a photo.
+ * Keyed by collection and slug. Do not add to this list: a new entry over 160
+ * is a description that needs shortening, not an exemption.
  */
-const slot = (image: () => z.ZodType<ImageMetadata>) =>
-  z
-    .object({
-      label: z.string(),
-      picture: picture(image).optional(),
-    })
-    .strict();
+const DESCRIPTION_CARRY_OVER: Readonly<Record<string, { length: number; why: string }>> = {
+  'products/gel-packs': { length: 362, why: 'Carried over unchanged in the Phase 2 refactor, to be shortened by content PR.' },
+  'products/thermal-liners': { length: 350, why: 'Carried over unchanged in the Phase 2 refactor, to be shortened by content PR.' },
+  'products/puncture-pack': { length: 252, why: 'Carried over unchanged in the Phase 2 refactor, to be shortened by content PR.' },
+  'products/eps-foam-coolers': { length: 240, why: 'Carried over unchanged in the Phase 2 refactor, to be shortened by content PR.' },
+  'products/insulated-metallic-mailers': { length: 194, why: 'Carried over unchanged in the Phase 2 refactor, to be shortened by content PR.' },
+  'categories/custom-boxes': { length: 186, why: 'Carried over unchanged in the Phase 2 refactor, to be shortened by content PR.' },
+};
 
-/**
- * A PRODUCT PAGE IS AN ORDERED LIST OF TYPED SECTIONS (§5).
- *
- * The five v1 product pages share a vocabulary but not a skeleton: PuncturePack
- * runs hero → how it works → why choose → sizes → packouts → branding →
- * applications → FAQ; gel packs runs hero → network → construction → formats →
- * custom options and has no FAQ at all; thermal liners opens with a liner
- * chooser nothing else has. Eight section types, five different orders.
- *
- * SO THE ORDER IS DATA, NOT TEMPLATE. The alternative is a template carrying
- * eight optional fields and a hardcoded sequence, which gets the first four
- * pages right and then has to grow a `sectionOrder` array for the fifth — at
- * which point the order is data anyway, expressed twice. One list of
- * discriminated-union members says what is on the page and in what order, and
- * the template is a `switch`.
- *
- * `discriminatedUnion` rather than a loose object: zod reports
- * "invalid_union_discriminator" with the list of valid types when `type` is
- * wrong, and type-checks only the branch that matches when it is right, so a
- * `features` section with a `steps` key is an error rather than silent extra
- * data. Every branch is `.strict()` for the same reason the collections are.
- */
-const section = (image: () => z.ZodType<ImageMetadata>) =>
-  z.discriminatedUnion('type', [
-    /* "How it works" — a heading and numbered steps on the left, a picture on
-       the right. The steps are a real ordered sequence, so the template renders
-       an <ol>; the design's numerals come from CSS counters, not from content. */
-    z
-      .object({
-        type: z.literal('steps'),
-        heading: z.string(),
-        steps: z.array(z.object({ title: z.string(), body: z.string() }).strict()).min(1),
-        image: slot(image).optional(),
-        /* A looping clip in place of the image. `src` is the file's base name
-           under VIDEO_BASE (src/lib/media.ts) and under src/assets/posters/;
-           `aspect` is the video's own ratio, because a remote file cannot be
-           measured at build time. */
-        video: z
-          .object({
-            src: z.string(),
-            label: z.string(),
-            aspect: z.string().regex(/^\d+ ?\/ ?\d+$/),
-          })
-          .strict()
-          .optional(),
-      })
-      .strict()
-      .refine((s) => Boolean(s.image) !== Boolean(s.video), {
-        message: 'A steps section needs exactly one of `image` or `video`.',
-      }),
-
-    /* "Why choose …" / "Construction" — an icon grid. The design draws four
-       across and then three or four across; the template lets the grid wrap
-       rather than storing a row structure, because a row is a layout fact and
-       this is content (§4.4). */
-    z
-      .object({
-        type: z.literal('features'),
-        heading: z.string(),
-        features: z
-          .array(z.object({ icon: ICON, title: z.string(), body: z.string() }).strict())
-          .min(1),
-      })
-      .strict(),
-
-    /* "Sizes and specifications" — a two-column specification sheet beside a
-       dimension drawing, with an intro above and a qualifying note below.
-       `columns` is a tuple because the sheet is exactly two columns wide: the
-       thing and its options. A sheet with three would be a different block. */
-    z
-      .object({
-        type: z.literal('specs'),
-        heading: z.string(),
-        intro: z.string().optional(),
-        note: z.string().optional(),
-        columns: z.tuple([z.string(), z.string()]),
-        rows: z.array(z.object({ label: z.string(), value: z.string() }).strict()).min(1),
-        image: slot(image),
-      })
-      .strict(),
-
-    /* "Tailored pack-outs" / "Brand your box" — copy one side, picture the
-       other. `imageSide` because the design alternates them down the page, and
-       which side a picture sits on is the one layout decision this section
-       genuinely owns. */
-    z
-      .object({
-        type: z.literal('split'),
-        heading: z.string(),
-        subheading: z.string().optional(),
-        body: z.string(),
-        note: z.string().optional(),
-        action: z.object({ label: z.string(), href: z.string() }).strict().optional(),
-        image: slot(image),
-        imageSide: z.enum(['start', 'end']).default('end'),
-      })
-      .strict(),
-
-    /* "Applications" / "Nationwide cold storage" / "Custom & private-label" —
-       a heading and an optional paragraph on the left, a numbered list on the
-       right. `body` on an item is optional because two of the three instances
-       are titles alone. */
-    z
-      .object({
-        type: z.literal('numbered'),
-        heading: z.string(),
-        body: z.string().optional(),
-        items: z.array(z.object({ title: z.string(), body: z.string().optional() }).strict()).min(1),
-      })
-      .strict(),
-
-    /* "Which liner is right for you?" — full-width rows, each a picture and a
-       short pitch. Thermal liners only, today. */
-    z
-      .object({
-        type: z.literal('cards'),
-        heading: z.string(),
-        cards: z
-          .array(z.object({ title: z.string(), body: z.string(), image: slot(image) }).strict())
-          .min(1),
-      })
-      .strict(),
-
-    /* "Available formats & sizes" — a card per format, each listing its sizes
-       as chips. Gel packs only, today. */
-    z
-      .object({
-        type: z.literal('formats'),
-        heading: z.string(),
-        cards: z
-          .array(z.object({ title: z.string(), sizes: z.array(z.string()).min(1) }).strict())
-          .min(1),
-      })
-      .strict(),
-
-    /*
-     * FAQ — and `answer` DEFAULTS TO EMPTY, which is not a formality.
-     *
-     * The design first arrived with seven to ten questions per page and the
-     * answer to exactly one of them: the first item expanded with its copy,
-     * every other row collapsed with no answer text anywhere in the file. That
-     * was true of all four FAQ instances, so the schema was built to carry a
-     * question whose answer was still owed, and the adapter drops any item that
-     * has one. The answers have since been written — all 34 of them — so
-     * nothing is currently filtered.
-     *
-     * THE DEFAULT STAYS ANYWAY. It cost nothing, it is what let the pages ship
-     * honestly while the copy was outstanding, and the next product's FAQ will
-     * arrive the same way. The alternative — requiring an answer — would have
-     * meant either holding the pages back or inventing claims about thermal
-     * performance and disposal.
-     */
-    /* "Everything you can customize" — one card at a time, centred, with its
-       neighbours showing at both edges (Figma 1268:24141).
-
-       A LIST, NOT A GRID, AND THE DIFFERENCE IS THE CONTENT'S. The eight cards
-       are a catalogue of options a buyer reads through — box style, closures,
-       finish, board, two coatings, inserts, branding — not a ranked set where
-       the first three matter most. A grid would publish seven of them below the
-       fold and imply the top row is the important one; the carousel gives each
-       the same card and the same turn.
-
-       `slides` is `.min(2)` because one slide is not a carousel: it is a card
-       that has grown a scroller, a snap axis and a pair of buttons that cannot
-       do anything. The component renders a plain card at one slide, and this
-       floor keeps content from asking it to. */
-    z
-      .object({
-        type: z.literal('carousel'),
-        heading: z.string(),
-        lede: z.string().optional(),
-        slides: z
-          .array(
-            z
-              .object({ title: z.string(), body: z.string(), image: slot(image) })
-              .strict(),
-          )
-          .min(2),
-      })
-      .strict(),
-
-    z
-      .object({
-        type: z.literal('faq'),
-        heading: z.string(),
-        items: z
-          .array(
-            z
-              .object({ question: z.string(), answer: z.array(z.string()).default([]) })
-              .strict(),
-          )
-          .min(1),
-      })
-      .strict(),
-  ]);
+/** The description rule, as a refinement any collection with a slug can run. */
+const checkDescription =
+  (collection: string) =>
+  (entry: { slug: string; description: string }, ctx: z.RefinementCtx): void => {
+    const { length } = entry.description;
+    const carried = DESCRIPTION_CARRY_OVER[`${collection}/${entry.slug}`];
+    const max = carried?.length ?? DESCRIPTION_MAX;
+    if (length < DESCRIPTION_MIN) {
+      ctx.addIssue({
+        code: 'custom',
+        path: ['description'],
+        message: `description is ${length} characters; it needs at least ${DESCRIPTION_MIN} to be useful in a search result.`,
+      });
+    }
+    if (length > max) {
+      ctx.addIssue({
+        code: 'custom',
+        path: ['description'],
+        message: carried
+          ? `description is ${length} characters, longer than the ${carried.length} it was carried over at. Shorten it to ${DESCRIPTION_MAX} or fewer.`
+          : `description is ${length} characters; the limit is ${DESCRIPTION_MAX}. Search results cut it off mid-sentence beyond that.`,
+      });
+    }
+  };
 
 const products = defineCollection({
   loader: glob({ pattern: '**/*.md', base: './src/content/products' }),
@@ -353,6 +148,25 @@ const products = defineCollection({
 
         /** The card's one-line sublabel: "3–32 oz · 4 variants". */
         summary: z.string(),
+        /**
+         * The product page's meta description: the snippet under the page's
+         * title in a search result. 50 to 160 characters (see
+         * DESCRIPTION_MAX above). Written for the page, not copied from it; if
+         * you change the lede, re-read this.
+         */
+        description: z.string(),
+
+        /**
+         * The picture shown when this page is shared (Slack, LinkedIn, iMessage).
+         * Cropped to 1200 x 630 at build. Leave it out to use the site default.
+         */
+        ogImage: picture(image).optional(),
+        /**
+         * true keeps this page out of search engines: a robots noindex tag, and
+         * no entry in the sitemap or llms.txt. The page still exists and links
+         * to it still work.
+         */
+        noindex: z.boolean().default(false),
 
         /**
          * The line UNDER the product page's H1, set in the eyebrow style.
@@ -440,7 +254,8 @@ const products = defineCollection({
          */
         sections: z.array(section(image)).default([]),
       })
-      .strict(),
+      .strict()
+      .superRefine(checkDescription('products')),
 });
 
 const categories = defineCollection({
@@ -511,6 +326,35 @@ const categories = defineCollection({
         navBody: z.string(),
 
         /**
+         * The category page's meta description: the snippet under the page's
+         * title in a search result. 50 to 160 characters (see
+         * DESCRIPTION_MAX above).
+         */
+        description: z.string(),
+
+        /**
+         * The picture shown when this page is shared (Slack, LinkedIn, iMessage).
+         * Cropped to 1200 x 630 at build. Leave it out to use the site default.
+         */
+        ogImage: picture(image).optional(),
+        /**
+         * true keeps this page out of search engines: a robots noindex tag, and
+         * no entry in the sitemap or llms.txt. The page still exists and links
+         * to it still work.
+         */
+        noindex: z.boolean().default(false),
+
+        /**
+         * The link on this category's cross-link card, at the foot of the
+         * OTHER category pages: "Explore custom boxes".
+         *
+         * Was derived ("Explore" plus `pageTitle`, lower-cased) and is a field
+         * now, so the wording can be changed without a developer. The three
+         * entries carry exactly what the rule produced.
+         */
+        crossLinkLabel: z.string(),
+
+        /**
          * THE CATEGORY'S OWN PAGE BODY, where it has one.
          *
          * Cold chain and pharmacy formats list their products: a heading and a
@@ -551,10 +395,275 @@ const categories = defineCollection({
          */
         cardThumb: picture(image).optional(),
       })
-      .strict(),
+      .strict()
+      .superRefine(checkDescription('categories')),
 });
 
-export const collections = { products, categories };
+/**
+ * PAGES: the site's own pages, and any page the client adds (WORKLOG 183).
+ *
+ * TWO KINDS OF ENTRY, told apart by which key they carry:
+ *
+ *   - `route` names one of the five pages the site was built with: home,
+ *     about, contact, products (the products index) and 404. Each has its own
+ *     template under src/pages/ that draws its layout and reads its words from
+ *     here. Exactly one entry per route.
+ *   - `slug` makes a NEW page at /<slug>, drawn by src/pages/[slug].astro from
+ *     the section types in src/schema/sections.ts. Adding an entry adds the
+ *     page; nothing else has to change. It does NOT add the page to the menus:
+ *     that is the `nav` and `footer` lists in the site entry.
+ *
+ * Page-level fields (title, description, heading) are fields; the bands under
+ * the heading are `sections`, in order, like a product page.
+ */
+const ROUTES = ['home', 'about', 'contact', 'products', '404'] as const;
+
+/**
+ * URLs a new page may not take, because the system already answers them.
+ *
+ * The five built-in pages, the product tree, the generated files at the root of
+ * the build, and the styleguide (which exists in dev builds). A slug here would
+ * either fail to build or quietly lose to the system's route.
+ */
+const RESERVED_SLUGS = [
+  'index',
+  'home',
+  'about',
+  'contact',
+  'products',
+  '404',
+  'styleguide',
+  'robots.txt',
+  'sitemap.xml',
+  'llms.txt',
+  'favicon.ico',
+  'favicon.svg',
+  'apple-touch-icon.png',
+  'og-default.png',
+  '_astro',
+  '_headers',
+  '_redirects',
+] as const;
+
+/** Which section types each built-in page draws. A new page gets the union and the closing band. */
+const PAGE_SECTIONS_BY_ROUTE: Record<(typeof ROUTES)[number], readonly string[]> = {
+  home: ['categories', 'testimonial', 'closing'],
+  about: ['prose'],
+  contact: ['contact-form'],
+  products: ['catalogue', 'closing'],
+  '404': [],
+};
+const NEW_PAGE_SECTIONS = [
+  'split',
+  'features',
+  'numbered',
+  'cards',
+  'carousel',
+  'faq',
+  'steps',
+  'specs',
+  'formats',
+  'closing',
+];
+
+const pageSchema = ({ image }: { image: () => z.ZodType<ImageMetadata> }) =>
+    z
+      .object({
+        /** One of the built-in pages. Do not change it, and do not use it on a new page. */
+        route: z.enum(ROUTES).optional(),
+        /**
+         * A new page's URL: /<slug>. Lower case, words joined by hyphens. Not
+         * one of the reserved names (RESERVED_SLUGS above). Changing it on a
+         * live page changes its URL, so it needs a redirect (redirects.yaml).
+         */
+        slug: z
+          .string()
+          .regex(/^[a-z0-9]+(?:-[a-z0-9]+)*$/, 'slug: lower case letters, digits and single hyphens only, e.g. "cold-chain-guide".')
+          .optional(),
+        /** The <title> in the browser tab and the headline of a search result. */
+        title: z.string(),
+        /** The search-result snippet. 50 to 160 characters. */
+        description: z.string(),
+        /**
+         * The page's short name: the last step of its breadcrumb, and its name
+         * in llms.txt unless `listing` says otherwise. "About", "Contact".
+         */
+        label: z.string(),
+        /** The page's H1. */
+        heading: z.string(),
+        /** The paragraph under the H1, where the page has one. */
+        lede: z.string().optional(),
+        /** Buttons under the hero, in order. At most two. */
+        actions: z.array(z.object({ label: z.string(), href: z.string() }).strict()).max(2).default([]),
+        /** The page's main picture, where it has one. */
+        image: picture(image).optional(),
+        /** As on products: the share picture. Leave out for the site default. */
+        ogImage: picture(image).optional(),
+        /** As on products: true keeps the page out of search engines, the sitemap and llms.txt. */
+        noindex: z.boolean().default(false),
+        /**
+         * How the page is listed in llms.txt's "Company" section. Leave it out
+         * to list the page under its `label` with its `description`; `false`
+         * leaves it out. `order` sorts the list (lower first).
+         */
+        listing: z
+          .union([
+            z.literal(false),
+            z.object({ label: z.string(), note: z.string(), order: z.number().int() }).strict(),
+          ])
+          .optional(),
+        sections: z.array(pageSection(image)).default([]),
+      })
+      .strict()
+      .superRefine((page, ctx) => {
+        const where = page.route ?? page.slug ?? '(no route or slug)';
+        if (Boolean(page.route) === Boolean(page.slug)) {
+          ctx.addIssue({
+            code: 'custom',
+            message: `page "${where}": give exactly one of \`route\` (a built-in page) or \`slug\` (a new page).`,
+          });
+        }
+        if (page.slug && (RESERVED_SLUGS as readonly string[]).includes(page.slug)) {
+          ctx.addIssue({
+            code: 'custom',
+            path: ['slug'],
+            message: `slug "${page.slug}" is reserved: the site already has a page or file at /${page.slug}. Choose another slug.`,
+          });
+        }
+        const allowed = page.route ? PAGE_SECTIONS_BY_ROUTE[page.route] : NEW_PAGE_SECTIONS;
+        page.sections.forEach((section, index) => {
+          if (!allowed.includes(section.type)) {
+            ctx.addIssue({
+              code: 'custom',
+              path: ['sections', index, 'type'],
+              message: `page "${where}" cannot use a "${section.type}" section. It can use: ${allowed.join(', ') || 'none'}. A new kind of section is a developer change.`,
+            });
+          }
+        });
+        if (page.route === 'contact' && page.sections.filter((s) => s.type === 'contact-form').length !== 1) {
+          ctx.addIssue({
+            code: 'custom',
+            path: ['sections'],
+            message: 'the contact page needs exactly one "contact-form" section: without it the page has no form.',
+          });
+        }
+        const cap = (field: 'heading' | 'lede', max: number) => {
+          const value = page[field];
+          if (value && value.length > max) {
+            ctx.addIssue({
+              code: 'custom',
+              path: [field],
+              message: `page "${where}": ${field} is ${value.length} characters; the layout is drawn for at most ${max} (LENGTH_CAPS in src/schema/sections.ts).`,
+            });
+          }
+        };
+        if (page.route === 'home') {
+          cap('heading', LENGTH_CAPS.homeHeading);
+          cap('lede', LENGTH_CAPS.homeLede);
+        }
+        if (page.route === 'about') cap('heading', LENGTH_CAPS.aboutHeading);
+        checkDescription('pages')({ slug: where, description: page.description }, ctx);
+      });
+
+const pages = defineCollection({
+  loader: glob({ pattern: '**/*.md', base: './src/content/pages' }),
+  schema: pageSchema,
+});
+
+/** A link in a hand-made menu: a label and where it goes. */
+const menuLink = z
+  .object({
+    label: z.string(),
+    /** A path on this site ("/about") or a full URL. Every path is checked against the build. */
+    href: z.string().regex(/^(\/|https?:\/\/|mailto:)/, 'href: start with "/" for a page on this site, or a full https:// URL.'),
+  })
+  .strict();
+
+/**
+ * SITE: the words every page shares (WORKLOG 183). One entry,
+ * src/content/site/site.md.
+ *
+ * The menus are part catalogue, part hand-made. The Products menu and the
+ * footer's category columns are built from the products and categories, and
+ * stay that way. The links here sit beside them, in the order written.
+ */
+const siteSchema = ({ image }: { image: () => z.ZodType<ImageMetadata> }) =>
+    z
+      .object({
+        /** What CentiPack is, in one sentence. Used in structured data and at the top of llms.txt. */
+        description: z.string(),
+        /** The published enquiry address: the footer, the contact page, structured data, llms.txt. */
+        email: z.email(),
+        labels: z
+          .object({
+            /** The first step of every breadcrumb. */
+            home: z.string(),
+            /** The products menu, and the breadcrumb step for the products index. */
+            products: z.string(),
+            /** The quote button in the header (and in the phone menu). */
+            getQuote: z.string(),
+          })
+          .strict(),
+        /** Links after the Products menu in the header, in order. */
+        nav: z.array(menuLink),
+        footer: z
+          .object({
+            /** Columns after the category columns, in order. */
+            columns: z.array(z.object({ title: z.string(), links: z.array(menuLink).min(1) }).strict()),
+            /** After "© <year> CentiPack." */
+            rights: z.string(),
+          })
+          .strict(),
+        /** The band at the foot of most pages: a heading, a line, the quote button and a picture. */
+        closingBand: z
+          .object({
+            heading: z.string(),
+            body: z.string(),
+            actionLabel: z.string(),
+            /** Decorative: the heading says what it is, so `alt` stays "". */
+            image: picture(image),
+          })
+          .strict(),
+        /** "The rest of the build": the cross-links at the foot of each category page. */
+        crossLinks: z.object({ eyebrow: z.string(), body: z.string() }).strict(),
+      })
+      .strict();
+
+const site = defineCollection({
+  loader: glob({ pattern: '**/*.md', base: './src/content/site' }),
+  schema: siteSchema,
+});
+
+/**
+ * REDIRECTS (editing addendum A3): src/content/redirects.yaml.
+ *
+ * Each key is an OLD path, and its value says where it goes now. The build
+ * writes them to the host's `_redirects` file. Any change that removes a URL
+ * (a renamed slug, a deleted page or product) adds one here in the same PR,
+ * pointing at the nearest useful page; the `urls` check fails the PR otherwise.
+ *
+ *   /products/old-name:
+ *     to: /products/cold-chain-shipping/new-name
+ *     reason: Renamed in November 2026.
+ */
+const redirectSchema = z
+    .object({
+      /** Where the old path goes: a path on this site. */
+      to: z.string().regex(/^\//, 'to: a path on this site, starting with "/".'),
+      /** 301 (moved for good) unless there is a reason for anything else. */
+      status: z.union([z.literal(301), z.literal(302)]).default(301),
+      /** Why it exists, for whoever reads this next. */
+      reason: z.string(),
+    })
+    .strict();
+
+const redirects = defineCollection({
+  loader: file('src/content/redirects.yaml'),
+  schema: redirectSchema,
+});
+
+
+export const collections = { products, categories, pages, site, redirects };
 
 /**
  * The section union as ZOD infers it, exported for the adapter.
@@ -571,3 +680,16 @@ export const collections = { products, categories };
  * the `src` inside a picture, which the adapter hands straight to `getImage`.
  */
 export type ProductSectionInput = z.infer<ReturnType<typeof section>>;
+
+/** A page section as zod infers it, for the pages adapter (same reasoning as above). */
+export type PageSectionInput = z.infer<ReturnType<typeof pageSection>>;
+
+/*
+ * THE ENTRY TYPES, inferred from the schemas for the adapters (src/lib/site.ts,
+ * src/pages/[redirects].ts). Astro's generated `CollectionEntry` data types
+ * flatten to `any` for these schemas, as noted above `ProductSectionInput`, so
+ * reading them off the zod objects is the only way the adapters get checked.
+ */
+export type PageData = z.infer<ReturnType<typeof pageSchema>>;
+export type SiteData = z.infer<ReturnType<typeof siteSchema>>;
+export type RedirectData = z.infer<typeof redirectSchema>;

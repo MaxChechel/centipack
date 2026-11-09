@@ -35,6 +35,9 @@ crossBody: >-
   Mailers, coolers, gel packs and liners, verified to maintain 2–8°C from packout through delivery.
 navBody: >-
   Mailers, coolers, gel packs and liners, verified to maintain 2–8°C.
+description: >-
+  Choose your insulation format and pair it with the right refrigerant. Validated hold times for 24, 48, and 72-hour transit profiles.
+crossLinkLabel: "Explore cold chain packaging"
 navLinkLabel: >-
   Browse cold chain packaging
 rangeImage:

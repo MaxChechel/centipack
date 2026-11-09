@@ -4,6 +4,8 @@ slug: insulated-metallic-mailers
 category: cold-chain-shipping
 order: 3
 summary: "6 sizes · 1–1.5 in wall"
+description: >-
+  CentiPack’s elegant insulated metallic mailers arrive vacuum-sealed to save space in storage and at your packing stations. Pull the tab, and the foam expands into an insulated, protective pouch.
 descriptor: >-
   Self-expanding foam insulation with an elegant, durable outer shell · Compact storage. Premium protection.
 lede: >-

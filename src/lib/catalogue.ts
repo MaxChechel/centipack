@@ -223,6 +223,11 @@ export interface ProductView {
   descriptor?: string;
   lede?: string;
   contactLinkLabel?: string;
+  /** The meta description (WORKLOG 180). */
+  description: string;
+  /** The share image's URL, when the entry sets one (`toOgImage` below). */
+  ogImage?: string;
+  noindex: boolean;
   /**
    * Where this product's page is — or `undefined` when product detail pages are
    * not part of this launch (`LAUNCH.productPages` in src/consts.ts).
@@ -273,6 +278,10 @@ export interface CategoryView {
   navBody: string;
   selectionHeading: string;
   crossBody: string;
+  description: string;
+  crossLinkLabel: string;
+  ogImage?: string;
+  noindex: boolean;
   href: string;
   /** The category's own page body, where it has one. Empty means "show the rail". */
   sections: readonly ProductSection[];
@@ -387,7 +396,7 @@ const WIDE_WIDTHS = [640, 960, 1280, 1920, 2560, 3840] as const;
 const SECTION_WIDTHS = [440, 660, 900, 1320, 1980] as const;
 const SECTION_WIDTH = 1320;
 
-type RawPicture = { src: ImageMetadata; alt: string; mobile?: ImageMetadata } | undefined;
+export type RawPicture = { src: ImageMetadata; alt: string; mobile?: ImageMetadata } | undefined;
 
 /** One number per surface, so every caller asks for the same asset. */
 const MOBILE_WIDTH = 900;
@@ -495,6 +504,18 @@ async function toPicture(
  *
  * Exported because pages may call it; components still receive only `Picture`.
  */
+/**
+ * A share image, cropped to the 1200 x 630 that BaseLayout declares in
+ * `og:image:width` and `og:image:height` (those are stated, not measured, so
+ * the file has to match them). JPEG, because not every scraper reads WebP.
+ * The URL is content-hashed: it changes only when the picture does.
+ */
+export async function toOgImage(picture: RawPicture): Promise<string | undefined> {
+  if (!picture) return undefined;
+  const rendered = await getImage({ src: picture.src, format: 'jpg', width: 1200, height: 630, fit: 'cover' });
+  return rendered.src;
+}
+
 export async function toPageImage(
   picture: { src: ImageMetadata; alt: string; mobile?: ImageMetadata },
   width = WIDE_WIDTH,
@@ -539,7 +560,7 @@ async function toSlot(slot: { label: string; picture?: RawPicture }): Promise<Sl
  * ship while the copy was still outstanding, and because the next one will
  * arrive the same way: questions first, answers after. See the schema's note.
  */
-async function toSection(section: ProductSectionInput): Promise<ProductSection> {
+export async function toSection(section: ProductSectionInput): Promise<ProductSection> {
   switch (section.type) {
     case 'steps':
       return {
@@ -621,6 +642,9 @@ async function toProduct(entry: CollectionEntry<'products'>): Promise<ProductVie
     descriptor: entry.data.descriptor,
     lede: entry.data.lede,
     contactLinkLabel: entry.data.contactLinkLabel,
+    description: entry.data.description,
+    ogImage: await toOgImage(entry.data.ogImage),
+    noindex: entry.data.noindex,
     /* THE ONE PLACE THE LAUNCH GATE REACHES THE VIEW MODEL. Every product link
        on the site is derived from this field, so gating it here gates all of
        them at once — and cannot leave one list pointing at pages the build does
@@ -660,6 +684,10 @@ async function toCategory(entry: CollectionEntry<'categories'>): Promise<Categor
     navBody: entry.data.navBody,
     selectionHeading: entry.data.selectionHeading,
     crossBody: entry.data.crossBody,
+    description: entry.data.description,
+    crossLinkLabel: entry.data.crossLinkLabel,
+    ogImage: await toOgImage(entry.data.ogImage),
+    noindex: entry.data.noindex,
     href: categoryHref(entry.data.slug),
     sections: await Promise.all(entry.data.sections.map(toSection)),
     rangeImage: await toPicture(entry.data.rangeImage, WIDE_WIDTH, WIDE_WIDTHS),

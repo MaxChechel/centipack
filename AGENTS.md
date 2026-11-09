@@ -21,6 +21,13 @@ reviews the preview and merges.
   checked by the schema in `src/content.config.ts`. Read the comment above a
   field before writing it; the comments explain what each field is for and
   where it appears.
+- `src/content/pages/*.md`: the words on Home, About, Contact, the products
+  index and the 404 page (each has a `route`), and any page you add (it has a
+  `slug`; see `pages` in the schema). Sections come from
+  `src/schema/sections.ts`.
+- `src/content/site/site.md`: words every page shares, the email address, and
+  the hand-made menu links.
+- `src/content/redirects.yaml`: old URLs and where they go now.
 - New or replaced pictures under `src/assets/` (products, categories, home,
   about, shared, posters, clients), referenced from content.
 

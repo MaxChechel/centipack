@@ -5,6 +5,8 @@ slug: thermal-liners
 category: cold-chain-shipping
 order: 5
 summary: "Curbside recyclable"
+description: >-
+  CentiPack thermal liners turn standard corrugated boxes into insulated shippers for temperature-sensitive products. Choose from paper, PET, and bubble wrap options to match your product, packing process, and shipping requirements. Pair your liner with the right gel packs for a complete pack-out built around your target temperature and transit time.
 descriptor: >-
   Fitted paper-based, PET, and bubble wrap insulation for shipping cartons · Insulation for your box to perform.
 lede: >-

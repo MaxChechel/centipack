@@ -3,6 +3,7 @@ import Logo from '../atoms/Logo.astro';
 import Section from '../Section.astro';
 import { getFooterColumns, legalLinks } from '../../data/navigation';
 import { SITE } from '../../consts';
+import { getSite } from '../../lib/site';
 
 /**
  * Site footer (§4.3).
@@ -24,7 +25,8 @@ const columns = await getFooterColumns();
    §9, restored when the v1 footer drew it, and is now removed again — so the
    site's only published contact is email. The constant went with it from
    `src/consts.ts`, so nothing can render it by accident. */
-const contact = [{ href: `mailto:${SITE.email}`, label: SITE.email }];
+const site = await getSite();
+const contact = [{ href: `mailto:${site.email}`, label: site.email }];
 
 /* Same rule as the nav: the underline is the hover, not a colour. See
    `.link-underline` in global.css. */
@@ -103,7 +105,7 @@ const linkClass = 'link-underline text-body text-primary';
         nothing else. "Cold chain packaging built for compounding pharmacy."
         was doing a strapline's job in a legal row, and the logo above it now
         carries the strapline of its own. */}
-    <p class="text-caption text-tertiary">&copy; {year} {SITE.name}. All rights reserved.</p>
+    <p class="text-caption text-tertiary">&copy; {year} {SITE.name}. {site.footer.rights}</p>
     {/* The social marks were here and are gone at the client's request. The
         wrapper that held them beside the legal row went with them — a flex row
         around a single child is a div doing nothing. `socialLinks` and

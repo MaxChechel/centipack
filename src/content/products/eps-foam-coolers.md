@@ -5,6 +5,8 @@ slug: eps-foam-coolers
 category: cold-chain-shipping
 order: 4
 summary: "Corrugated outer included"
+description: >-
+  CentiPack EPS coolers pair lightweight insulation with rigid protection. The molded foam body and fitted lid slow heat transfer and protect your products from handling and transit, all inside a matched corrugated outer that's ready to ship.
 descriptor: >-
   Reliable insulation. Rigid protection. · Proven thermal performance. Built-in strength.
 lede: >-

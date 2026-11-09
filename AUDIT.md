@@ -518,3 +518,57 @@ answering the first.
 own `h-[600px]` card with centred content, and it is what gives the quote its
 air before the closing plate — attribution to plate went 97px → 147 against the
 design's ~141. The rules sit on a band that is the right height either way.
+
+---
+
+## D12 — Phase 2 changed two built files: the contact page and `_redirects`
+
+**Deviation from the editing brief's Phase 2 rule ("the HTML must match"),
+approved in advance by ruling, 2026-11-09.** WORKLOG 183.
+
+Phase 2 moved every editorial string into `src/content/` and had to leave the
+built site unchanged. Built before (main, `ca3821f`) and after, `dist/`
+compared file by file: every page, `llms.txt`, `sitemap.xml` and all 419 hashed
+assets are byte-identical **except two**, and both are the rulings themselves:
+
+1. **`contact.html`.** The status element gains `data-sending`,
+   `data-success`, `data-failed` and `data-unreachable`, and the inlined
+   contact script reads them instead of carrying its own copies (CE-3). The
+   visible page is unchanged; the script shrank from 592 B to 508 B gzipped.
+2. **`_redirects`.** It was `public/_redirects`, the template's commented-out
+   examples with no live rule; it is now generated from
+   `src/content/redirects.yaml` (editing addendum A3) and holds one comment
+   line and, today, no rules. The host's behaviour is identical: no redirects
+   before, none after.
+
+Nothing else differs. This is the record that the two differences are
+intended, so the next diff that shows them is not read as a regression.
+
+---
+
+## D13 — The carousel's script moved into the block, and the category chunk changed
+
+**Deviation from the Phase 2 no-change rule, on instruction, 2026-11-09.**
+WORKLOG 186 (CE-15).
+
+The carousel script was imported by the category template, so it loaded on all
+three category pages and on no other page. A carousel anywhere else (a product
+page, a page the client adds) rendered as the bare scroll-snap row, without the
+loop, the drag or the centring. It now travels with the block: a `<script>` in
+`Carousel.astro`, which Astro emits on the pages that render the component.
+
+What changed in `dist/`, compared with the Phase 2 build:
+
+- **Custom boxes** (the one page with a carousel) carries the carousel module
+  inline, 994 B gzipped against its 1,100 B budget, and the category chunk
+  without it.
+- **Cold chain and pharmacy formats** no longer download carousel code they
+  never ran. The category chunk's hash changed accordingly
+  (`DsyHUmeQ` → `BjGkG4rj`).
+- **Any other page** that renders a carousel gets the script; shown with a
+  throwaway new page, then removed.
+
+Behaviour is unchanged where a carousel already existed: `npm run verify`
+green, including the overflow sweep at seven widths, the pointer, reveal and
+keyboard checks and axe on `/products/custom-boxes`. The no-change rule exists
+to catch unintended changes; this one is intended.

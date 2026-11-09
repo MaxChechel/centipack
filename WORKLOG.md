@@ -11151,3 +11151,313 @@ does not become a failure when Node 20 is removed. **[template]**
 
 verify (local, with the fix): 10 checks, 1,275 assertions, 0 failures, §9 PASS.
 The CI rerun is the evidence that closes Gate 1.
+
+## 2026-11-09 — Entry 183. Client-editable site, Phase 2: every editorial string is content
+
+Gate 1 closed first: CI run 42617540663 on 5a6e461, `verify` green in 3m 53s,
+`scope` skipped on the push as designed, no Node 20 warning.
+
+Phase 2 as briefed, extended by CLAUDE-EDITABLE-ADDENDUM (A1–A5; it arrived
+mid-phase and wins where the two disagree).
+
+### What moved
+
+- **`pages` collection** (`src/content/pages/`): home, about, contact,
+  products, 404. Each entry has page-level fields (title, description, label,
+  heading, lede, actions, image, ogImage, noindex, listing) and `sections`.
+  Two kinds of entry: `route` (one of the five built-in pages, each keeping its
+  own template) or `slug` (a new page). Exactly one of the two; every route
+  exactly once; slugs unique (the last two checked across the set in
+  `src/lib/site.ts`, which throws naming the problem). **[template]**
+- **`site` entry** (`src/content/site/site.md`): description, email, the three
+  shared labels (Home, Products, Get a quote), the hand-made nav links, the
+  footer's hand-made columns and rights line, the closing band (words and
+  picture), the category cross-links. **[template]**
+- **`redirects`** (`src/content/redirects.yaml`, Astro's `file()` loader, keyed
+  by old path). Empty. **[template]**
+- **Products and categories** gain `description`, `ogImage`, `noindex`;
+  categories gain `crossLinkLabel`.
+- **Adapters:** `src/lib/site.ts` (pages, site, the one noindex rule) beside
+  `src/lib/catalogue.ts`. No component or page sees a `CollectionEntry`, so the
+  Sanity swap is still a loader change. Every new schema is written as a Sanity
+  schema would be: named fields, `.strict()`, no file-name semantics.
+- **Pages are thin.** Each built-in page reads its entry and renders its
+  sections in the entry's order with a per-type branch; layout stays in the
+  template. Home's three bands, About's prose and the products index's
+  catalogue and closing band are now data-ordered.
+
+### Decisions, with reasons
+
+1. **Built-in pages keep their own files; new pages use `src/pages/[slug].astro`**
+   (A1, my call). Each built-in page draws a bespoke layout (the home hero's
+   two-line measure, About's narrow column, Contact's two-column form). Moving
+   them onto a generic renderer would either change their HTML or need layout
+   switches in content. The catch-all draws the product page's grammar, which
+   is the site's general one. **[template]**
+2. **Section types are restricted per route** (`PAGE_SECTIONS_BY_ROUTE`).
+   A testimonial on About is a schema error naming what About can use, rather
+   than a band its template silently does not draw. New pages get the shared
+   union plus `closing`. **[template]**
+3. **The section union moved to `src/schema/sections.ts`** (A5): base (split,
+   features, numbered, cards, carousel, faq) plus project (steps, specs,
+   formats), and the page-only types (categories, testimonial, prose,
+   contact-form, catalogue, closing) as a second union for pages. Member text
+   unchanged; `dist/` identical. **[template]**
+4. **One noindex rule** (A4): `isNoindexedPath()` in `src/lib/site.ts` joins
+   `SITE.noindex` (system routes: the styleguide) with every entry's `noindex`
+   field. BaseLayout's robots tag, the sitemap and llms.txt all call it.
+   `isNoindexed` in consts.ts is removed so there is no second rule. **[template]**
+5. **`ogImage`** renders through `getImage` at exactly 1200x630, JPEG, because
+   BaseLayout declares those dimensions rather than measuring them. Measured on
+   a test entry: 1200x630 JPEG, other pages keep `/og-default.png`. **[template]**
+6. **`{email}` token** in the contact messages and the llms.txt contact note,
+   filled from the site entry by the adapter. The address is stated once.
+7. **The contact messages ride as `data-` attributes** (CE-3): cheaper than a
+   JSON script tag and no parse. Contact script 592 B → 508 B gzipped.
+8. **`crossLinkLabel` is a field**, reversing the CrossLinks note that it
+   should stay derived until a category needed to break the rule. The trigger
+   was different (the copy became the client's), the outcome the same. The
+   three entries carry exactly what the rule produced.
+9. **Page-less products' `description`**: today's fallback string, with the
+   double full stop it produced ("Clearly organized..") collapsed. Those
+   strings ship nowhere today, so the no-op rule does not bind them; carrying
+   the typo into content would ship it the day the page launches.
+10. **CE-4 caps** (`LENGTH_CAPS`, `src/schema/sections.ts`): home H1 65 (now 59),
+    home lede 290 (264), About H1 36 (32), testimonial 230 (206).
+11. **CE-11 allowlist** as ruled in entry 180, each capped at its measured
+    length so the exemption can only shrink.
+12. **`[redirects].ts` is a one-path dynamic route**, because Astro does not
+    route a file whose name starts with an underscore. `public/_redirects`
+    (the template's commented-out examples, no live rule) is retired.
+13. **The harness sweeps new pages automatically**: `PAGES` in
+    `scripts/verify/lib/cdp.mjs` appends every `slug:` entry. Coverage
+    widened, nothing narrowed. Without it a client page would never get the
+    overflow sweep or axe.
+14. **`[slug].astro` loads no page script.** Importing the carousel script
+    there re-chunked the category pages even with no new page built (new
+    shared `carousel` chunk, a two-import pointer the census does not
+    recognise). Removed; see CE-15.
+15. **Types.** Astro's generated data types are `any` for every collection here
+    (true on main too: probed, `getCollection('categories')[0].data` assigns to
+    `number` without error). The new adapters annotate with types inferred
+    from the named zod schemas (`PageData`, `SiteData`, `RedirectData`), the
+    pattern `ProductSectionInput` already used. **[template]**
+
+### Two bugs found by the red paths, fixed
+
+- **A broken `redirects.yaml` built clean.** A duplicated key: Astro's file
+  loader logs an error and continues with no entries; exit 0, every redirect
+  silently gone. Worse, locally it keeps the LAST GOOD load from its content
+  cache, so a broken file came back as stale rules. `[redirects].ts` now
+  compares the paths written in the file with the paths loaded and fails
+  naming both. Shown: duplicate key exit 1; bad indent exit 1; stale cache
+  (`/old-z` cached, `/old-y` written) exit 1. **[template]**
+- **The testimonial cap printed zod's generic message.** Given its own.
+
+### No-op proof
+
+`dist/` from main (`ca3821f`, `npm run build`) against this tree, every
+non-asset file compared byte for byte and the `_astro/` name sets diffed:
+
+```
+files only on one side:   none
+content differences:      ./_redirects   ./contact.html
+_astro:                   419 before, 419 after, no names differ
+```
+
+Both differences are the rulings (AUDIT D12): the contact status element's
+four `data-` attributes plus the script reading them, and `_redirects` as a
+generated header with no rules in place of commented-out examples. Every other
+page, `llms.txt` and `sitemap.xml` are identical.
+
+### Red paths (each run, then the content restored from a backup)
+
+```
+R1  new page, slug "products"             exit 1  slug "products" is reserved: the site already has a page or file at /products.
+R2a new page, description 161             exit 1  description is 161 characters; the limit is 160.
+R2b new page, description 160             exit 0
+R2c gel-packs at 362 (allowlisted)        exit 0
+R2d gel-packs grown to 363                exit 1  description is 363 characters, longer than the 362 it was carried over at.
+R2e new page, description 49              exit 1  description is 49 characters; it needs at least 50
+R3  home heading 74                       exit 1  heading is 74 characters; the layout is drawn for at most 65
+R3b testimonial 231                       exit 1
+R4  testimonial on About                  exit 1  page "about" cannot use a "testimonial" section. It can use: prose.
+R5  contact page without its form         exit 1  the contact page needs exactly one "contact-form" section
+A2  nav entry "Nope" → /nope              exit 1  "Nope" → /nope — on 13 page(s). Fix the href in src/content/site/site.md
+A3  redirects: chain, missing, shadow     exit 1  5 problems named (/about shadowed; /old-a → /old-b not built and chained;
+                                                  /old-b → /about chained; /old-c → /nope not built)
+A3  one sound redirect                    exit 0  1 redirect(s), every target built
+A3  duplicate key / bad indent / stale    exit 1  (see bugs above)
+urls rename gel-packs, no redirect        exit 1  /products/cold-chain-shipping/gel-packs … no redirect
+urls same rename, with redirect           exit 0  … is gone, and redirected.
+A1  new page /cold-chain-guide in nav     verify §9 PASS: 11 pages × 7 widths swept, axe 22 runs, 448 menu links
+                                          resolve, listed in sitemap and llms.txt, JS census clean
+A4  About noindex + ogImage               robots noindex tag; absent from sitemap and llms.txt; og:image 1200x630 JPEG
+```
+
+The urls run took 4.4 s locally (identical lockfile, so the base worktree
+reuses node_modules; a changed lockfile runs `npm ci` there).
+
+### Harness changes, all additive
+
+- `contracts.mjs`: `menus link to built pages (A2)`, `redirects are sound (A3)`;
+  the icon-enum check reads `src/schema/sections.ts` (the enum moved).
+- `cdp.mjs`: new content pages join the swept list (decision 13).
+- `js-census.mjs`: the contact entry's measurement note updated (592 → 508 B);
+  budget unchanged.
+- `urls.mjs` new; `verify.yml` gains the `urls` job, NOT skipped by
+  `dev-change`. **[template]**
+
+### Left in code, deliberately
+
+Structural, each with its reason:
+
+- Accessibility strings: "Skip to main content", "Menu", `aria-label`s
+  ("Main", "Footer", "Breadcrumb", "<label> menu", "<name> — home"),
+  "(opens in a new tab)", "(required)". System-wide; a client edit that
+  changes one changes what a screen reader announces everywhere.
+- Contact integration: `FORM_ENDPOINT`, `TURNSTILE_SITE_KEY`, the honeypot
+  name and its "Leave this field empty" label, and the five field `name`s.
+  Coupled to Formspark's dashboard and to `contracts.mjs`.
+- `SITE.name`, `origin`, `locale`, `contactHref`, `ogImage`, `noindex`,
+  `LAUNCH`: build inputs.
+- Title patterns built from fields (`<pageTitle> — <category> | CentiPack`) and
+  every href to a system route.
+- Media pending-box labels and "[ image pending ]": developer placeholders
+  that only render with no picture.
+- Image width caps (`PAGE_IMAGE_WIDTH`), the closing band's empty alt (in
+  content, by ruling) and its pending label.
+- The footer's copyright mark and year.
+- Button variants (first action primary, second secondary): layout.
+
+### Open questions
+
+CE-13. **Old site URLs (addendum A3 finding).** `public/_redirects` was only the
+       template's commented-out examples, so if CentiPack had a site before
+       this one, every indexed URL of it is 404ing today. The fix is a Search
+       Console (and old CMS) export; the list then goes into
+       `src/content/redirects.yaml`. Human punch list.
+CE-14. **Renaming one of the six allowlisted slugs drops its exemption.** The
+       allowlist is keyed by slug (as ruled), so a rename must shorten the
+       description in the same PR or the build fails (seen in the urls red
+       path). All five live product pages are on the list. Recommend the
+       six-description content PR goes before any rename; the
+       rename-or-remove skill will say so either way.
+CE-15. **A carousel outside the category pages has no script.** Product pages
+       never loaded it and new pages do not either, so a carousel section there
+       is the native scroll-snap row without the loop and centring. Fixing it
+       is a developer change (load it per component, or name the two-import
+       pointer in the census). Fine to leave until a page wants a carousel?
+CE-16. **Every build warns "collection redirects … is empty"** while the file
+       has no rules. True, harmless, and noise. Leave it?
+CE-17. **The home page, the 404 page and the site entry carry the same
+       sentence** as description (it was `SITE.description` for all three).
+       Three copies now; editing one does not edit the others. Intended (each
+       is a different job), but worth knowing.
+CE-18. **A new page's `actions` render as text links**, like a product page's
+       contact link, not as the home hero's buttons. Matches the grammar it
+       borrows; say if new pages should get buttons.
+
+## 2026-11-09 — Entry 184. Template backlog from the editing pilot **[template]**
+
+From the editing addendum, Part B. Recorded only; nothing here is built in
+CentiPack.
+
+1. **A general-purpose base section set in `outredge-system`** (hero, prose with
+   the MDX Figure/Clip/Lede vocabulary, split, features, cards, stats, quote,
+   logos, FAQ, CTA). CentiPack's base set is six types because that is what its
+   pages drew; a new project needs enough on day one that "ask Claude for a
+   page" produces a real page.
+2. **Safe layout options per section** (`theme`: light, dark, brand; possibly
+   `space`), as small enums mapped to existing tokens. The flexibility clients
+   ask for, with nothing that can drift off the scale.
+3. **A posts collection** (news, resources, case studies) on the MDX vocabulary,
+   with the same SEO fields and redirect rules. The first thing most clients
+   ask for after pages.
+4. **An optional visual editor (Keystatic) on the same files**, per client, not
+   default. Click-to-edit for copy; Claude stays the way to compose pages, and
+   the schema and CI stay the safety net either way.
+5. **`UPGRADING.md`, the yearly system update runbook**: dependency and Astro
+   major upgrades, re-run verify, compare `dist/`. The dist-diff method used
+   in entry 183 is the core of it.
+6. **The agent-editing layer itself**: Editing mode in `AGENTS.md`,
+   `edit-scope.mjs`, `urls.mjs`, `verify.yml`, the pages/site/redirects
+   collections and adapter, the base/project section split, the menu and
+   redirect contracts, the six skills, the arbitrary-value check, `EDITING.md`
+   as a template, and an "Agent editing" section in `ARCHITECTURE.md`. Plus
+   the lessons: declare `@types/node` (entry 182), and never trust a `file()`
+   loader to fail loudly (entry 183).
+
+## 2026-11-09 — Entry 185. Phase 2 verify collided with another project's verify
+
+The first two final `npm run verify` runs died in the sweep (exit 13, then a
+`TypeError` in `cdp.mjs` `eval`). Not this code: with the CDP error printed,
+the sweep's Chrome on port 9400 was showing `localhost:4331/work/replit-vibecon`,
+a page from `outredge-2026`, whose own verify was running at the same moment.
+Both repos carry the template harness, which launches Chrome on FIXED debugging
+ports (9400–9402) with fixed `/tmp/outredge-verify-*` profiles, so two projects
+verifying at once drive one browser between them. The debug print was reverted.
+Rerun once the other project's sweep had exited: green.
+
+**[template]** The harness should take a free port per run (or derive one from
+the repo path) and a per-repo profile directory, and `connect()` should fail
+legibly when `Runtime.evaluate` returns an error instead of reading
+`r.result.result` off `undefined`. Not changed here: it is harness work outside
+this phase's scope, and it only bites when two projects verify at once.
+
+**Final, Phase 2 tree:** verify 10 checks, 1,668 assertions, 0 failures, §9 PASS
+(baseline 1,275; the 390 menu-link assertions are most of the rise). `dist/`
+against main: only `_redirects` and `contact.html` differ, as recorded in AUDIT
+D12; 419 assets, no names differ.
+
+## 2026-11-09 — Entry 186. Gate 2 rulings: CE-13 to CE-18, and two fixes
+
+**CE-13, old URLs: CLOSED, no redirects needed.** Max: the old site was one
+page, which is `/`, and `/` still exists. Supporting evidence, checked on
+2026-11-09: the Internet Archive holds no capture of the domain at all. CDX
+`url=centipack.com&matchType=domain` returned `[]`; exact `centipack.com`, and
+prefix `www.centipack.com/`, `[]`; the availability API returned no snapshot
+for `centipack.com`, `www.centipack.com` or `centipack.com/sitemap.xml`. No
+candidate list, because there is nothing to list. `redirects.yaml` stays `{}`.
+
+**CE-14, renaming an exempt product: RULED.** Shortening the six descriptions is
+the next content PR, in Editing mode, once Phase 2 is merged and branch
+protection is on. **For Phase 3:** the rename-or-remove skill carries the line
+"if the slug is on the description allowlist, shorten the description in the
+same PR". The skill does not exist yet (Phase 3 creates it), so the line is
+recorded here as a requirement on it rather than written now.
+
+**CE-15, carousels: FIXED.** The script travels with the block: `Carousel.astro`
+carries it, the category template no longer imports it, and `[slug].astro`
+needs no page script. Measured: the script loads on exactly the pages that
+draw a carousel (custom boxes, and a throwaway new page with a carousel) and on
+no other (cold chain, pharmacy formats, home, PuncturePack: 0). The category
+chunk's hash changed, accepted as AUDIT D13. verify green after the move: 10
+checks, 1,669 assertions; carousel 994 B gzipped inline against 1,100 B.
+
+**[template] Every block owns its script.** A behaviour a block needs is
+imported by the block, never by the page that happens to use it today. Then it
+loads wherever the block renders and nowhere else, and a new page cannot get
+the markup without the behaviour. Candidates in this repo to follow the same
+rule later: the rail (imported by two templates) and the nav disclosure.
+
+**CE-16, empty-redirects warning: FIXED.** The file says it is empty in exactly
+one way, `{}`, and then the collection is not queried, so Astro has nothing to
+warn about. Anything else is loaded and checked: a file with content but no
+rule loaded fails the build. Shown: `{}` exit 0 and no warning; a key missing
+its colon exit 1; a duplicate key exit 1; one sound rule exit 0.
+
+**CE-17, the description in three places: LEFT, as ruled.** **For Phase 3:**
+the update-copy skill carries "when changing a factual claim, search all of
+src/content/ for other places that state it."
+
+**CE-18, new pages' actions as text links: ACCEPTED for CentiPack.**
+**[template]** Actions in base sections get a `style: button | link` field,
+mapped to the existing Button variants.
+
+**Entry 185, fixed Chrome ports: ruled template-only.** **[template]** Free
+ports and a unique profile directory per run.
+
+**Deviations accepted:** the crossLinkLabel field, the fallback descriptions
+with the double full stop collapsed, and `[slug].astro`'s script gap (now
+resolved by CE-15).

@@ -312,3 +312,129 @@ export const projectSections = (image: ImageFn) =>
 export const section = (image: ImageFn) =>
   z.discriminatedUnion('type', [...baseSections(image), ...projectSections(image)]);
 
+/*
+ * ---------------------------------------------------------------------------
+ * PAGE SECTIONS: the bands the site's own pages draw (Home, About, Contact, the
+ * products index).
+ *
+ * Project sections, and narrower than the union above: each was written for one
+ * page and is drawn by that page's template. A page entry may use only the types
+ * its route draws (PAGE_SECTIONS_BY_ROUTE in content.config.ts), so asking for a
+ * testimonial on the About page is a schema error, not a silently empty band.
+ * ---------------------------------------------------------------------------
+ */
+
+/**
+ * LENGTH CAPS ON THE FEW FIELDS THE LAYOUT IS TUNED TO (WORKLOG 179, CE-4).
+ *
+ * These strings are set in measures the design fixes: the home headline in
+ * exactly two lines, the About headline in a 27rem column, the hero lede and
+ * the testimonial in their drawn widths. Copy much longer than today's still
+ * renders and still passes verify, but wraps into a shape the design never
+ * drew. A line-count check would be brittle across seven sweep widths, so the
+ * guard is a length cap: today's length plus about 10%. The preview is still
+ * the visual review; this only stops an edit from being an order of magnitude
+ * off.
+ */
+export const LENGTH_CAPS = {
+  /** Home H1, 59 characters at the cap's setting. */
+  homeHeading: 65,
+  /** Home hero lede, 264. */
+  homeLede: 290,
+  /** About H1, 32. */
+  aboutHeading: 36,
+  /** Home testimonial quote, 206. */
+  testimonialQuote: 230,
+} as const;
+
+const link = z.object({ label: z.string(), href: z.string() }).strict();
+
+/** Home: the band with the three category cards. The cards come from the categories collection. */
+const categoriesSection = z
+  .object({
+    type: z.literal('categories'),
+    heading: z.string(),
+    lede: z.string(),
+    /** The "Browse all products" link beside the heading. */
+    action: link,
+  })
+  .strict();
+
+/** Home: the pull quote. One instance, on one page. */
+const testimonialSection = z
+  .object({
+    type: z.literal('testimonial'),
+    quote: z
+      .string()
+      .max(
+        LENGTH_CAPS.testimonialQuote,
+        `quote: the layout is drawn for at most ${LENGTH_CAPS.testimonialQuote} characters (LENGTH_CAPS in src/schema/sections.ts).`,
+      ),
+    /** Who said it, as the client wants them named. */
+    attribution: z.string(),
+  })
+  .strict();
+
+/** About: the column of paragraphs under the picture, and the closing line. */
+const proseSection = z
+  .object({
+    type: z.literal('prose'),
+    paragraphs: z.array(z.string()).min(1),
+    /** The single line after the paragraphs, set larger. */
+    closer: z.string().optional(),
+  })
+  .strict();
+
+const field = z.object({ label: z.string(), placeholder: z.string() }).strict();
+
+/**
+ * Contact: the enquiry form's words. The form's FIELDS are fixed (Formspark
+ * receives them by name); only what a visitor reads is here.
+ *
+ * In `messages`, write `{email}` where the site's email address should appear;
+ * it is filled in from the site entry, so the address is stated once.
+ */
+const contactFormSection = z
+  .object({
+    type: z.literal('contact-form'),
+    /** The label before the email address in the left column: "Email:". */
+    emailLabel: z.string(),
+    fields: z
+      .object({ name: field, email: field, company: field, volume: field, message: field })
+      .strict(),
+    /** The options in the shipments-per-week menu, in order. */
+    volumeOptions: z.array(z.string()).min(1),
+    submitLabel: z.string(),
+    messages: z
+      .object({
+        /** Shown while the request is in flight. */
+        sending: z.string(),
+        /** Replaces the form once the enquiry is accepted. */
+        success: z.string(),
+        /** The service answered with an error and gave no message of its own. */
+        failed: z.string(),
+        /** The service could not be reached at all. */
+        unreachable: z.string(),
+      })
+      .strict(),
+  })
+  .strict();
+
+/** Products index: one band per category, built from the catalogue. No words of its own. */
+const catalogueSection = z.object({ type: z.literal('catalogue') }).strict();
+
+/** The closing band with the quote button. Its words are in the site entry, shared by every page. */
+const closingSection = z.object({ type: z.literal('closing') }).strict();
+
+/** The union a page entry's `sections` are checked against. */
+export const pageSection = (image: ImageFn) =>
+  z.discriminatedUnion('type', [
+    ...baseSections(image),
+    ...projectSections(image),
+    categoriesSection,
+    testimonialSection,
+    proseSection,
+    contactFormSection,
+    catalogueSection,
+    closingSection,
+  ]);

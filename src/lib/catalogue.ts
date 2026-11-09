@@ -223,6 +223,8 @@ export interface ProductView {
   descriptor?: string;
   lede?: string;
   contactLinkLabel?: string;
+  /** The meta description (WORKLOG 180). */
+  description: string;
   /**
    * Where this product's page is — or `undefined` when product detail pages are
    * not part of this launch (`LAUNCH.productPages` in src/consts.ts).
@@ -273,6 +275,8 @@ export interface CategoryView {
   navBody: string;
   selectionHeading: string;
   crossBody: string;
+  description: string;
+  crossLinkLabel: string;
   href: string;
   /** The category's own page body, where it has one. Empty means "show the rail". */
   sections: readonly ProductSection[];
@@ -387,7 +391,7 @@ const WIDE_WIDTHS = [640, 960, 1280, 1920, 2560, 3840] as const;
 const SECTION_WIDTHS = [440, 660, 900, 1320, 1980] as const;
 const SECTION_WIDTH = 1320;
 
-type RawPicture = { src: ImageMetadata; alt: string; mobile?: ImageMetadata } | undefined;
+export type RawPicture = { src: ImageMetadata; alt: string; mobile?: ImageMetadata } | undefined;
 
 /** One number per surface, so every caller asks for the same asset. */
 const MOBILE_WIDTH = 900;
@@ -539,7 +543,7 @@ async function toSlot(slot: { label: string; picture?: RawPicture }): Promise<Sl
  * ship while the copy was still outstanding, and because the next one will
  * arrive the same way: questions first, answers after. See the schema's note.
  */
-async function toSection(section: ProductSectionInput): Promise<ProductSection> {
+export async function toSection(section: ProductSectionInput): Promise<ProductSection> {
   switch (section.type) {
     case 'steps':
       return {
@@ -621,6 +625,7 @@ async function toProduct(entry: CollectionEntry<'products'>): Promise<ProductVie
     descriptor: entry.data.descriptor,
     lede: entry.data.lede,
     contactLinkLabel: entry.data.contactLinkLabel,
+    description: entry.data.description,
     /* THE ONE PLACE THE LAUNCH GATE REACHES THE VIEW MODEL. Every product link
        on the site is derived from this field, so gating it here gates all of
        them at once — and cannot leave one list pointing at pages the build does
@@ -660,6 +665,8 @@ async function toCategory(entry: CollectionEntry<'categories'>): Promise<Categor
     navBody: entry.data.navBody,
     selectionHeading: entry.data.selectionHeading,
     crossBody: entry.data.crossBody,
+    description: entry.data.description,
+    crossLinkLabel: entry.data.crossLinkLabel,
     href: categoryHref(entry.data.slug),
     sections: await Promise.all(entry.data.sections.map(toSection)),
     rangeImage: await toPicture(entry.data.rangeImage, WIDE_WIDTH, WIDE_WIDTHS),

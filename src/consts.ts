@@ -19,16 +19,6 @@ export const SITE = {
   name: 'CentiPack',
 
   /**
-   * The default <meta name="description">.
-   *
-   * Lifted verbatim from the home hero lede in Figma — the copy is locked, and
-   * a description written separately from the page is a description that drifts
-   * from it.
-   */
-  description:
-    '2–8°C shippers, gel packs, branded boxes and the pharmacy formats that go inside them — specified around your lanes and produced to your run.',
-
-  /**
    * The canonical production origin, no trailing slash.
    *
    * This is the single source of truth for it. `astro.config.mjs` imports this
@@ -45,18 +35,15 @@ export const SITE = {
   /** Sets <html lang>. */
   locale: 'en',
 
-  /** Where enquiries go in the markup. The endpoint's own config is in env. */
+  /** Where enquiries go in the markup: the contact page's path. */
   contactHref: '/contact',
 
-  /**
-   * The published address, stated once.
-   *
-   * It was typed into the footer and the contact page independently, and the
-   * structured data would have been a third — an `Organization.email` that can
-   * drift from the address a visitor can actually see is worse than no
-   * structured data, because a machine reads the one nobody proofreads.
+  /*
+   * THE DESCRIPTION AND THE EMAIL ADDRESS ARE CONTENT NOW: src/content/site/
+   * site.md, read through src/lib/site.ts, so the client can change them
+   * without a developer (WORKLOG 183). What stays here is what the build
+   * depends on.
    */
-  email: 'info@centipack.com',
 
   /**
    * The default share image, root-relative.

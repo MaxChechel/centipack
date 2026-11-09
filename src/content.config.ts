@@ -3,7 +3,7 @@ import { glob } from 'astro/loaders';
 /* Imported from zod directly: astro:content's `z` re-export is deprecated as of
    Astro 7, and a deprecated import is a migration someone else has to do later. */
 import { z } from 'zod';
-import { picture, section } from './schema/sections';
+import { picture, section, pageSection, LENGTH_CAPS } from './schema/sections';
 
 /**
  * Content collections (§5).
@@ -50,6 +50,71 @@ import { picture, section } from './schema/sections';
 const CATEGORY = z.enum(['cold-chain-shipping', 'custom-boxes', 'pharmacy-formats']);
 
 
+/**
+ * THE META DESCRIPTION, as a field on every entry that has a page (WORKLOG 179,
+ * 180).
+ *
+ * It was derived: a category shipped its `lede`, a product its `lede` or a
+ * sentence assembled from its title and summary, and a page typed its own. A
+ * derived snippet changes whenever the paragraph does, and nobody editing the
+ * paragraph is thinking about the search result. A field is a decision someone
+ * can see.
+ *
+ * 50 TO 160 CHARACTERS. Below 50 says nothing a search result can use; above
+ * 160 is cut off mid-clause with an ellipsis. Counted in characters as
+ * JavaScript counts them, which is what the search engines' own limits
+ * approximate.
+ */
+const DESCRIPTION_MIN = 50;
+const DESCRIPTION_MAX = 160;
+
+/**
+ * THE ONLY ENTRIES ALLOWED OVER 160, and each may not grow.
+ *
+ * These six shipped longer descriptions before the cap existed (measured in
+ * dist/, WORKLOG 179). Phase 2 of the editing brief had to leave the built site
+ * unchanged, so their text was carried over as it was rather than rewritten in
+ * a refactor. Each is capped at its measured length, so the exemption can only
+ * shrink. An entry leaves this list by being shortened to 160 or fewer in a
+ * content PR, and then the normal cap applies to it like everything else.
+ *
+ * Keyed by collection and slug. Do not add to this list: a new entry over 160
+ * is a description that needs shortening, not an exemption.
+ */
+const DESCRIPTION_CARRY_OVER: Readonly<Record<string, { length: number; why: string }>> = {
+  'products/gel-packs': { length: 362, why: 'Carried over unchanged in the Phase 2 refactor, to be shortened by content PR.' },
+  'products/thermal-liners': { length: 350, why: 'Carried over unchanged in the Phase 2 refactor, to be shortened by content PR.' },
+  'products/puncture-pack': { length: 252, why: 'Carried over unchanged in the Phase 2 refactor, to be shortened by content PR.' },
+  'products/eps-foam-coolers': { length: 240, why: 'Carried over unchanged in the Phase 2 refactor, to be shortened by content PR.' },
+  'products/insulated-metallic-mailers': { length: 194, why: 'Carried over unchanged in the Phase 2 refactor, to be shortened by content PR.' },
+  'categories/custom-boxes': { length: 186, why: 'Carried over unchanged in the Phase 2 refactor, to be shortened by content PR.' },
+};
+
+/** The description rule, as a refinement any collection with a slug can run. */
+const checkDescription =
+  (collection: string) =>
+  (entry: { slug: string; description: string }, ctx: z.RefinementCtx): void => {
+    const { length } = entry.description;
+    const carried = DESCRIPTION_CARRY_OVER[`${collection}/${entry.slug}`];
+    const max = carried?.length ?? DESCRIPTION_MAX;
+    if (length < DESCRIPTION_MIN) {
+      ctx.addIssue({
+        code: 'custom',
+        path: ['description'],
+        message: `description is ${length} characters; it needs at least ${DESCRIPTION_MIN} to be useful in a search result.`,
+      });
+    }
+    if (length > max) {
+      ctx.addIssue({
+        code: 'custom',
+        path: ['description'],
+        message: carried
+          ? `description is ${length} characters, longer than the ${carried.length} it was carried over at. Shorten it to ${DESCRIPTION_MAX} or fewer.`
+          : `description is ${length} characters; the limit is ${DESCRIPTION_MAX}. Search results cut it off mid-sentence beyond that.`,
+      });
+    }
+  };
+
 const products = defineCollection({
   loader: glob({ pattern: '**/*.md', base: './src/content/products' }),
   schema: ({ image }) =>
@@ -83,6 +148,13 @@ const products = defineCollection({
 
         /** The card's one-line sublabel: "3–32 oz · 4 variants". */
         summary: z.string(),
+        /**
+         * The product page's meta description: the snippet under the page's
+         * title in a search result. 50 to 160 characters (see
+         * DESCRIPTION_MAX above). Written for the page, not copied from it; if
+         * you change the lede, re-read this.
+         */
+        description: z.string(),
 
         /**
          * The line UNDER the product page's H1, set in the eyebrow style.
@@ -170,7 +242,8 @@ const products = defineCollection({
          */
         sections: z.array(section(image)).default([]),
       })
-      .strict(),
+      .strict()
+      .superRefine(checkDescription('products')),
 });
 
 const categories = defineCollection({
@@ -241,6 +314,23 @@ const categories = defineCollection({
         navBody: z.string(),
 
         /**
+         * The category page's meta description: the snippet under the page's
+         * title in a search result. 50 to 160 characters (see
+         * DESCRIPTION_MAX above).
+         */
+        description: z.string(),
+
+        /**
+         * The link on this category's cross-link card, at the foot of the
+         * OTHER category pages: "Explore custom boxes".
+         *
+         * Was derived ("Explore" plus `pageTitle`, lower-cased) and is a field
+         * now, so the wording can be changed without a developer. The three
+         * entries carry exactly what the rule produced.
+         */
+        crossLinkLabel: z.string(),
+
+        /**
          * THE CATEGORY'S OWN PAGE BODY, where it has one.
          *
          * Cold chain and pharmacy formats list their products: a heading and a
@@ -281,10 +371,160 @@ const categories = defineCollection({
          */
         cardThumb: picture(image).optional(),
       })
-      .strict(),
+      .strict()
+      .superRefine(checkDescription('categories')),
 });
 
-export const collections = { products, categories };
+/**
+ * PAGES: the site's own pages, and any page the client adds (WORKLOG 183).
+ *
+ * `route` names one of the five pages the site was built with: home, about,
+ * contact, products (the products index) and 404. Each has its own template
+ * under src/pages/ that draws its layout and reads its words from here.
+ * Exactly one entry per route.
+ *
+ * Page-level fields (title, description, heading) are fields; the bands under
+ * the heading are `sections`, in order, like a product page.
+ */
+const ROUTES = ['home', 'about', 'contact', 'products', '404'] as const;
+
+/** Which section types each built-in page draws. */
+const PAGE_SECTIONS_BY_ROUTE: Record<(typeof ROUTES)[number], readonly string[]> = {
+  home: ['categories', 'testimonial', 'closing'],
+  about: ['prose'],
+  contact: ['contact-form'],
+  products: ['catalogue', 'closing'],
+  '404': [],
+};
+
+const pageSchema = ({ image }: { image: () => z.ZodType<ImageMetadata> }) =>
+    z
+      .object({
+        /** Which built-in page this is. Do not change it. */
+        route: z.enum(ROUTES),
+        /** The <title> in the browser tab and the headline of a search result. */
+        title: z.string(),
+        /** The search-result snippet. 50 to 160 characters. */
+        description: z.string(),
+        /**
+         * The page's short name: the last step of its breadcrumb, and its name
+         * in llms.txt unless `listing` says otherwise. "About", "Contact".
+         */
+        label: z.string(),
+        /** The page's H1. */
+        heading: z.string(),
+        /** The paragraph under the H1, where the page has one. */
+        lede: z.string().optional(),
+        /** Buttons under the hero, in order. At most two. */
+        actions: z.array(z.object({ label: z.string(), href: z.string() }).strict()).max(2).default([]),
+        /** The page's main picture, where it has one. */
+        image: picture(image).optional(),
+        /**
+         * How the page is listed in llms.txt's "Company" section. Leave it out
+         * to list the page under its `label` with its `description`; `false`
+         * leaves it out. `order` sorts the list (lower first).
+         */
+        listing: z
+          .union([
+            z.literal(false),
+            z.object({ label: z.string(), note: z.string(), order: z.number().int() }).strict(),
+          ])
+          .optional(),
+        sections: z.array(pageSection(image)).default([]),
+      })
+      .strict()
+      .superRefine((page, ctx) => {
+        const where = page.route;
+        const allowed = PAGE_SECTIONS_BY_ROUTE[page.route];
+        page.sections.forEach((section, index) => {
+          if (!allowed.includes(section.type)) {
+            ctx.addIssue({
+              code: 'custom',
+              path: ['sections', index, 'type'],
+              message: `page "${where}" cannot use a "${section.type}" section. It can use: ${allowed.join(', ') || 'none'}. A new kind of section is a developer change.`,
+            });
+          }
+        });
+        if (page.route === 'contact' && page.sections.filter((s) => s.type === 'contact-form').length !== 1) {
+          ctx.addIssue({
+            code: 'custom',
+            path: ['sections'],
+            message: 'the contact page needs exactly one "contact-form" section: without it the page has no form.',
+          });
+        }
+        const cap = (field: 'heading' | 'lede', max: number) => {
+          const value = page[field];
+          if (value && value.length > max) {
+            ctx.addIssue({
+              code: 'custom',
+              path: [field],
+              message: `page "${where}": ${field} is ${value.length} characters; the layout is drawn for at most ${max} (LENGTH_CAPS in src/schema/sections.ts).`,
+            });
+          }
+        };
+        if (page.route === 'home') {
+          cap('heading', LENGTH_CAPS.homeHeading);
+          cap('lede', LENGTH_CAPS.homeLede);
+        }
+        if (page.route === 'about') cap('heading', LENGTH_CAPS.aboutHeading);
+        checkDescription('pages')({ slug: where, description: page.description }, ctx);
+      });
+
+const pages = defineCollection({
+  loader: glob({ pattern: '**/*.md', base: './src/content/pages' }),
+  schema: pageSchema,
+});
+
+/**
+ * SITE: the words every page shares (WORKLOG 183). One entry,
+ * src/content/site/site.md.
+
+ */
+const siteSchema = ({ image }: { image: () => z.ZodType<ImageMetadata> }) =>
+    z
+      .object({
+        /** What CentiPack is, in one sentence. Used in structured data and at the top of llms.txt. */
+        description: z.string(),
+        /** The published enquiry address: the footer, the contact page, structured data, llms.txt. */
+        email: z.email(),
+        labels: z
+          .object({
+            /** The first step of every breadcrumb. */
+            home: z.string(),
+            /** The products menu, and the breadcrumb step for the products index. */
+            products: z.string(),
+            /** The quote button in the header (and in the phone menu). */
+            getQuote: z.string(),
+          })
+          .strict(),
+        footer: z
+          .object({
+            /** After "© <year> CentiPack." */
+            rights: z.string(),
+          })
+          .strict(),
+        /** The band at the foot of most pages: a heading, a line, the quote button and a picture. */
+        closingBand: z
+          .object({
+            heading: z.string(),
+            body: z.string(),
+            actionLabel: z.string(),
+            /** Decorative: the heading says what it is, so `alt` stays "". */
+            image: picture(image),
+          })
+          .strict(),
+        /** "The rest of the build": the cross-links at the foot of each category page. */
+        crossLinks: z.object({ eyebrow: z.string(), body: z.string() }).strict(),
+      })
+      .strict();
+
+const site = defineCollection({
+  loader: glob({ pattern: '**/*.md', base: './src/content/site' }),
+  schema: siteSchema,
+});
+
+
+export const collections = { products, categories, pages, site };
 
 /**
  * The section union as ZOD infers it, exported for the adapter.
@@ -301,3 +541,14 @@ export const collections = { products, categories };
  * the `src` inside a picture, which the adapter hands straight to `getImage`.
  */
 export type ProductSectionInput = z.infer<ReturnType<typeof section>>;
+
+/** A page section as zod infers it, for the pages adapter (same reasoning as above). */
+export type PageSectionInput = z.infer<ReturnType<typeof pageSection>>;
+
+/*
+ * THE ENTRY TYPES, inferred from the schemas for the adapter (src/lib/site.ts). Astro's generated `CollectionEntry` data types
+ * flatten to `any` for these schemas, as noted above `ProductSectionInput`, so
+ * reading them off the zod objects is the only way the adapters get checked.
+ */
+export type PageData = z.infer<ReturnType<typeof pageSchema>>;
+export type SiteData = z.infer<ReturnType<typeof siteSchema>>;

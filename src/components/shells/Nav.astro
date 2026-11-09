@@ -4,6 +4,7 @@ import Button from '../atoms/Button.astro';
 import Media from '../blocks/Media.astro';
 import { getNavigation, isGroup } from '../../data/navigation';
 import { SITE } from '../../consts';
+import { getSite } from '../../lib/site';
 import { canonicalPath } from '../../lib/urls';
 
 /**
@@ -31,6 +32,7 @@ import { canonicalPath } from '../../lib/urls';
  */
 const here = canonicalPath(Astro.url.pathname);
 const navigation = await getNavigation();
+const site = await getSite();
 
 /**
  * `aria-current="page"` is the accessible half; the styling hangs off it too.
@@ -258,7 +260,7 @@ const linkClass = 'link-underline text-body text-primary aria-[current=page]:tex
             NO `icon="square"` here: the nav button is label-only in the design.
             The square mark belongs to the closing CTA's button, which keeps it. */}
         <Button href={SITE.contactHref} variant="primary">
-          Get a quote
+          {site.labels.getQuote}
         </Button>
 
         {/* Mobile disclosure. Same source, folded: a group's columns become
@@ -417,7 +419,7 @@ const linkClass = 'link-underline text-body text-primary aria-[current=page]:tex
             <div class="border-line bg-base shrink-0 border-t">
               <div class="container-main py-lg">
                 <Button href={SITE.contactHref} variant="primary" class="w-full">
-                  Get a quote
+                  {site.labels.getQuote}
                 </Button>
               </div>
             </div>

@@ -7,6 +7,8 @@ slug: puncture-pack
 category: cold-chain-shipping
 order: 2
 summary: "Expands at pack-out"
+description: >-
+  PuncturePack™ combines thermal insulation and protective cushioning in an easy-to-use mailer. Delivered vacuum-compressed to save storage space, its foam expands when punctured. Simply pack, seal, and puncture to activate the expanding foam insulation.
 descriptor: >-
   Self-expanding insulated poly mailer · Compact storage · Expanded protection
 lede: >-
@@ -178,7 +180,7 @@ sections:
 
   # ALL SEVEN ANSWERED. The first pass through Figma found six of these rows
   # collapsed with no answer text in the file; the client has since written
-  # them, and they are transcribed here verbatim. The adapter still drops an
+  # them, and they were originally transcribed here as written. The adapter still drops an
   # item with an empty `answer`, which is the right behaviour to keep: it is
   # what makes a half-written FAQ render as the part that is written rather
   # than as a disclosure that opens onto nothing.

@@ -37,6 +37,12 @@
  *
  * The form is NOT disabled in markup and nothing here enables it. The endpoint
  * is public and static — there is no unconfigured state to protect against.
+ *
+ * THE WORDS ARE NOT HERE. The four messages are content (the contact page's
+ * entry) and arrive as `data-sending`, `data-success`, `data-failed` and
+ * `data-unreachable` on the status element, so a copy edit never touches this
+ * file and the email address in them is filled in from the site entry
+ * (WORKLOG 183, CE-3).
  */
 /**
  * Turnstile's global, if it loaded.
@@ -56,6 +62,10 @@ if (form) {
   const status = form.querySelector<HTMLParagraphElement>('[data-contact-status]');
   const submit = form.querySelector<HTMLButtonElement>('button[type="submit"]');
 
+  /** One of the status element's own messages, by name. */
+  const words = (name: 'sending' | 'success' | 'failed' | 'unreachable'): string =>
+    status?.dataset[name] ?? '';
+
   const say = (message: string): void => {
     if (!status) return;
     status.textContent = message;
@@ -68,7 +78,7 @@ if (form) {
     if (!form.reportValidity()) return;
     event.preventDefault();
     if (submit) submit.disabled = true;
-    say('Sending…');
+    say(words('sending'));
 
     try {
       const response = await fetch(form.action, {
@@ -122,20 +132,16 @@ if (form) {
         for (const child of [...form.children]) {
           if (child !== status) child.remove();
         }
-        say('Thank you — your request is with the team. We reply from a person, not a sequence.');
+        say(words('success'));
         return;
       }
 
-      say(
-        result.message ??
-          result.error ??
-          'Could not send right now. Please email info@centipack.com.',
-      );
+      say(result.message ?? result.error ?? words('failed'));
     } catch {
       /* Offline, DNS, a blocked request — anything that never reached the
          endpoint. The address is in the message because it is the one route
          that still works when this one does not. */
-      say('Could not reach the server. Please email info@centipack.com.');
+      say(words('unreachable'));
     }
 
     if (submit) submit.disabled = false;

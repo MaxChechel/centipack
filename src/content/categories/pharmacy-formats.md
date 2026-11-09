@@ -17,6 +17,9 @@ crossBody: >-
   Made-to-order vial kits, bottles, dispensers and jars
 navBody: >-
   Made-to-order vial kits, bottles, dispensers and jars for compounded medications.
+description: >-
+  Produced to pharmaceutical standards. Available individually or as part of a complete solution.
+crossLinkLabel: "Explore pharmacy formats"
 navLinkLabel: >-
   Browse pharmacy formats
 rangeImage:

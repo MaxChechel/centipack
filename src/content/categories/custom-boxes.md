@@ -22,7 +22,7 @@ crossBody: >-
   Secondary packaging made to your specifications
 # THE PAGE BODY (Figma 1005:14931). Three rows describing what can be built,
 # then the carousel of options. No product rail: this category sells a
-# capability, and the v1 design draws no cards for it. Copy is verbatim from
+# capability, and the v1 design draws no cards for it. Copy was originally from
 # the frame; the picture slots carry labels and no file, so each renders the
 # design's own "IMAGE SLOT" placeholder until the photography lands.
 sections:
@@ -133,6 +133,9 @@ sections:
               Three mailer boxes in blue, green and terracotta, each printed with the same white CentiPack arrow on the lid.
 navBody: >-
   Individual product boxes, protocol kits and exterior shipping boxes, made to your specification.
+description: >-
+  From individual vial holders to complete protocol kits and exterior shipping boxes, CentiPack helps you create packaging around your products, your brand, and the way you fulfill orders.
+crossLinkLabel: "Explore custom boxes"
 navLinkLabel: >-
   Browse custom boxes
 rangeImage:

@@ -4,6 +4,8 @@ slug: gel-packs
 category: cold-chain-shipping
 order: 1
 summary: "3–32 oz · 4 variants"
+description: >-
+  Built for reliable cold chain performance, our gel packs feature durable, heat-sealed, leak-resistant exteriors that stand up to handling and transit. · Supports 2–8°C chilled shipping applications · Compatible with a variety of cold chain packout systems · Available ambient, refrigerated and frozen · Custom sizes and formats available · Consistent Performance
 # NO DESCRIPTOR AND NO CONTACT LINK. The gel packs hero is the one of the five
 # drawn without the eyebrow line under its H1, and its tertiary button is
 # present in the file but hidden (Figma 1207:3804). Both fields self-skip.

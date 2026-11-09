@@ -2,6 +2,7 @@
 import { Font } from 'astro:assets';
 import { canonicalUrl, canonicalPath } from '../../lib/urls';
 import { SITE, isNoindexed } from '../../consts';
+import { getSite } from '../../lib/site';
 import Nav from './Nav.astro';
 import Footer from './Footer.astro';
 import JsonLd from '../atoms/JsonLd.astro';
@@ -39,7 +40,7 @@ interface Props {
 
 const {
   title,
-  description = SITE.description,
+  description: descriptionProp,
   ogImage = SITE.ogImage,
   noindex = false,
   bare = false,
@@ -48,6 +49,8 @@ const {
 
 const canonical = canonicalUrl(Astro.url.pathname, Astro.site);
 const path = canonicalPath(Astro.url.pathname);
+const site = await getSite();
+const description = descriptionProp ?? site.description;
 const isNoindex = noindex || isNoindexed(path);
 const ogImageAbsolute = ogImage ? new URL(ogImage, Astro.site).href : undefined;
 
@@ -94,8 +97,8 @@ const structuredData = {
       '@id': ORG_ID,
       name: SITE.name,
       url: SITE.origin,
-      description: SITE.description,
-      email: SITE.email,
+      description: site.description,
+      email: site.email,
       logo: {
         '@type': 'ImageObject',
         url: new URL('/apple-touch-icon.png', SITE.origin).href,
@@ -105,7 +108,7 @@ const structuredData = {
       contactPoint: {
         '@type': 'ContactPoint',
         contactType: 'sales',
-        email: SITE.email,
+        email: site.email,
         url: new URL(SITE.contactHref, SITE.origin).href,
       },
     },
@@ -114,7 +117,7 @@ const structuredData = {
       '@id': SITE_ID,
       url: SITE.origin,
       name: SITE.name,
-      description: SITE.description,
+      description: site.description,
       publisher: { '@id': ORG_ID },
       inLanguage: SITE.locale,
       /* NO `SearchAction`. It is the one thing everybody copies into a WebSite

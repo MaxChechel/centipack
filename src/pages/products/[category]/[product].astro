@@ -22,6 +22,7 @@ import {
 } from '../../../lib/catalogue';
 import { closingBand } from '../../../lib/closing-band';
 import { SITE } from '../../../consts';
+import { getSite } from '../../../lib/site';
 
 /**
  * Product family — one template, and as many pages as there are products with
@@ -50,7 +51,7 @@ import { SITE } from '../../../consts';
  * copy came from the client's own redline and deleting it to tidy a template is
  * not this change's business. Flagged for review rather than quietly dropped.
  *
- * Copy is verbatim from Figma uMHWj1JRHoqmY9uOQNfyL6, nodes 1179:3192,
+ * Copy was originally from Figma uMHWj1JRHoqmY9uOQNfyL6, nodes 1179:3192,
  * 1204:3919, 1205:3879, 1206:3839 and 1207:3793.
  */
 export async function getStaticPaths() {
@@ -74,6 +75,7 @@ interface Props {
 
 const { product, category } = Astro.props;
 const cta = await closingBand();
+const site = await getSite();
 
 /**
  * EXHAUSTIVENESS, ENFORCED AT COMPILE TIME.
@@ -161,7 +163,7 @@ const sectionGround = (section: ProductSection, index: number): string =>
 
 <BaseLayout
   title={`${product.pageTitle} — ${category.title} | ${SITE.name}`}
-  description={product.lede ?? `${product.title} — ${product.summary}. ${category.summary}`}
+  description={product.description}
 >
   {/* `spaceBottom="sm"`, NOT `lg`, and the whole reason is the picture below.
       This hero is copy followed by a full-bleed plate, and the gap between the
@@ -196,8 +198,8 @@ const sectionGround = (section: ProductSection, index: number): string =>
             structured-data graph has one root. */}
         <Breadcrumb
           trail={[
-            { label: 'Home', href: '/' },
-            { label: 'Products', href: '/products' },
+            { label: site.labels.home, href: '/' },
+            { label: site.labels.products, href: '/products' },
             { label: category.title, href: category.href },
             { label: product.title },
           ]}

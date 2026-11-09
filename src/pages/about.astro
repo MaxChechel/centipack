@@ -3,9 +3,7 @@ import BaseLayout from '../components/shells/BaseLayout.astro';
 import Section from '../components/Section.astro';
 import Media from '../components/blocks/Media.astro';
 import Breadcrumb from '../components/blocks/Breadcrumb.astro';
-import { toPageImage } from '../lib/catalogue';
-import { SITE } from '../consts';
-import aboutImage from '../assets/about/warehouse-eps-coolers.avif';
+import { getPage, getSite } from '../lib/site';
 
 /**
  * About (§4.4).
@@ -18,29 +16,21 @@ import aboutImage from '../assets/about/warehouse-eps-coolers.avif';
  * The body is `.prose` rather than a stack of styled paragraphs: it is
  * long-form copy, and §2.5's scoped prose style is what owns paragraph rhythm.
  *
- * Copy is verbatim from Figma 788:9540.
+ * THE WORDS ARE CONTENT: src/content/pages/about.md (WORKLOG 183). Copy was
+ * originally from Figma 788:9540.
  */
 
-/**
- * The one photograph on this page, and the last pending box on the site.
- *
- * 1800px rather than the adapter's 2400 default: the slot is 900px wide inside
- * the narrow container, so 1800 is the 2x file and anything beyond it is bytes
- * nobody sees. The source is 1928px, so this is also very nearly the original.
- */
-const aboutPicture = await toPageImage(
-  {
-    src: aboutImage,
-    alt: 'A warehouse aisle racked to the ceiling with EPS foam coolers on pallets.',
-  },
-  1800,
-);
+const page = await getPage('about');
+const site = await getSite();
+
+/* The photograph's width cap (1800, the 2x file for a 900px slot) is in
+   src/lib/site.ts, PAGE_IMAGE_WIDTH. */
 ---
 
 <BaseLayout
   pageType="AboutPage"
-  title={`About — ${SITE.name}`}
-  description="Our background is Centigrade Logistics, a cold chain logistics operation. Moving product at 2–8°C teaches you which packaging holds and which fails."
+  title={page.title}
+  description={page.description}
 >
   <Section width="narrow" spaceTop="nav" space="lg" reveal="hero">
     <div class="gap-2xl flex flex-col items-center">
@@ -50,11 +40,11 @@ const aboutPicture = await toPageImage(
           affordance the rest of the site is consistent about. Centred, because
           this page is centred — placement follows the page, the component does
           not impose one. */}
-      <Breadcrumb trail={[{ label: 'Home', href: '/' }, { label: 'About' }]} />
-      <h1 class="text-h2 text-primary max-w-[27rem] text-center">We came from the cold chain side</h1>
+      <Breadcrumb trail={[{ label: site.labels.home, href: '/' }, { label: page.label }]} />
+      <h1 class="text-h2 text-primary max-w-[27rem] text-center">{page.heading}</h1>
 
       <Media
-        image={aboutPicture}
+        image={page.image}
         label="A warehouse aisle racked with EPS foam coolers"
         ratio="900 / 520"
         loading="eager"
@@ -63,44 +53,26 @@ const aboutPicture = await toPageImage(
         class="rounded-plate w-full"
       />
 
+      {page.sections.map((section) => section.type === 'prose' && (
       <div class="gap-2xl flex flex-col">
-        {/* VERBATIM FROM FIGMA 1005:14620, replacing the copy that stood here
-            before. The design runs four paragraphs where this ran three, drops
-            the "20+ years of combined cold-chain experience" line entirely —
-            it still appears in the home hero — and ends the closer two
-            sentences in rather than three.
-
-            ONE WORD IS NOT VERBATIM, and it is recorded rather than quietly
-            fixed: the frame reads "high-volume fulfilment". Every other
-            instance of the word on this site is "fulfillment", and a single
-            British spelling on a US pharmaceutical site reads as a typo rather
-            than a choice. Taken as a slip in the frame, not a copy decision.
-            Open question 101. */}
+        {/* ORIGINALLY FROM FIGMA 1005:14620. The frame reads "high-volume
+            fulfilment"; the site spells it "fulfillment" everywhere, and the
+            entry keeps the US spelling (open question 101). */}
         <div class="prose">
+          {section.paragraphs.map((paragraph) => (
           <p>
-            Our background is Centigrade Logistics, a cold chain logistics operation. Moving product
-            at 2–8°C teaches you which packaging holds and which fails.
+            {paragraph}
           </p>
-          <p>
-            When compounding pharmacies moved into high-volume fulfillment, they found a fragmented
-            market — one company selling gel packs, another coolers, a distributor marking up both.
-          </p>
-          <p>
-            CentiPack is that single supplier — shipper, refrigerant, custom box and the formats
-            inside. We produce through our own manufacturing partners and sell direct, which is what
-            keeps pricing competitive and supply dependable at volume.
-          </p>
-          <p>
-            That capacity runs from hundreds of packages a week to tens of thousands — for
-            pharmaceutical, healthcare and other temperature-sensitive products — without giving up
-            consistency, service or speed.
-          </p>
+          ))}
         </div>
 
+        {section.closer && (
         <p class="text-h5 text-primary measure">
-          Cold chain is what we do. Scale is what we are built for.
+          {section.closer}
         </p>
+        )}
       </div>
+      ))}
     </div>
   </Section>
 </BaseLayout>

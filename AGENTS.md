@@ -3,6 +3,70 @@
 For any agent working in this repo or in a project copied from it. It points at
 the rules; it does not restate them.
 
+## Which mode you are in
+
+**Editing mode is the default.** If you are working for CentiPack's team (changing
+copy, products, FAQs, images), follow **Editing mode** below and nothing else in
+this file applies to you. **Build mode** (every section after Editing mode) is
+for Outredge developers only, and only when the human says so explicitly.
+
+## Editing mode
+
+The site is edited through pull requests. You never publish anything: a person
+reviews the preview and merges.
+
+### What you may change
+
+- `src/content/products/*.md` and `src/content/categories/*.md`: every field is
+  checked by the schema in `src/content.config.ts`. Read the comment above a
+  field before writing it; the comments explain what each field is for and
+  where it appears.
+- New or replaced pictures under `src/assets/` (products, categories, home,
+  about, shared, posters, clients), referenced from content.
+
+Everything else is a developer change: components, styles, scripts, pages under
+`src/pages/`, `src/data/`, `src/lib/`, config, `package.json`, `.github/`, and
+the verify harness. If a request needs any of those, do not attempt it. Say
+plainly that it needs a developer and what would have to change. CI enforces
+this (`scripts/verify/edit-scope.mjs`), so a PR that drifts will fail anyway.
+
+### How to make a change
+
+1. Branch from `main` as `claude/<short-description>`.
+2. Make the smallest change that does what was asked.
+3. Run `npm run verify` if your environment can run it. If it cannot (no
+   Chrome, no Node), say so; CI runs it on the PR either way.
+4. Commit, push the branch, and open a PR. In the description, say what changed
+   in plain words, list the pages affected, and link the preview once the host
+   posts it.
+5. Never push to `main`, never merge your own PR, and never change a check to
+   make it pass. If verify fails, the content is wrong: fix the content.
+
+### Content rules
+
+- **Copy in `src/content/` is the source of truth; it may differ from Figma.**
+- **The schema is strict on purpose.** An unknown or misspelled key fails the
+  build. Do not add keys; if something has no field, it needs a developer.
+- **`slug` is a field, not the file name.** Never change a live slug without
+  being asked: it changes the URL.
+- **A product page exists only when it has `sections`.** A product with no
+  sections shows its name without a link. That is the launch gate, not a bug.
+- **Every picture needs `alt`** that describes what is actually in that picture.
+  Re-read it whenever the picture changes.
+- **Do not invent claims.** Thermal performance, temperature ranges, durations,
+  certifications, compliance, materials and prices come from the CentiPack team
+  only. If the request needs one you were not given, ask.
+- Keep names consistent with the rest of the site (for example "PuncturePack™"
+  as a page heading, "Puncture Pack" in menus, as the existing entries do).
+
+### What not to read
+
+Skip `WORKLOG.md`, `TEMPLATE-NOTES.md` and `AUDIT.md` for content edits. They
+are the build history, they are long, and they do not change how content is
+written. `src/content.config.ts` and the existing entries are all you need.
+
+# Build mode (Outredge developers only)
+
 ## The spec is law
 
 **[ARCHITECTURE.md](ARCHITECTURE.md) governs.** Read it before proposing anything

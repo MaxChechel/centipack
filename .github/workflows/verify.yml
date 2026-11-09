@@ -1,0 +1,58 @@
+# The gate every change passes before it can reach `main`.
+#
+# Branch protection on `main` requires both jobs, so an edit made by anyone,
+# person or agent, is published only by merging a green PR. Nothing here
+# deploys: the host builds `main` and gives every PR its own preview URL.
+
+name: verify
+
+on:
+  pull_request:
+    types: [opened, synchronize, reopened, labeled, unlabeled]
+  push:
+    branches: [main]
+
+concurrency:
+  group: verify-${{ github.ref }}
+  cancel-in-progress: true
+
+permissions:
+  contents: read
+
+jobs:
+  # Content PRs may only touch content (scripts/verify/edit-scope.mjs). A PR a
+  # developer labels `dev-change` skips it and still runs the full harness.
+  scope:
+    if: github.event_name == 'pull_request'
+    runs-on: ubuntu-24.04
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          fetch-depth: 0
+      - name: Content-only scope
+        if: ${{ !contains(github.event.pull_request.labels.*.name, 'dev-change') }}
+        run: node scripts/verify/edit-scope.mjs origin/${{ github.base_ref }}
+      - name: Developer change (scope check skipped by label)
+        if: ${{ contains(github.event.pull_request.labels.*.name, 'dev-change') }}
+        run: echo "Labelled dev-change, so the content allowlist does not apply. The full harness still runs."
+
+  verify:
+    runs-on: ubuntu-24.04
+    timeout-minutes: 25
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-node@v4
+        with:
+          node-version-file: .nvmrc
+          cache: npm
+      - run: npm ci
+      # Ubuntu 24.04 blocks the unprivileged user namespaces Chrome's sandbox
+      # needs, and the harness launches Chrome without --no-sandbox on purpose
+      # (it is the same launch a developer's machine makes). Lifting the
+      # restriction on the throwaway runner keeps the launch identical.
+      - name: Allow Chrome's sandbox on the runner
+        run: sudo sysctl -w kernel.apparmor_restrict_unprivileged_userns=0
+      - name: npm run verify
+        run: npm run verify
+        env:
+          CHROME: /usr/bin/google-chrome

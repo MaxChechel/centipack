@@ -11021,3 +11021,88 @@ CE-11. **The six over-length descriptions** (table above). Options: (a) write
 CE-12. **For the client: should the contact form carry an enquiry type
        (quote / samples)?** Product pages invite samples requests, and the
        form cannot tell one from a quote. Not to be built now.
+
+## 2026-11-09 — Entry 180. CE-11 ruled: description cap with a carry-over allowlist
+
+Option (c), modified by Max. **Phase 2** adds a required `description` to every
+product and category, carrying today's shipped text unchanged so the refactor
+stays a provable no-op. **The 160-character cap goes live in the same phase for
+every entry**, except an enumerated allowlist of the six over-length slugs, each
+with its measured length (entry 179) and the reason "carried over unchanged in
+the Phase 2 refactor, to be shortened by content PR":
+
+| Slug | Length |
+|---|---|
+| gel-packs | 362 |
+| thermal-liners | 350 |
+| puncture-pack | 252 |
+| eps-foam-coolers | 240 |
+| insulated-metallic-mailers | 194 |
+| custom-boxes | 186 |
+
+An entry that leaves the allowlist must pass the cap. Red path to show in Phase
+2: an allowlisted slug passes; a new entry at 161 characters fails.
+
+**Shortening the six is a content PR after Phase 2**, made the way the client's
+Claude would make it (Editing mode, `claude/…` branch, PR). The new descriptions
+are condensed from each page's existing copy with no new claims, and Max
+approves the wording before merge. **It is the first real test of the editing
+workflow**, and is logged as such when it runs. Closes CE-11.
+
+## 2026-11-09 — Entry 181. Client-editable site, Phase 1: editing contract, scope check, CI
+
+**Files.** All three added as drafted, with two changes to `edit-scope.mjs`
+(below) and one ruled line in `AGENTS.md`.
+
+- `AGENTS.md`: "Which mode you are in" and "Editing mode" inserted after the
+  opening paragraph; `# Build mode (Outredge developers only)` above
+  `## The spec is law`, so the existing rules are Build mode unchanged.
+  `CLAUDE.md` is still the symlink to it. Added to Content rules, per CE-5:
+  "Copy in `src/content/` is the source of truth; it may differ from Figma."
+  The "What you may change" list is revisited after Phase 2 adds collections.
+  **[template]**
+- `scripts/verify/edit-scope.mjs`. **[template]**
+- `.github/workflows/verify.yml`: as drafted. Parses; jobs `scope`, `verify`.
+  `CHROME=/usr/bin/google-chrome` is already the third path `lib/cdp.mjs`
+  tries, so the env var is belt and braces. **[template]**
+
+**Two real problems in the drafted scope check, both fixed and both shown.**
+
+1. **Renames hid the source path.** Git detects renames by default, and
+   `--name-only` prints only the destination. `git mv
+   src/components/blocks/Faq.astro src/content/Faq.astro` produced ONE allowed
+   path and the draft passed (exit 0), so a component could leave the system
+   through a content PR. Fix: `--no-renames`, so a move is a delete plus an
+   add and both are checked.
+2. **Quoted paths failed legitimate content.** Git quotes paths with non-ASCII
+   bytes, so `src/assets/home/café-hero.avif` came out as
+   `"src/assets/home/caf\303\251-hero.avif"`, and the leading quote failed the
+   allowlist (exit 1) for a picture. Fix: `-z`, split on NUL.
+
+The content loaders are `**/*.md` only (no MDX), so an entry under
+`src/content/` cannot import a component or carry JSX. That is what makes the
+`src/content/` prefix a safe allowlist. If a collection ever moves to MDX, that
+assumption breaks and this check needs revisiting. **[template]**
+
+**Red paths**, run in a throwaway worktree off `main` (ca3821f), base ref `main`:
+
+```
+1. empty diff        edit-scope: the diff is empty, so nothing was checked.
+                     Is the base ref right?                          exit 2
+2. content only      1 changed file(s) checked … passed.             exit 0
+   (custom-boxes.md summary edited)
+3. global.css        2 changed file(s) … FAILED …
+                       src/styles/global.css                         exit 1
+4. component moved   draft: 1 changed file(s) … passed.              exit 0
+   into src/content  fixed: 2 changed file(s) … FAILED …
+                       src/components/blocks/Faq.astro               exit 1
+5. café-hero.avif    draft: FAILED … "src/assets/home/caf\303\251-hero.avif"  exit 1
+                     fixed: 1 changed file(s) … passed.              exit 0
+```
+
+**Not yet shown:** the first CI run. It needs a push, which is Max's. The
+`dev-change` label and branch protection are punch-list items, so until they
+exist the `scope` job reports but blocks nothing.
+
+verify: 10 checks, 1,275 assertions, 0 failures, §9 PASS. Unchanged from the
+baseline, as expected: nothing in Phase 1 reaches the build.

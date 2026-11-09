@@ -690,7 +690,7 @@ function noCommentsInShippedHtml() {
 /**
  * THE ICON MAP AND THE SCHEMA'S ICON ENUM NAME THE SAME FIFTEEN MARKS.
  *
- * `src/components/atoms/icons.ts` holds the drawings; `src/content.config.ts`
+ * `src/components/atoms/icons.ts` holds the drawings; `src/schema/sections.ts`
  * holds the `z.enum` a product's `features` validate against. They are two
  * lists of the same names in two files, which is the shape §5 spends its whole
  * section warning about — and here it is unavoidable, because one is runtime
@@ -726,7 +726,7 @@ function iconNamesMatchSchema() {
   let failures = 0;
 
   const iconsSource = readFileSync('src/components/atoms/icons.ts', 'utf8');
-  const schemaSource = readFileSync('src/content.config.ts', 'utf8');
+  const schemaSource = readFileSync('src/schema/sections.ts', 'utf8');
 
   /** The keys of the ICONS map — top-level entries of the object literal. */
   const mapBlock = iconsSource.slice(
@@ -748,7 +748,7 @@ function iconNamesMatchSchema() {
     failures += 1;
     notes.push(
       `ICON LISTS NOT FOUND — parsed ${inMap.size} name(s) from icons.ts and ` +
-        `${inEnum.size} from content.config.ts. One of the two files has been ` +
+        `${inEnum.size} from src/schema/sections.ts. One of the two files has been ` +
         'restructured and this check is no longer reading it. Fix the check, not the count.',
     );
     return { checks, failures, notes };
@@ -766,7 +766,7 @@ function iconNamesMatchSchema() {
       failures += 1;
       notes.push(
         `ICON "${name}" is in the ICONS map but NOT in the schema's enum ` +
-          '(src/content.config.ts). No product can reference it; the path data is dead.',
+          '(src/schema/sections.ts). No product can reference it; the path data is dead.',
       );
     }
   }
